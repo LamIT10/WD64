@@ -1,4 +1,3 @@
-@extends('app')
 
 @section('content')
     <div class="px-[20px]">
@@ -53,7 +52,7 @@
         <div class="w-full px-[20px] py-[10px] my-[10px] bg-[#ffffff] rounded-[10px]">
 
             <div class="w-full bg-[#FFFFFF] rounded-[10px] px-[10px] py-[10px] mt-[10px]">
-                <div class="w-[100%] items-center mx-auto my-[10px] grid grid-cols-8 gap-x-[20px]">
+                <div class="w-[100%] mx-auto my-[10px] grid grid-cols-7 gap-x-[20px]">
 
                     <div class="flex flex-col gap-[5px]">
                         <label class="text-[12px] text-[#000000]">Item</label>
@@ -101,21 +100,18 @@
                     </div>
 
 
+                    <div class="flex gap-[10px] items-end">
+                        <div class="flex flex-col gap-[5px] w-full">
+                            <label class="text-[12px] text-[#000000] ">Unit</label>
+                            <input type="text" value="Name" disabled
+                                class="w-full px-[12px] py-[8px] text-[12px] text-[#A5A1A1] rounded-[5px]  bg-[#ffffff] border border-gray-200">
+                        </div>
 
-                    <div class="flex flex-col gap-[5px] w-full">
-                        <label class="text-[12px] text-[#000000] ">Unit</label>
-                        <input type="text" value="Name" disabled
-                            class="w-full px-[12px] py-[8px] text-[12px] text-[#A5A1A1] rounded-[5px]  bg-[#ffffff] border border-gray-200">
-                    </div>
-                    <div class="flex flex-col gap-[5px]  h-[59px] w-[138px] justify-end">
                         <button
-                            class="w-[28px] h-[28px] bg-[#BE202F] text-white rounded-full hover:bg-[#c53e38] font-bold relative ">
-                            <span class=" absolute left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%]">+</span>
+                            class="w-[38px] h-[38px] mb-[2px] bg-[#BE202F] text-white rounded-full  hover:bg-[#c53e38] text-[20px] font-bold flex items-center justify-center">
+                            +
                         </button>
                     </div>
-
-
-
                 </div>
             </div>
 
