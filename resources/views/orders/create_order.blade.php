@@ -1,4 +1,3 @@
-@extends('app')
 @section('content')
     <div class="w-full h-auto my-[10px] p-[20px] bg-[#f5f7fa]">
         <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] p-[15px] mb-[7px] relative">
@@ -86,8 +85,9 @@
 
         <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] p-[15px] mb-[7px] relative">
             <h2 class="text-[14px] font-bold text-[#000]">Raw Materials</h2>
-            <button class="w-[90px] h-[25px] absolute top-[15px] right-[20px] text-[#E54C42] bg-[#BE202F] text-[#fff] rounded-[10px] flex justify-center items-center font-bold">Return</button>
-
+            <button class="absolute top-[15px] right-[20px] text-[#E54C42]">
+                <i class="fa-solid fa-times"></i>
+            </button>   
         </div>
         <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] shadow-2xl p-[20px] mb-[30px]">
             <div class="flex items-center gap-[15px] mb-[15px]">
@@ -171,6 +171,7 @@
                 <textarea class="w-full h-[80px] rounded-[5px] border border-[#ddd] text-[12px] text-[#000] p-[10px] bg-[#f9f9f9]" placeholder="Remarks"></textarea>
             </div>
             <div class="flex gap-[10px]">
+                <button class="w-[100px] h-[40px] bg-[#BE202F] text-[#fff] rounded-[5px] flex justify-center items-center font-bold">Return</button>
                 <button class="w-[100px] h-[40px] bg-[#BE202F] text-[#fff] rounded-[5px] flex justify-center items-center font-bold">Save</button>
             </div>
         </div>
