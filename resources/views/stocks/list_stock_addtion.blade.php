@@ -21,7 +21,7 @@
             <td class="w-[15%] text-center">Kg</td>
      
             <td class="w-[15%] text-center">
-                •••
+       <i class="fa-solid fa-ellipsis text-[#6B7280] cursor-pointer"></i>
             </td>
      
    
