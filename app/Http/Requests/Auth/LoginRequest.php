@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
-use Anhskohbo\NoCaptcha\Rules\CaptchaRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Anhskohbo\NoCaptcha\Facades\NoCaptcha;
 
 class LoginRequest extends FormRequest
 {
@@ -20,22 +20,30 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        // return [
-        //     'email' => ['required', 'email'],
-        //     'password' => ['required'],
-        //     'g-recaptcha-response' => ['required', new CaptchaRule],
-        // ];
-
-        $rules = [
+        return [
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'g-recaptcha-response' => ['required'], // Chỉ kiểm tra required
         ];
-    
-        if (!app()->environment('local', 'testing')) {
-            $rules['g-recaptcha-response'] = ['required', new CaptchaRule];
+    }
+
+    /**
+     * Xác minh reCAPTCHA sau khi validation.
+     */
+    protected function passedValidation()
+    {
+        if (!NoCaptcha::verifyResponse($this->input('g-recaptcha-response'))) {
+            $this->failedRecaptcha();
         }
-    
-        return $rules;
+    }
+
+    /**
+     * Xử lý khi reCAPTCHA không hợp lệ.
+     */
+    protected function failedRecaptcha()
+    {
+        $this->validator->errors()->add('g-recaptcha-response', 'Xác minh reCAPTCHA thất bại.');
+        throw new \Illuminate\Validation\ValidationException($this->validator);
     }
 
     /**
@@ -48,8 +56,6 @@ class LoginRequest extends FormRequest
             'email.email' => 'Email không hợp lệ.',
             'password.required' => 'Vui lòng nhập mật khẩu.',
             'g-recaptcha-response.required' => 'Vui lòng xác minh reCAPTCHA.',
-            'g-recaptcha-response' => 'Xác minh reCAPTCHA thất bại.',
         ];
     }
-
 }

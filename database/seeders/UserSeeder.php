@@ -17,6 +17,13 @@ class UserSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => Hash::make('password'), // Mã hóa mật khẩu
-        ]);
+        ],
+        );
+        User::create([
+            'name' => 'Test User',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'), // Mã hóa mật khẩu
+        ],
+        );
     }
 }
