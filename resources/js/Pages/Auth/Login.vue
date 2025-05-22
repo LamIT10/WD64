@@ -46,6 +46,11 @@
 
       <!-- Nút submit -->
       <button type="submit" class="btn-submit">Đăng nhập</button>
+
+      <!-- Link quên mật khẩu -->
+      <div class="forgot-password-link" style="text-align:right; margin-top:10px;">
+        <a href="/forgot-password">Quên mật khẩu?</a>
+      </div>
     </form>
   </div>
 </template>
