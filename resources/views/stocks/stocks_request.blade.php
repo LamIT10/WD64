@@ -1,4 +1,3 @@
-@extends('app')
 @section('content')
     <div class="w-full h-auto my-[10px] p-[20px] bg-[#f5f7fa]">
         <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] shadow-2xl p-[20px] mb-[30px]">
