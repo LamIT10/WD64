@@ -15,7 +15,7 @@ class BaseRepository
     }
     public function delete(int $id)
     {
-        return $this->handleModel::where('id', $id)->delete($id);
+        return $this->handleModel::where('id', $id)->delete();
     }
     public function update(int $id, array $data)
     {
