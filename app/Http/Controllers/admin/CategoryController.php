@@ -7,6 +7,7 @@ use App\Http\Requests\CategoryRequest;
 use App\Http\Requests\EditCategoryRequest;
 use App\Repositories\CategoryRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -92,7 +93,7 @@ class CategoryController extends Controller
 
             $this->categoryRepository->update($id, $data);
         } catch (\Throwable $th) {
-            \Log::error('Lỗi khi tạo danh mục: ' . $th->getMessage());
+            Log::error('Lỗi khi tạo danh mục: ' . $th->getMessage());
 
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi, cập nhật không thành công. Vui lòng thử lại.');

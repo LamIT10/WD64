@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Category;
 use Illuminate\Support\Facades\DB;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class CategoryRepository extends BaseRepository
 {
@@ -23,7 +23,7 @@ class CategoryRepository extends BaseRepository
                 ->whereNull('parent_id')
                 ->paginate(10);
         } catch (\Throwable $th) {
-            \Log::error('Lỗi Danh Sách Danh Mục: ' . $th->getMessage());
+            Log::error('Lỗi Danh Sách Danh Mục: ' . $th->getMessage());
         }
     }
 
@@ -47,7 +47,7 @@ class CategoryRepository extends BaseRepository
             }
             return $category;
         } catch (\Throwable $th) {
-            \Log::error('Lỗi chi tiết category: ' . $th->getMessage());
+            Log::error('Lỗi chi tiết category: ' . $th->getMessage());
         }
     }
 
@@ -60,7 +60,7 @@ class CategoryRepository extends BaseRepository
 
             DB::commit();
         } catch (\Throwable $th) {
-            \Log::error('Lỗi khi tạo danh mục: ' . $th->getMessage());
+            Log::error('Lỗi khi tạo danh mục: ' . $th->getMessage());
             DB::rollBack();
         }
     }
@@ -78,7 +78,7 @@ class CategoryRepository extends BaseRepository
 
             return true;
         } catch (\Throwable $th) {
-            \Log::error('Lỗi khi xóa danh mục: ' . $th->getMessage());
+            Log::error('Lỗi khi xóa danh mục: ' . $th->getMessage());
 
             return $this->returnError('Lỗi không thể xóa danh mục');
         }

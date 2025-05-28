@@ -9,14 +9,6 @@ abstract class Controller
 
     protected $handleRepository;
 
-    public function returnInertia($data, $message, $route)
-    {
-        if (isset($data['status']) && $data['status'] == false) {
-            return redirect()->back()->with('error', $data['message']);
-        } else {
-            return redirect()->route($route)->with('success', $message);
-        }
-    }
     // handle upload only one file
     public function handleUploadOneFile(object $file)
     {
@@ -54,5 +46,19 @@ abstract class Controller
             return Storage::disk('public')->delete($path);
         }
         return false;
+    }
+    public function returnInertiaList($data, $view)
+    {
+        return inertia($view, [
+            'data' => $data
+        ]);
+    }
+    public function returnInertia($data, $message, $route)
+    {
+        if (isset($data['status']) && $data['status'] == false) {
+            return redirect()->back()->with('error', $data['message']);
+        } else {
+            return redirect()->route($route)->with('success', $message);
+        }
     }
 }
