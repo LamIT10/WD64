@@ -3,22 +3,22 @@
     <div class="w-full h-auto my-[10px] p-[20px] bg-[#f5f7fa]">
       <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] shadow p-[20px] mb-[30px]">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Customer Management</h2>
+          <h2 class="text-xl font-bold">Quản lý khách hàng</h2>
           <Link :href="route('admin.customers.create')" class="bg-[#BE202F] text-white px-4 py-2 rounded">
-            Add Customer
+            Thêm khách hàng
           </Link>
         </div>
         <table class="w-full text-[12px] text-[#000]">
           <thead>
             <tr class="bg-[#f9f9f9] text-[#A49E9E] uppercase">
               <th class="p-[10px] text-left">#</th>
-              <th class="p-[10px] text-left">Name</th>
-              <th class="p-[10px] text-left">Contact Person</th>
-              <th class="p-[10px] text-left">Phone</th>
+              <th class="p-[10px] text-left">Tên</th>
+              <th class="p-[10px] text-left">Người liên hệ</th>
+              <th class="p-[10px] text-left">SĐT</th>
               <th class="p-[10px] text-left">Email</th>
-              <th class="p-[10px] text-left">Debt</th>
-              <th class="p-[10px] text-left">Rank</th>
-              <th class="p-[10px] text-left">Actions</th>
+              <th class="p-[10px] text-left">Công nợ</th>
+              <th class="p-[10px] text-left">Hạng</th>
+              <th class="p-[10px] text-left">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -34,8 +34,8 @@
                 <span v-else>-</span>
               </td>
               <td class="p-[10px]">
-                <Link :href="route('customers.edit', customer.id)" class="text-[#2A66FF] font-bold mr-2">Edit</Link>
-                <button @click="deleteCustomer(customer.id)" class="text-[#BE202F] font-bold">Delete</button>
+                <Link :href="route('admin.customers.edit', customer.id)" class="text-[#2A66FF] font-bold mr-2">Sửa</Link>
+                <button @click="handleDelete(customer.id)" class="text-[#BE202F] font-bold">Xóa</button>
               </td>
             </tr>
           </tbody>
@@ -48,22 +48,18 @@
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import { route } from 'ziggy-js';
-
-
-
 
 defineProps({
   customers: Array,
 });
 
-const deleteCustomer = (id) => {
-  if (confirm('Are you sure you want to delete this customer?')) {
+const handleDelete = (id) => {
+  if (confirm('Bạn có chắc muốn xóa khách hàng này không?')) {
     useForm({}).delete(route('customers.destroy', id), {
-      onSuccess: () => alert('Customer deleted successfully.'),
+      onSuccess: () => alert('Xóa khách hàng thành công.'),
     });
   }
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped lang="scss"></style>
