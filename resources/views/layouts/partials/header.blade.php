@@ -11,10 +11,10 @@
    <button class="px-[14px] py-[20px] bg-[#BE202F] rounded-[12px] flex justify-center items-center mr-[15px]">
     <i class="fa-solid fa-filter text-[#fff] text-[20px]"></i>
    </button>
-   <button class="px-[14px] py-[20px] rounded-[12px] flex justify-center gap-x-[5px] items-center text-[#BE202F] bg-[#FCFCFD] shadow-2xl mr-[6px]">
+   <a href={{route('order.export')}} class="px-[14px] py-[20px] rounded-[12px] flex justify-center gap-x-[5px] items-center text-[#BE202F] bg-[#FCFCFD] shadow-2xl mr-[6px]">
     <i class="fa-solid fa-file-export text-[20px]"></i>
     <p class="text-[14px]">Export</p>
-   </button>
+   </a>
    <div class="w-[2px] h-[70%] bg-[#000] opacity-10 self-center mr-[6px]"></div>
    <div class="self-center">
     <i class="fa-solid fa-bell text-[24px] text-[#000]"></i>
