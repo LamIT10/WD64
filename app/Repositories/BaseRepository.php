@@ -9,10 +9,10 @@ class BaseRepository
 
     protected $handleModel;
 
-    public function create(array $data)
-    {
-        return  $this->handleModel::create($data);
-    }
+    // public function create(array $data)
+    // {
+    //     return  $this->handleModel::create($data);
+    // }
     public function delete(int $id)
     {
         return $this->handleModel::where('id', $id)->delete();
