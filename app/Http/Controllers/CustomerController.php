@@ -3,25 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\Rank;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Requests\StoreRankRequest;
+use App\Repositories\CustomerRepository;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
+    protected CustomerRepository $customerRepo;
+
+    public function __construct(CustomerRepository $customerRepo)
+    {
+        $this->customerRepo = $customerRepo;
+    }
+
     public function index()
     {
-        try {
-            $customers = Customer::with('ranks')->get();
-            return Inertia::render('admin/Customers/Index', [
-                'customers' => $customers,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Customer index error: ' . $e->getMessage());
-            return response()->json(['error' => 'Lỗi server'], 500);
-        }
+        $customers = $this->customerRepo->getAllWithRanks();
+
+        return Inertia::render('admin/Customers/Index', [
+            'customers' => $customers,
+        ]);
     }
 
     public function create()
@@ -29,73 +32,41 @@ class CustomerController extends Controller
         return Inertia::render('admin/Customers/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'contact_person' => 'nullable|string|max:50',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'password' => 'required|string|max:50',
-            'address' => 'nullable|string',
-            'current_debt' => 'nullable|numeric',
-        ]);
-
-        $data = $request->all();
-        $data['password'] = Hash::make($data['password']);
-        Customer::create($data);
+        $this->customerRepo->createCustomer($request->validated());
 
         return redirect()->route('admin.customers.index')->with('success', 'Thêm khách hàng thành công.');
     }
 
     public function edit(Customer $customer)
     {
-        try {
-            return Inertia::render('admin/Customers/Edit', [
-                'customer' => $customer->load('ranks'),
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Customer edit error: ' . $e->getMessage());
-            return response()->json(['error' => 'Lỗi server'], 500);
-        }
+        return Inertia::render('admin/Customers/Edit', [
+            'customer' => $customer->load('ranks'),
+        ]);
     }
 
-    public function update(Request $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'contact_person' => 'nullable|string|max:50',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'password' => 'required|string|max:50',
-            'address' => 'nullable|string',
-            'current_debt' => 'nullable|numeric',
-        ]);
-
-        $data = $request->all();
-        $data['password'] = Hash::make($data['password']);
-        $customer->update($data);
+        $this->customerRepo->updateCustomer($customer, $request->validated());
 
         return redirect()->route('admin.customers.index')->with('success', 'Cập nhật khách hàng thành công.');
     }
 
     public function destroy(Customer $customer)
     {
-        $customer->delete();
+        if ($customer->orders()->exists()) {
+            return redirect()->route('admin.customers.index')->with('error', 'Không thể xóa khách hàng có đơn hàng.');
+        }
+
+        $this->customerRepo->deleteCustomer($customer);
+
         return redirect()->route('admin.customers.index')->with('success', 'Xóa khách hàng thành công.');
     }
 
-    public function storeRank(Request $request, Customer $customer)
+    public function storeRank(StoreRankRequest $request, Customer $customer)
     {
-        $request->validate([
-            'name' => 'required|string|max:50',
-            'min_total_spent' => 'required|integer',
-            'discount_percent' => 'required|integer',
-            'credit_percent' => 'required|integer',
-            'note' => 'nullable|string',
-        ]);
-
-        $customer->ranks()->create($request->all());
+        $this->customerRepo->storeRank($customer, $request->validated());
 
         return redirect()->route('admin.customers.edit', $customer)->with('success', 'Thêm hạng khách hàng thành công.');
     }
