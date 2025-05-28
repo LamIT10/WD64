@@ -84,5 +84,4 @@ class BaseRepository
            'message' => $message
        ];
     }
-    
 }
