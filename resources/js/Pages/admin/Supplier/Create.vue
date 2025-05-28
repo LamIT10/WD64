@@ -14,9 +14,6 @@ import { route } from 'ziggy-js';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link, usePage } from '@inertiajs/vue3'
 
-const flash = usePage().props.flash
-console.log(flash);
-
 const props = defineProps({
     suppliers: {
         type: Array,
