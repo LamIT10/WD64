@@ -37,16 +37,13 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import { usePage } from '@inertiajs/vue3'
 
-const flash = usePage().props.flash
 const props = defineProps({
     suppliers: {
         type: Array,
         default: () => []
     },
 });
-console.log(flash);
 
 </script>
 
