@@ -5,7 +5,7 @@
             <p class="text-[10px] text-[#756C6C] self-end">16 of 100 entries</p>
         </div>
         <div class="flex gap-x-[10px] h-full">
-            <div class="relative shadow-2xl rounded-[10px] mr-[15px]">
+            <div class="relative shadow rounded-[10px] mr-[15px]">
                 <input type="text"
                     class="w-[331px] h-full py-[9px] px-[40px] bg-[#FCFCFD] placeholder-[#C3C3C3] text-[14px] rounded-[10px]"
                     placeholder="Search">

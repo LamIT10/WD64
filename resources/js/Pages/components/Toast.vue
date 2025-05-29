@@ -84,7 +84,8 @@ watch(
 }
 
 .bg-error {
-    background: #fb5050;
+    background: #ffffff;
+    box-shadow: 0 0 3px red;
 }
 
 .toast-content {
