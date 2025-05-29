@@ -62,6 +62,18 @@ const Ziggy = {
             methods: ["DELETE"],
             parameters: ["permission"],
         },
+        "admin.suppliers.index": {
+            uri: "admin/suppliers",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.suppliers.create": {
+            uri: "admin/suppliers/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.suppliers.store": {
+            uri: "admin/suppliers/store",
+            methods: ["GET", "HEAD"],
+        },
         "storage.local": {
             uri: "storage/{path}",
             methods: ["GET", "HEAD"],

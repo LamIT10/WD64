@@ -22,14 +22,9 @@ class RoleRepository extends BaseRepository
     public function getDataListRole($data)
     {
         try {
-            // dd($data);
-            //  $page= (int)$data['page'] ?? 1;
-               
-            Paginator::currentPageResolver(function  ()  {
-                return request()->get('page', 2);
-            });
-    
+
             $query = $this->handleModel->with('permissions')->select(["*"]);
+            dd($query);
             if (!empty($data)) {
                 $filters = [
                     'search' => [
@@ -37,6 +32,10 @@ class RoleRepository extends BaseRepository
                     ]
                 ];
                 $query = $this->filterData($query, $filters);
+                
+                // $query = $query->with('role_has_permission', function ($q) {
+                //     dd($q->where('permission_id','like','%'. "58" .'%'));
+                // });
             }
             $query->orderBy('id', "desc");
             return $query->paginate(10);
@@ -48,41 +47,69 @@ class RoleRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-            $role = $this->handleModel::create($data);
+            $newRole = [];
+
+            $newRole['name'] = $data['name'];
+            $role = $this->handleModel::create($newRole);
+
             if (!empty($data['permissions'])) {
                 $role->permissions()->sync($data['permissions']);
             }
+            if(!$role){
+                throw new \Exception('Có lỗi khi thêm vai trò');
+            }
+
+
             DB::commit();
+            return $role;
         } catch (\Throwable $th) {
-            Log::error("Thêm role lỗi, " . $th->getMessage());
+            Log::error("Thêm vai trò lỗi, " . $th->getMessage());
             DB::rollBack();
+            return $this->returnError($th->getMessage());
         }
     }
     public function handleUpdate(int $id, array $data = [])
     {
         try {
             DB::beginTransaction();
+          
 
+            $oldRole = $this->findById($id);
+            $newRole = [];
+            $newRole ['name'] = $data['name'];
             $permission = $data['permissions'];
-            unset($data['permissions']);
 
-
-            $oldRole = $this->getById($id);
-
-
-            if (empty($oldRole)) {
-                return false;
+            $role = $this->update($id, $data);
+            if(!$role){
+                throw new \Exception('Có lỗi khi cập nhật');
             }
-            $this->update($id, $data);
 
-            $oldRole->syncPermissions($permission);
-
+            $permission =  $oldRole->syncPermissions($permission);
+            if(!$permission){
+                throw new \Exception('Có lỗi khi cập nhật');
+            }
+          
             DB::commit();
-
-            return true;
+            return $role;
         } catch (\Throwable $th) {
-            Log::error("Sửa role lỗi, " . $th->getMessage());
+            Log::error("Cập nhật vai trò lỗi, " . $th->getMessage());
             DB::rollBack();
+            return $this->returnError($th->getMessage());
+        }
+    }
+    public function handleDelete($id){
+        try {
+            $this->findById($id);
+            $role = $this->delete($id);
+            if(!$role){
+                throw new \Exception("Có lỗi khi xoá vai trò");
+            }
+            DB::commit();
+            return $role;
+        } catch (\Throwable $th) {
+            Log::error("Xoá vai trò lỗi, " . $th->getMessage());
+            DB::rollBack();
+            return $this->returnError($th->getMessage());
         }
     }
     public function renderForm()
@@ -93,6 +120,7 @@ class RoleRepository extends BaseRepository
             return $data;
         } catch (\Throwable $th) {
             Log::error("Lấy quyền lỗi, " . $th->getMessage());
+            return [];
         }
     }
 }

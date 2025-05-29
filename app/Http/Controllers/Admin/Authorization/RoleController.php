@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Authorization;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
 use App\Repositories\RoleRepository;
 use Illuminate\Http\Request;
@@ -24,9 +25,15 @@ class RoleController extends Controller
     public function index()
     {
         $data = request()->all();
+        $renderForm = $this->handleRepository->renderForm();
         $listRoles = $this->handleRepository->getDataListRole($data);
-
-        return Inertia::render("admin/Roles/Index", ['listRoles' => $listRoles]);
+        return Inertia::render(
+            "admin/Roles/Index",
+            [
+                'listRoles' => $listRoles,
+                'permissions' => $renderForm['permissions']
+            ]
+        );
     }
     /**
      * Show the form for creating a new resource.
@@ -34,7 +41,12 @@ class RoleController extends Controller
     public function create()
     {
         $data = $this->handleRepository->renderForm();
-        return Inertia::render("admin/Roles/CreateRole", ['permissions' => $data['permissions']]);
+        return Inertia::render(
+            "admin/Roles/CreateRole",
+            [
+                'permissions' => $data['permissions']
+            ]
+        );
     }
 
     /**
@@ -43,8 +55,8 @@ class RoleController extends Controller
     public function store(RoleRequest $request)
     {
         $data = $request->validated();
-        $this->handleRepository->handleCreate($data);
-        return redirect()->route("admin.role.index");
+        $role = $this->handleRepository->handleCreate($data);
+        return $this->returnInertia($role, "Thêm vai trò thành công", "admin.role.index");
     }
 
     /**
@@ -61,12 +73,8 @@ class RoleController extends Controller
     public function edit(string $id)
     {
         $data = $this->handleRepository->renderForm();
-        $role = $this->handleRepository->getById($id);
-
+        $role = $this->handleRepository->findById($id);
         $role['permissions'] = $role->permissions()->pluck('id')->toArray();
-        if (!$role) {
-            return redirect()->route("admin.permission.index")->with("success", "");
-        }
         return Inertia::render("admin/Roles/EditRole", ['role' => $role, 'permissions' => $data['permissions']]);
     }
 
@@ -75,7 +83,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-       
+
         $message =  [
             'name.required' => 'Tên quyền là bắt buộc.',
             'name.min' => 'Tên phải có ít nhất :min ký tự.',
@@ -97,11 +105,8 @@ class RoleController extends Controller
         }
 
         $data = $request->all();
-        $isCheck = $this->handleRepository->handleUpdate($id, $data);
-        if (!$isCheck) {
-            return  redirect()->back()->with('error', '');
-        }
-        return redirect()->route("admin.role.index")->with("success", "");
+        $role = $this->handleRepository->handleUpdate($id, $data);
+        return $this->returnInertia($role, "Cập nhật vai trò thành công", "admin.role.index");
     }
 
     /**
@@ -109,10 +114,8 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!$this->handleRepository->getById($id)) {
-            return redirect()->route("admin.role.index")->with("success", "");
-        }
-        $role = $this->handleRepository->delete($id);
-        return redirect()->route("admin.role.index")->with("success", "");
+        
+        $role = $this->handleRepository->handleDelete($id);
+        return $this->returnInertia($role, "Xoá thành công", "admin.role.index");
     }
 }
