@@ -18,4 +18,19 @@ class UpdateCustomerRequest extends FormRequest
             'current_debt' => 'nullable|numeric',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Vui lòng nhập tên khách hàng.',
+            'name.max' => 'Tên khách hàng không được vượt quá 100 ký tự.',
+            'contact_person.max' => 'Người liên hệ không được vượt quá 50 ký tự.',
+            'phone.max' => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'email.email' => 'Email không đúng định dạng.',
+            'email.max' => 'Email không được vượt quá 100 ký tự.',
+            'password.max' => 'Mật khẩu không được vượt quá 50 ký tự.',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            'current_debt.numeric' => 'Công nợ phải là số.',
+        ];
+    }
 }
