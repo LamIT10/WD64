@@ -19,6 +19,9 @@ class Product extends Model
         'production_date' => 'date',
     ];
 
+    public function images() {
+        return $this->morphMany(Image::class,'imageable');
+    }
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
@@ -29,7 +32,7 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function variants()
+    public function productVariants()
     {
         return $this->hasMany(ProductVariant::class);
     }

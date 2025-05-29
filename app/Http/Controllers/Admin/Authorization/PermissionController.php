@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Admin\Authorization;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Permissions\PermissionRequest;
 use App\Repositories\PermissionRepository;
 use Illuminate\Http\Request;
@@ -38,8 +38,8 @@ class PermissionController extends Controller
      */
     public function store(PermissionRequest $request)
     {
-        $this->handleRepository->handleCreate($request->all());
-        return redirect()->route("admin.permission.index")->with("success", "");
+        $permission = $this->handleRepository->handleCreate($request->all());
+        return $this->returnInertia($permission, "Thêm quyền thành công", 'admin.permission.index');
     }
     /**
      * Display the specified resource.
@@ -54,10 +54,7 @@ class PermissionController extends Controller
      */
     public function edit(string $id)
     {
-        $permission = $this->handleRepository->getById($id);
-        if (!$permission) {
-            return redirect()->route("admin.permission.index")->with("success", "");
-        }
+        $permission = $this->handleRepository->findById($id);
         return Inertia::render("admin/Permissions/EditPermission", ["permission" => $permission]);
     }
     /**
@@ -82,21 +79,19 @@ class PermissionController extends Controller
             return redirect()->back()->withErrors($validator)
                 ->withInput();
         }
-        $isTrue = $this->handleRepository->handleUpdate($id, $request->all());
-        if(!$isTrue){
+        $permission = $this->handleRepository->handleUpdate($id, $request->all());
+        if(!$permission){
             return redirect()->back()->with("success","");
         }
-        return redirect()->route("admin.permission.index")->with("success","");
+        return $this->returnInertia($permission, "Cập nhật thành công", "admin.permission.index");
     }
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
-    {
-        if (!$this->handleRepository->getById($id)) {
-            return redirect()->route("admin.permission.index")->with("success", "");
-        }
-        $this->handleRepository->delete($id);
-        return redirect()->route("admin.permission.index")->with("success", "");
+    { 
+
+        $permission = $this->handleRepository->handleDelete($id);
+        return $this->returnInertia($permission, "Xoá quyền thành công", "admin.permission.index");
     }
 }

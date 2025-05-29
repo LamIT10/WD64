@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 
 class PermissionRepository extends BaseRepository
-{   
+{
     /**
      * @var \Spatie\Permission\Models\Permission
      */
@@ -43,11 +43,20 @@ class PermissionRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-            $this->handleModel::create($data);
+            $newPermission = [];
+            $newPermission['name'] = $data['name'] ?? "";
+            $newPermission['description'] = $data['description'] ?? "";
+
+            $permission = $this->handleModel::create($newPermission);
+            if (!$permission) {
+                throw new \Exception("Lỗi khi tạo quyền");
+            }
             DB::commit();
+            return $permission;
         } catch (\Throwable $th) {
             Log::error("Tạo quyền lỗi, " . $th->getMessage());
             DB::rollBack();
+            return $this->returnError($th->getMessage());
         }
     }
     public function handleUpdate(int $id, array $data = [])
@@ -55,21 +64,39 @@ class PermissionRepository extends BaseRepository
         try {
             DB::beginTransaction();
 
-            $permission = $this->getById($id);
+            $permission = $this->handleModel->findOrFail($id);
 
-            $oldRole = $this->getById($id);
+            // $oldRole = $this->handleModel->findOrFail($id);
+            $newPermission = [];
+            $newPermission["name"] = $data["name"] ?? "";
+            $newPermission["description"] = $data["description"] ?? "";
 
-            if (!empty($oldRole)) {
-                return false;
+            $permission = $this->update($id, $newPermission);
+            if ($permission) {
+                throw new \Exception("Có lỗi khi cập nhật");
             }
-            $this->update($id, $data);
-            $oldRole->syncPermissions($permission);
-
             DB::commit();
             return true;
         } catch (\Throwable $th) {
             Log::error("Sửa role lỗi, " . $th->getMessage());
             DB::rollBack();
+            return $this->returnError($th->getMessage());
+        }
+    }
+    public function handleDelete($id)
+    {
+        try {
+            $this->findById($id);
+            $permission = $this->delete($id);
+            if (!$permission) {
+                throw new \Exception("Có lỗi khi xoá quyền");
+            }
+            DB::commit();
+            return $permission;
+        } catch (\Throwable $th) {
+            Log::error("Xoá quyền lỗi, " . $th->getMessage());
+            DB::rollBack();
+            return $this->returnError($th->getMessage());
         }
     }
 }

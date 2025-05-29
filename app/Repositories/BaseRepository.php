@@ -8,11 +8,6 @@ class BaseRepository
 {
 
     protected $handleModel;
-
-    // public function create(array $data)
-    // {
-    //     return  $this->handleModel::create($data);
-    // }
     public function delete(int $id)
     {
         return $this->handleModel::where('id', $id)->delete();
@@ -77,5 +72,14 @@ class BaseRepository
             }
         }
         return $query;
+    }
+    public function returnError($message){
+       return [
+           'status' => false,
+           'message' => $message
+       ];
+    }
+    public function findById($id){
+        return $this->handleModel->findOrFail($id);
     }
 }

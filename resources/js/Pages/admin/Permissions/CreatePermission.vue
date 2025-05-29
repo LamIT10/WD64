@@ -4,7 +4,7 @@
             <div class="px-[20px] mt-[20px]">
                 <div class="w-full bg-[#FFFFFF] rounded-[10px] px-[10px] py-[10px] mt-[10px]">
                     <div class="w-[100%] mx-auto my-[10px] gap-x-[20px]">
-                        <form @submit.prevent="hanldeSubmitForm" class="gap-[10px] items-end w-full">
+                        <form @submit.prevent="hanldeSubmitForm" class="gap-[10px] items-end w-[40%]">
                             <div class="flex flex-col gap-[5px] w-full">
                                 <label class="text-[12px] text-[#000000] ">Tên quyền hạng <span class="text-red-500">*</span></label>
                                 <input type="text" value="" v-model="form.name"
