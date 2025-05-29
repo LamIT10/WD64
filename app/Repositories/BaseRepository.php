@@ -78,4 +78,10 @@ class BaseRepository
         }
         return $query;
     }
+    public function returnError($message){
+       return [
+           'status' => false,
+           'message' => $message
+       ];
+    }
 }
