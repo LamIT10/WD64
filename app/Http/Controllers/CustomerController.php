@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Requests\StoreRankRequest;
+use App\Http\Requests\UpdateCustomerRequest;
+use App\Models\Customer;
+
 use App\Repositories\CustomerRepository;
 use Inertia\Inertia;
 
@@ -43,9 +44,9 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
-        $this->customerRepo->createCustomer($request->validated());
+        $data = $this->customerRepo->createCustomer($request->validated());
 
-        return redirect()->route('admin.customers.index')->with('success', 'Thêm khách hàng thành công.');
+        return $this->returnInertia($data, "Thêm thành công", 'admin.customers.index');
     }
 
     public function edit(Customer $customer)

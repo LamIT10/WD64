@@ -13,7 +13,7 @@ class StoreCustomerRequest extends FormRequest
             'contact_person' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:10',
             'email' => 'nullable|email|max:100',
-            'password' => 'required|string|max:50',
+            'password' => 'required|string|max:50|confirmed',
             'address' => 'nullable|string',
             'current_debt' => 'nullable|numeric',
         ];
