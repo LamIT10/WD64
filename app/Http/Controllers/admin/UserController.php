@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UserRequest;
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -24,51 +26,44 @@ class UserController extends Controller
             'users' => $users
         ]);
     }
+
     public function show($id)
     {
-        $user = $this->userRepo->getById((int) $id);
-        return Inertia::render('admin/users/Show', ['user' => $user]);
+        return Inertia::render('admin/users/Show', [
+            'user' => $this->userRepo->getById((int)$id)
+        ]);
     }
+
     public function create()
     {
-        return Inertia::render('admin/users/Create'); 
+        return Inertia::render('admin/users/Create');
     }
 
-    public function store(UserRequest $request)
+    public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
-        $data['password'] = Hash::make($data['password']);
-        $this->userRepo->create($data);
-
-        return redirect()->route('users.index')->with('success', 'Thêm người dùng thành công');
+        $user = $this->userRepo->createUser($data);
+        return $this->returnInertia($user, 'Tạo mới người dùng thành công', 'admin.users.index');
     }
 
     public function edit($id)
     {
-        $user = $this->userRepo->getById((int) $id);
         return Inertia::render('admin/users/Edit', [
-            'user' => $user
+            'user' => $this->userRepo->getById((int)$id)
         ]);
     }
 
-    public function update(UserRequest $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $data = $request->validated();
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
-        $this->userRepo->update($id, $data);
-
-        return redirect()->route('users.index')->with('success', 'Cập nhật người dùng thành công');
+        $user = $this->userRepo->updateUser((int)$id, $data);
+        return $this->returnInertia($user, 'Cập nhật người dùng thành công', 'admin.users.index');
     }
 
     public function destroy($id)
     {
-        $this->userRepo->delete($id);
+        $user = $this->userRepo->deleteUser((int)$id);
 
-        return redirect()->route('users.index')->with('success', 'Xóa người dùng thành công');
+        return $this->returnInertia($user, 'Xóa người dùng thành công', 'admin.users.index');
     }
 }

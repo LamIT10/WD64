@@ -10,31 +10,13 @@
                 Thêm người dùng
                 </Link>
             </div>
-
-            <!-- Tabs và tìm kiếm -->
-            <div class="flex gap-[30px] mb-[20px] border-b border-[#E5E7EB]">
-                <button class="text-[#2A66FF] text-[14px] font-medium pb-[10px] border-b-2 border-[#4F46E5]">
-                    Tất cả người dùng
-                </button>
-                <button class="text-[#000000] text-[14px] pb-[10px] hover:text-[#2A66FF] transition-colors">
-                    Người dùng hoạt động
-                </button>
-                <button class="text-[#000000] text-[14px] pb-[10px] hover:text-[#2A66FF] transition-colors">
-                    Người dùng không hoạt động
-                </button>
-                <div class="ml-auto">
-                    <input type="text" placeholder="Tìm kiếm..."
-                        class="bg-[#F9FAFB] border border-[#E5E7EB] rounded-[9px] px-[12px] py-[8px] text-[14px] w-[200px] focus:outline-none focus:ring-2 focus:ring-[#2A66FF] focus:border-transparent">
-                </div>
-            </div>
-
             <!-- Bảng dữ liệu -->
             <div class="w-full">
                 <table class="w-full rounded-[10px] overflow-hidden">
                     <!-- Header bảng -->
                     <tr
                         class="w-full text-[#A49E9E] uppercase px-[20px] py-[12px] flex gap-x-[20px] justify-between items-center bg-[#F9FAFB] text-[12px] font-medium">
-                        <td class="w-[8%] text-left">ID</td>
+                        <td class="w-[8%] text-left">#</td>
                         <td class="w-[20%] text-left">User Name</td>
                         <td class="w-[20%] text-left">EMAIL</td>
                         <td class="w-[15%] text-left">ĐIỆN THOẠI</td>
@@ -44,11 +26,11 @@
                     </tr>
 
                     <!-- Dữ liệu bảng -->
-                    <tr v-for="user in users.data" :key="user.id"
+                    <tr v-for="(user, index) in users.data" :key="user.id"
                         class="text-[#000000] px-[20px] py-[15px] flex gap-x-[20px] justify-between items-center bg-[#ffffff] text-[14px] w-full mt-[2px] shadow-sm hover:bg-[#F9FAFB] transition-colors">
 
                         <!-- ID -->
-                        <td class="w-[8%] text-left font-medium">{{ user.id }}</td>
+                        <td class="w-[8%] text-left font-medium">{{ index + 1 }}</td>
 
                         <!-- Họ tên -->
                         <td class="w-[20%] text-left">
@@ -74,15 +56,16 @@
                             <div class="flex justify-center gap-[8px]">
                                 <Link :href="route('admin.users.show', user.id)"
                                     class="text-[#6B7280] hover:text-[#2A66FF] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#F3F4F6]">
-                                 <i class="ri-eye-line"></i>
+                                <i class="ri-eye-line"></i>
                                 </Link>
                                 <Link :href="route('admin.users.edit', user.id)"
                                     class="text-[#2A66FF] hover:text-[#1E4FCC] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#EEF2FF]">
-                        <i class="ri-pencil-line"></i>
+                                <i class="ri-pencil-line"></i>
                                 </Link>
-                                <button @click="deleteUser(user.id)"
+
+                                <button type="submit" @click="hanldeDelete(user.id)"
                                     class="text-[#D93F21] hover:text-[#B91C1C] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#FEF2F2]">
-                             <i class="ri-delete-bin-line"></i>
+                                    <i class="ri-delete-bin-line"></i>
                                 </button>
                             </div>
                         </td>
@@ -100,14 +83,14 @@
     </AppLayout>
 </template>
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import 'remixicon/fonts/remixicon.css';
 const props = defineProps({ users: Object });
-
-function deleteUser(id) {
-    if (confirm('Bạn có chắc muốn xóa?')) {
-        router.delete(`/users/${id}`);
+const hanldeDelete = (id) => {
+    if (confirm("Bạn có chắc chắn muốn xoá người dùng này không?")) {
+        const formDelete = useForm({});
+        formDelete.delete(route('admin.users.destroy', id));
     }
 }
 </script>
