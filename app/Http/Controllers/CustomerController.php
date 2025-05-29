@@ -20,10 +20,19 @@ class CustomerController extends Controller
 
     public function index()
     {
-        $customers = $this->customerRepo->getAllWithRanks();
+        $perPage = request()->get('perPage', 10);
+
+        $customers = $this->customerRepo->getAllWithRanks($perPage);
 
         return Inertia::render('admin/Customers/Index', [
             'customers' => $customers,
+        ]);
+    }
+
+    public function show(Customer $customer)
+    {
+        return Inertia::render('admin/Customers/Show', [
+            'customer' => $customer->load('ranks'),
         ]);
     }
 
@@ -55,7 +64,7 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
-        if ($customer->orders()->exists()) {
+        if ($customer->salesOrders()->exists()) {
             return redirect()->route('admin.customers.index')->with('error', 'Không thể xóa khách hàng có đơn hàng.');
         }
 

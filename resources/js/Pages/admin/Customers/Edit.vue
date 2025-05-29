@@ -1,58 +1,69 @@
 <template>
   <AppLayout>
-    <div class="w-full h-auto my-[10px] p-[20px] bg-[#f5f7fa]">
-      <div class="w-[90%] mx-auto bg-[#ffffff] rounded-[10px] shadow p-[20px] mb-[30px]">
-        <h2 class="text-xl font-bold mb-4">Sửa thông tin khách hàng</h2>
-        <form @submit.prevent="handleUpdate">
-          <div class="mb-4" v-for="(label, field) in fieldLabels" :key="field">
-            <label class="block text-sm font-medium">{{ label }}</label>
+    <div class="w-full h-auto my-4 p-5 bg-[#f5f7fa]">
+      <div class="w-[90%] mx-auto bg-white rounded-2xl shadow p-6 mb-10">
+        <!-- Cập nhật thông tin khách hàng -->
+        <h2 class="text-2xl font-bold mb-6">Sửa thông tin khách hàng</h2>
+        <form @submit.prevent="handleUpdate" class="space-y-4">
+          <div v-for="(label, field) in fieldLabels" :key="field">
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
             <input
               v-model="form[field]"
               :type="inputTypes[field] || 'text'"
-              class="w-full border rounded p-2"
+              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               :required="field === 'name'"
             />
+            <span v-if="form.errors[field]" class="text-red-500 text-sm">{{ form.errors[field] }}</span>
           </div>
-          <button type="submit" class="bg-[#BE202F] text-white px-4 py-2 rounded">Cập nhật</button>
+          <button type="submit" class="bg-[#BE202F] text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+            Cập nhật
+          </button>
         </form>
-
-        <h3 class="text-lg font-bold mt-8 mb-4">Customer Ranks</h3>
-        <form @submit.prevent="handleAddRank" class="mb-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div v-for="(label, field) in rankFieldLabels" :key="field" class="col-span-1">
-              <label class="block text-sm font-medium">{{ label }}</label>
-              <input
-                v-model="rankForm[field]"
-                :type="rankInputTypes[field] || 'text'"
-                class="w-full border rounded p-2"
-                :required="field !== 'note'"
-              />
-            </div>
-            <div class="col-span-2">
-              <label class="block text-sm font-medium">Ghi chú</label>
-              <textarea v-model="rankForm.note" class="w-full border rounded p-2"></textarea>
-            </div>
+        <h3 class="text-xl font-bold mt-10 mb-4">Thêm hạng khách hàng</h3>
+        <form @submit.prevent="handleAddRank" class="grid grid-cols-2 gap-4">
+          <div v-for="(label, field) in rankFieldLabels" :key="field" class="col-span-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
+            <input
+              v-model="rankForm[field]"
+              :type="rankInputTypes[field] || 'text'"
+              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :required="field !== 'note'"
+            />
+            <span v-if="rankForm.errors[field]" class="text-red-500 text-sm">{{ rankForm.errors[field] }}</span>
           </div>
-          <button type="submit" class="bg-[#2A66FF] text-white px-4 py-2 rounded mt-4">Thêm hạng</button>
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+            <textarea
+              v-model="rankForm.note"
+              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="3"
+            ></textarea>
+            <span v-if="rankForm.errors.note" class="text-red-500 text-sm">{{ rankForm.errors.note }}</span>
+          </div>
+          <div class="col-span-2 mt-2">
+            <button type="submit" class="bg-[#2A66FF] text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+              Thêm hạng
+            </button>
+          </div>
         </form>
-
-        <table class="w-full text-[12px] text-[#000]">
+        <h3 class="text-xl font-bold mt-10 mb-4">Danh sách hạng của khách hàng</h3>
+        <table class="w-full text-sm text-gray-700 border-t border-gray-200">
           <thead>
-            <tr class="bg-[#f9f9f9] text-[#A49E9E] uppercase">
-              <th class="p-[10px] text-left">Tên hạng</th>
-              <th class="p-[10px] text-left">Tổng chi tiêu tối thiểu</th>
-              <th class="p-[10px] text-left">% giảm giá</th>
-              <th class="p-[10px] text-left">% tín dụng</th>
-              <th class="p-[10px] text-left">Ghi chú</th>
+            <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
+              <th class="p-3 text-left">Tên hạng</th>
+              <th class="p-3 text-left">Tổng chi tiêu tối thiểu</th>
+              <th class="p-3 text-left">% giảm giá</th>
+              <th class="p-3 text-left">% tín dụng</th>
+              <th class="p-3 text-left">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="rank in customer.ranks" :key="rank.id">
-              <td class="p-[10px]">{{ rank.name }}</td>
-              <td class="p-[10px]">{{ rank.min_total_spent }}</td>
-              <td class="p-[10px]">{{ rank.discount_percent }}%</td>
-              <td class="p-[10px]">{{ rank.credit_percent }}%</td>
-              <td class="p-[10px]">{{ rank.note || '-' }}</td>
+            <tr v-for="rank in customer.ranks" :key="rank.id" class="border-b border-gray-200">
+              <td class="p-3">{{ rank.name }}</td>
+              <td class="p-3">{{ rank.min_total_spent }}</td>
+              <td class="p-3">{{ rank.discount_percent }}%</td>
+              <td class="p-3">{{ rank.credit_percent }}%</td>
+              <td class="p-3">{{ rank.note || '-' }}</td>
             </tr>
           </tbody>
         </table>
@@ -63,14 +74,12 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import AppLayout from '../Layouts/AppLayout.vue';
 import { watch } from 'vue';
+import AppLayout from '../Layouts/AppLayout.vue';
 
-const { customer } = defineProps({
-  customer: Object,
-});
+const { customer } = defineProps({ customer: Object });
 
-// Update form
+// Form chính (cập nhật khách hàng)
 const form = useForm({
   name: '',
   contact_person: '',
@@ -113,7 +122,7 @@ const inputTypes = {
   current_debt: 'number',
 };
 
-// Rank form
+// Form thêm rank
 const rankForm = useForm({
   name: '',
   min_total_spent: 0,

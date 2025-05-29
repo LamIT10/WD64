@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerRepository
 {
-    public function getAllWithRanks()
+    public function getAllWithRanks($perPage = 10)
     {
-        return Customer::with('ranks')->get();
+        return Customer::with('ranks')->paginate($perPage);
     }
 
     public function createCustomer(array $data): void

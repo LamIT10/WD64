@@ -16,4 +16,18 @@ class StoreRankRequest extends FormRequest
             'note' => 'nullable|string',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Vui lòng nhập tên hạng.',
+            'name.max' => 'Tên hạng không được vượt quá 50 ký tự.',
+            'min_total_spent.required' => 'Vui lòng nhập tổng chi tiêu tối thiểu.',
+            'min_total_spent.integer' => 'Tổng chi tiêu tối thiểu phải là số nguyên.',
+            'discount_percent.required' => 'Vui lòng nhập phần trăm giảm giá.',
+            'discount_percent.integer' => 'Phần trăm giảm giá phải là số nguyên.',
+            'credit_percent.required' => 'Vui lòng nhập phần trăm công nợ.',
+            'credit_percent.integer' => 'Phần trăm công nợ phải là số nguyên.',
+        ];
+    }
 }
