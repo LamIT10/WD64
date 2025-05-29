@@ -60,7 +60,7 @@ class CategoryRepository extends BaseRepository
             $newCategory['parent_id'] = $data['parent_id'] ?? null;
             $newCategory['description'] = $data['description'] ?? null;
 
-            $category = $this->create($newCategory);
+            $category = $this->handleModel->create($newCategory);
             if (!$category) {
                 throw new Exception('Lỗi, thêm không thành công');
             }
