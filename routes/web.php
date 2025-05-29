@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\Admin\Authorization\PermissionController ;
 use App\Http\Controllers\Admin\Authorization\RoleController;
 use App\Http\Controllers\SupplierController;
@@ -10,6 +12,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', action: function () {
         return Inertia::render('Dashboard');
     });
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
 
     
     Route::prefix('permission')->as('permission.')->group(function () {
