@@ -85,7 +85,6 @@
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import 'remixicon/fonts/remixicon.css';
 const props = defineProps({ users: Object });
 const hanldeDelete = (id) => {
     if (confirm("Bạn có chắc chắn muốn xoá người dùng này không?")) {
