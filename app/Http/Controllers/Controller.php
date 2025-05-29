@@ -47,12 +47,6 @@ abstract class Controller
         }
         return false;
     }
-    public function returnInertiaList($data, $view)
-    {
-        return inertia($view, [
-            'data' => $data
-        ]);
-    }
     public function returnInertia($data, $message, $route)
     {
         if (isset($data['status']) && $data['status'] == false) {
