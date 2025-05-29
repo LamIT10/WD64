@@ -49,7 +49,7 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
         $category = $this->categoryRepository->store($data);
-        
+
         return $this->returnInertia($category, 'Thêm thành công', 'admin.categories.index');
     }
 
@@ -60,6 +60,9 @@ class CategoryController extends Controller
     {
         $category = $this->categoryRepository->show($id);
 
+        if (isset($category['status']) && $category['status'] == false) {
+            return abort(404);
+        }
         return Inertia::render('admin/categories/Show', [
             'category' => $category
         ]);
@@ -83,21 +86,9 @@ class CategoryController extends Controller
      */
     public function update(EditCategoryRequest $request, string $id)
     {
-        try {
-            $data = $request->validated();
-            $category = $this->categoryRepository->findById($id);
-            if (!$category) {
-                return redirect()->back()
-                    ->with('error', 'Đã xảy ra lỗi, không tồn tại id. Vui lòng thử lại.');
-            }
-
-            $this->categoryRepository->update($id, $data);
-        } catch (\Throwable $th) {
-            Log::error('Lỗi khi tạo danh mục: ' . $th->getMessage());
-
-            return redirect()->back()
-                ->with('error', 'Đã xảy ra lỗi, cập nhật không thành công. Vui lòng thử lại.');
-        }
+        $data = $request->validated();
+        $category = $this->categoryRepository->update($id, $data);
+        return $this->returnInertia($category, 'Update thành công', 'admin.categories.edit', ['id' => $category->id]);
     }
 
     /**
@@ -105,8 +96,7 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $data['status'] = $this->categoryRepository->destroy($id);
-
+        $data = $this->categoryRepository->destroy($id);
 
         return $this->returnInertia($data, 'Xóa thành công', 'admin.categories.index');
     }

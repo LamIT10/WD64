@@ -91,10 +91,10 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                                    <a :href="route('admin.categories.index')"
+                                    <Link :href="route('admin.categories.index')"
                                         class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    Hủy bỏ
-                                    </a>
+                                        Hủy bỏ
+                                    </Link>
                                     <button type="submit" :disabled="form.processing"
                                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
                                         {{ processing ? 'Đang xử lý...' : 'Thêm danh mục' }}
@@ -111,7 +111,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 
 import { usePage } from '@inertiajs/vue3'
@@ -138,7 +138,7 @@ const addCategory = () => {
     form.post('/admin/categories', {
         preserveScroll: true,
         onSuccess: () => {
-            
+
         },
         onError: (errors) => {
             console.error('Validation errors:', errors);
