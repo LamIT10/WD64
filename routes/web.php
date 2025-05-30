@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\Authorization\PermissionController ;
-use App\Http\Controllers\Admin\Authorization\RoleController;
+use App\Http\Controllers\Auth\PermissionController ;
+use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Authorization;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
@@ -26,7 +26,7 @@ class RoleController extends Controller
     {
         $data = request()->all();
         $renderForm = $this->handleRepository->renderForm();
-        $listRoles = $this->handleRepository->getDataListRole($data);
+        $listRoles = $this->handleRepository->getDataListRole($data, $data['perPage'] ?? 15);
         return Inertia::render(
             "admin/Roles/Index",
             [

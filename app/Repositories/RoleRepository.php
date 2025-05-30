@@ -19,26 +19,25 @@ class RoleRepository extends BaseRepository
         $this->handleModel = $permission;
         $this->permissionRepository = $permissionRepository;
     }
-    public function getDataListRole($data)
+    public function getDataListRole($data, $perPage = 15)
     {
         try {
 
             $query = $this->handleModel->with('permissions')->select(["*"]);
-            dd($query);
             if (!empty($data)) {
                 $filters = [
                     'search' => [
                         'name' => $data['name'],
-                    ]
+                    ],
                 ];
                 $query = $this->filterData($query, $filters);
-                
-                // $query = $query->with('role_has_permission', function ($q) {
-                //     dd($q->where('permission_id','like','%'. "58" .'%'));
-                // });
+                $query = $query->whereHas('permissions', function ($q) use ($data) {
+                    $q->where('id', $data['permission']);
+                });
             }
             $query->orderBy('id', "desc");
-            return $query->paginate(10);
+
+            return $query->paginate($perPage);
         } catch (\Throwable $th) {
             Log::error("Lấy danh sách role lỗi, " . $th->getMessage());
         }
@@ -51,15 +50,12 @@ class RoleRepository extends BaseRepository
 
             $newRole['name'] = $data['name'];
             $role = $this->handleModel::create($newRole);
-
             if (!empty($data['permissions'])) {
                 $role->permissions()->sync($data['permissions']);
             }
-            if(!$role){
+            if (!$role) {
                 throw new \Exception('Có lỗi khi thêm vai trò');
             }
-
-
             DB::commit();
             return $role;
         } catch (\Throwable $th) {
@@ -72,23 +68,22 @@ class RoleRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-          
 
-            $oldRole = $this->findById($id);
+            $role = $this->findById($id);
             $newRole = [];
-            $newRole ['name'] = $data['name'];
+            $newRole['name'] = $data['name'];
             $permission = $data['permissions'];
 
-            $role = $this->update($id, $data);
-            if(!$role){
+            $role->update($newRole);
+            if (!$role) {
                 throw new \Exception('Có lỗi khi cập nhật');
             }
 
-            $permission =  $oldRole->syncPermissions($permission);
-            if(!$permission){
+            $permission =  $role->syncPermissions($permission);
+            if (!$permission) {
                 throw new \Exception('Có lỗi khi cập nhật');
             }
-          
+
             DB::commit();
             return $role;
         } catch (\Throwable $th) {
@@ -97,11 +92,12 @@ class RoleRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
-    public function handleDelete($id){
+    public function handleDelete($id)
+    {
         try {
-            $this->findById($id);
-            $role = $this->delete($id);
-            if(!$role){
+            $role  =  $this->findById($id);
+            $role->delete($id);
+            if (!$role) {
                 throw new \Exception("Có lỗi khi xoá vai trò");
             }
             DB::commit();
