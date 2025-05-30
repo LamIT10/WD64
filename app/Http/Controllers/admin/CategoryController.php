@@ -88,7 +88,7 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
         $category = $this->categoryRepository->update($id, $data);
-        return $this->returnInertia($category, 'Update thành công', 'admin.categories.edit', ['id' => $category->id]);
+        return $this->returnInertia($category, 'Cập nhật thành công', 'admin.categories.edit', [$category->id]);
     }
 
     /**

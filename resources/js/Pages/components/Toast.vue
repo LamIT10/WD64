@@ -80,7 +80,7 @@ watch(
 }
 
 .bg-success {
-    background: #3fbb46;
+    background: #fff;
 }
 
 .bg-error {
@@ -102,19 +102,18 @@ watch(
 }
 
 .bg-success .toast-icon {
-    color: #ffffff; /* Xanh lá cây cho success */
+    color: #0abf00; /* Xanh lá cây cho success */
 }
 
 .bg-error .toast-icon {
-    color: #fdfdfd; /* Đỏ cho error */
+    color: #fc0707; /* Đỏ cho error */
 }
 
 .toast-text {
     font-size: 16px;
-    color: #ffffff;
+    color: #000;
     white-space: nowrap;
     flex: 1;
-    font-weight: 700;
 }
 
 .close-button {
@@ -137,7 +136,7 @@ watch(
 .close-icon {
     width: 14px;
     height: 14px;
-    color: #ffffff;
+    color: #888;
     stroke-width: 2.5;
 }
 

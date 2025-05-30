@@ -3,7 +3,7 @@
         <AppLayout>
             <template #header>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Chỉnh sửa danh mục: {{ category.name }}
+                    Chỉnh sửa danh mục
                 </h2>
             </template>
 
@@ -11,6 +11,7 @@
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                         <div class="p-6 lg:p-8">
+                            <!-- Breadcrumb -->
                             <nav class="flex mb-6" aria-label="Breadcrumb">
                                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                                     <li>
@@ -38,6 +39,7 @@
                             <!-- Form -->
                             <form @submit.prevent="updateCategory" class="space-y-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Tên danh mục -->
                                     <div class="md:col-span-2">
                                         <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                                             Tên danh mục <span class="text-red-500">*</span>
@@ -48,9 +50,6 @@
                                             maxlength="100" />
                                         <div v-if="errors.name" class="mt-1 text-sm text-red-600">
                                             {{ errors.name }}
-                                        </div>
-                                        <div class="mt-1 text-xs text-gray-500">
-                                            {{ form.name.length }}/100 ký tự
                                         </div>
                                     </div>
 
@@ -63,14 +62,16 @@
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                             :class="{ 'border-red-500': errors.parent_id }">
                                             <option value="">Chọn danh mục cha</option>
-                                            
+                                            <option v-for="cat in categories" :key="cat.id" :value="cat.id"
+                                                :disabled="cat.id === form.id">
+                                                {{ cat.name }}
+                                            </option>
                                         </select>
                                         <div v-if="errors.parent_id" class="mt-1 text-sm text-red-600">
                                             {{ errors.parent_id }}
                                         </div>
                                         <div class="mt-1 text-xs text-gray-500">
-                                            Để trống nếu đây là danh mục gốc. Không thể chọn chính nó hoặc danh mục con
-                                            của nó.
+                                            Để trống nếu đây là danh mục gốc
                                         </div>
                                     </div>
 
@@ -89,24 +90,20 @@
                                     </div>
                                 </div>
 
-                                <div class="flex justify-between pt-6 border-t border-gray-200">
-                                    <div class="flex space-x-2">
-                                        <button type="button" @click="resetForm"
-                                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 ">
-                                            Reset
-                                        </button>
-                                    </div>
-
-                                    <div class="flex space-x-4">
-                                        <a :href="route('admin.categories.index')"
-                                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 ">
-                                            Hủy bỏ
-                                        </a>
-                                        <button type="submit" :disabled="form.processing"
-                                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2  disabled:opacity-50 disabled:cursor-not-allowed">
-                                            {{ form.processing ? 'Đang cập nhật...' : 'Cập nhật danh mục' }}
-                                        </button>
-                                    </div>
+                                <!-- Action Buttons -->
+                                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                                    <button type="button" @click="resetForm"
+                                        class="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Hủy bỏ
+                                    </button>
+                                    <Link :href="route('admin.categories.index')"
+                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Quay lại
+                                    </Link>
+                                    <button type="submit" :disabled="form.processing"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        {{ processing ? 'Đang xử lý...' : 'Cập nhật danh mục' }}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -118,44 +115,39 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 
-defineProps({
+const props = defineProps({
     category: Object,
     categories: Array,
-    errors: Object,
+    errors: Object
 });
 
 const form = useForm({
-    name: category.name || '',
-    parent_id: category.parent_id || '',
-    description: category.description || ''
+    name: props.category.name || '',
+    parent_id: props.category.parent_id || '',
+    description: props.category.description || ''
 });
 
+const processing = ref(false);
+
 const updateCategory = () => {
-    form.put(`/admin/categories/${category.id}`, {
+    form.put(route('admin.categories.update', props.category.id), {
         preserveScroll: true,
         onSuccess: () => {
-            
+            console.log('Cập nhật thành công');
         },
         onError: (errors) => {
-            console.error('Validation errors:', errors);
+            console.error('Lỗi validate:', errors);
         }
     });
 };
 
 const resetForm = () => {
-    form.name = category.name || '';
-    form.parent_id = category.parent_id || '';
-    form.description = category.description || '';
-    form.clearErrors();
+    form.reset();
 };
-
-
 </script>
 
-<style lang="" scoped>
-
-</style>
+<style scoped></style>

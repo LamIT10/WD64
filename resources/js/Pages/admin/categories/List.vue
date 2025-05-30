@@ -1,89 +1,232 @@
+<script>
+// <CategoryItem v-for="(category, index) in categories.data" :key="index" :category="category" /> 
+// import AppLayout from '../Layouts/AppLayout.vue'
+// import { Link, router } from '@inertiajs/vue3'
+// import CategoryItem from '../../components/CategoryItem.vue'
+
+
+// const props = defineProps({
+//     categories: Object,
+// })
+</script>
+
 <template>
     <AppLayout>
-        <div class="container mx-auto px-4 py-6">
-            <!-- Header and Add button -->
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Quản lý Danh Mục</h1>
-                <Link :href="route('admin.categories.create')" class="btn-primary">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Thêm danh mục
-                </Link>
-            </div>
-
-            <!-- Categories table -->
-            <div class="bg-white rounded-xl shadow overflow-hidden">
-                <!-- Table header -->
-                <div class="grid grid-cols-12 bg-gray-50 px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <div class="col-span-1 text-center">#</div>
-                    <div class="col-span-2 text-center">ID</div>
-                    <div class="col-span-3 text-center">Tên Danh Mục</div>
-                    <div class="col-span-2 text-center">Mô tả</div>
-                    <div class="col-span-2 text-center">Ngày Tạo</div>
-                    <div class="col-span-2 text-center">Thao Tác</div>
+        <div class="min-h-screen bg-gray-50 p-6">
+            <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
+                <!-- Header với tiêu đề và nút thêm -->
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-semibold text-gray-800">Danh sách Danh mục Sản phẩm</h1>
+                    <button
+                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Thêm danh mục mới
+                    </button>
                 </div>
 
-                <!-- Categories list -->
-                <div class="divide-y divide-gray-200">
-                    <template v-for="(category, index) in categories.data" :key="category.id">
-                        <!-- Parent category -->
-                        <div class="transition-all duration-200 hover:bg-gray-50">
-                            <div @click="toggleCategory(category.id)" 
-                                 class="grid grid-cols-12 px-6 py-4 items-center cursor-pointer select-none">
-                                <div class="col-span-1 text-center text-gray-600 font-medium">{{ index + 1 }}</div>
-                                <div class="col-span-2 text-center text-gray-600">{{ category.id }}</div>
-                                <div class="col-span-3 text-center font-semibold text-gray-800">{{ category.name }}</div>
-                                <div class="col-span-2 text-center text-gray-500 truncate">{{ category.description }}</div>
-                                <div class="col-span-2 text-center text-gray-500 text-sm">{{ formatDate(category.created_at) }}</div>
-                                <div class="col-span-2 flex justify-center space-x-2">
-                                    <button @click.stop="toggleCategory(category.id)" class="text-gray-400 hover:text-gray-600 p-1">
-                                        <i :class="expanded[category.id] ? 'fa-chevron-up' : 'fa-chevron-down'" class="fas text-sm"></i>
-                                    </button>
-                                    <Link :href="route('admin.categories.show', category.id)" 
-                                          class="text-blue-500 hover:text-blue-700 p-1" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </Link>
-                                    <Link :href="route('admin.categories.edit', category.id)" 
-                                          class="text-yellow-500 hover:text-yellow-700 p-1" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </Link>
-                                    <button @click.stop="deleteCategory(category.id)" 
-                                            class="text-red-500 hover:text-red-700 p-1" title="Xóa">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Child categories -->
-                            <div v-show="expanded[category.id]" class="bg-gray-50 pl-12 pr-6 transition-all duration-300">
-                                <div v-for="(child, childIndex) in category.children" :key="child.id" 
-                                     class="grid grid-cols-12 py-3 items-center border-t border-gray-200 hover:bg-gray-100">
-                                    <div class="col-span-1 text-center text-gray-400">{{ childIndex + 1 }}</div>
-                                    <div class="col-span-2 text-center text-gray-400">{{ child.id }}</div>
-                                    <div class="col-span-3 text-center text-gray-600">
-                                        <span class="ml-4">{{ child.name }}</span>
-                                    </div>
-                                    <div class="col-span-2 text-center text-gray-400 truncate">{{ child.description }}</div>
-                                    <div class="col-span-2 text-center text-gray-400 text-sm">{{ formatDate(child.created_at) }}</div>
-                                    <div class="col-span-2 flex justify-center space-x-2">
-                                        <Link :href="route('admin.categories.show', child.id)" 
-                                              class="text-blue-500 hover:text-blue-700 p-1" title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
-                                        </Link>
-                                        <Link :href="route('admin.categories.edit', child.id)" 
-                                              class="text-yellow-500 hover:text-yellow-700 p-1" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </Link>
-                                        <button @click.stop="deleteCategory(child.id)" 
-                                                class="text-red-500 hover:text-red-700 p-1" title="Xóa">
-                                            <i class="fas fa-trash-alt"></i>
+                <!-- Bảng danh mục -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
+                                    Tên danh mục
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                                    Mô tả
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Danh mục cha 1 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <button class="mr-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
                                         </button>
+                                        <span>Điện tử</span>
                                     </div>
-                                </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                    ELEC
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                        Xem
+                                    </button>
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                                        Sửa
+                                    </button>
+                                    <button
+                                        class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Danh mục con 1 (được mở rộng) -->
+                            <tr class="hover:bg-gray-50 bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center pl-10">
+                                        <span class="text-gray-600">Điện thoại di động</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                    MOBILE
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        75
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                        Xem
+                                    </button>
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                                        Sửa
+                                    </button>
+                                    <button
+                                        class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Danh mục không có con -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span>Thời trang</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                                    FASHION
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        156
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                        Xem
+                                    </button>
+                                    <button
+                                        class="mr-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                                        Sửa
+                                    </button>
+                                    <button
+                                        class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Modal thêm/sửa danh mục (hidden) -->
+                <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                Thêm danh mục mới
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="category-name">
+                                    Tên danh mục <span class="text-red-500">*</span>
+                                </label>
+                                <input id="category-name" type="text"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="Nhập tên danh mục" />
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="category-code">
+                                    Mã danh mục <span class="text-red-500">*</span>
+                                </label>
+                                <input id="category-code" type="text"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="Nhập mã danh mục" />
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="category-parent">
+                                    Danh mục cha
+                                </label>
+                                <select id="category-parent"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    <option value="">-- Không có --</option>
+                                    <option value="1">Điện tử</option>
+                                    <option value="2">Đồ gia dụng</option>
+                                </select>
                             </div>
                         </div>
-                    </template>
+                        <div class="px-6 py-4 border-t flex justify-end">
+                            <button
+                                class="mr-2 px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                Hủy
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                                Thêm mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal xác nhận xóa (hidden) -->
+                <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                Xác nhận xóa
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-gray-700 mb-4">
+                                Bạn có chắc chắn muốn xóa danh mục "Điện thoại di động"?
+                            </p>
+                            <p class="text-red-500 text-sm">
+                                Lưu ý: Tất cả danh mục con và sản phẩm trong danh mục này sẽ bị xóa.
+                            </p>
+                        </div>
+                        <div class="px-6 py-4 border-t flex justify-end">
+                            <button
+                                class="mr-2 px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                Hủy
+                            </button>
+                            <button
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -91,54 +234,11 @@
 </template>
 
 <script setup>
-import AppLayout from '../Layouts/AppLayout.vue'
-import { ref } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import AppLayout from '../Layouts/AppLayout.vue';
 
-
-const props = defineProps({
-    categories: Object,
-    
-})
-
-const expanded = ref({})
-const toggleCategory = (categoryId) => {
-    expanded.value[categoryId] = !expanded.value[categoryId]
-}
-
-const deleteCategory = (id) => {
-    if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-        router.delete(route('admin.categories.destroy', id))
-    }
-}
-
-const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' }
-    return new Date(dateString).toLocaleDateString('vi-VN', options)
-}
+// Không có logic, chỉ là giao diện
 </script>
 
-<style lang="css" scoped>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
-
-.btn-primary {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background: #2563eb;
-    color: #fff;
-    border-radius: 0.5rem;
-    transition: background 0.2s;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-.btn-primary:hover {
-    background: #1d4ed8;
-}
-
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-
+<style scoped>
+/* Có thể thêm style tùy chỉnh nếu cần */
 </style>

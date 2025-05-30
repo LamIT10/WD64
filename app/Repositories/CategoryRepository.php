@@ -22,7 +22,7 @@ class CategoryRepository extends BaseRepository
     {
         try {
             return $this->handleModel
-                ->with('children')
+                ->with('allChildren')
                 ->whereNull('parent_id')
                 ->paginate(10);
         } catch (\Throwable $th) {
@@ -78,8 +78,11 @@ class CategoryRepository extends BaseRepository
         try {
             DB::beginTransaction();
             $category = $this->getById($id);
-            if(!$category) {
+            if (!$category) {
                 throw new Exception('Danh mục sản phẩm không tồn tại');
+            }
+            if ($category->children()->count() > 0 && !empty($data['parent_id'])) {
+                throw new Exception('Danh mục hiện tại là danh mục cha, không thể gán danh mục cha mới.');
             }
             $dataCategory = [];
             $dataCategory['name'] = $data['name'] ?? null;
