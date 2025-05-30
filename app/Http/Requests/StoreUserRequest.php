@@ -15,7 +15,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed', 
             'phone' => 'nullable|string|max:12',
         ];
     }
@@ -30,7 +30,7 @@ class StoreUserRequest extends FormRequest
             'phone.max' => 'Số điện thoại không được vượt quá 12 ký tự',
             'password.required' => 'Vui lòng nhập mật khẩu',
             'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-         
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp',
         ];
     }
 }

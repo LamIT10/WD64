@@ -42,7 +42,10 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
+        unset($data['password_confirmation']);
+
         $user = $this->userRepo->createUser($data);
+
         return $this->returnInertia($user, 'Tạo mới người dùng thành công', 'admin.users.index');
     }
 

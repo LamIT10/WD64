@@ -27,6 +27,7 @@ class UpdateUserRequest extends FormRequest
             'email.email' => 'Email không hợp lệ',
             'email.unique' => 'Email đã được sử dụng',
             'phone.max' => 'Số điện thoại không được vượt quá 12 ký tự',
+            
         ];
     }
 }

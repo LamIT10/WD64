@@ -56,16 +56,16 @@
                             <div class="flex justify-center gap-[8px]">
                                 <Link :href="route('admin.users.show', user.id)"
                                     class="text-[#6B7280] hover:text-[#2A66FF] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#F3F4F6]">
-                                <i class="ri-eye-line"></i>
+                              <i class="fa-solid fa-eye"></i>    
                                 </Link>
                                 <Link :href="route('admin.users.edit', user.id)"
                                     class="text-[#2A66FF] hover:text-[#1E4FCC] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#EEF2FF]">
-                                <i class="ri-pencil-line"></i>
+                            <i class="fa-solid fa-pen-to-square"></i>
                                 </Link>
 
                                 <button type="submit" @click="hanldeDelete(user.id)"
                                     class="text-[#D93F21] hover:text-[#B91C1C] transition-colors text-[12px] px-[8px] py-[4px] rounded-[6px] hover:bg-[#FEF2F2]">
-                                    <i class="ri-delete-bin-line"></i>
+                             <i class="fa-solid fa-trash"></i>.
                                 </button>
                             </div>
                         </td>
@@ -78,6 +78,17 @@
                 </table>
             </div>
 
+            <!-- Phân trang -->
+              <nav class="mt-4 flex justify-center">
+        <ul class="inline-flex -space-x-px">
+          <li v-for="(link, index) in users.links" :key="index" class="cursor-pointer px-3 py-1 border"
+            :class="{ 'bg-gray-300 font-bold': link.active, 'rounded-l': index === 0, 'rounded-r': index === users.links.length - 1 }">
+            <Link v-html="formatLabel(link.label)" :href="link.url" class="block" v-if="link.url" />
+            <span v-else v-html="formatLabel(link.label)" class="block text-gray-500 cursor-not-allowed" />
+          </li>
+        </ul>
+      </nav>
+
 
         </div>
     </AppLayout>
@@ -85,12 +96,18 @@
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import 'remixicon/fonts/remixicon.css';
 const props = defineProps({ users: Object });
 const hanldeDelete = (id) => {
     if (confirm("Bạn có chắc chắn muốn xoá người dùng này không?")) {
         const formDelete = useForm({});
         formDelete.delete(route('admin.users.destroy', id));
     }
+}
+function formatLabel(label) {
+  return label
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/Previous/i, 'Trước')
+    .replace(/Next/i, 'Tiếp');
 }
 </script>
