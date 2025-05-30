@@ -13,13 +13,13 @@ class ForgotPasswordController extends Controller
     {
         return inertia('Auth/ForgotPassword');
     }
-
+    
     public function sendResetLinkEmail(ForgotPasswordRequest $request)
     {
         $status = Password::sendResetLink(
             $request->only('email')
         );
-
+        
         if ($status === Password::RESET_LINK_SENT) {
             // Nếu gửi thành công, trả về thông báo thành công cho Inertia/Vue
             return redirect()->back()->with([

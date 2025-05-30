@@ -29,7 +29,7 @@ class LoginController extends Controller
     public function login(LoginRequest $request)
     {
        $user = User::where('email', $request->email)->first();
-
+        
     //    return !Hash::check("123456", "$2y$10$.dQHrt9q9Z2xYhY.gE6zY.dh/wBUEglmBHWNWioI2Rv5n2vd4KUQK");
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -57,4 +57,5 @@ class LoginController extends Controller
 
         return redirect('/login');
     }
+    
 }

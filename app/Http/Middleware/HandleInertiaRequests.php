@@ -40,6 +40,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'recaptchaSiteKey' => config('nocaptcha.sitekey'),
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error'   => fn() => $request->session()->get('error'),
+            ],
         ]);
     }
 }

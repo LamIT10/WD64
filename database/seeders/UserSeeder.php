@@ -68,6 +68,30 @@ class UserSeeder extends Seeder
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'name' => 'Yuh',
+                'password' => Hash::make('123456'),
+                'email' => 'nhuy04625@gmail.com',
+                'phone' => '0971424792',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'yyuh7643',
+                'password' => Hash::make('123456'),
+                'email' => 'yyuh7643@gmail.com',
+                'phone' => '0971424792',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'vivastylen7',
+                'password' => Hash::make('123456'),
+                'email' => 'vivastylen7@gmail.com',
+                'phone' => '0971424792',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
     }
 }
