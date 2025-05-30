@@ -146,7 +146,6 @@ const rankInputTypes = {
 
 const handleUpdate = () => {
   form.put(route('admin.customers.update', customer.id), {
-    onSuccess: () => alert('Cập nhật thông tin khách hàng thành công.'),
   });
 };
 
@@ -154,7 +153,6 @@ const handleAddRank = () => {
   rankForm.post(route('admin.customers.ranks.store', customer.id), {
     onSuccess: () => {
       rankForm.reset();
-      alert('Thêm hạng khách hàng thành công.');
     },
   });
 };

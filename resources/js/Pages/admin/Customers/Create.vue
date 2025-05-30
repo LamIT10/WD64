@@ -66,7 +66,6 @@ const form = useForm({
 
 const submit = () => {
   form.post(route('admin.customers.store'), {
-    onSuccess: () => alert('Thêm khách hàng mới thành công.'),
   });
 };
 </script>

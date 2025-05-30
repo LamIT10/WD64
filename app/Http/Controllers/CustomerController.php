@@ -46,7 +46,7 @@ class CustomerController extends Controller
     {
         $data = $this->customerRepo->createCustomer($request->validated());
 
-        return $this->returnInertia($data, "Thêm thành công", 'admin.customers.index');
+        return $this->returnInertia($data, "Thêm khách hàng mới thành công", 'admin.customers.index');
     }
 
     public function edit(Customer $customer)
