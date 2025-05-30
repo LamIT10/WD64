@@ -13,7 +13,11 @@
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+<<<<<<< HEAD
         "maatwebsite/excel": "^3.1",
+=======
+        "spatie/image": "^3.8",
+>>>>>>> 6fd5b45cfc3bb5aa0a21d0b9cbf22a0c21640e96
         "spatie/laravel-permission": "*",
         "tightenco/ziggy": "^2.5"
     },

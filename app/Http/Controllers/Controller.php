@@ -47,4 +47,12 @@ abstract class Controller
         }
         return false;
     }
+    public function returnInertia($data, $message, $route)
+    {
+        if (isset($data['status']) && $data['status'] == false) {
+            return redirect()->back()->with('error', $data['message']);
+        } else {
+            return redirect()->route($route)->with('success', $message);
+        }
+    }
 }
