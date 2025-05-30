@@ -1,12 +1,167 @@
-<<<<<<< HEAD
 const Ziggy = {
     url: "http://127.0.0.1:8000",
     port: null,
     defaults: {},
     routes: {
-<<<<<<< HEAD
-=======
         "admin.": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
+        "admin.categories.index": {
+            uri: "admin/categories",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.categories.create": {
+            uri: "admin/categories/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.categories.store": {
+            uri: "admin/categories",
+            methods: ["POST"],
+        },
+        "admin.categories.show": {
+            uri: "admin/categories/{category}",
+            methods: ["GET", "HEAD"],
+            parameters: ["category"],
+        },
+        "admin.categories.edit": {
+            uri: "admin/categories/{category}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["category"],
+        },
+        "admin.categories.update": {
+            uri: "admin/categories/{category}",
+            methods: ["PUT", "PATCH"],
+            parameters: ["category"],
+        },
+        "admin.categories.destroy": {
+            uri: "admin/categories/{category}",
+            methods: ["DELETE"],
+            parameters: ["category"],
+        },
+        "admin.products.index": {
+            uri: "admin/products",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.products.create": {
+            uri: "admin/products/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.products.store": { uri: "admin/products", methods: ["POST"] },
+        "admin.products.show": {
+            uri: "admin/products/{product}",
+            methods: ["GET", "HEAD"],
+            parameters: ["product"],
+        },
+        "admin.products.edit": {
+            uri: "admin/products/{product}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["product"],
+        },
+        "admin.products.update": {
+            uri: "admin/products/{product}",
+            methods: ["PUT", "PATCH"],
+            parameters: ["product"],
+        },
+        "admin.products.destroy": {
+            uri: "admin/products/{product}",
+            methods: ["DELETE"],
+            parameters: ["product"],
+        },
+        "admin.customers.index": {
+            uri: "admin/customers",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customers.create": {
+            uri: "admin/customers/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customers.store": { uri: "admin/customers", methods: ["POST"] },
+        "admin.customers.show": {
+            uri: "admin/customers/{customer}",
+            methods: ["GET", "HEAD"],
+            parameters: ["customer"],
+            bindings: { customer: "id" },
+        },
+        "admin.customers.edit": {
+            uri: "admin/customers/{customer}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["customer"],
+            bindings: { customer: "id" },
+        },
+        "admin.customers.update": {
+            uri: "admin/customers/{customer}",
+            methods: ["PUT", "PATCH"],
+            parameters: ["customer"],
+            bindings: { customer: "id" },
+        },
+        "admin.customers.destroy": {
+            uri: "admin/customers/{customer}",
+            methods: ["DELETE"],
+            parameters: ["customer"],
+            bindings: { customer: "id" },
+        },
+        "admin.customers.ranks.store": {
+            uri: "admin/customers/{customer}/ranks",
+            methods: ["POST"],
+            parameters: ["customer"],
+            bindings: { customer: "id" },
+        },
+        "admin.permission.index": {
+            uri: "admin/permission",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.permission.create": {
+            uri: "admin/permission/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.permission.store": {
+            uri: "admin/permission",
+            methods: ["POST"],
+        },
+        "admin.permission.edit": {
+            uri: "admin/permission/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.permission.update": {
+            uri: "admin/permission/{id}",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.permission.destroy": {
+            uri: "admin/permission/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.permission.show": {
+            uri: "admin/permission/{id}",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.role.index": { uri: "admin/role", methods: ["GET", "HEAD"] },
+        "admin.role.create": {
+            uri: "admin/role/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.role.store": { uri: "admin/role", methods: ["POST"] },
+        "admin.role.edit": {
+            uri: "admin/role/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.role.update": {
+            uri: "admin/role/{id}",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.role.destroy": {
+            uri: "admin/role/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.role.show": {
+            uri: "admin/role/{id}",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
         "admin.suppliers.index": {
             uri: "admin/suppliers",
             methods: ["GET", "HEAD"],
@@ -15,7 +170,36 @@ const Ziggy = {
             uri: "admin/suppliers/create",
             methods: ["GET", "HEAD"],
         },
->>>>>>> 6fd5b45cfc3bb5aa0a21d0b9cbf22a0c21640e96
+        "admin.suppliers.store": {
+            uri: "admin/suppliers/store",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
+        "admin.users.create": {
+            uri: "admin/users/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.users.store": { uri: "admin/users", methods: ["POST"] },
+        "admin.users.show": {
+            uri: "admin/users/{user}",
+            methods: ["GET", "HEAD"],
+            parameters: ["user"],
+        },
+        "admin.users.edit": {
+            uri: "admin/users/{user}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["user"],
+        },
+        "admin.users.update": {
+            uri: "admin/users/{user}",
+            methods: ["PUT", "PATCH"],
+            parameters: ["user"],
+        },
+        "admin.users.destroy": {
+            uri: "admin/users/{user}",
+            methods: ["DELETE"],
+            parameters: ["user"],
+        },
         "storage.local": {
             uri: "storage/{path}",
             methods: ["GET", "HEAD"],
@@ -26,10 +210,21 @@ const Ziggy = {
 };
 if (typeof window !== "undefined" && typeof window.Ziggy !== "undefined") {
     Object.assign(Ziggy.routes, window.Ziggy.routes);
-=======
-const Ziggy = {"url":"http:\/\/127.0.0.1:8000","port":null,"defaults":{},"routes":{"admin.":{"uri":"admin\/dashboard","methods":["GET","HEAD"]},"admin.categories.index":{"uri":"admin\/categories","methods":["GET","HEAD"]},"admin.categories.create":{"uri":"admin\/categories\/create","methods":["GET","HEAD"]},"admin.categories.store":{"uri":"admin\/categories","methods":["POST"]},"admin.categories.show":{"uri":"admin\/categories\/{category}","methods":["GET","HEAD"],"parameters":["category"]},"admin.categories.edit":{"uri":"admin\/categories\/{category}\/edit","methods":["GET","HEAD"],"parameters":["category"]},"admin.categories.update":{"uri":"admin\/categories\/{category}","methods":["PUT","PATCH"],"parameters":["category"]},"admin.categories.destroy":{"uri":"admin\/categories\/{category}","methods":["DELETE"],"parameters":["category"]},"admin.products.index":{"uri":"admin\/products","methods":["GET","HEAD"]},"admin.products.create":{"uri":"admin\/products\/create","methods":["GET","HEAD"]},"admin.products.store":{"uri":"admin\/products","methods":["POST"]},"admin.products.show":{"uri":"admin\/products\/{product}","methods":["GET","HEAD"],"parameters":["product"]},"admin.products.edit":{"uri":"admin\/products\/{product}\/edit","methods":["GET","HEAD"],"parameters":["product"]},"admin.products.update":{"uri":"admin\/products\/{product}","methods":["PUT","PATCH"],"parameters":["product"]},"admin.products.destroy":{"uri":"admin\/products\/{product}","methods":["DELETE"],"parameters":["product"]},"admin.customers.index":{"uri":"admin\/customers","methods":["GET","HEAD"]},"admin.customers.create":{"uri":"admin\/customers\/create","methods":["GET","HEAD"]},"admin.customers.store":{"uri":"admin\/customers","methods":["POST"]},"admin.customers.show":{"uri":"admin\/customers\/{customer}","methods":["GET","HEAD"],"parameters":["customer"],"bindings":{"customer":"id"}},"admin.customers.edit":{"uri":"admin\/customers\/{customer}\/edit","methods":["GET","HEAD"],"parameters":["customer"],"bindings":{"customer":"id"}},"admin.customers.update":{"uri":"admin\/customers\/{customer}","methods":["PUT","PATCH"],"parameters":["customer"],"bindings":{"customer":"id"}},"admin.customers.destroy":{"uri":"admin\/customers\/{customer}","methods":["DELETE"],"parameters":["customer"],"bindings":{"customer":"id"}},"admin.customers.ranks.store":{"uri":"admin\/customers\/{customer}\/ranks","methods":["POST"],"parameters":["customer"],"bindings":{"customer":"id"}},"admin.permission.index":{"uri":"admin\/permission","methods":["GET","HEAD"]},"admin.permission.create":{"uri":"admin\/permission\/create","methods":["GET","HEAD"]},"admin.permission.store":{"uri":"admin\/permission","methods":["POST"]},"admin.permission.edit":{"uri":"admin\/permission\/{id}\/edit","methods":["GET","HEAD"],"parameters":["id"]},"admin.permission.update":{"uri":"admin\/permission\/{id}","methods":["PATCH"],"parameters":["id"]},"admin.permission.destroy":{"uri":"admin\/permission\/{id}","methods":["DELETE"],"parameters":["id"]},"admin.permission.show":{"uri":"admin\/permission\/{id}","methods":["GET","HEAD"],"parameters":["id"]},"admin.role.index":{"uri":"admin\/role","methods":["GET","HEAD"]},"admin.role.create":{"uri":"admin\/role\/create","methods":["GET","HEAD"]},"admin.role.store":{"uri":"admin\/role","methods":["POST"]},"admin.role.edit":{"uri":"admin\/role\/{id}\/edit","methods":["GET","HEAD"],"parameters":["id"]},"admin.role.update":{"uri":"admin\/role\/{id}","methods":["PATCH"],"parameters":["id"]},"admin.role.destroy":{"uri":"admin\/role\/{id}","methods":["DELETE"],"parameters":["id"]},"admin.role.show":{"uri":"admin\/role\/{id}","methods":["GET","HEAD"],"parameters":["id"]},"admin.suppliers.index":{"uri":"admin\/suppliers","methods":["GET","HEAD"]},"admin.suppliers.create":{"uri":"admin\/suppliers\/create","methods":["GET","HEAD"]},"admin.suppliers.store":{"uri":"admin\/suppliers\/store","methods":["GET","HEAD"]},"admin.users.index":{"uri":"admin\/users","methods":["GET","HEAD"]},"admin.users.create":{"uri":"admin\/users\/create","methods":["GET","HEAD"]},"admin.users.store":{"uri":"admin\/users","methods":["POST"]},"admin.users.show":{"uri":"admin\/users\/{user}","methods":["GET","HEAD"],"parameters":["user"]},"admin.users.edit":{"uri":"admin\/users\/{user}\/edit","methods":["GET","HEAD"],"parameters":["user"]},"admin.users.update":{"uri":"admin\/users\/{user}","methods":["PUT","PATCH"],"parameters":["user"]},"admin.users.destroy":{"uri":"admin\/users\/{user}","methods":["DELETE"],"parameters":["user"]},"storage.local":{"uri":"storage\/{path}","methods":["GET","HEAD"],"wheres":{"path":".*"},"parameters":["path"]}}};
-if (typeof window !== 'undefined' && typeof window.Ziggy !== 'undefined') {
-  Object.assign(Ziggy.routes, window.Ziggy.routes);
->>>>>>> 102007491a1acb411fb449cb9e89c1487e68ea78
+    const Ziggy = {
+        url: "http://127.0.0.1:8000",
+        port: null,
+        defaults: {},
+        routes: {
+            "storage.local": {
+                uri: "storage/{path}",
+                methods: ["GET", "HEAD"],
+                wheres: { path: ".*" },
+                parameters: ["path"],
+            },
+        },
+    };
+    if (typeof window !== "undefined" && typeof window.Ziggy !== "undefined") {
+        Object.assign(Ziggy.routes, window.Ziggy.routes);
+    }
 }
 export { Ziggy };
