@@ -52,7 +52,6 @@ watch(
             // Đảm bảo visible = false trước
             visible.value = false;
             await nextTick();
-            
             // Set message và type
             toastMessage.value = flash.success || flash.error;
             toastType.value = flash.success ? "success" : "error";
@@ -81,11 +80,12 @@ watch(
 }
 
 .bg-success {
-    background: #ffffff;
+    background: #3fbb46;
 }
 
 .bg-error {
     background: #ffffff;
+    box-shadow: 0 0 3px red;
 }
 
 .toast-content {
@@ -98,21 +98,23 @@ watch(
     width: 16px;
     height: 16px;
     flex-shrink: 0;
+  
 }
 
 .bg-success .toast-icon {
-    color: #4ade80; /* Xanh lá cây cho success */
+    color: #ffffff; /* Xanh lá cây cho success */
 }
 
 .bg-error .toast-icon {
-    color: #f87171; /* Đỏ cho error */
+    color: #fdfdfd; /* Đỏ cho error */
 }
 
 .toast-text {
     font-size: 16px;
-    color: #000000;
+    color: #ffffff;
     white-space: nowrap;
     flex: 1;
+    font-weight: 700;
 }
 
 .close-button {
@@ -135,7 +137,7 @@ watch(
 .close-icon {
     width: 14px;
     height: 14px;
-    color: #666666;
+    color: #ffffff;
     stroke-width: 2.5;
 }
 
