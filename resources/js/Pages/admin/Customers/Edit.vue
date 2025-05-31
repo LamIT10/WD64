@@ -1,72 +1,88 @@
 <template>
   <AppLayout>
-    <div class="w-full h-auto my-4 p-5 bg-[#f5f7fa]">
-      <div class="w-[90%] mx-auto bg-white rounded-2xl shadow p-6 mb-10">
+    <div class="bg-gray-50 p-6">
+      <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <!-- Cập nhật thông tin khách hàng -->
-        <h2 class="text-2xl font-bold mb-6">Sửa thông tin khách hàng</h2>
-        <form @submit.prevent="handleUpdate" class="space-y-4">
+        <h2 class="text-lg text-purple-700 font-semibold mb-6">Sửa thông tin khách hàng</h2>
+        <form @submit.prevent="handleUpdate" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div v-for="(label, field) in fieldLabels" :key="field">
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
-            <input
-              v-model="form[field]"
-              :type="inputTypes[field] || 'text'"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :required="field === 'name'"
-            />
-            <span v-if="form.errors[field]" class="text-red-500 text-sm">{{ form.errors[field] }}</span>
+            <input v-model="form[field]" :type="inputTypes[field] || 'text'"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors[field] }" :required="field === 'name'" />
+            <span v-if="form.errors[field]" class="text-red-500 text-sm mt-1">{{ form.errors[field] }}</span>
           </div>
-          <button type="submit" class="bg-[#BE202F] text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
-            Cập nhật
-          </button>
+          <div class="md:col-span-2 flex justify-end space-x-3">
+            <Link :href="route('admin.customers.index')"
+              class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            Hủy
+            </Link>
+            <button type="submit"
+              class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+              Cập nhật
+            </button>
+          </div>
         </form>
-        <h3 class="text-xl font-bold mt-10 mb-4">Thêm hạng khách hàng</h3>
-        <form @submit.prevent="handleAddRank" class="grid grid-cols-2 gap-4">
-          <div v-for="(label, field) in rankFieldLabels" :key="field" class="col-span-1">
+
+        <!-- Thêm hạng khách hàng -->
+        <h3 class="text-lg text-purple-700 font-semibold mt-10 mb-6">Thêm hạng khách hàng</h3>
+        <form @submit.prevent="handleAddRank" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="(label, field) in rankFieldLabels" :key="field">
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
-            <input
-              v-model="rankForm[field]"
-              :type="rankInputTypes[field] || 'text'"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :required="field !== 'note'"
-            />
-            <span v-if="rankForm.errors[field]" class="text-red-500 text-sm">{{ rankForm.errors[field] }}</span>
+            <input v-model="rankForm[field]" :type="rankInputTypes[field] || 'text'"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': rankForm.errors[field] }" :required="field !== 'note'" />
+            <span v-if="rankForm.errors[field]" class="text-red-500 text-sm mt-1">{{ rankForm.errors[field] }}</span>
           </div>
-          <div class="col-span-2">
+          <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-            <textarea
-              v-model="rankForm.note"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="3"
-            ></textarea>
-            <span v-if="rankForm.errors.note" class="text-red-500 text-sm">{{ rankForm.errors.note }}</span>
+            <textarea v-model="rankForm.note"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': rankForm.errors.note }" rows="3"></textarea>
+            <span v-if="rankForm.errors.note" class="text-red-500 text-sm mt-1">{{ rankForm.errors.note }}</span>
           </div>
-          <div class="col-span-2 mt-2">
-            <button type="submit" class="bg-[#2A66FF] text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+          <div class="md:col-span-2 flex justify-end space-x-3">
+            <button type="submit"
+              class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
               Thêm hạng
             </button>
           </div>
         </form>
-        <h3 class="text-xl font-bold mt-10 mb-4">Danh sách hạng của khách hàng</h3>
-        <table class="w-full text-sm text-gray-700 border-t border-gray-200">
-          <thead>
-            <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
-              <th class="p-3 text-left">Tên hạng</th>
-              <th class="p-3 text-left">Tổng chi tiêu tối thiểu</th>
-              <th class="p-3 text-left">% giảm giá</th>
-              <th class="p-3 text-left">% tín dụng</th>
-              <th class="p-3 text-left">Ghi chú</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="rank in customer.ranks" :key="rank.id" class="border-b border-gray-200">
-              <td class="p-3">{{ rank.name }}</td>
-              <td class="p-3">{{ rank.min_total_spent }}</td>
-              <td class="p-3">{{ rank.discount_percent }}%</td>
-              <td class="p-3">{{ rank.credit_percent }}%</td>
-              <td class="p-3">{{ rank.note || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
+
+        <!-- Danh sách hạng -->
+        <h3 class="text-lg text-purple-700 font-semibold mt-10 mb-6">Danh sách hạng của khách hàng</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tên hạng
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tổng chi tiêu tối thiểu
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  % giảm giá
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  % tín dụng
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ghi chú
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="rank in customer.ranks" :key="rank.id" class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ rank.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rank.min_total_spent }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rank.discount_percent }}%</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rank.credit_percent }}%</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rank.note || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </AppLayout>
@@ -74,6 +90,7 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { watch } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 
@@ -146,6 +163,9 @@ const rankInputTypes = {
 
 const handleUpdate = () => {
   form.put(route('admin.customers.update', customer.id), {
+    onSuccess: () => {
+      // Optional: Add success notification
+    },
   });
 };
 
@@ -158,4 +178,22 @@ const handleAddRank = () => {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="css">
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+</style>
