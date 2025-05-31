@@ -61,33 +61,32 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-
-const props = defineProps({
-  initialFlash: Object
-})
+import { router, usePage } from '@inertiajs/vue3'
 
 const showToast = ref(false)
 const toastMessage = ref('')
 const toastType = ref('success')
 
-const flash = props.initialFlash || {}
-const displayed = ref(false)
+// ✅ xử lý toast mỗi khi có response mới từ server
+router.on('success', () => {
+  const flash = usePage().props.flash
 
-if ((flash.success || flash.error) && !displayed.value) {
-  displayed.value = true
-  toastMessage.value = flash.success || flash.error
-  toastType.value = flash.success ? 'success' : 'error'
-  showToast.value = true
+  if (flash.success || flash.error) {
+    toastMessage.value = flash.success || flash.error
+    toastType.value = flash.success ? 'success' : 'error'
+    showToast.value = true
 
-  setTimeout(() => {
-    showToast.value = false
-  }, 5000)
-}
+    setTimeout(() => {
+      showToast.value = false
+    }, 5000)
+  }
+})
 
 function hideToast() {
   showToast.value = false
 }
 </script>
+
 
 
 
