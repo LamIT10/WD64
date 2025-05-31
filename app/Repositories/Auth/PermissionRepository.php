@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Auth;
 
+use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
@@ -66,13 +67,12 @@ class PermissionRepository extends BaseRepository
 
             $permission = $this->handleModel->findOrFail($id);
 
-            // $oldRole = $this->handleModel->findOrFail($id);
             $newPermission = [];
             $newPermission["name"] = $data["name"] ?? "";
             $newPermission["description"] = $data["description"] ?? "";
 
-            $permission = $this->update($id, $newPermission);
-            if ($permission) {
+            $permission = $permission->update($newPermission);
+            if (!$permission) {
                 throw new \Exception("Có lỗi khi cập nhật");
             }
             DB::commit();
@@ -86,8 +86,8 @@ class PermissionRepository extends BaseRepository
     public function handleDelete($id)
     {
         try {
-            $this->findById($id);
-            $permission = $this->delete($id);
+            $permission = $this->findById($id);
+            $permission->delete($id);
             if (!$permission) {
                 throw new \Exception("Có lỗi khi xoá quyền");
             }

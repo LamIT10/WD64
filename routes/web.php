@@ -1,19 +1,18 @@
 <?php
 
+use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
-use App\Http\Controllers\Admin\Authorization\PermissionController ;
-use App\Http\Controllers\Admin\Authorization\RoleController;
+use App\Http\Controllers\Auth\PermissionController ;
+use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 
 
 Route::prefix('admin')->as('admin.')->group(function () {
