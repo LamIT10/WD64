@@ -24,7 +24,6 @@ class LoginRepository extends BaseRepository
 
     public function login($data)
     {
-        // dd(1);
         try {
             DB::beginTransaction();
             // Login băng thư viện hỗ trợ Atem
