@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Not Found</title>
+    <title>404 - Lost in Space</title>
     <style>
         /* Reset CSS */
         * {
@@ -15,7 +15,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
             color: #fff;
             height: 100vh;
             overflow: hidden;
@@ -27,7 +27,7 @@
 
         .container {
             text-align: center;
-            z-index: 10;
+            z-index: 20;
             padding: 2rem;
             max-width: 800px;
         }
@@ -36,15 +36,15 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: #00ff88;
-            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            color: #4facfe;
+            text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
             animation: glow 2s infinite alternate;
         }
 
         h1 {
             font-size: 8rem;
             margin: 0;
-            background: linear-gradient(45deg, #00ff88, #0099ff);
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -67,23 +67,24 @@
         .btn {
             display: inline-block;
             padding: 12px 30px;
-            background: linear-gradient(45deg, #00ff88, #0099ff);
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
             color: #16213e;
             text-decoration: none;
             border-radius: 50px;
             font-weight: 600;
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
             border: none;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            z-index: 10;
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
         }
 
         .btn:active {
@@ -105,67 +106,53 @@
             left: 100%;
         }
 
-        .gamepad {
-            width: 150px;
+        /* Spaceship Animation */
+        .spaceship-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .spaceship {
+            position: absolute;
+            width: 120px;
+            height: 60px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60"><path d="M10,30 L50,10 L110,30 L50,50 Z" fill="%234facfe"/><circle cx="80" cy="30" r="10" fill="%2300f2fe"/><path d="M20,25 L40,25 M20,35 L40,35" stroke="white" stroke-width="2"/></svg>') no-repeat;
+            animation: fly 20s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.7));
+        }
+
+        /* Planets */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+
+        .planet-1 {
+            width: 100px;
             height: 100px;
-            margin: 2rem auto;
-            position: relative;
+            background: radial-gradient(circle at 30% 30%, #ff9a9e, #fad0c4);
+            top: 20%;
+            left: 15%;
+            animation: float 15s ease-in-out infinite;
         }
 
-        .gamepad-base {
+        .planet-2 {
             width: 150px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            position: relative;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            height: 150px;
+            background: radial-gradient(circle at 70% 30%, #a1c4fd, #c2e9fb);
+            bottom: 10%;
+            right: 10%;
+            animation: float 18s ease-in-out infinite reverse;
         }
 
-        .gamepad-stick {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(45deg, #00ff88, #0099ff);
-            border-radius: 50%;
-            position: absolute;
-            top: 25px;
-            left: 30px;
-            animation: moveStick 4s infinite ease-in-out;
-        }
-
-        .gamepad-buttons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .gamepad-button {
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(45deg, #ff3366, #ff0066);
-            border-radius: 50%;
-            animation: blink 2s infinite;
-        }
-
-        .gamepad-button:nth-child(2) {
-            animation-delay: 0.5s;
-            background: linear-gradient(45deg, #ffcc00, #ff9900);
-        }
-
-        .gamepad-button:nth-child(3) {
-            animation-delay: 1s;
-            background: linear-gradient(45deg, #0099ff, #0066ff);
-        }
-
-        .gamepad-button:nth-child(4) {
-            animation-delay: 1.5s;
-            background: linear-gradient(45deg, #9900ff, #6600cc);
-        }
-
-        .particles {
+        /* Stars */
+        .stars {
             position: absolute;
             top: 0;
             left: 0;
@@ -174,22 +161,50 @@
             z-index: 1;
         }
 
-        .particle {
+        .star {
             position: absolute;
-            background: rgba(255, 255, 255, 0.8);
+            background-color: white;
             border-radius: 50%;
-            pointer-events: none;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        /* Shooting Stars */
+        .shooting-star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0), white);
+            border-radius: 50%;
+            filter: drop-shadow(0 0 6px white);
+            animation: shoot var(--time) linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes fly {
+            0% {
+                transform: translateX(-150px) translateY(100px) rotate(10deg);
+            }
+            25% {
+                transform: translateX(25vw) translateY(30vh) rotate(-5deg);
+            }
+            50% {
+                transform: translateX(50vw) translateY(50vh) rotate(0deg);
+            }
+            75% {
+                transform: translateX(75vw) translateY(20vh) rotate(5deg);
+            }
+            100% {
+                transform: translateX(100vw) translateY(100px) rotate(10deg);
+            }
         }
 
         @keyframes float {
             0% {
                 transform: translateY(0px);
             }
-
             50% {
-                transform: translateY(-15px);
+                transform: translateY(-20px);
             }
-
             100% {
                 transform: translateY(0px);
             }
@@ -197,50 +212,32 @@
 
         @keyframes glow {
             from {
-                text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+                text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
             }
-
             to {
-                text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 30px rgba(0, 255, 136, 0.6);
+                text-shadow: 0 0 20px rgba(79, 172, 254, 0.8), 0 0 30px rgba(79, 172, 254, 0.6);
             }
         }
 
-        @keyframes moveStick {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            25% {
-                transform: translate(20px, -10px);
-            }
-
-            50% {
-                transform: translate(0, 10px);
-            }
-
-            75% {
-                transform: translate(-20px, -10px);
-            }
-
-            100% {
-                transform: translate(0, 0);
-            }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
         }
 
-        @keyframes blink {
+        @keyframes shoot {
             0% {
-                transform: scale(1);
+                transform: translateX(0) translateY(0);
+                opacity: 0;
+            }
+            10% {
                 opacity: 1;
             }
-
-            50% {
-                transform: scale(1.2);
-                opacity: 0.8;
+            70% {
+                opacity: 1;
             }
-
             100% {
-                transform: scale(1);
-                opacity: 1;
+                transform: translateX(500px) translateY(300px);
+                opacity: 0;
             }
         }
 
@@ -249,90 +246,87 @@
             h1 {
                 font-size: 5rem;
             }
-
             h2 {
                 font-size: 1.5rem;
             }
-
             p {
                 font-size: 1rem;
+            }
+            .spaceship {
+                width: 80px;
+                height: 40px;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="particles" id="particles"></div>
+    <!-- Space Background Elements -->
+    <div class="stars" id="stars"></div>
+    <div class="spaceship-container">
+        <div class="spaceship"></div>
+        <div class="planet planet-1"></div>
+        <div class="planet planet-2"></div>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
-        <div class="logo">KHÔNG TÌM THẤY</div>
         <h1>404</h1>
         <h2>Không tìm thấy trang</h2>
         <p>Rất tiếc! Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển. Hãy quay lại trang chủ để tiếp tục trải nghiệm.</p>
-        <div class="gamepad">
-            <div class="gamepad-base">
-                <div class="gamepad-stick"></div>
-                <div class="gamepad-buttons">
-                    <div class="gamepad-button"></div>
-                    <div class="gamepad-button"></div>
-                    <div class="gamepad-button"></div>
-                    <div class="gamepad-button"></div>
-                </div>
-            </div>
-        </div>
-
-        <a href="/" class="btn">Continue to Home</a>
+        <a href="/admin/suppliers" class="btn">Trở về Trang chủ</a>
     </div>
 
     <script>
-        // Particle animation
+        // Create stars
         document.addEventListener('DOMContentLoaded', function() {
-            const particlesContainer = document.getElementById('particles');
-            const particleCount = 50;
-
-            for (let i = 0; i < particleCount; i++) {
-                createParticle();
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = Math.random() * 5 + 5;
+                
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.setProperty('--duration', `${duration}s`);
+                
+                starsContainer.appendChild(star);
             }
 
-            function createParticle() {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-
-                // Random properties
-                const size = Math.random() * 5 + 2;
-                const posX = Math.random() * window.innerWidth;
-                const posY = Math.random() * window.innerHeight;
-                const duration = Math.random() * 20 + 10;
-                const delay = Math.random() * 5;
-                const opacity = Math.random() * 0.5 + 0.1;
-                const color = getRandomColor();
-
-                // Apply styles
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${posX}px`;
-                particle.style.top = `${posY}px`;
-                particle.style.backgroundColor = color;
-                particle.style.opacity = opacity;
-                particle.style.animation = `float ${duration}s linear ${delay}s infinite`;
-
-                particlesContainer.appendChild(particle);
-
-                // Make particles move randomly
-                setInterval(() => {
-                    particle.style.left = `${Math.random() * window.innerWidth}px`;
-                    particle.style.top = `${Math.random() * window.innerHeight}px`;
-                }, duration * 1000);
+            // Create shooting stars
+            function createShootingStar() {
+                const shootingStar = document.createElement('div');
+                shootingStar.classList.add('shooting-star');
+                
+                const startX = Math.random() * 20;
+                const startY = Math.random() * 20;
+                const time = Math.random() * 3 + 2;
+                
+                shootingStar.style.left = `${startX}%`;
+                shootingStar.style.top = `${startY}%`;
+                shootingStar.style.setProperty('--time', `${time}s`);
+                
+                document.body.appendChild(shootingStar);
+                
+                setTimeout(() => {
+                    shootingStar.remove();
+                }, time * 1000);
             }
-
-            function getRandomColor() {
-                const colors = [
-                    'rgba(0, 255, 136, 0.7)',
-                    'rgba(0, 153, 255, 0.7)',
-                    'rgba(255, 51, 102, 0.7)',
-                    'rgba(255, 204, 0, 0.7)',
-                    'rgba(153, 0, 255, 0.7)'
-                ];
-                return colors[Math.floor(Math.random() * colors.length)];
+            
+            // Regular shooting stars
+            setInterval(createShootingStar, 2000);
+            
+            // Initial shooting stars
+            for (let i = 0; i < 3; i++) {
+                setTimeout(createShootingStar, i * 800);
             }
 
             // Button ripple effect
@@ -351,29 +345,6 @@
                 setTimeout(() => {
                     ripple.remove();
                 }, 1000);
-            });
-
-            // Add keyboard interaction
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'ArrowUp' || e.key === 'ArrowDown' ||
-                    e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    const stick = document.querySelector('.gamepad-stick');
-                    stick.style.animation = 'none';
-                    void stick.offsetWidth; // Trigger reflow
-
-                    let transform = '';
-                    if (e.key === 'ArrowUp') transform = 'translate(0, -15px)';
-                    if (e.key === 'ArrowDown') transform = 'translate(0, 15px)';
-                    if (e.key === 'ArrowLeft') transform = 'translate(-15px, 0)';
-                    if (e.key === 'ArrowRight') transform = 'translate(15px, 0)';
-
-                    stick.style.transform = transform;
-
-                    setTimeout(() => {
-                        stick.style.animation = 'moveStick 4s infinite ease-in-out';
-                        stick.style.transform = '';
-                    }, 500);
-                }
             });
         });
     </script>

@@ -160,7 +160,7 @@
             </div>
 
             <!-- Orders -->
-            <div class="mb-40">
+            <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('order-menu')"
@@ -207,11 +207,99 @@
                     </a>
                 </div>
             </div>
+
+            <!-- Suppliers -->
+            <div class="mb-1">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    onclick="toggleDropdown('supplier-menu')"
+                >
+                    <div
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors"
+                    >
+                        <i class="fas fa-shopping-bag text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left"
+                        >Nhà cung cấp</span
+                    >
+                    <i
+                        class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="supplier-icon"
+                    ></i>
+                </button>
+
+                <div
+                    id="supplier-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
+                >
+                    <a
+                        href="purchase-orders.html"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                        >
+                            <i class="fas fa-shopping-cart text-xs"></i>
+                        </div>
+                        <Link :href="route('admin.suppliers.index')" class="text-xs">Quản lý</Link>
+                    </a>
+                    <a
+                        href="sales-orders.html"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                        >
+                            <i class="fas fa-truck text-xs"></i>
+                        </div>
+                        <span class="text-xs">Công nợ</span>
+                    </a>
+                </div>
+            </div>
+            <!-- Role -->
+            <div class="mb-40">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    onclick="toggleDropdown('admin-menu')"
+                >
+                    <div
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors"
+                    >
+                        <i class="fas fa-cog text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left"
+                        >Quản trị hệ thống</span
+                    >
+                    <i
+                        class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="admin-icon"
+                    ></i>
+                </button>
+
+                <div
+                    id="admin-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
+                >
+                    <Link
+                        :href="route('admin.role.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                        >
+                            <i class="fas fa-user-tag text-xs"></i>
+                        </div>
+                        <span class="text-xs">Quản lý vai trò</span>
+                    </Link>
+                </div>
+            </div>
         </nav>
     </div>
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
     const icon = document.getElementById(menuId.replace("-menu", "-icon"));
