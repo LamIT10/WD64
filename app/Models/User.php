@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name', 'password', 'role_id', 'email', 'phone'
+        'name', 'password', 'email', 'phone','status', 'address', 'position','note','gender'
     ];
 
     /**
@@ -26,16 +26,17 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // protected $hidden = [
+    //     'password',
+    //     'remember_token',
+    // ];
 
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
+
     protected function casts(): array
     {
         return [
@@ -78,4 +79,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
+
+
 }

@@ -13,9 +13,12 @@ class SupplierRepository extends BaseRepository
 
     public function getList()
     {
-        return $this->handleModel->get();
+        $query = $this->handleModel->select(['*']);
+        $query->paginate(2);
+        return $query->paginate(2);;
     }
     public function createData(){
-        return $this->returnError("lỗi");
+        return true;
+        return $this->returnError("Lỗi khi thêm nhà cung cấp");
     }
 }
