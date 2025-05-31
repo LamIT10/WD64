@@ -44,5 +44,4 @@ class StoreRankRequest extends FormRequest
             'note.max' => 'Ghi chú không được vượt quá 255 ký tự.',
         ];
     }
-
 }

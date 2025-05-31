@@ -94,8 +94,8 @@ function formatLabel(label) {
   return label
     .replace(/&laquo;/g, '«')
     .replace(/&raquo;/g, '»')
-    .replace(/Previous/i, 'Trước')
-    .replace(/Next/i, 'Tiếp');
+    .replace(/Previous/i, '')
+    .replace(/Next/i, '');
 }
 </script>
 
