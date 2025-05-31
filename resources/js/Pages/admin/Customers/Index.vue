@@ -166,7 +166,8 @@ const toggleDropdown = (id) => {
 const handleDelete = (id) => {
   if (confirm('Bạn có chắc muốn xóa khách hàng này không?')) {
     useForm({}).delete(route('admin.customers.destroy', id), {
-      onSuccess: () => alert('Xóa khách hàng thành công.'),
+      onSuccess: () => {
+      },
     });
   }
 };

@@ -2,7 +2,6 @@
   <AppLayout>
     <div class="bg-gray-50 p-6">
       <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <!-- Cập nhật thông tin khách hàng -->
         <h2 class="text-lg text-purple-700 font-semibold mb-6">Sửa thông tin khách hàng</h2>
         <form @submit.prevent="handleUpdate" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div v-for="(label, field) in fieldLabels" :key="field">
@@ -31,7 +30,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
             <input v-model="rankForm[field]" :type="rankInputTypes[field] || 'text'"
               class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              :class="{ 'border-red-500': rankForm.errors[field] }" :required="field !== 'note'" />
+              :class="{ 'border-red-500': rankForm.errors[field] }" />
             <span v-if="rankForm.errors[field]" class="text-red-500 text-sm mt-1">{{ rankForm.errors[field] }}</span>
           </div>
           <div class="md:col-span-2">
@@ -164,7 +163,6 @@ const rankInputTypes = {
 const handleUpdate = () => {
   form.put(route('admin.customers.update', customer.id), {
     onSuccess: () => {
-      // Optional: Add success notification
     },
   });
 };

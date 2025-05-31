@@ -77,18 +77,40 @@ class CustomerRepository extends BaseRepository
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error('Lỗi cập nhật khách hàng: ' . $th->getMessage());
-            throw $th;
+            return $this->returnError('Lỗi cập nhật khách hàng: ' . $th->getMessage());
         }
     }
 
-    public function deleteCustomer(Customer $customer): void
+    public function deleteCustomer(Customer $customer)
     {
-        $customer->delete();
-        
+        try {
+            $customer = $this->handleModel->findOrFail($customer->id);
+            $customer->ranks()->delete();
+            if (!$customer->delete()) {
+                throw new \Exception('Không thể xoá khách hàng có liên kết với bảng xếp hạng');
+            }
+            DB::commit();
+            return $customer;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi xoá khách hàng: ' . $th->getMessage());
+            return $this->returnError('Lỗi xoá khách hàng: ' . $th->getMessage());
+        }        
     }
 
-    public function storeRank(Customer $customer, array $data): void
+    public function storeRank(Customer $customer, array $data)
     {
-        $customer->ranks()->create($data);
+        try {
+            $customer->ranks()->create($data);
+            if (!$customer->ranks()->exists()) {
+                throw new \Exception('Không thể lưu xếp hạng khách hàng');
+            }
+            DB::commit();
+            return $customer->ranks;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi lưu xếp hạng khách hàng: ' . $th->getMessage());
+            return $this->returnError('Lỗi lưu xếp hạng khách hàng: ' . $th->getMessage());
+        }
     }
 }
