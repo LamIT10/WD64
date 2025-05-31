@@ -23,7 +23,7 @@
                                 <input type="text" v-model="form.name"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                     placeholder="Nhập tên vai trò..." required />
-                                <span v-if="errors.name" class="text-red-500 text-xs">{{ errors.name }}</span>
+                                <span v-if="form.errors.name" class="text-red-500 text-xs">{{ form.errors.name }}</span>
                             </div>
 
                             <!-- Permissions -->
@@ -31,7 +31,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Quyền hạng <span class="text-red-500">*</span>
                                 </label>
-                                <span v-if="errors.permissions" class="text-red-500 text-xs">{{ errors.permissions
+                                <span v-if="form.errors.permissions" class="text-red-500 text-xs">{{ form.errors.permissions
                                 }}</span>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
@@ -96,11 +96,7 @@ const errors = reactive({
 })
 
 const hanldeSubmitForm = () => {
-    form.post(route('admin.role.store'), {
-        onError: (xhr) => {
-            errors.name = xhr.name;
-        }
-    })
+    form.post(route('admin.role.store'));
 }
 const handleSelect = (id) => {
     if (form.permissions.includes(id)) {

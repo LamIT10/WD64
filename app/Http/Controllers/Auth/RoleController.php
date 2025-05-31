@@ -108,7 +108,7 @@ class RoleController extends Controller
 
         $data = $request->all();
         $role = $this->handleRepository->handleUpdate($id, $data);
-        return $this->returnInertia($role, "Cập nhật vai trò thành công", "admin.role.index");
+        return $this->returnInertia($role, "Cập nhật vai trò thành công", "admin.role.edit", $id);
     }
 
     /**

@@ -32,7 +32,7 @@ class LoginController extends Controller
     {
         $data = $request->validated();
         $status = $this->loginRepository->login($data);
-
+        
         return $this->returnInertia($status, 'Đăng nhập thành công', 'dashboard');
     }
     /**
