@@ -20,7 +20,7 @@
         <!-- Navigation Menu -->
         <nav class="mt-4 px-3 pb-3 overflow-y-auto h-[calc(100%-4rem)]">
             <!-- Dashboard -->
-            <div class="mb-2">
+            <div class="mb-3">
                 <a href="index.html"
                     class="flex items-center p-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
@@ -32,7 +32,7 @@
             </div>
 
             <!-- Warehouse Operations -->
-            <div class="mb-2">
+            <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('warehouse-menu')">
@@ -83,7 +83,7 @@
             </div>
 
             <!-- Product Management -->
-            <div class="mb-2">
+            <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('product-menu')">
@@ -118,7 +118,7 @@
             </div>
 
             <!-- Orders -->
-            <div class="mb-2">
+            <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('order-menu')">
@@ -186,9 +186,8 @@
                     </a>
                 </div>
             </div>
-
             <!-- Customers -->
-            <div class="mb-2">
+            <div class="mb-40">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('customer-menu')">
@@ -209,7 +208,7 @@
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
                             <i class="fas fa-list text-xs"></i>
                         </div>
-                        <Link :href="route('admin.customers.index')" class="text-xs">Danh sách khách hàng</Link>
+                        <Link :href="route('admin.customers.index')" class="text-xs">Quản lý</Link>
                     </a>
                     <a href="customer-debt.html"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">

@@ -41,8 +41,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'recaptchaSiteKey' => config('nocaptcha.sitekey'),
             'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error'   => fn() => $request->session()->get('error'),
+                'success' => tap($request->session()->get('success'), fn() => $request->session()->forget('success')),
+                'error' => tap($request->session()->get('error'), fn() => $request->session()->forget('error')),
             ],
         ]);
     }

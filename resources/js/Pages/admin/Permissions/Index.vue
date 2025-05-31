@@ -1,54 +1,152 @@
 <template>
     <AppLayout>
-        <div class="container mx-auto px-4 py-8">
-            <!-- Header Section -->
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-800">Quản lý quyền</h1>
-                <Link :href="route('admin.permission.create')" 
-                      class="flex items-center gap-2 px-4 py-2  bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
-                    <i class="fas fa-plus"></i>
-                    <span>Thêm quyền mới</span>
-                </Link>
+        <div class="bg-gray-50 p-6">
+            <!-- Header -->
+            <div
+                class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200"
+            >
+                <h5 class="text-lg text-purple-700 font-semibold">
+                    Danh sách Quyền
+                </h5>
+                <div class="flex items-center space-x-3">
+                    <!-- Search bar -->
+                    <div class="relative">
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm quyền..."
+                            class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                        />
+                        <i
+                            class="fas fa-search absolute left-3 top-3 text-gray-400"
+                        ></i>
+                    </div>
+                    <Link
+                        :href="route('admin.permission.create')"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                    >
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm mới</span>
+                    </Link>
+                </div>
             </div>
 
-            <!-- Table Section -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <!-- Table Header -->
-                <div class="grid grid-cols-12 bg-gray-100 px-6 py-4 font-semibold text-gray-700 uppercase text-sm">
-                    <div class="col-span-1 text-center">#</div>
-                    <div class="col-span-4 text-center">Tên quyền</div>
-                    <div class="col-span-4 text-center">Mô tả</div>
-                    <div class="col-span-3 text-center">Thao tác</div>
+            <!-- Permission Table -->
+            <div
+                class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+            >
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    STT
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Tên quyền
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Mô tả
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Permission Rows -->
+                            <tr 
+                                v-for="(permission, index) in permissions.data" 
+                                :key="permission.id"
+                                class="hover:bg-gray-50 transition-colors"
+                            >
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ index + 1 }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ permission.name }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500">
+                                        {{ permission.description }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <Link
+                                            :href="route('admin.permission.edit', permission.id)"
+                                            class="flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-600 rounded-md hover:bg-purple-200 transition-colors"
+                                        >
+                                            <i class="fas fa-edit text-sm"></i>
+                                            <span class="text-sm">Sửa</span>
+                                        </Link>
+                                        <button 
+                                            @click="hanldeDelete(permission.id)"
+                                            class="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors"
+                                        >
+                                            <i class="fas fa-trash text-sm"></i>
+                                            <span class="text-sm">Xóa</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Empty State -->
+                            <tr v-if="permissions.data.length === 0">
+                                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                    Không có quyền nào được tìm thấy
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Table Rows -->
-                <div v-for="(permission, index) in permissions.data" :key="permission.id" 
-                     class="grid grid-cols-12 px-6 py-4 border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <div class="col-span-1 text-center text-gray-600">{{ index + 1 }}</div>
-                    <div class="col-span-4 text-center font-medium text-gray-800">{{ permission.name }}</div>
-                    <div class="col-span-4 text-center text-gray-600">{{ permission.description }}</div>
-                    <div class="col-span-3 flex justify-center space-x-2">
-                        <Link :href="route('admin.permission.edit', permission.id)"
-                              class="flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors">
-                            <i class="fas fa-edit text-sm"></i>
-                            <span class="text-sm">Sửa</span>
-                        </Link>
-                        <button @click="hanldeDelete(permission.id)"
-                                class="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors">
-                            <i class="fas fa-trash text-sm"></i>
-                            <span class="text-sm">Xoá</span>
+                <!-- Pagination -->
+                <div
+                    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
+                >
+                    <div class="text-sm text-gray-500">
+                        Hiển thị <span class="font-medium">1</span> đến
+                        <span class="font-medium">{{ permissions.data.length }}</span> của
+                        <span class="font-medium">{{ permissions.total }}</span> kết quả
+                    </div>
+                    <div class="flex space-x-1">
+                        <button
+                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button
+                            class="px-3 py-1 bg-purple-600 text-white rounded-md"
+                        >
+                            1
+                        </button>
+                        <button
+                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+                        >
+                            2
+                        </button>
+                        <button
+                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
+                        >
+                            <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                 </div>
-
-                <!-- Empty State -->
-                <div v-if="permissions.data.length === 0" class="p-8 text-center text-gray-500">
-                    Không có quyền nào được tìm thấy
-                </div>
             </div>
-
-            <!-- Pagination (if needed) -->
-            <!-- <Pagination :links="permissions.links" class="mt-6" /> -->
         </div>
     </AppLayout>
 </template>
@@ -60,8 +158,8 @@ import AppLayout from '../Layouts/AppLayout.vue';
 const { permissions } = defineProps({
     permissions: {
         type: Object,
-        default: {}
-    }
+        default: () => ({}),
+    },
 });
 
 const hanldeDelete = (id) => {
@@ -72,5 +170,19 @@ const hanldeDelete = (id) => {
 }
 </script>
 
-<style scoped>
+<style lang="css" scoped>
+::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
 </style>
