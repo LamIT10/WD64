@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
-use App\Repositories\RoleRepository;
+use App\Repositories\Auth\RoleRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
@@ -12,7 +12,7 @@ use Inertia\Inertia;
 class RoleController extends Controller
 {
     /**
-     * @var  \App\Repositories\RoleRepository;
+     * @var  \App\Repositories\Auth\RoleRepository;
      */
     public function __construct(RoleRepository $roleRepository)
     {
@@ -116,7 +116,6 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        
         $role = $this->handleRepository->handleDelete($id);
         return $this->returnInertia($role, "Xoá thành công", "admin.role.index");
     }
