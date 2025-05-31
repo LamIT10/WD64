@@ -5,7 +5,7 @@
                 <h5 class="text-lg text-purple-700 font-semibold">Thêm nhân viên mới</h5>
                 <Link :href="route('admin.users.index')"
                     class="px-4 py-2 bg-purple-50 rounded hover:text-purple-500 text-purple-600 transition-colors">
-                <i class="fas fa-arrow-left"></i> Quay lại
+                    <i class="fas fa-arrow-left"></i> Quay lại
                 </Link>
             </div>
             <div class="mx-auto bg-white rounded shadow-md overflow-hidden">
@@ -19,11 +19,11 @@
                                 <!-- Full Name -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên *</label>
-                                    <input v-model="form.fullname" type="text"
+                                    <input v-model="form.name" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         placeholder="Nhập họ tên đầy đủ..." />
                                     <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.fullname }}
+                                        {{ form.errors.name }}
                                     </p>
                                 </div>
                                 <!-- Email -->
@@ -62,22 +62,8 @@
                                 </div>
                             </div>
 
-                            <!-- Row 3: Role + Gender + Status -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <!-- Role -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò *</label>
-                                    <select v-model="form.role_id"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
-                                        <option value="" disabled>Chọn vai trò...</option>
-                                        <option v-for="role in roles" :key="role.id" :value="role.id">
-                                            {{ role.name }}
-                                        </option>
-                                    </select>
-                                    <p v-if="form.errors.role_id" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.role_id }}
-                                    </p>
-                                </div>
+                            <!-- Row 3: Gender + Status -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Gender -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
@@ -100,6 +86,7 @@
                                         <option value="" disabled>Chọn trạng thái...</option>
                                         <option value="active">Hoạt động</option>
                                         <option value="inactive">Không hoạt động</option>
+                                        <option value="suspended">Tạm ngưng</option>
                                     </select>
                                     <p v-if="form.errors.status" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.status }}
@@ -145,8 +132,7 @@
                                 </div>
                                 <!-- Confirm Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu
-                                        *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu *</label>
                                     <input v-model="form.password_confirmation" type="password"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                                         placeholder="Nhập lại mật khẩu..." />
@@ -158,14 +144,17 @@
                             </div>
 
                             <!-- Row 6: Note -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                                <textarea v-model="form.note"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                                    placeholder="Nhập ghi chú..." rows="4"></textarea>
-                                <p v-if="form.errors.note" class="text-red-500 text-sm mt-1">
-                                    {{ form.errors.note }}
-                                </p>
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Note -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                                    <textarea v-model="form.note"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                        placeholder="Nhập ghi chú..." rows="4"></textarea>
+                                    <p v-if="form.errors.note" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.note }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -175,7 +164,7 @@
                 <div class="flex justify-end space-x-3 p-6 bg-gray-50 border-t border-gray-200">
                     <Link :href="route('admin.users.index')"
                         class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                    Hủy bỏ
+                        Hủy bỏ
                     </Link>
                     <button type="submit" @click="submit"
                         class="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md"
@@ -194,19 +183,10 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 
-const props = defineProps({
-    roles: {
-        type: Array,
-        default: () => [],
-    },
-});
-console.log('Roles:', props.roles);
-
 const form = useForm({
     name: '',
     email: '',
     phone: '',
-    role_id: '',
     position: '',
     gender: '',
     avatar: null,
@@ -214,14 +194,14 @@ const form = useForm({
     status: '',
     note: '',
     password: '',
-    password_confirmation: '',
+    password_confirmation: ''
 });
 
 function submit() {
     form.post('/admin/users', {
         onError: (errors) => {
             console.error(errors);
-        },
+        }
     });
 }
 </script>

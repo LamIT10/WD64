@@ -13,14 +13,14 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fullname' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed', 
             'phone' => 'required|string|max:12',
             'address' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:100',
             'gender' => 'nullable|in:male,female,other',
-            'status' => 'nullable|in:active,inactive',
+            'status' => 'nullable|in:active,inactive,suspended',
             'note' => 'nullable|string|max:500',
         ];
     }
@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Vui lòng nhập tên',
+            'name.required' => 'Vui lòng nhập họ tên đầy đủ',
             'email.required' => 'Email là bắt buộc',
             'email.email' => 'Email không hợp lệ',
             'email.unique' => 'Email đã được sử dụng',

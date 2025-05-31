@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active'); // Trạng thái
             $table->timestamp('last_login_at')->nullable(); // Lần đăng nhập cuối
             $table->text('note')->nullable(); // Ghi chú
-            $table->string('fullname')->nullable()->after('name'); // Họ tên đầy đủ
+          
         });
     }
 

@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name', 'password', 'role_id', 'email', 'phone'
+        'name', 'password', 'email', 'phone','status', 'address', 'position','note','gender'
     ];
 
     /**
@@ -79,9 +79,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
-    public function getRoleNames()
-    {
-        return $this->belongsTo(Role::class);
-    }
+
 
 }
