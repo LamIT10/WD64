@@ -11,7 +11,7 @@ use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
-
+use App\Http\Controllers\SaleOrderController;
 
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', action: function () {
@@ -54,4 +54,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
 
     Route::resource('users', UserController::class);
+    Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
+        Route::get('/', [SaleOrderController::class, 'index'])->name('index');
+    });
 });
