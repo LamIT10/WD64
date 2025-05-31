@@ -2,14 +2,25 @@
 
 use App\Http\Controllers\Auth\PermissionController ;
 use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\admin\UserController;
+use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
 
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', action: function () {
         return Inertia::render('Dashboard');
     });
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
+
+    Route::resource('customers', CustomerController::class)->names('customers');
+    Route::post('customers/{customer}/ranks', [CustomerController::class, 'storeRank'])->name('customers.ranks.store');
+
 
     
     Route::prefix('permission')->as('permission.')->group(function () {
@@ -39,4 +50,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('create', [SupplierController::class, 'create'])->name('create');
         Route::get('store', [SupplierController::class, 'store'])->name('store');
     });
+    
+    
+    Route::resource('users', UserController::class);
+    
 });
+      

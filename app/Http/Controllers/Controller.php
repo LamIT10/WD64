@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 abstract class Controller
 {
@@ -47,12 +48,16 @@ abstract class Controller
         }
         return false;
     }
-    public function returnInertia($data, $message, $route)
+    public function returnInertia($data, $message, $route, $params = [])
     {
         if (isset($data['status']) && $data['status'] == false) {
             return redirect()->back()->with('error', $data['message']);
         } else {
-            return redirect()->route($route)->with('success', $message);
+            return redirect()->route($route, $params)->with('success', $message);
         }
+    }
+    public function renderView(array $data = [], string $view = '')
+    {
+        return Inertia::render($view, $data);
     }
 }

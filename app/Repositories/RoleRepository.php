@@ -19,7 +19,7 @@ class RoleRepository extends BaseRepository
         $this->handleModel = $permission;
         $this->permissionRepository = $permissionRepository;
     }
-    public function getDataListRole($data, $perPage = 15)
+    public function getDataListRole($data, $perPage)
     {
         try {
 
@@ -27,19 +27,23 @@ class RoleRepository extends BaseRepository
             if (!empty($data)) {
                 $filters = [
                     'search' => [
-                        'name' => $data['name'],
+                        'name' => $data['name'] ?? "",
                     ],
                 ];
                 $query = $this->filterData($query, $filters);
-                $query = $query->whereHas('permissions', function ($q) use ($data) {
-                    $q->where('id', $data['permission']);
-                });
+                if (!empty($data['permission'])) {
+                    $query = $query->whereHas('permissions', function ($q) use ($data) {
+                        $q->where('id', $data['permission']);
+                    });
+                }
+                
             }
-            $query->orderBy('id', "desc");
-
-            return $query->paginate($perPage);
+            $query = $query->orderBy('id', "desc");
+            $query = $query->paginate($perPage);
+            return $query;
         } catch (\Throwable $th) {
             Log::error("Lấy danh sách role lỗi, " . $th->getMessage());
+            return $th;
         }
     }
     public function handleCreate(array $data = [])

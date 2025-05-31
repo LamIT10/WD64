@@ -25,8 +25,10 @@ class RoleController extends Controller
     public function index()
     {
         $data = request()->all();
+        $perPage = request()->get('perPage', 15);
+        // lấy data cho ô tìm kiếm
         $renderForm = $this->handleRepository->renderForm();
-        $listRoles = $this->handleRepository->getDataListRole($data, $data['perPage'] ?? 15);
+        $listRoles = $this->handleRepository->getDataListRole($data, $perPage);
         return Inertia::render(
             "admin/Roles/Index",
             [
