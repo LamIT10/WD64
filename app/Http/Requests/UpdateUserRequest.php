@@ -16,6 +16,11 @@ class UpdateUserRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $this->route('user'),
             'phone' => 'nullable|string|max:12',
+            'address' => 'nullable|string|max:255',
+            'position' => 'nullable|string|max:100',
+            'gender' => 'nullable|in:male,female,other',
+            'status' => 'nullable|in:active,inactive,suspended',
+            'note' => 'nullable|string|max:500',
         ];
     }
 
@@ -27,6 +32,7 @@ class UpdateUserRequest extends FormRequest
             'email.email' => 'Email không hợp lệ',
             'email.unique' => 'Email đã được sử dụng',
             'phone.max' => 'Số điện thoại không được vượt quá 12 ký tự',
+            
         ];
     }
 }
