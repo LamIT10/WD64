@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UserRequest;
+use App\Models\Role;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,16 +37,14 @@ class UserController extends Controller
 
     public function create()
     {
-        return Inertia::render('admin/users/Create');
+    return Inertia::render('admin/users/Create');
     }
 
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
         unset($data['password_confirmation']);
-
         $user = $this->userRepo->createUser($data);
-
         return $this->returnInertia($user, 'Tạo mới người dùng thành công', 'admin.users.index');
     }
 

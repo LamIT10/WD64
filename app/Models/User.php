@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
+    public function getRoleNames()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
 }

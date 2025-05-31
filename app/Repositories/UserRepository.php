@@ -18,7 +18,7 @@ class UserRepository extends BaseRepository
 
     public function allWithPaginate($limit = 10)
     {
-        return $this->handleModel::paginate($limit);
+        return $this->handleModel->with('role')->paginate($limit);
     }
 
     public function createUser(array $data)
@@ -26,9 +26,14 @@ class UserRepository extends BaseRepository
         try {
             DB::beginTransaction();
             $dataUser = [];
-            $dataUser['name'] = $data['name'] ?? null;
+            $dataUser['fullname'] = $data['fullname'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
+            $dataUser['status'] = $data['status'] ?? 1;
+            $dataUser['address'] = $data['address'] ?? null;
+            $dataUser['position'] = $data['position'] ?? null;
             $dataUser['phone'] = $data['phone'] ?? null;
+            $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['render'] = $data['render'] ?? null;
             $dataUser['password'] = Hash::make($data['password']);
             $user = $this->handleModel->create($dataUser);
             DB::commit();
@@ -39,7 +44,6 @@ class UserRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
-
 
     public function updateUser(int $id, array $data)
     {

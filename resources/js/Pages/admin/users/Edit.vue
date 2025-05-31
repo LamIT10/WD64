@@ -35,8 +35,6 @@
 <script setup>
 import { router, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
-import { route } from 'ziggy-js';
-
 const props = defineProps({ user: Object });
 
 const form = useForm({
@@ -47,9 +45,6 @@ const form = useForm({
 
 function submit() {
   form.put(route('admin.users.update', props.user.id), {
-    onSuccess: () => {
-      router.visit(route('admin.users.index'));
-    },
     onError: (errors) => {
       console.error(errors);
     }
