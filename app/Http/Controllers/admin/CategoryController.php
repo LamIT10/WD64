@@ -35,7 +35,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $categories = $this->categoryRepository->parent();
+        $categories = $this->categoryRepository->getHierarchicalCategories();
 
         return Inertia::render('admin/categories/Create', [
             'categories' => $categories
@@ -74,7 +74,7 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = $this->categoryRepository->findById($id);
-        $categories = $this->categoryRepository->parent();
+        $categories = $this->categoryRepository->getHierarchicalCategories();
         return Inertia::render('admin/categories/Edit', [
             'category' => $category,
             'categories' => $categories

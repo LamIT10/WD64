@@ -145,8 +145,8 @@
                         </div>
                         <span class="text-xs">Biến thể sản phẩm</span>
                     </a>
-                    <a
-                        href="categories.html"
+                    <Link
+                        :href=" route('admin.categories.index') "
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
                     >
                         <div
@@ -155,7 +155,7 @@
                             <i class="fas fa-tags text-xs"></i>
                         </div>
                         <span class="text-xs">Danh mục</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
 
@@ -212,6 +212,7 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3';
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
     const icon = document.getElementById(menuId.replace("-menu", "-icon"));

@@ -50,6 +50,28 @@ class CategoryRepository extends BaseRepository
         return $category;
     }
 
+    public function getHierarchicalCategories()
+    {
+        return $this->handleModel::with('children')
+            ->whereNull('parent_id')
+            ->get()
+            ->map(function ($category) {
+                return $this->formatCategory($category);
+            });
+    }
+
+    protected function formatCategory($category)
+    {
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'parent_id' => $category->parent_id,
+            'description' => $category->description,
+            'children' => $category->children->map(function ($child) {
+                return $this->formatCategory($child);
+            })
+        ];
+    }
 
     public function store($data)
     {
@@ -59,7 +81,7 @@ class CategoryRepository extends BaseRepository
             $newCategory['name'] = $data['name'] ?? null;
             $newCategory['parent_id'] = $data['parent_id'] ?? null;
             $newCategory['description'] = $data['description'] ?? null;
-
+            // dd($newCategory);
             $category = $this->handleModel->create($newCategory);
             if (!$category) {
                 throw new Exception('Lỗi, thêm không thành công');
@@ -80,9 +102,6 @@ class CategoryRepository extends BaseRepository
             $category = $this->getById($id);
             if (!$category) {
                 throw new Exception('Danh mục sản phẩm không tồn tại');
-            }
-            if ($category->children()->count() > 0 && !empty($data['parent_id'])) {
-                throw new Exception('Danh mục hiện tại là danh mục cha, không thể gán danh mục cha mới.');
             }
             $dataCategory = [];
             $dataCategory['name'] = $data['name'] ?? null;
