@@ -7,7 +7,7 @@
       'bg-red-50 border-red-500 dark:bg-red-800': toastType === 'error',
     }"
   >
-    <divc class="shadow-md flex items-center gap-2 px-4 py-2 rounded text-gray-800 dark:text-gray-200">
+    <div class="shadow-md flex items-center gap-2 px-4 py-2 rounded text-gray-800 dark:text-gray-200">
       <!-- ✅ Success Icon -->
       <div
         v-if="toastType === 'success'"
@@ -54,7 +54,7 @@
           />
         </svg>
       </button>
-    </divc>
+    </div>
   </div>
 </template>
 

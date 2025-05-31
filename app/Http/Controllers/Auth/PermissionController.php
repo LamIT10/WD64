@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Authorization;
+namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Permissions\PermissionRequest;
-use App\Repositories\PermissionRepository;
+use App\Repositories\Auth\PermissionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
@@ -11,7 +11,7 @@ use Inertia\Inertia;
 class PermissionController extends Controller
 {
     /**
-     * @var \App\Repositories\PermissionRepository;
+     * @var \App\Repositories\Auth\PermissionRepository;
      */
     public function __construct(PermissionRepository $repository)
     {
