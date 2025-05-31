@@ -6,30 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Inertia\Inertia;
 
 class ForgotPasswordController extends Controller
 {
     public function showLinkRequestForm()
     {
-        return inertia('Auth/ForgotPassword');
+        return Inertia::render('Auth/ForgotPassword');
     }
     
     public function sendResetLinkEmail(ForgotPasswordRequest $request)
     {
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-        
+        $status = Password::sendResetLink( $request->only('email'));
         if ($status === Password::RESET_LINK_SENT) {
-            // Nếu gửi thành công, trả về thông báo thành công cho Inertia/Vue
-            return redirect()->back()->with([
-                'success' => __($status),
-            ]);
+            return $this->returnInertia(__($status),'Đường dẫn đặt lại mật khẩu đã được gửi đến email của bạn.','login');
         } else {
-            // Nếu gửi thất bại (email không tồn tại...), trả về lỗi cho Inertia/Vue
-            return redirect()->back()->withErrors([
-                'email' => __($status),
-            ]);
+            return redirect()->back()->withErrors(['email' => __($status),]);
         }
     }
 }

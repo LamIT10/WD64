@@ -1,86 +1,38 @@
 <template>
-  <div class="forgot-password-container">
-    <h1>Quên mật khẩu</h1>
-
-    <!-- Hiển thị thông báo thành công -->
-    <div v-if="$page.props.success" class="alert alert-success">
-      {{ $page.props.success }}
-    </div>
-
-    <!-- Hiển thị lỗi -->
-    <div v-if="form.errors.email" class="alert alert-danger">
-      {{ form.errors.email }}
-    </div>
-
-    <form @submit.prevent="submit">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input
-          id="email"
-          v-model="form.email"
-          type="email"
-          placeholder="Nhập email của bạn"
-          required
-        />
+  <AuthLayout>
+    <form @submit.prevent="submitForm" class="bg-white px-10 h-full">
+      <h1 class="text-2xl mb-5">Quên mật khẩu</h1>
+      <input id="email" v-model="form.email" type="text" placeholder="Nhập email của bạn"
+        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
+      <div class="w-full text-left" v-if="form.errors.email">
+        <span class="text-red-600 text-left">{{ form.errors.email }}</span>
       </div>
-      <button type="submit" :disabled="form.processing">Gửi liên kết đặt lại mật khẩu</button>
+      <!-- <Link :href="route('password.request')" @click.prevent="showForgot = true" class="text-gray-700 text-xs my-3 block text-right" > Quay lại? </Link> -->
+      <button
+        class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer">
+        Gửi liên kết
+      </button>
     </form>
-  </div>
+  </AuthLayout>
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { useForm } from "@inertiajs/vue3";
+import { ref } from "vue";
+import { Link } from '@inertiajs/vue3';
+import { route } from "ziggy-js";
+import AuthLayout from "./AuthLayout.vue";
+
+const showForgot = ref(false);
 
 const form = useForm({
-  email: '',
-})
+  email: "",
+});
 
-function submit() {
-  form.post('/forgot-password')
+function submitForm() {
+  form.post("/forgot-password");
 }
+
 </script>
 
-<style scoped>
-.forgot-password-container {
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 24px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background: #fff;
-}
-.alert {
-  margin-bottom: 16px;
-  padding: 12px;
-  border-radius: 4px;
-}
-.alert-success {
-  background: #e6ffed;
-  color: #1a7f37;
-}
-.alert-danger {
-  background: #ffeaea;
-  color: #c00;
-}
-.form-group {
-  margin-bottom: 16px;
-}
-input[type="email"] {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  padding: 8px 16px;
-  background: #1a7f37;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-button[disabled] {
-  background: #ccc;
-  cursor: not-allowed;
-}
-</style>
+<style></style>

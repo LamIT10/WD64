@@ -17,20 +17,11 @@ class GoogleController extends Controller
     public function handleGoogleCallback()
     {
         $googleUser = Socialite::driver('google')->stateless()->user();
-
-        // Tìm user theo email
         $user = User::where('email', $googleUser->getEmail())->first();
-        
         if (!$user) {
-            // Nếu không tồn tại user, chuyển về trang login kèm thông báo lỗi
-            return redirect()->route('login')->withErrors([
-                'email' => 'Email Google của bạn chưa được đăng ký trong hệ thống!',
-            ]);
+            return redirect()->route("login")->with('error', "Email Google của bạn chưa được đăng ký trong hệ thống!");
         }
-
-        // Nếu tồn tại user, đăng nhập
         Auth::login($user);
-
-        return redirect()->intended('/dashboard');
+        return $this->returnInertia(['status' => true], 'Đăng nhập thành công!', 'dashboard');
     }
 }

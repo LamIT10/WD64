@@ -20,11 +20,17 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'g-recaptcha-response' => ['required'], // Chỉ kiểm tra required
         ];
+
+        // Chỉ kiểm tra reCAPTCHA nếu không phải môi trường test
+        if (env('APP_ENV') !== 'testing') {
+            $rules['g-recaptcha-response'] = ['required'];
+        }
+
+        return $rules;
     }
 
     /**
@@ -32,6 +38,10 @@ class LoginRequest extends FormRequest
      */
     protected function passedValidation()
     {
+        // Bỏ qua kiểm tra reCAPTCHA nếu đang ở môi trường test
+        if (env('APP_ENV') === 'testing') {
+            return;
+        }
         if (!NoCaptcha::verifyResponse($this->input('g-recaptcha-response'))) {
             $this->failedRecaptcha();
         }

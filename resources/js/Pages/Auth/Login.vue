@@ -1,66 +1,51 @@
 <template>
-  <div class="container bg-white rounded-[30px] shadow-lg relative overflow-hidden h-[600px] w-[788px] max-w-full min-h-[580px]" id="container">
-    <!-- Form Đăng nhập -->
-    <transition name="fade">
-      <div v-if="!showForgot" key="login" class="form-container sign-in absolute top-0 left-0 h-full w-1/2 z-2 transition-all duration-600 ease-in-out">
-        <form @submit.prevent="submitForm" class="bg-white px-10 h-full">
-          <h1 class="text-2xl mb-5">Đăng nhập</h1>
-          <div class="social-icons flex gap-2 my-5">
-            <Link :href="route('google.login')"
-              class="icon border border-gray-300 rounded-[20%] flex items-center justify-center w-10 h-10">
-              <img class="items-center justify-center" src="https://developers.google.com/identity/images/g-logo.png"
-                alt="Google" style="width:20px;vertical-align:middle;">
-              <!-- Đăng nhập Google -->
-            </Link>
-          </div>
-          <span class="text-xs">hoặc đăng nhập bằng </span>
-          <input id="email" v-model="form.email" type="text" placeholder="Nhập email của bạn"
-            class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
-          <div class="w-full text-left" v-if="form.errors.email">
-            <span class="text-red-600 text-left">{{ form.errors.email }}</span>
-          </div>
-          <input id="password" v-model="form.password" type="password" placeholder="Nhập mật khẩu của bạn"
-            class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
-          <div class="w-full text-left" v-if="form.errors.password">
-            <span class="text-red-600">{{ form.errors.password }}</span>
-          </div>
-          <div class="form-group recaptcha-container">
-            <vue-recaptcha ref="recaptcha" :sitekey="siteKey" @verify="onVerify" @expired="onExpired"></vue-recaptcha>
-          </div>
-          <Link href="/forgot-password" class="text-blue-500">Đi tới trang mới</Link>
-          <a href="#" @click.prevent="showForgot = true" class="text-gray-700 text-xs my-3 block text-right">Quên mật khẩu?</a>
-          <button
-            class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer">
-            Đăng nhập
-          </button>
-        </form>
+  <AuthLayout>
+    <form @submit.prevent="submitForm" class="bg-white px-10 h-full">
+      <h1 class="text-2xl mb-5">Đăng nhập</h1>
+      <div class="social-icons flex gap-2 my-5">
+        <a href="/auth/google"
+          class="icon border border-gray-300 rounded-[20%] flex items-center justify-center w-10 h-10">
+          <img class="items-center justify-center" src="https://developers.google.com/identity/images/g-logo.png"
+            alt="Google" style="width:20px;vertical-align:middle;">
+          <!-- Đăng nhập Google -->
+        </a>
       </div>
-    </transition>
-    
-    <!-- Toggle Container giữ nguyên -->
-    <div
-      class="toggle-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-600 ease-in-out rounded-[150px_0_0_100px] z-[1000]">
-      <div
-        class="toggle bg-gradient-to-r from-indigo-500 to-teal-600 text-white relative left-[-100%] h-full w-[200%] transform translate-x-0 transition-all duration-600 ease-in-out">
-        <div
-          class="toggle-panel toggle-right absolute w-1/2 h-full flex items-center justify-center flex-col px-8 text-center top-0 right-0 transform translate-x-0 transition-all duration-600 ease-in-out">
-          <h1 class="text-2xl mb-5">SUVAN xin chào!</h1>
-          <p class="text-sm leading-5 mb-5">Đăng nhập để tiếp tục công việc của bạn.</p>
-        </div>
+      <span class="text-xs">hoặc đăng nhập bằng </span>
+      <input id="email" v-model="form.email" type="text" placeholder="Nhập email của bạn"
+        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
+      <div class="w-full text-left" v-if="errors.email">
+        <span class="text-red-600 text-left">{{ errors.email }}</span>
       </div>
-    </div>
-  </div>
+      <input id="password" v-model="form.password" type="password" placeholder="Nhập mật khẩu của bạn"
+        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
+      <div class="w-full text-left" v-if="errors.password">
+        <span class="text-red-600">{{ errors.password }}</span>
+      </div>
+      <div class="form-group recaptcha-container">
+        <vue-recaptcha ref="recaptcha" :sitekey="siteKey" @verify="onVerify" @expired="onExpired"></vue-recaptcha>
+      </div>
+      <Link :href="route('password.request')" @click.prevent="showForgot = true"
+        class="text-gray-700 text-xs my-3 block text-right"> Quên mật khẩu? </Link>
+      <button
+        class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer">
+        Đăng nhập
+      </button>
+    </form>
+  </AuthLayout>
 </template>
 
 <script setup>
 import { useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import VueRecaptcha from "vue3-recaptcha2";
 import { Link } from '@inertiajs/vue3';
+import { route } from "ziggy-js";
+import Toast from '../components/Toast.vue';
+import AuthLayout from "./AuthLayout.vue";
 
 const showForgot = ref(false);
 
-const siteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Thay bằng Site Key của bạn
+const siteKey = "6LccsEErAAAAABih7tLBLalq7fbEgVICF-gGn7Gk"; // Thay bằng Site Key của bạn
 
 const form = useForm({
   email: "",
@@ -74,15 +59,23 @@ function submitForm() {
     return;
   }
   form.post("/login", {
-    onSuccess: () => {
-      alert("Đăng nhập thành công!");
-    },
-    onError: (errors) => {
+    // onSuccess: () => {
+    //   // alert("Đăng nhập thành công!");
+    // },
+    onError: (error) => {
+      errors.email = error.email || "";
+      errors.password = error.password || "";
+      errors["g-recaptcha-response"] = error["g-recaptcha-response"] || "";
       console.error("Lỗi đăng nhập:", errors);
-      alert("Đăng nhập thất bại. Vui lòng kiểm tra thông tin.");
+      // alert("Đăng nhập thất bại. Vui lòng kiểm tra thông tin.");
     },
   });
 }
+
+const errors = reactive({
+  email: "",
+  password: "",
+});
 
 function onVerify(token) {
   form["g-recaptcha-response"] = token;
@@ -97,10 +90,13 @@ function onExpired() {
 </script>
 
 <style>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -111,6 +107,7 @@ function onExpired() {
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
 }
+
 body {
   background-color: #c9d6ff;
   background: linear-gradient(to right, #e2e2e2, #c9d6ff);
@@ -120,6 +117,7 @@ body {
   flex-direction: column;
   height: 100vh;
 }
+
 .container {
   background-color: #fff;
   border-radius: 30px;
@@ -130,21 +128,25 @@ body {
   max-width: 100%;
   min-height: 480px;
 }
+
 .container p {
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.3px;
   margin: 20px 0;
 }
+
 .container span {
   font-size: 12px;
 }
+
 .container a {
   color: #333;
   font-size: 13px;
   text-decoration: none;
   margin: 15px 0 10px;
 }
+
 .container button {
   background-color: #2da0a8;
   color: #fff;
@@ -158,10 +160,12 @@ body {
   margin-top: 10px;
   cursor: pointer;
 }
+
 .container button.hidden {
   background-color: transparent;
   border-color: #fff;
 }
+
 .container form {
   background-color: #fff;
   display: flex;
@@ -171,6 +175,7 @@ body {
   padding: 0 40px;
   height: 100%;
 }
+
 .container input {
   background-color: #eee;
   border: none;
@@ -181,45 +186,57 @@ body {
   width: 100%;
   outline: none;
 }
+
 .form-container {
   position: absolute;
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
 }
+
 .sign-in {
   left: 0;
   width: 50%;
   z-index: 2;
 }
+
 .container.active .sign-in {
   transform: translateX(100%);
 }
+
 .sign-up {
   left: 0;
   width: 50%;
   opacity: 0;
   z-index: 1;
 }
+
 .container.active .sign-up {
   transform: translateX(100%);
   opacity: 1;
   z-index: 5;
   animation: move 0.6s;
 }
+
 @keyframes move {
-  0%, 49.99% {
+
+  0%,
+  49.99% {
     opacity: 0;
     z-index: 1;
   }
-  50%, 100% {
+
+  50%,
+  100% {
     opacity: 1;
     z-index: 5;
   }
 }
+
 .social-icons {
   margin: 20px 0;
 }
+
 .social-icons a {
   border: 1px solid #ccc;
   border-radius: 20%;
@@ -230,6 +247,7 @@ body {
   width: 40px;
   height: 40px;
 }
+
 .toggle-container {
   position: absolute;
   top: 0;
@@ -241,10 +259,12 @@ body {
   border-radius: 150px 0 0 100px;
   z-index: 1000;
 }
+
 .container.active .toggle-container {
   transform: translateX(-100%);
   border-radius: 0 150px 100px 0;
 }
+
 .toggle {
   background-color: #2da0a8;
   height: 100%;
@@ -257,9 +277,11 @@ body {
   transform: translateX(0);
   transition: all 0.6s ease-in-out;
 }
+
 .container.active .toggle {
   transform: translateX(50%);
 }
+
 .toggle-panel {
   position: absolute;
   width: 50%;
@@ -274,16 +296,20 @@ body {
   transform: translateX(0);
   transition: all 0.6s ease-in-out;
 }
+
 .toggle-left {
   transform: translateX(-200%);
 }
+
 .container.active .toggle-left {
   transform: translateX(0);
 }
+
 .toggle-right {
   right: 0;
   transform: translateX(0);
 }
+
 .container.active .toggle-right {
   transform: translateX(200%);
 }

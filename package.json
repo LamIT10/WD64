@@ -6,11 +6,11 @@
         "dev": "vite"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.0.0",
+        "@tailwindcss/vite": "^4.1.7",
         "axios": "^1.8.2",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.2.0",
-        "tailwindcss": "^4.0.0",
+        "tailwindcss": "^4.1.7",
         "vite": "^6.2.4"
     },
     "dependencies": {
@@ -23,6 +23,8 @@
         "vue-recaptcha-v3": "^2.0.1",
         "vue3-recaptcha-v2": "^2.1.0",
         "vue3-recaptcha2": "^1.8.0",
+        "remixicon": "^4.6.0",
+
         "ziggy-js": "^2.5.2"
     }
 }
