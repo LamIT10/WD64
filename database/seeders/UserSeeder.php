@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+
     public function run()
     {
         $now = Carbon::now();
@@ -104,6 +106,30 @@ class UserSeeder extends Seeder
                 'status' => 'active',
                 'last_login_at' => $now,
                 'note' => '',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Yuh',
+                'password' => Hash::make('123456'),
+                'email' => 'nhuy04625@gmail.com',
+                'phone' => '0971424792',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'yyuh7643',
+                'password' => Hash::make('123456'),
+                'email' => 'yyuh7643@gmail.com',
+                'phone' => '0971424792',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'vivastylen7',
+                'password' => Hash::make('123456'),
+                'email' => 'vivastylen7@gmail.com',
+                'phone' => '0971424792',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
