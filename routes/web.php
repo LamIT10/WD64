@@ -67,7 +67,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::group(['prefix' => 'suppliers', 'as' => 'suppliers.'], function () {
         Route::get('/', [SupplierController::class, 'getList'])->name('index');
         Route::get('create', [SupplierController::class, 'create'])->name('create');
-        Route::get('store', [SupplierController::class, 'store'])->name('store');
+        Route::patch('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
+        Route::post('store', [SupplierController::class, 'store'])->name('store');
     });
 
 
