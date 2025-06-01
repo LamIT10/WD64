@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
     {
         $rules = [
             'email' => ['required', 'email'],
-            'password' => ['required'],
+            'password' => ['required', 'min:6']
         ];
 
         // Chỉ kiểm tra reCAPTCHA nếu không phải môi trường test
@@ -65,6 +65,7 @@ class LoginRequest extends FormRequest
             'email.required' => 'Vui lòng nhập email.',
             'email.email' => 'Email không hợp lệ.',
             'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
             'g-recaptcha-response.required' => 'Vui lòng xác minh reCAPTCHA.',
         ];
     }

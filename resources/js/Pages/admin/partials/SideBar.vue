@@ -82,6 +82,7 @@
                 </div>
             </div>
             <!-- User Management -->
+
             <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
@@ -131,6 +132,7 @@
                         </div>
                         <span class="text-xs">Biến thể sản phẩm</span>
                     </a>
+
                     <Link :href="route('admin.categories.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
