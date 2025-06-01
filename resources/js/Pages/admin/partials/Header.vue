@@ -4,9 +4,9 @@
         class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30"
     >
         <div
-            class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5"
+            class="flex items-center space-x-2 bg-indigo-50 rounded-lg px-3 py-1.5"
         >
-            <div class="text-purple-600">
+            <div class="text-indigo-600">
                 <i class="fas fa-layer-group"></i>
             </div>
             <div class="text-sm hidden sm:block">
@@ -20,7 +20,7 @@
             <div class="flex items-center space-x-1 sm:space-x-2">
                 <!-- QR Code Scanner -->
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 relative group"
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 relative group"
                     title="Quét mã vạch"
                 >
                     <i class="fas fa-qrcode text-lg"></i>
@@ -33,7 +33,7 @@
 
                 <!-- Dark Mode Toggle -->
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     title="Chế độ tối"
                 >
                     <i class="fas fa-moon text-lg"></i>
@@ -43,7 +43,7 @@
             <!-- Notifications -->
             <div class="relative">
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                 >
                     <i class="fas fa-bell text-lg"></i>
                     <span
@@ -80,7 +80,7 @@
                         class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5"
                     >
                         <div
-                            class="bg-gray-200 group-hover:bg-purple-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors"
+                            class="bg-gray-200 group-hover:bg-indigo-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors"
                         >
                             <i
                                 class="fas fa-chevron-down text-[6px] text-gray-500 group-hover:text-white"
