@@ -2,9 +2,9 @@
     <AppLayout>
         <div class="bg-gray-50 p-6">
             <div class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center">
-                <h5 class="text-lg text-purple-700 font-semibold">Thêm Vai Trò Mới</h5>
+                <h5 class="text-lg text-indigo-700 font-semibold">Thêm Vai Trò Mới</h5>
                 <Link :href="route('admin.role.index')">
-                <button class="px-4 py-2 bg-purple-50 rounded hover:text-purple-500 text-purple-600 transition-colors">
+                <button class="px-4 py-2 bg-indigo-50 rounded hover:text-indigo-500 text-indigo-600 transition-colors">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </button>
                 </Link>
@@ -21,7 +21,7 @@
                                     Tên vai trò <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" v-model="form.name"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                     placeholder="Nhập tên vai trò..." required />
                                 <span v-if="form.errors.name" class="text-red-500 text-xs">{{ form.errors.name }}</span>
                             </div>
@@ -42,7 +42,7 @@
                                                 @change="handleSelect(permission.id)"
                                                 :checked="form.permissions.includes(permission.id)">
                                             <div
-                                                class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600">
+                                                class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
                                             </div>
                                             <span class="ms-3 text-sm font-medium text-gray-700">{{ permission.name
                                             }}</span>
@@ -60,7 +60,7 @@
                                 </button>
                                 </Link>
                                 <button type="submit" :disabled="form.processing"
-                                    class="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
                                     <i class="fas fa-save mr-2"></i> Lưu vai trò
                                 </button>
                             </div>

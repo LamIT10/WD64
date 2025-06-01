@@ -4,19 +4,19 @@
             <!-- Header -->
             <div
                 class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200">
-                <h5 class="text-lg text-purple-700 font-semibold">
+                <h5 class="text-lg text-indigo-700 font-semibold">
                     Danh sách Vai trò
                 </h5>
                 <div class="flex items-center space-x-3">
                     <!-- Search Toggle Button -->
                     <button @click="toggleSearchForm"
-                        class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">
+                        class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
                         <i class="fas fa-search"></i>
                         <span>Tìm kiếm</span>
                     </button>
                     <!-- Add Role Button -->
               
-                    <Waiting route-name="admin.role.create" :route-params="{}" :color="' bg-purple-600 hover:bg-purple-700 text-white'">
+                    <Waiting route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus"></i>
                         <span>Thêm vai trò</span>
                     </Waiting>
@@ -30,12 +30,12 @@
                         <!-- Role Name -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-user-tag mr-2 text-purple-500"></i>
+                                <i class="fas fa-user-tag mr-2 text-indigo-500"></i>
                                 Tên vai trò
                             </label>
                             <div class="relative">
                                 <input v-model="searchForm.name" type="text" placeholder="Nhập tên vai trò..."
-                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                                 <i
                                     class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
@@ -44,12 +44,12 @@
                         <!-- Permission -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">
-                                <i class="fas fa-key mr-2 text-purple-500"></i>
+                                <i class="fas fa-key mr-2 text-indigo-500"></i>
                                 Quyền hạn
                             </label>
                             <div class="relative">
                                 <select v-model="searchForm.permission"
-                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none transition-all">
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all">
                                     <option value="">Tất cả quyền hạn</option>
                                     <option v-for="permission in permissions" :value="permission.id"
                                         :key="permission.id">
@@ -73,7 +73,7 @@
                                 Đặt lại
                             </button>
                             <button type="submit"
-                                class="flex items-center ms-5 gap-2 px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+                                class="flex items-center ms-5 gap-2 px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
                                 <i class="fas fa-search"></i>
                                 Tìm kiếm
                             </button>
@@ -121,7 +121,7 @@
                                 <td class="px-6 py-4">
                                     <div class="relative">
                                         <button @click="togglePermissionsDropdown(role.id)"
-                                            class="flex items-center gap-2 px-3 py-1.5 bg-purple-50 text-purple-600 rounded-md hover:bg-purple-100 transition-all duration-200 ease-in-out">
+                                            class="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-all duration-200 ease-in-out">
                                             <span>Xem quyền hạn ({{ role.permissions.length }})</span>
                                             <i :class="{
                                                 'fas fa-chevron-down transform transition-transform duration-200': !activeDropdowns[role.id],
@@ -137,15 +137,15 @@
                                             leave-from-class="opacity-100 translate-y-0"
                                             leave-to-class="opacity-0 translate-y-1">
                                             <div v-if="activeDropdowns[role.id]"
-                                                class="absolute z-10 mt-1 w-64 max-h-60 overflow-y-auto bg-white rounded-md shadow-lg border border-purple-100 transform origin-top">
+                                                class="absolute z-10 mt-1 w-64 max-h-60 overflow-y-auto bg-white rounded-md shadow-lg border border-indigo-100 transform origin-top">
                                                 <div class="py-1">
                                                     <div v-for="permission in role.permissions" :key="permission.id"
-                                                        class="px-4 py-2 text-sm text-black hover:bg-purple-50 transition-colors duration-100 ease-in-out">
-                                                        <i class="fas fa-key mr-2 text-purple-400"></i>
+                                                        class="px-4 py-2 text-sm text-black hover:bg-indigo-50 transition-colors duration-100 ease-in-out">
+                                                        <i class="fas fa-key mr-2 text-indigo-400"></i>
                                                         {{ permission.name }}
                                                     </div>
                                                     <div v-if="role.permissions.length === 0"
-                                                        class="px-4 py-2 text-sm text-purple-400 italic">
+                                                        class="px-4 py-2 text-sm text-indigo-400 italic">
                                                         <i class="fas fa-info-circle mr-2"></i>
                                                         Không có quyền hạn
                                                     </div>
@@ -157,7 +157,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
                                         <Link :href="route('admin.role.edit', role.id)"
-                                            class="flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-600 rounded-md hover:bg-purple-200 transition-colors">
+                                            class="flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-600 rounded-md hover:bg-indigo-200 transition-colors">
                                         <i class="fas fa-edit text-sm"></i>
                                         <span>Sửa</span>
                                         </Link>
@@ -202,7 +202,7 @@
                                 class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
                             {{ page.label }}
                             </Link>
-                            <span v-else-if="page.active" class="px-3 py-1 bg-purple-600 text-white rounded-md">
+                            <span v-else-if="page.active" class="px-3 py-1 bg-indigo-600 text-white rounded-md">
                                 {{ page.label }}
                             </span>
                             <span v-else-if="page.label === '...'"

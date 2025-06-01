@@ -50,6 +50,7 @@ class PermissionConstant
     public const SETTING_INDEX = 'admin.setting.index';
     public const SETTING_UPDATE = 'admin.setting.update';
 
+    public const CATEGORY_INDEX = 'admin.category.index';
 
     public static function all(): array
     {
@@ -99,6 +100,8 @@ class PermissionConstant
             // Settings
             self::SETTING_INDEX,
             self::SETTING_UPDATE,
+
+            self::CATEGORY_INDEX,
 
      
         ];

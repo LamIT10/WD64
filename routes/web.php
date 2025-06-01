@@ -54,7 +54,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     });
 
     Route::prefix('role')->as('role.')->group(function () {
-        Route::get('/', [RoleController::class, 'index'])->middleware("has_permission:" . PermissionConstant::ROLE_INDEX)->name('index');
+        Route::get('/', [RoleController::class, 'index'])->name('index');
         Route::get('/create', [RoleController::class, 'create'])->name('create');
         Route::post('', [RoleController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit');
