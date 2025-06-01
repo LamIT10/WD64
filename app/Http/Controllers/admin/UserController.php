@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UserRequest;
+use App\Repositories\Auth\RoleRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,10 +14,12 @@ use Inertia\Inertia;
 class UserController extends Controller
 {
     protected $userRepo;
+    private $roleRepo;
 
-    public function __construct(UserRepository $userRepo)
+    public function __construct(UserRepository $userRepo, RoleRepository $roleRepository)
     {
         $this->userRepo = $userRepo;
+        $this->roleRepo = $roleRepository;
     }
 
     public function index()
@@ -36,12 +39,14 @@ class UserController extends Controller
 
     public function create()
     {
-        return Inertia::render('admin/users/Create');
+        $listRoles = $this->roleRepo->getAll();
+        return Inertia::render('admin/users/Create', ['listRoles' => $listRoles]);
     }
 
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
+        unset($data['password_confirmation']);
         $user = $this->userRepo->createUser($data);
         return $this->returnInertia($user, 'Tạo mới người dùng thành công', 'admin.users.index');
     }

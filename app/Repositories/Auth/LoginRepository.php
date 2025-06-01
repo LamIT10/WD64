@@ -24,7 +24,6 @@ class LoginRepository extends BaseRepository
 
     public function login($data)
     {
-        // dd(1);
         try {
             DB::beginTransaction();
             // Login băng thư viện hỗ trợ Atem
@@ -32,18 +31,20 @@ class LoginRepository extends BaseRepository
                 'email' => $data['email'],
                 'password' => $data['password'],
             ];
-            if (!Auth::attempt($credentials)){
+            if (!Auth::attempt($credentials)) {
                 throw new Exception('Thông tin đăng nhập không chính xác.');
             }
 
-            // Auth::login($user);
+            $user = User::find(Auth::check() ? Auth::user()->id : null);
+            // xử lý các quyên hạng trùng nhau
+            $permissions = $user->getPermissionsViaRoles()->pluck("name")->unique()->values();
+            session(['permissions' => $permissions]);
             DB::commit();
-            return true; 
+            return true;
         } catch (\Throwable $th) {
             Log::error('Lỗi đăng nhập: ' . $th->getMessage());
             DB::rollBack();
             return $this->returnError($th->getMessage());
         }
     }
-    
 }

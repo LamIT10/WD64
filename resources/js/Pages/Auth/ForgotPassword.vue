@@ -35,4 +35,5 @@ function submitForm() {
 
 </script>
 
-<style></style>
+<style scoped>
+</style>

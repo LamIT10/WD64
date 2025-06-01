@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Constant\PermissionConstant;
-use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,9 +13,8 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-
+        DB::table("permissions")->delete();
         $now = now(); // hoặc Carbon::now();
-
         $data = [];
         foreach (PermissionConstant::all() as $item) {
             $data[] = [

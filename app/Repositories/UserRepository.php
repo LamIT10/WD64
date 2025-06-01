@@ -16,9 +16,9 @@ class UserRepository extends BaseRepository
         $this->handleModel = $user;
     }
 
-    public function allWithPaginate($limit = 20)
+    public function allWithPaginate($limit = 10)
     {
-        return $this->handleModel::paginate($limit);
+        return $this->handleModel->orderBy('created_at', 'desc')->paginate($limit);
     }
 
     public function createUser(array $data)
@@ -28,9 +28,24 @@ class UserRepository extends BaseRepository
             $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
+            $dataUser['status'] = $data['status'] ?? 'active';
+            $dataUser['address'] = $data['address'] ?? null;
+            $dataUser['position'] = $data['position'] ?? null;
             $dataUser['phone'] = $data['phone'] ?? null;
+            $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['gender'] = $data['gender'] ?? null;
             $dataUser['password'] = Hash::make($data['password']);
-            $user = $this->handleModel->create($data);
+            $user = $this->handleModel->create($dataUser);
+           
+            if (!$user) {
+                throw new \Exception('Có lỗi khi thêm nhân viên');
+            }
+            if ($data['roles']) {
+                $role = $user->syncRoles(($data['roles']));
+                if (!$role) {
+                    throw new \Exception('Có lỗi khi thêm vai trò người dùng');
+                }
+            }
             DB::commit();
             return $user;
         } catch (\Throwable $th) {
@@ -51,7 +66,12 @@ class UserRepository extends BaseRepository
             $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
+            $dataUser['status'] = $data['status'] ?? 'active';
+            $dataUser['address'] = $data['address'] ?? null;
+            $dataUser['position'] = $data['position'] ?? null;
             $dataUser['phone'] = $data['phone'] ?? null;
+            $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['gender'] = $data['gender'] ?? null;
             $user->update($dataUser);
             DB::commit();
             return $user;

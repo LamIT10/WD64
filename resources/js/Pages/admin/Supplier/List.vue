@@ -1,7 +1,6 @@
 <template>
     <AppLayout>
         <div class="bg-gray-50 p-6">
-            <!-- Header -->
             <div
                 class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200"
             >
@@ -20,258 +19,115 @@
                             class="fas fa-search absolute left-3 top-3 text-gray-400"
                         ></i>
                     </div>
-                    <Link
-                        :href="route('admin.suppliers.create')"
-                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                    <Waiting
+                        route-name="admin.suppliers.create"
+                        :route-params="{}"
                     >
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm mới</span>
-                    </Link>
+                        <i class="fas fa-plus mr-1"></i> Thêm mới
+                    </Waiting>
                 </div>
             </div>
 
-            <!-- Supplier Table -->
             <div
                 class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Tên NCC
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Mã số thuế
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Địa chỉ
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Người liên hệ
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Trạng thái
-                                </th>
-                                <th
-                                    scope="col"
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                ></th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Supplier 1 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div
-                                            class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-md flex items-center justify-center"
-                                        >
-                                            <i
-                                                class="fas fa-building text-purple-600"
-                                            ></i>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div
-                                                class="text-sm font-medium text-gray-900"
+                    <div
+                        class="relative overflow-x-auto shadow-md sm:rounded-lg"
+                    >
+                        <table
+                            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                        >
+                            <thead
+                                class="text-xs text-gray-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400"
+                            >
+                                <tr>
+                                    <th scope="col" class="p-4">
+                                        <div class="flex items-center">
+                                            <input
+                                                id="checkbox-all-search"
+                                                type="checkbox"
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label
+                                                for="checkbox-all-search"
+                                                class="sr-only"
+                                                >checkbox</label
                                             >
-                                                Công ty TNHH ABC
-                                            </div>
-                                            <div class="text-sm text-gray-500">
-                                                abc@example.com
-                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Tên NCC
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Đại điện
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Số điện thoại
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">EMail</th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Địa chỉ
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Hành động
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="supplier in suppliers.data"
+                                    :key="supplier.id"
+                                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
                                 >
-                                    0101234567
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                >
-                                    Số 1, đường ABC, Hà Nội
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        Nguyễn Văn A
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        0987654321
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
-                                    >
-                                        Hoạt động
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                                >
-                                    <div
-                                        class="relative inline-block text-left"
-                                    >
-                                        <button
-                                            class="text-gray-400 hover:text-gray-600 focus:outline-none"
-                                        >
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
-
-                                        <!-- Dropdown menu - Hidden by default -->
-                                        <div
-                                            class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                                        >
-                                            <div class="py-1">
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-edit mr-2 text-purple-600"
-                                                    ></i>
-                                                    Sửa
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-trash-alt mr-2 text-red-500"
-                                                    ></i>
-                                                    Xóa
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-ban mr-2 text-yellow-500"
-                                                    ></i>
-                                                    Tạm ngừng
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Supplier 2 -->
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div
-                                            class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-md flex items-center justify-center"
-                                        >
-                                            <i
-                                                class="fas fa-warehouse text-blue-600"
-                                            ></i>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div
-                                                class="text-sm font-medium text-gray-900"
+                                    <td class="w-4 p-4">
+                                        <div class="flex items-center">
+                                            <input
+                                                id="checkbox-table-search-1"
+                                                type="checkbox"
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                            <label
+                                                for="checkbox-table-search-1"
+                                                class="sr-only"
+                                                >checkbox</label
                                             >
-                                                Công ty CP XYZ
-                                            </div>
-                                            <div class="text-sm text-gray-500">
-                                                xyz@example.com
-                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                >
-                                    0107654321
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                >
-                                    Số 10, đường XYZ, TP.HCM
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        Trần Thị B
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        0912345678
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800"
+                                    </td>
+                                    <th
+                                        scope="row"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
-                                        Tạm ngừng
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                                >
-                                    <div
-                                        class="relative inline-block text-left"
-                                    >
-                                        <button
-                                            class="text-gray-400 hover:text-gray-600 focus:outline-none"
+                                        {{ supplier.name }}
+                                    </th>
+                                    <td class="px-6 py-4">
+                                        {{ supplier.contact_person }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ supplier.phone }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ supplier.email }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ supplier.address }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <Waiting
+                                            route-name="admin.suppliers.edit"
+                                            :route-params="{
+                                                supplier: supplier.id,
+                                            }"
+                                            :color="'bg-blue-500 hover:bg-green-700 text-white'"
                                         >
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
-
-                                        <!-- Dropdown menu - Hidden by default -->
-                                        <div
-                                            class="hidden origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                                        >
-                                            <div class="py-1">
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-edit mr-2 text-purple-600"
-                                                    ></i>
-                                                    Sửa
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-trash-alt mr-2 text-red-500"
-                                                    ></i>
-                                                    Xóa
-                                                </a>
-                                                <a
-                                                    href="#"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                                >
-                                                    <i
-                                                        class="fas fa-check-circle mr-2 text-green-500"
-                                                    ></i>
-                                                    Kích hoạt
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                            <i class="fas fa-edit mr-1"></i>
+                                            Sửa
+                                        </Waiting>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Pagination -->
@@ -283,27 +139,21 @@
                         <span class="font-medium">2</span> của
                         <span class="font-medium">10</span> kết quả
                     </div>
-                    <div class="flex space-x-1">
+                    <div class="flex justify-end space-x-1 mt-4">
                         <button
-                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button
-                            class="px-3 py-1 bg-purple-600 text-white rounded-md"
-                        >
-                            1
-                        </button>
-                        <button
-                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
-                        >
-                            2
-                        </button>
-                        <button
-                            class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
-                        >
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
+                            v-for="link in suppliers.links"
+                            :key="link.label"
+                            v-html="link.label"
+                            :disabled="!link.url"
+                            @click="$inertia.visit(link.url)"
+                            :class="[
+                                'px-3 py-1 rounded-md text-sm',
+                                link.active
+                                    ? 'bg-purple-600 text-white'
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
+                                !link.url && 'opacity-50 cursor-not-allowed',
+                            ]"
+                        ></button>
                     </div>
                 </div>
             </div>
@@ -312,17 +162,17 @@
 </template>
 
 <script setup>
-import { Link } from "@inertiajs/vue3";
 import AppLayout from "../Layouts/AppLayout.vue";
+import Waiting from "../../components/Waiting.vue";
 
-const props = defineProps({
+const { suppliers } = defineProps({
     suppliers: {
-        type: Array,
-        default: () => [],
+        default: () => {},
     },
 });
-</script>
+console.log(suppliers);
 
+</script>
 <style lang="css" scoped>
 ::-webkit-scrollbar {
     height: 6px;
@@ -337,5 +187,16 @@ const props = defineProps({
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #a0a0a0;
+}
+tr {
+    height: 40px; /* chiều cao cố định */
+    max-height: 40px;
+}
+
+td {
+    white-space: nowrap; /* không xuống dòng */
+    overflow: hidden;
+    text-overflow: ellipsis; /* hiện dấu ... nếu text dài */
+    max-width: 200px;
 }
 </style>

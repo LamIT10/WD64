@@ -15,11 +15,11 @@
                         <span>Tìm kiếm</span>
                     </button>
                     <!-- Add Role Button -->
-                    <Link :href="route('admin.role.create')"
-                        class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">
-                    <i class="fas fa-plus"></i>
-                    <span>Thêm vai trò</span>
-                    </Link>
+              
+                    <Waiting route-name="admin.role.create" :route-params="{}" :color="' bg-purple-600 hover:bg-purple-700 text-white'">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm vai trò</span>
+                    </Waiting>
                 </div>
             </div>
 
@@ -230,6 +230,8 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { ref } from 'vue';
+import Waiting from '../../components/Waiting.vue'
+
 const props = defineProps({
     listRoles: {
         type: Object,
