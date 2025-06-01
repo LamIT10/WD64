@@ -11,6 +11,7 @@ const page = usePage()
     <Sidebar />
     <div
         id="main-content"
+        style="font-size: 12px"
         class="min-h-screen transition-all duration-300 lg:ml-56"
     >
         <Header />
