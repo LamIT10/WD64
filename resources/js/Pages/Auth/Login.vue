@@ -47,8 +47,8 @@ import Toast from '../components/Toast.vue';
 import AuthLayout from "./AuthLayout.vue";
 
 const showForgot = ref(false);
-
-const siteKey = "6LccsEErAAAAABih7tLBLalq7fbEgVICF-gGn7Gk"; // Thay bằng Site Key của bạn
+const siteKey = "6LccsEErAAAAABih7tLBLalq7fbEgVICF-gGn7Gk";
+const recaptcha = ref(null)
 
 const form = useForm({
   email: "",
@@ -98,10 +98,14 @@ function validate() {
 function submitForm() {
   if (!validate()) return;
   form.post("/login", {
+    onSuccess: () => {
+      resetForm();
+    },
     onError: (error) => {
       errors.email = error.email || "";
       errors.password = error.password || "";
       errors["g-recaptcha-response"] = error["g-recaptcha-response"] || "";
+      resetForm();
     },
   });
 }
@@ -112,6 +116,11 @@ function onVerify(token) {
 
 function onExpired() {
   form["g-recaptcha-response"] = "";
+}
+
+function resetForm() {
+  form["g-recaptcha-response"] = "";
+  if (recaptcha.value) recaptcha.value.reset();
 }
 </script>
 
