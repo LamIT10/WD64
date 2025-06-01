@@ -22,7 +22,7 @@ class LoginRequest extends FormRequest
     {
         $rules = [
             'email' => ['required', 'email'],
-            'password' => ['required|min:6'],
+            'password' => ['required', 'min:6']
         ];
 
         // Chỉ kiểm tra reCAPTCHA nếu không phải môi trường test
