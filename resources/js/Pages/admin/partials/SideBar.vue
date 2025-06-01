@@ -243,10 +243,7 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
-<<<<<<< HEAD
-=======
 import { route } from 'ziggy-js';
->>>>>>> 2a48212725468b3f4d23600ce78a2b366ac172de
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
     const icon = document.getElementById(menuId.replace("-menu", "-icon"));
