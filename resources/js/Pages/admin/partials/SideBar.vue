@@ -82,7 +82,11 @@
                 </div>
             </div>
             <!-- User Management -->
+<<<<<<< HEAD
+              <div class="mb-1">
+=======
             <div class="mb-1">
+>>>>>>> 2e93b62f9482c1879bb8254d479fc220346c5359
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('user-menu')">
@@ -131,6 +135,16 @@
                         </div>
                         <span class="text-xs">Biến thể sản phẩm</span>
                     </a>
+<<<<<<< HEAD
+                    <a href="categories.html"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                            <i class="fas fa-tags text-xs"></i>
+                        </div>
+                        <span class="text-xs">Danh mục</span>
+                    </a>
+=======
                     <Link :href="route('admin.categories.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
@@ -139,6 +153,7 @@
                     </div>
                     <span class="text-xs">Danh mục</span>
                     </Link>
+>>>>>>> 2e93b62f9482c1879bb8254d479fc220346c5359
                 </div>
             </div>
 
@@ -243,10 +258,7 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
-<<<<<<< HEAD
-=======
 import { route } from 'ziggy-js';
->>>>>>> 2a48212725468b3f4d23600ce78a2b366ac172de
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
     const icon = document.getElementById(menuId.replace("-menu", "-icon"));
