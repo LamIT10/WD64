@@ -35,7 +35,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        $categories = $this->categoryRepository->parent();
+        $categories = $this->categoryRepository->getHierarchicalCategories();
 
         return Inertia::render('admin/categories/Create', [
             'categories' => $categories
@@ -74,7 +74,7 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = $this->categoryRepository->findById($id);
-        $categories = $this->categoryRepository->parent();
+        $categories = $this->categoryRepository->getHierarchicalCategories();
         return Inertia::render('admin/categories/Edit', [
             'category' => $category,
             'categories' => $categories
@@ -88,7 +88,7 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
         $category = $this->categoryRepository->update($id, $data);
-        return $this->returnInertia($category, 'Update thành công', 'admin.categories.edit', ['id' => $category->id]);
+        return $this->returnInertia($category, 'Cập nhật thành công', 'admin.categories.edit', [$category->id]);
     }
 
     /**

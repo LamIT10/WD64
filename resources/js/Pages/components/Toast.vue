@@ -1,191 +1,116 @@
 <template>
-    <transition 
-        name="toast"
-        enter-active-class="toast-enter-active"
-        leave-active-class="toast-leave-active"
-        enter-from-class="toast-enter-from"
-        leave-to-class="toast-leave-to"
-    >
-        <div
-            v-if="visible"
-            class="toast-container"
-            :class="{
-                'bg-success': toastType === 'success',
-                'bg-error': toastType === 'error'
-            }"
+  <div
+    v-if="showToast"
+    class="fixed top-0 toathihi left-1/2 rounded -translate-x-1/2 z-50 transition-all duration-400 ease-in-out toast-animation"
+    :class="{
+      'bg-green-50 border-green-500 dark:bg-green-800': toastType === 'success',
+      'bg-red-50 border-red-500 dark:bg-red-800': toastType === 'error',
+    }"
+  >
+    <div class="shadow-md flex items-center gap-2 px-4 py-2 rounded text-gray-800 dark:text-gray-200">
+      <!-- ✅ Success Icon -->
+      <div
+        v-if="toastType === 'success'"
+        class="inline-flex items-center justify-center w-8 h-8 text-green-500 bg-green-200 rounded-lg dark:bg-green-800 dark:text-green-200"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+          />
+        </svg>
+      </div>
+
+      <!-- ❌ Error Icon -->
+      <div
+        v-else
+        class="inline-flex items-center justify-center w-8 h-8 text-red-500 bg-red-200 rounded-lg dark:bg-red-800 dark:text-red-200"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
+          />
+        </svg>
+      </div>
+
+      <!-- Message -->
+      <span class="text-sm">{{ toastMessage }}</span>
+
+      <!-- Close Button -->
+      <button
+        @click="hideToast"
+        class="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      >
+        <svg
+          class="w-4 h-4 text-gray-500 dark:text-gray-300"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-            <div class="toast-content">
-                <svg v-if="toastType === 'success'" class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <svg v-else class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="toast-text">{{ toastMessage }}</span>
-                <button @click="closeToast" class="close-button">
-                    <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </transition>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
 </template>
 
+
 <script setup>
-import { ref, watch, nextTick } from "vue";
-import { usePage } from "@inertiajs/vue3";
+import { ref, onMounted } from 'vue'
+import { router, usePage } from '@inertiajs/vue3'
 
-const visible = ref(false);
-const toastMessage = ref("");
-const toastType = ref("success"); // Biến mới để theo dõi loại thông báo
-const page = usePage();
+const showToast = ref(false)
+const toastMessage = ref('')
+const toastType = ref('success')
 
-const closeToast = () => {
-    visible.value = false;
-};
+// ✅ xử lý toast mỗi khi có response mới từ server
+router.on('success', () => {
+  const flash = usePage().props.flash
 
-watch(
-    () => page.props.flash,
-    async (flash) => {
-        if (flash.success || flash.error) {
-            // Đảm bảo visible = false trước
-            visible.value = false;
-            await nextTick();
-            // Set message và type
-            toastMessage.value = flash.success || flash.error;
-            toastType.value = flash.success ? "success" : "error";
-            visible.value = true;
-            
-            setTimeout(() => {
-                visible.value = false;
-            }, 5000);
-        }
-    },
-    { immediate: true }
-);
+  if (flash.success || flash.error) {
+    toastMessage.value = flash.success || flash.error
+    toastType.value = flash.success ? 'success' : 'error'
+    showToast.value = true
+
+    setTimeout(() => {
+      showToast.value = false
+    }, 5000)
+  }
+})
+
+function hideToast() {
+  showToast.value = false
+}
 </script>
 
+
+
+
 <style scoped>
-.toast-container {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    border-radius: 8px;
-    box-shadow: 0 4px 25px rgba(175, 175, 175, 0.3);
-    padding: 12px 16px;
-    min-width: 150px;
-}
-
-.bg-success {
-    background: #3fbb46;
-}
-
-.bg-error {
-    background: #ffffff;
-    box-shadow: 0 0 3px red;
-}
-
-.toast-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.toast-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  
-}
-
-.bg-success .toast-icon {
-    color: #ffffff; /* Xanh lá cây cho success */
-}
-
-.bg-error .toast-icon {
-    color: #fdfdfd; /* Đỏ cho error */
-}
-
-.toast-text {
-    font-size: 16px;
-    color: #ffffff;
-    white-space: nowrap;
-    flex: 1;
-    font-weight: 700;
-}
-
-.close-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-    margin-left: 8px;
-}
-
-.close-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-.close-icon {
-    width: 14px;
-    height: 14px;
-    color: #ffffff;
-    stroke-width: 2.5;
-}
-
-.toast-enter-active {
-    animation: toast-bounce-in 0.5s cubic-bezier(0.9, -0.55, 0.265, 1.55);
-}
-
-.toast-leave-active {
-    animation: toast-bounce-out 0.3s ease-in;
-}
-
-.toast-enter-from {
-    transform: translateX(-50%) scale(0.6);
-    opacity: 0;
-}
-
-.toast-leave-to {
-    transform: translateX(-50%) scale(0.8);
-    opacity: 0;
-}
-
-@keyframes toast-bounce-in {
+@keyframes toastEffect {
     0% {
-        transform: translateX(-50%) scale(0.8);
         opacity: 0;
+        top: 0;
     }
-    50% {
-        transform: translateX(-50%) scale(1.1);
-        opacity: 0.8;
-    }
-    75% {
-        transform: translateX(-50%) scale(1);
+    5% {
         opacity: 1;
+        top: 30px;
+    }
+    95% {
+        opacity: 1;
+        top: 30px; 
     }
     100% {
-        transform: translateX(-50%) scale(1);
-        opacity: 1;
+        opacity: 0;
+        top: -1rem; 
     }
 }
 
-@keyframes toast-bounce-out {
-    0% {
-        transform: translateX(-50%) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translateX(-50%) scale(0.7);
-        opacity: 0;
-    }
+.toast-animation {
+    animation: toastEffect 5s ease-in-out forwards;
 }
 </style>
