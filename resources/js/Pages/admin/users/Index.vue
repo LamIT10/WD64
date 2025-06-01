@@ -14,11 +14,13 @@
                             class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
-                    <Link :href="route('admin.users.create')"
-                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2">
-                    <i class="fas fa-plus"></i>
-                    <span>Thêm mới</span>
-                    </Link>
+           
+                      <Waiting
+                        route-name="admin.users.create"
+                        :route-params="{}"
+                    >
+                             <i class="fas fa-plus"></i> Thêm mới
+                    </Waiting>
                 </div>
             </div>
 
@@ -179,6 +181,7 @@
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
+import Waiting from '../../components/Waiting.vue';
 
 const props = defineProps({
     users: Object

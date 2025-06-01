@@ -3,10 +3,13 @@
         <div class="bg-gray-50 p-6">
             <div class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-purple-700 font-semibold">Thêm nhân viên mới</h5>
-                <Link :href="route('admin.users.index')"
-                    class="px-4 py-2 bg-purple-50 rounded hover:text-purple-500 text-purple-600 transition-colors">
-                    <i class="fas fa-arrow-left"></i> Quay lại
-                </Link>
+                  <Waiting
+                    route-name="admin.users.index"
+                    :route-params="{}"
+                    :color="'bg-purple-50 text-purple-700'"
+                >
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                </Waiting>
             </div>
             <div class="mx-auto bg-white rounded shadow-md overflow-hidden">
                 <!-- Main Content -->
@@ -178,10 +181,11 @@
 </template>
 
 <script setup>
-import { router, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import Waiting from '../../components/Waiting.vue';
 
 const form = useForm({
     name: '',
@@ -198,7 +202,7 @@ const form = useForm({
 });
 
 function submit() {
-    form.post('/admin/users', {
+    form.post(route('admin.users.store'), {
         onError: (errors) => {
             console.error(errors);
         }
