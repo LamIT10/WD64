@@ -9,6 +9,13 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
-        vue(),
+        vue({
+            template: {
+                compilerOptions: {
+                    // Cho phép hiển thị HTML trong custom label
+                    isCustomElement: (tag) => tag.includes('multiselect')
+                }
+            }
+        }),
     ],
 });
