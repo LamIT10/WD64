@@ -56,5 +56,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
         Route::get('/', [SaleOrderController::class, 'index'])->name('index');
+        Route::post('/', [SaleOrderController::class, 'create'])->name('create');
     });
 });

@@ -29,16 +29,16 @@ class CustomerRepository extends BaseRepository
             $newCustomer['email'] = $data['email'] ?? '';
             $newCustomer['address'] = $data['address'] ?? '';
             $newCustomer['current_debt'] = $data['current_debt'] ?? 0;
-            
+
             if (!empty($data['password'])) {
                 $newCustomer['password'] = Hash::make($data['password']);
             }
 
             $customer = $this->handleModel::create($newCustomer);
-            if(!$customer) {
+            if (!$customer) {
                 throw new \Exception('Không thể tạo khách hàng');
             }
-         
+
             DB::commit();
             return $customer;
         } catch (\Throwable $th) {
@@ -50,7 +50,7 @@ class CustomerRepository extends BaseRepository
 
     public function updateCustomer(Customer $customer, array $data)
     {
-        
+
         try {
             DB::beginTransaction();
             $newCustomer = [];
@@ -71,7 +71,7 @@ class CustomerRepository extends BaseRepository
             if (!$updated) {
                 throw new \Exception('Không thể cập nhật khách hàng');
             }
-            
+
             DB::commit();
             return $customer;
         } catch (\Throwable $th) {
@@ -84,11 +84,18 @@ class CustomerRepository extends BaseRepository
     public function deleteCustomer(Customer $customer): void
     {
         $customer->delete();
-        
     }
 
     public function storeRank(Customer $customer, array $data): void
     {
         $customer->ranks()->create($data);
+    }
+    public function getList()
+    {
+        try {
+            return  $this->handleModel->get();
+        } catch (\Throwable $th) {
+            return  Log::error('Lỗi lấy toàn bộ danh sách khách hàng: ' . $th->getMessage());
+        }
     }
 }

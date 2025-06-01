@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://127.0.0.1:8000",
+    url: "http://127.0.0.1:8000/",
     port: null,
     defaults: {},
     routes: {
@@ -200,6 +200,10 @@ const Ziggy = {
             methods: ["DELETE"],
             parameters: ["user"],
         },
+        "admin.sale-orders.index": {
+            uri: "admin/sale-orders",
+            methods: ["GET", "HEAD"],
+        },
         "storage.local": {
             uri: "storage/{path}",
             methods: ["GET", "HEAD"],
@@ -210,21 +214,5 @@ const Ziggy = {
 };
 if (typeof window !== "undefined" && typeof window.Ziggy !== "undefined") {
     Object.assign(Ziggy.routes, window.Ziggy.routes);
-    const Ziggy = {
-        url: "http://127.0.0.1:8000",
-        port: null,
-        defaults: {},
-        routes: {
-            "storage.local": {
-                uri: "storage/{path}",
-                methods: ["GET", "HEAD"],
-                wheres: { path: ".*" },
-                parameters: ["path"],
-            },
-        },
-    };
-    if (typeof window !== "undefined" && typeof window.Ziggy !== "undefined") {
-        Object.assign(Ziggy.routes, window.Ziggy.routes);
-    }
 }
 export { Ziggy };
