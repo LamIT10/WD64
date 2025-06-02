@@ -16,7 +16,7 @@
                     </button>
                     <!-- Add Role Button -->
               
-                    <Waiting route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
+                    <Waiting v-can="'admin.permission.create'" route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus"></i>
                         <span>Thêm vai trò</span>
                     </Waiting>

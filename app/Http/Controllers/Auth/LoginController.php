@@ -32,8 +32,7 @@ class LoginController extends Controller
     {
         $data = $request->validated();
         $status = $this->loginRepository->login($data);
-       
-        return $this->returnInertia($status, 'Đăng nhập thành công', 'dashboard');
+        return $this->returnInertia($status, 'Đăng nhập thành công', 'dashboard', ['permissions' => session("permissions")] );
     }
     /**
      * Xử lý đăng xuất.
@@ -43,7 +42,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+        session()->forget("permissions");
         return redirect('/login');
     }
     
