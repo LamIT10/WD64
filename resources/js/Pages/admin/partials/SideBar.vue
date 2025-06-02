@@ -81,7 +81,32 @@
                     </a>
                 </div>
             </div>
+            <!-- User Management -->
+            <div class="mb-1">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    onclick="toggleDropdown('user-menu')">
+                    <div
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors">
+                        <i class="fas fa-users sx-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left">Quản lý nhân viên</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="user-icon"></i>
+                </button>
 
+                <div id="user-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
+                    <Link :href="route('admin.users.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-user-tag text-xs"></i>
+                    </div>
+                    <span class="text-xs">Quản lý nhân viên</span>
+                    </Link>
+                </div>
+            </div>
             <!-- Product Management -->
             <div class="mb-1">
                 <button
@@ -106,14 +131,14 @@
                         </div>
                         <span class="text-xs">Biến thể sản phẩm</span>
                     </a>
-                    <a href="categories.html"
+                    <Link :href="route('admin.categories.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                            <i class="fas fa-tags text-xs"></i>
-                        </div>
-                        <span class="text-xs">Danh mục</span>
-                    </a>
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-tags text-xs"></i>
+                    </div>
+                    <span class="text-xs">Danh mục</span>
+                    </Link>
                 </div>
             </div>
 
@@ -186,38 +211,76 @@
                     </a>
                 </div>
             </div>
+
             <!-- Customers -->
-            <div class="mb-40">
+            <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('customer-menu')">
+                    @click="toggleDropdown('customer-menu')">
                     <div
-                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
-                        <i class="fas fa-users text-sm"></i>
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-yellow-100 text-yellow-600 group-hover:bg-yellow-200 transition-colors">
+                        <i class="fas fa-user-friends text-sm"></i>
                     </div>
-                    <span class="text-sm font-medium flex-1 text-left">Quản lý khách hàng</span>
+                    <span class="text-sm font-medium flex-1 text-left">Khách hàng</span>
                     <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
                         id="customer-icon"></i>
                 </button>
 
                 <div id="customer-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <a href="customers.html"
+                    <Link :href="route('admin.customers.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-address-book text-xs"></i>
+                    </div>
+                    <span class="text-xs">Quản lý khách hàng</span>
+                    </Link>
+                    <Link :href="route('admin.ranks.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-star text-xs"></i>
+                    </div>
+                    <span class="text-xs">Quản lý hạng</span>
+                    </Link>
+                    <a href="#"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                            <i class="fas fa-list text-xs"></i>
+                            <i class="fas fa-file-invoice-dollar text-xs"></i>
                         </div>
-                        <Link :href="route('admin.customers.index')" class="text-xs">Quản lý</Link>
+                        <span class="text-xs">Công nợ khách hàng</span>
                     </a>
-                    <a href="customer-debt.html"
+                </div>
+            </div>
+
+
+
+            <!-- Customers -->
+            <div class="mb-40">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    onclick="toggleDropdown('admin-menu')">
+                    <div
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors">
+                        <i class="fas fa-cog text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left">Quản trị hệ thống</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="admin-icon"></i>
+                </button>
+
+                <div id="admin-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
+                    <Link :href="route('admin.role.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                            <i class="fas fa-money-bill text-xs"></i>
-                        </div>
-                        <span class="text-xs">Công nợ</span>
-                    </a>
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-user-tag text-xs"></i>
+                    </div>
+                    <span class="text-xs">Quản lý vai trò</span>
+                    </Link>
                 </div>
             </div>
         </nav>

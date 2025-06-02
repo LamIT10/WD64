@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\PermissionController ;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\RankController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -22,10 +23,25 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
 
-    Route::resource('customers', CustomerController::class)->names('customers');
-    Route::post('customers/{customer}/ranks', [CustomerController::class, 'storeRank'])->name('customers.ranks.store');
+    Route::prefix('customers')->as('customers.')->group(function () {
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerController::class, 'create'])->name('create');
+        Route::post('/', [CustomerController::class, 'store'])->name('store');
+        Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+        Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+        Route::patch('/{customer}', [CustomerController::class, 'update'])->name('update');
+        Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+    });
 
-
+    Route::prefix('ranks')->as('ranks.')->group(function () {
+        Route::get('/', [RankController::class, 'index'])->name('index');        // Danh sách rank của customer
+        Route::get('/create', [RankController::class, 'create'])->name('create'); // Form tạo mới
+        Route::post('/', [RankController::class, 'store'])->name('store');        // Lưu rank mới
+        Route::get('/{rank}', [RankController::class, 'show'])->name('show');     // Chi tiết rank
+        Route::get('/{rank}/edit', [RankController::class, 'edit'])->name('edit'); // Form sửa
+        Route::patch('/{rank}', [RankController::class, 'update'])->name('update');  // Cập nhật rank
+        Route::delete('/{rank}', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
+    });
     
     Route::prefix('permission')->as('permission.')->group(function () {
         Route::get('/', [PermissionController::class, 'index'])->name('index');

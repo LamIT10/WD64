@@ -32,9 +32,6 @@
                   Tên
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Người liên hệ
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   SĐT
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -69,9 +66,6 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ customer.contact_person || '-' }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ customer.phone || '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -83,8 +77,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
-                    v-if="customer.ranks && customer.ranks.length">
-                    {{ customer.ranks[0].name }}
+                    v-if="customer.rank">
+                    {{ customer.rank.name }}
                   </span>
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800"
                     v-else>
@@ -97,7 +91,6 @@
                       @click="toggleDropdown(customer.id)">
                       <i class="fas fa-ellipsis-v"></i>
                     </button>
-                    <!-- Dropdown menu -->
                     <div v-if="activeDropdown === customer.id"
                       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                       <div class="py-1">
@@ -150,8 +143,8 @@
 
 <script setup>
 import { Link, useForm } from '@inertiajs/vue3';
-import AppLayout from '../Layouts/AppLayout.vue';
 import { ref } from 'vue';
+import AppLayout from '../Layouts/AppLayout.vue';
 
 defineProps({
   customers: Object,
@@ -166,8 +159,7 @@ const toggleDropdown = (id) => {
 const handleDelete = (id) => {
   if (confirm('Bạn có chắc muốn xóa khách hàng này không?')) {
     useForm({}).delete(route('admin.customers.destroy', id), {
-      onSuccess: () => {
-      },
+      onSuccess: () => { },
     });
   }
 };
@@ -181,7 +173,7 @@ function formatLabel(label) {
 }
 </script>
 
-<style scoped lang="css">
+<style scoped>
 ::-webkit-scrollbar {
   height: 6px;
   width: 6px;
