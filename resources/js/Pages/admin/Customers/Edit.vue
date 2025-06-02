@@ -1,72 +1,68 @@
 <template>
   <AppLayout>
-    <div class="w-full h-auto my-4 p-5 bg-[#f5f7fa]">
-      <div class="w-[90%] mx-auto bg-white rounded-2xl shadow p-6 mb-10">
-        <!-- Cập nhật thông tin khách hàng -->
-        <h2 class="text-2xl font-bold mb-6">Sửa thông tin khách hàng</h2>
-        <form @submit.prevent="handleUpdate" class="space-y-4">
-          <div v-for="(label, field) in fieldLabels" :key="field">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
-            <input
-              v-model="form[field]"
-              :type="inputTypes[field] || 'text'"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :required="field === 'name'"
-            />
-            <span v-if="form.errors[field]" class="text-red-500 text-sm">{{ form.errors[field] }}</span>
+    <div class="bg-gray-50 p-6">
+      <div v-if="!customer" class="max-w-5xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <p class="text-red-500">Không tìm thấy khách hàng.</p>
+      </div>
+      <div v-else class="max-w-5xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg text-purple-700 font-semibold mb-6">Sửa khách hàng</h2>
+        <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng</label>
+            <input v-model="form.name" type="text"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.name }" />
+            <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</p>
           </div>
-          <button type="submit" class="bg-[#BE202F] text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
-            Cập nhật
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+            <input v-model="form.phone" type="text"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.phone }" />
+            <p v-if="form.errors.phone" class="text-red-500 text-sm mt-1">{{ form.errors.phone }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input v-model="form.email" type="email"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.email }" />
+            <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+            <input v-model="form.address" type="text"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.address }" />
+            <p v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Công nợ</label>
+            <input v-model="form.current_debt" type="number" step="0.01"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.current_debt }" />
+            <p v-if="form.errors.current_debt" class="text-red-500 text-sm mt-1">{{ form.errors.current_debt }}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hạng khách hàng</label>
+            <select v-model="selectedRank" @change="updateRank"
+              class="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              :class="{ 'border-red-500': form.errors.rank_id }">
+              <option value="" disabled>Chọn hạng</option>
+              <option v-for="rank in rankTemplates" :key="rank.id" :value="rank.id">{{ rank.name }}</option>
+            </select>
+            <p v-if="form.errors.rank_id" class="text-red-500 text-sm mt-1">{{ form.errors.rank_id }}</p>
+          </div>
+        </form>
+        <div class="mt-6 flex justify-end space-x-3">
+          <Link :href="route('admin.customers.index')"
+            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            Hủy
+          </Link>
+          <button @click="submit" type="button"
+            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors">
+            Lưu
           </button>
-        </form>
-        <h3 class="text-xl font-bold mt-10 mb-4">Thêm hạng khách hàng</h3>
-        <form @submit.prevent="handleAddRank" class="grid grid-cols-2 gap-4">
-          <div v-for="(label, field) in rankFieldLabels" :key="field" class="col-span-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ label }}</label>
-            <input
-              v-model="rankForm[field]"
-              :type="rankInputTypes[field] || 'text'"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :required="field !== 'note'"
-            />
-            <span v-if="rankForm.errors[field]" class="text-red-500 text-sm">{{ rankForm.errors[field] }}</span>
-          </div>
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-            <textarea
-              v-model="rankForm.note"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows="3"
-            ></textarea>
-            <span v-if="rankForm.errors.note" class="text-red-500 text-sm">{{ rankForm.errors.note }}</span>
-          </div>
-          <div class="col-span-2 mt-2">
-            <button type="submit" class="bg-[#2A66FF] text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-              Thêm hạng
-            </button>
-          </div>
-        </form>
-        <h3 class="text-xl font-bold mt-10 mb-4">Danh sách hạng của khách hàng</h3>
-        <table class="w-full text-sm text-gray-700 border-t border-gray-200">
-          <thead>
-            <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
-              <th class="p-3 text-left">Tên hạng</th>
-              <th class="p-3 text-left">Tổng chi tiêu tối thiểu</th>
-              <th class="p-3 text-left">% giảm giá</th>
-              <th class="p-3 text-left">% tín dụng</th>
-              <th class="p-3 text-left">Ghi chú</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="rank in customer.ranks" :key="rank.id" class="border-b border-gray-200">
-              <td class="p-3">{{ rank.name }}</td>
-              <td class="p-3">{{ rank.min_total_spent }}</td>
-              <td class="p-3">{{ rank.discount_percent }}%</td>
-              <td class="p-3">{{ rank.credit_percent }}%</td>
-              <td class="p-3">{{ rank.note || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
+        </div>
       </div>
     </div>
   </AppLayout>
@@ -74,90 +70,68 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import { watch } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 
-const { customer } = defineProps({ customer: Object });
+const props = defineProps({
+  customer: Object,
+  rankTemplates: Array,
+});
 
-// Form chính (cập nhật khách hàng)
+// Gán ngắn gọn để dễ dùng trong template và logic
+const customer = props.customer;
+const rankTemplates = props.rankTemplates;
+
+console.log('Customer:', customer);
+console.log('Rank Templates:', rankTemplates);
+
+const selectedRank = ref(customer?.rank_id || '');
+
 const form = useForm({
-  name: '',
-  contact_person: '',
-  phone: '',
-  email: '',
-  password_confirmation: '',
-  address: '',
-  current_debt: 0,
+  name: customer?.name || '',
+  contact_person: customer?.contact_person || '',
+  phone: customer?.phone || '',
+  email: customer?.email || '',
+  password: '',
+  address: customer?.address || '',
+  current_debt: customer?.current_debt || 0,
+  rank_id: customer?.rank_id || null,
 });
 
-watch(
-  () => customer,
-  (data) => {
-    if (!data) return;
-    Object.assign(form, {
-      name: data.name || '',
-      contact_person: data.contact_person || '',
-      phone: data.phone || '',
-      email: data.email || '',
-      address: data.address || '',
-      current_debt: data.current_debt || 0,
-    });
-  },
-  { immediate: true }
-);
-
-const fieldLabels = {
-  name: 'Tên khách hàng',
-  contact_person: 'Người liên hệ',
-  phone: 'Số điện thoại',
-  email: 'Email',
-  password_confirmation: 'Mật khẩu',
-  address: 'Địa chỉ',
-  current_debt: 'Công nợ',
+const updateRank = () => {
+  form.rank_id = selectedRank.value || null;
 };
 
-const inputTypes = {
-  email: 'email',
-  password_confirmation: 'password',
-  current_debt: 'number',
-};
-
-// Form thêm rank
-const rankForm = useForm({
-  name: '',
-  min_total_spent: 0,
-  discount_percent: 0,
-  credit_percent: 0,
-  note: '',
-});
-
-const rankFieldLabels = {
-  name: 'Tên hạng',
-  min_total_spent: 'Tổng chi tiêu tối thiểu',
-  discount_percent: '% giảm giá',
-  credit_percent: '% tín dụng',
-};
-
-const rankInputTypes = {
-  min_total_spent: 'number',
-  discount_percent: 'number',
-  credit_percent: 'number',
-};
-
-const handleUpdate = () => {
-  form.put(route('admin.customers.update', customer.id), {
-    onSuccess: () => alert('Cập nhật thông tin khách hàng thành công.'),
-  });
-};
-
-const handleAddRank = () => {
-  rankForm.post(route('admin.customers.ranks.store', customer.id), {
+const submit = () => {
+  if (!customer?.id) {
+    console.error('Customer ID không tồn tại');
+    return;
+  }
+  form.patch(route('admin.customers.update', customer.id), {
     onSuccess: () => {
-      rankForm.reset();
-      alert('Thêm hạng khách hàng thành công.');
+      form.reset('password');
     },
   });
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped>
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+</style>
