@@ -22,6 +22,7 @@ class StoreUserRequest extends FormRequest
             'gender' => 'nullable|in:male,female,other',
             'status' => 'nullable|in:active,inactive,suspended',
             'note' => 'nullable|string|max:500',
+            'roles' => 'required'
         ];
     }
 

@@ -31,10 +31,25 @@ class PermissionRepository extends BaseRepository
             return false;
         }
     }
-    public function getAll()
+    public function getDateRenderCreateRole()
     {
         try {
-            return $this->handleModel->select(['*'])->get();
+            $group_permission = $this->handleModel::select("group_permission", "group_description")
+            ->distinct()
+            ->get()
+            ->toArray();
+            $dataPermision = [];
+
+            foreach ($group_permission as $key => $value) {
+                $dataPermision[] = [
+                    'group_permission' => $value['group_permission'],
+                    'group_description' => $value['group_description'],
+                    'permission' => $this->handleModel::where("group_permission", $value)->get(["id","name", "description"])->toArray(),
+                    
+                ];
+            }
+
+            return $dataPermision;
         } catch (\Throwable $th) {
             Log::error("Lấy danh sách quyền lỗi, " . $th->getMessage());
             return [];
