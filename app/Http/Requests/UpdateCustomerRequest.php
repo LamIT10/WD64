@@ -6,21 +6,31 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCustomerRequest extends FormRequest
 {
-    public function authorize()
-    {
-        return true; // Điều chỉnh nếu cần kiểm tra quyền
-    }
-
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
+            'contact_person' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:255',
-            'current_debt' => 'nullable|numeric|min:0',
-            'password' => 'nullable|string|min:6',
-            'rank_id' => 'nullable|exists:ranks,id',
+            'email' => 'nullable|email|max:100',
+            'password' => 'nullable|string|max:50|confirmed',
+            'address' => 'nullable|string',
+            'current_debt' => 'nullable|numeric',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Vui lòng nhập tên khách hàng.',
+            'name.max' => 'Tên khách hàng không được vượt quá 100 ký tự.',
+            'contact_person.max' => 'Người liên hệ không được vượt quá 50 ký tự.',
+            'phone.max' => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'email.email' => 'Email không đúng định dạng.',
+            'email.max' => 'Email không được vượt quá 100 ký tự.',
+            'password.max' => 'Mật khẩu không được vượt quá 50 ký tự.',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            'current_debt.numeric' => 'Công nợ phải là số.',
         ];
     }
 }

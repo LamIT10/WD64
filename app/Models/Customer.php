@@ -11,12 +11,12 @@ class Customer extends Model
 
     protected $fillable = [
         'name',
+        'contact_person',
         'phone',
         'email',
         'password',
         'address',
-        'current_debt',
-        'rank_id',
+        'current_debt'
     ];
 
     protected $hidden = ['password'];
@@ -31,9 +31,9 @@ class Customer extends Model
         return $this->hasMany(CustomerTransaction::class);
     }
 
-    public function rank()
+    public function ranks()
     {
-        return $this->belongsTo(Rank::class);
+        return $this->hasMany(Rank::class);
     }
 
     public function contacts()
