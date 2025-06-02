@@ -88,7 +88,7 @@
     @inertiaHead
 </head>
 
-<body class="bg-gray-50 font-sans">
+<body class="bg-slate-100 font-sans">
     @inertia
     <script>
         // Sidebar toggle functionality

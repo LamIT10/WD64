@@ -50,12 +50,19 @@
                                         {{ form.errors.phone }}
                                     </p>
                                 </div>
-                                <!-- Position -->
+                                <!-- Position - Toggle Switch Version -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
-                                    <input v-model="form.position" type="text"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                                        placeholder="Nhập chức vụ..." />
+                                    <div class="flex flex-wrap gap-4">
+                                        <!-- Toggle for Manager -->
+                                        <div v-for="role in listRoles" :key="role.id" class="flex items-center">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" @change="handleRole(role.id)" class="sr-only peer">
+                                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
                                     <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.position }}
                                     </p>
@@ -182,13 +189,16 @@ import { router, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-
+const {listRoles} = defineProps({
+    listRoles: {},
+})
 const form = useForm({
     name: '',
     email: '',
     phone: '',
     position: '',
     gender: '',
+    roles: [],
     avatar: null,
     address: '',
     status: '',
@@ -196,9 +206,17 @@ const form = useForm({
     password: '',
     password_confirmation: ''
 });
-
+const handleRole = (id) => {
+    console.log(id)
+    if (form.roles.includes(id)) {
+        form.roles = form.roles.filter(permissionId => permissionId !== id);
+    } else {
+        form.roles = [...form.roles, id];
+    }
+}
 function submit() {
-    form.post('/admin/users', {
+    console.log(form);
+    form.post(route('admin.users.store'), {
         onError: (errors) => {
             console.error(errors);
         }

@@ -86,7 +86,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <Link
+                                        <Link v-can="'admin.permission.edit'"
                                             :href="route('admin.permission.edit', permission.id)"
                                             class="flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-600 rounded-md hover:bg-purple-200 transition-colors"
                                         >
@@ -161,13 +161,13 @@ const { permissions } = defineProps({
         default: () => ({}),
     },
 });
-
 const hanldeDelete = (id) => {
     if (confirm("Bạn có chắc chắn muốn xoá quyền này không?")) {
         const formDelete = useForm({});
         formDelete.delete(route('admin.permission.destroy', id));
     }
 }
+
 </script>
 
 <style lang="css" scoped>

@@ -1,10 +1,11 @@
 <template>
     <AppLayout>
-        <div class="bg-gray-50 p-6">
+        <div class="p-6">
             <div
-                class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200"
+            
+                class="p-3 bg-white mb-4 flex justify-between items-center"
             >
-                <h5 class="text-lg text-purple-700 font-semibold">
+                <h5 class="text-lg text-indigo-700 font-semibold">
                     Danh sách Nhà cung cấp
                 </h5>
                 <div class="flex items-center space-x-3">
@@ -13,7 +14,7 @@
                         <input
                             type="text"
                             placeholder="Tìm kiếm nhà cung cấp..."
-                            class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                            class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         />
                         <i
                             class="fas fa-search absolute left-3 top-3 text-gray-400"
@@ -29,17 +30,18 @@
             </div>
 
             <div
-                class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                class="bg-white overflow-hidden"
             >
                 <div class="overflow-x-auto">
                     <div
-                        class="relative overflow-x-auto shadow-md sm:rounded-lg"
+                        class="relative overflow-x-auto shadow-md"
                     >
                         <table
-                            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                            class="w-full text-left shadow-sm rtl:text-right text-gray-500 dark:text-gray-400"
                         >
                             <thead
-                                class="text-xs text-gray-700 uppercase bg-purple-50 dark:bg-gray-700 dark:text-gray-400"
+                            
+                                class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
                             >
                                 <tr>
                                     <th scope="col" class="p-4">
@@ -56,20 +58,20 @@
                                             >
                                         </div>
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-4 py-2">
                                         Tên NCC
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-4 py-2">
                                         Đại điện
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-4 py-2">
                                         Số điện thoại
                                     </th>
-                                    <th scope="col" class="px-6 py-3">EMail</th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-4 py-2">Email</th>
+                                    <th scope="col" class="px-4 py-2">
                                         Địa chỉ
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-4 py-2">
                                         Hành động
                                     </th>
                                 </tr>
@@ -96,24 +98,24 @@
                                     </td>
                                     <th
                                         scope="row"
-                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                        class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
                                         {{ supplier.name }}
                                     </th>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-2">
                                         {{ supplier.contact_person }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-2">
                                         {{ supplier.phone }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-2">
                                         {{ supplier.email }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-4 py-2">
                                         {{ supplier.address }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <Waiting
+                                    <td class="px-4 py-2">
+                                        <!-- <Waiting
                                             route-name="admin.suppliers.edit"
                                             :route-params="{
                                                 supplier: supplier.id,
@@ -122,7 +124,7 @@
                                         >
                                             <i class="fas fa-edit mr-1"></i>
                                             Sửa
-                                        </Waiting>
+                                        </Waiting> -->
                                     </td>
                                 </tr>
                             </tbody>
@@ -132,7 +134,7 @@
 
                 <!-- Pagination -->
                 <div
-                    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
+                    class="px-4 py-2 border-t border-gray-200 flex items-center justify-between"
                 >
                     <div class="text-sm text-gray-500">
                         Hiển thị <span class="font-medium">1</span> đến
@@ -149,7 +151,7 @@
                             :class="[
                                 'px-3 py-1 rounded-md text-sm',
                                 link.active
-                                    ? 'bg-purple-600 text-white'
+                                    ? 'bg-indigo-600 text-white'
                                     : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
                                 !link.url && 'opacity-50 cursor-not-allowed',
                             ]"
@@ -170,8 +172,6 @@ const { suppliers } = defineProps({
         default: () => {},
     },
 });
-console.log(suppliers);
-
 </script>
 <style lang="css" scoped>
 ::-webkit-scrollbar {
@@ -189,7 +189,7 @@ console.log(suppliers);
     background: #a0a0a0;
 }
 tr {
-    height: 40px; /* chiều cao cố định */
+    height: 20px; /* chiều cao cố định */
     max-height: 40px;
 }
 

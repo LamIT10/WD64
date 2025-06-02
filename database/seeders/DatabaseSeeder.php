@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
             InventoryAuditItemSeeder::class,
             ContactSeeder::class,
             DamagedExpiredProductSeeder::class,
+            PermissionSeeder::class,
         ]);
     }
 }

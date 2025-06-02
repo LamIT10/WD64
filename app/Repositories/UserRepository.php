@@ -36,6 +36,16 @@ class UserRepository extends BaseRepository
             $dataUser['gender'] = $data['gender'] ?? null;
             $dataUser['password'] = Hash::make($data['password']);
             $user = $this->handleModel->create($dataUser);
+           
+            if (!$user) {
+                throw new \Exception('Có lỗi khi thêm nhân viên');
+            }
+            if ($data['roles']) {
+                $role = $user->syncRoles(($data['roles']));
+                if (!$role) {
+                    throw new \Exception('Có lỗi khi thêm vai trò người dùng');
+                }
+            }
             DB::commit();
             return $user;
         } catch (\Throwable $th) {
