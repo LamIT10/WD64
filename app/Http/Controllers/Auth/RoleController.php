@@ -58,6 +58,7 @@ class RoleController extends Controller
     {
         $data = $request->validated();
         $role = $this->handleRepository->handleCreate($data);
+
         return $this->returnInertia($role, "Thêm vai trò thành công", "admin.role.index");
     }
 

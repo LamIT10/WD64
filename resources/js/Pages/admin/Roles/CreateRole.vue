@@ -26,27 +26,49 @@
                                 <span v-if="form.errors.name" class="text-red-500 text-xs">{{ form.errors.name }}</span>
                             </div>
 
-                            <!-- Permissions -->
+                            <!-- Permissions - Improved Section with Select All -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Quyền hạng <span class="text-red-500">*</span>
                                 </label>
-                                <span v-if="form.errors.permissions" class="text-red-500 text-xs">{{ form.errors.permissions
-                                }}</span>
+                                <span v-if="form.errors.permissions" class="text-red-500 text-xs">{{
+                                    form.errors.permissions
+                                    }}</span>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                                    <div v-for="permission in permissions" :key="permission.id"
-                                        class="flex items-center">
-                                        <label class="inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" class="hidden peer" :value="permission.id"
-                                                @change="handleSelect(permission.id)"
-                                                :checked="form.permissions.includes(permission.id)">
-                                            <div
-                                                class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600">
+                                <div class="space-y-6 mt-4">
+                                    <div v-for="permission in permissions" :key="permission.id" class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h3 class="font-medium text-gray-800 flex items-center">
+                                                <span class="bg-indigo-100 text-indigo-800 p-1 rounded mr-2">
+                                                    <i class="fas fa-folder-open text-sm"></i>
+                                                </span>
+                                                {{ permission.group_description }}
+                                            </h3>
+                                            <button 
+                                                type="button" 
+                                                @click="toggleAllPermissions(permission.permission)"
+                                                class="text-xs px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
+                                            >
+                                                Chọn tất cả
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-6">
+                                            <div v-for="value in permission.permission" :key="value.id"
+                                                class="flex items-center justify-between p-2 hover:bg-gray-100 rounded transition-colors">
+                                                <label class="flex items-center cursor-pointer w-full">
+                                                    <div class="relative inline-flex items-center">
+                                                        <input type="checkbox" class="sr-only peer" :value="value.id"
+                                                            @change="handleSelect(value.id)"
+                                                            :checked="form.permissions.includes(value.id)">
+                                                        <div
+                                                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                                        </div>
+                                                    </div>
+                                                    <span class="ml-3 text-sm text-gray-700 flex-1">{{ value.description }}</span>
+                                                </label>
                                             </div>
-                                            <span class="ms-3 text-sm font-medium text-gray-700">{{ permission.name
-                                            }}</span>
-                                        </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -98,6 +120,7 @@ const errors = reactive({
 const hanldeSubmitForm = () => {
     form.post(route('admin.role.store'));
 }
+
 const handleSelect = (id) => {
     if (form.permissions.includes(id)) {
         form.permissions = form.permissions.filter(permissionId => permissionId !== id);
@@ -105,4 +128,25 @@ const handleSelect = (id) => {
         form.permissions = [...form.permissions, id];
     }
 }
+
+// Thêm hàm xử lý chọn tất cả permissions trong nhóm
+const toggleAllPermissions = (permissionItems) => {
+    const permissionIds = permissionItems.map(item => item.id);
+    const allSelected = permissionIds.every(id => form.permissions.includes(id));
+    
+    if (allSelected) {
+        // Nếu đã chọn tất cả thì bỏ chọn tất cả
+        form.permissions = form.permissions.filter(id => !permissionIds.includes(id));
+    } else {
+        // Nếu chưa chọn tất cả thì thêm những permission chưa có
+        const newPermissions = [...form.permissions];
+        permissionIds.forEach(id => {
+            if (!newPermissions.includes(id)) {
+                newPermissions.push(id);
+            }
+        });
+        form.permissions = newPermissions;
+    }
+}
 </script>
+

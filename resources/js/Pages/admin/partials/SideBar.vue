@@ -220,8 +220,8 @@
                 </div>
             </div>
             <!-- Role -->
-            <div class="mb-40">
-                <button
+            <div v-can="'admin.permisison.index'" class="mb-40">
+                <button 
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('admin-menu')">
                     <div

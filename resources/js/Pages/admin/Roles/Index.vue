@@ -142,7 +142,7 @@
                                                     <div v-for="permission in role.permissions" :key="permission.id"
                                                         class="px-4 py-2 text-sm text-black hover:bg-indigo-50 transition-colors duration-100 ease-in-out">
                                                         <i class="fas fa-key mr-2 text-indigo-400"></i>
-                                                        {{ permission.name }}
+                                                        {{ permission.description }}
                                                     </div>
                                                     <div v-if="role.permissions.length === 0"
                                                         class="px-4 py-2 text-sm text-indigo-400 italic">

@@ -14,15 +14,20 @@ class PermissionSeeder extends Seeder
     public function run()
     {
         DB::table("permissions")->delete();
-        $now = now(); // hoặc Carbon::now();
+        $now = now();
         $data = [];
         foreach (PermissionConstant::all() as $item) {
-            $data[] = [
-                "name" => $item,
+            foreach ($item['permissions'] as $permission) {
+               $data[] = [
+                'name' => $permission['name'],
+                'description' => $permission['description'],
+                'group_permission' => $item['group_permission'],
+                "group_description" => $item['group_description'],
                 'guard_name' => 'web',
                 'created_at' => $now,
                 'updated_at' => $now,
-            ];
+               ];
+            }
         }
         DB::table('permissions')->insert($data);
     }

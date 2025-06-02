@@ -42,16 +42,16 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
 
 
-    Route::prefix('permission')->as('permission.')->group(function () {
+    // Route::prefix('permission')->as('permission.')->group(function () {
 
-        Route::get('/', [PermissionController::class, 'index'])->middleware('has_permission:' . PermissionConstant::PERMISSION_INDEX)->name('index');
-        Route::get('/create', [PermissionController::class, 'create'])->middleware('has_permission:'. PermissionConstant::PERMISSION_CREATE)->name('create');
-        Route::post('/', [PermissionController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [PermissionController::class, 'edit'])->name('edit');
-        Route::patch('/{id}', [PermissionController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PermissionController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}', [PermissionController::class, 'show'])->name('show');
-    });
+    //     Route::get('/', [PermissionController::class, 'index'])->middleware('has_permission:' . PermissionConstant::PERMISSION_INDEX)->name('index');
+    //     Route::get('/create', [PermissionController::class, 'create'])->middleware('has_permission:'. PermissionConstant::PERMISSION_CREATE)->name('create');
+    //     Route::post('/', [PermissionController::class, 'store'])->name('store');
+    //     Route::get('/{id}/edit', [PermissionController::class, 'edit'])->name('edit');
+    //     Route::patch('/{id}', [PermissionController::class, 'update'])->name('update');
+    //     Route::delete('/{id}', [PermissionController::class, 'destroy'])->name('destroy');
+    //     Route::get('/{id}', [PermissionController::class, 'show'])->name('show');
+    // });
 
     Route::prefix('role')->as('role.')->group(function () {
         Route::get('/', [RoleController::class, 'index'])->name('index');

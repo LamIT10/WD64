@@ -10,8 +10,6 @@ class PermissionConstant
     public const USER_EDIT = 'admin.user.edit';
     public const USER_DELETE = 'admin.user.delete';
     public const USER_SHOW = 'admin.user.show';
-    public const USER_UPDATE = 'admin.user.update';
-    public const USER_STORE = 'admin.user.store';
 
     // ==== ROLES ====
     public const ROLE_INDEX = 'admin.role.index';
@@ -19,17 +17,6 @@ class PermissionConstant
     public const ROLE_EDIT = 'admin.role.edit';
     public const ROLE_DELETE = 'admin.role.delete';
     public const ROLE_SHOW = 'admin.role.show';
-    public const ROLE_UPDATE = 'admin.role.update';
-    public const ROLE_STORE = 'admin.role.store';
-
-    // ==== PERMISSIONS ====
-    public const PERMISSION_INDEX = 'admin.permission.index';
-    public const PERMISSION_CREATE = 'admin.permission.create';
-    public const PERMISSION_EDIT = 'admin.permission.edit';
-    public const PERMISSION_DELETE = 'admin.permission.delete';
-    public const PERMISSION_SHOW = 'admin.permission.show';
-    public const PERMISSION_UPDATE = 'admin.permission.update';
-    public const PERMISSION_STORE = 'admin.permission.store';
 
     // ==== CUSTOMERS ====
     public const CUSTOMER_INDEX = 'admin.customers.index';
@@ -37,73 +24,94 @@ class PermissionConstant
     public const CUSTOMER_EDIT = 'admin.customers.edit';
     public const CUSTOMER_DELETE = 'admin.customers.destroy';
     public const CUSTOMER_SHOW = 'admin.customers.show';
-    public const CUSTOMER_UPDATE = 'admin.customers.update';
-    public const CUSTOMER_STORE = 'admin.customers.store';
     public const CUSTOMER_RANK_STORE = 'admin.customers.ranks.store';
-
-    // ==== SUPPLIERS ====
-    public const SUPPLIER_INDEX = 'admin.suppliers.index';
-    public const SUPPLIER_CREATE = 'admin.suppliers.create';
-    public const SUPPLIER_STORE = 'admin.suppliers.store';
-
-    // ==== SETTINGS ====
-    public const SETTING_INDEX = 'admin.setting.index';
-    public const SETTING_UPDATE = 'admin.setting.update';
-
-    public const CATEGORY_INDEX = 'admin.category.index';
 
     public static function all(): array
     {
         return [
             // Users
-            self::USER_INDEX,
-            self::USER_CREATE,
-            self::USER_EDIT,
-            self::USER_DELETE,
-            self::USER_SHOW,
-            self::USER_UPDATE,
-            self::USER_STORE,
+            [
+                "group_permission" => "PERMISSION_USER",
+                "group_description" => "Quyền người dùng",
+                "permissions" => [
+                    [
+                        "description" => "Danh sách người dùng",
+                        "name" => self::USER_INDEX,
+                    ],
+                    [
+                        "description" => "Tạo người dùng",
+                        "name" => self::USER_CREATE,
+                    ],
+                    [
+                        "description" => "Sửa người dùng",
+                        "name" => self::USER_EDIT,
+                    ],
+                    [
+                        "description" => "Xoá người dùng",
+                        "name" => self::USER_DELETE,
+                    ],
+                    [
+                        "description" => "Xem người dùng",
+                        "name" => self::USER_SHOW,
+                    ],
+                ]
+            ],
 
-            // Roles
-            self::ROLE_INDEX,
-            self::ROLE_CREATE,
-            self::ROLE_EDIT,
-            self::ROLE_DELETE,
-            self::ROLE_SHOW,
-            self::ROLE_UPDATE,
-            self::ROLE_STORE,
+            [
+                "group_permission" => "PERMISSION_ROLE",
+                "group_description" => "Quyền vai trò",
+                "permissions" => [
+                    [
+                        "description" => "Danh sách vai trò",
+                        "name" => self::ROLE_INDEX,
+                    ],
+                    [
+                        "description" => "Tạo vai trò",
+                        "name" => self::ROLE_CREATE,
+                    ],
+                    [
+                        "description" => "Sửa vai trò",
+                        "name" => self::ROLE_EDIT,
+                    ],
+                    [
+                        "description" => "Xoá vai trò",
+                        "name" => self::ROLE_DELETE,
+                    ],
+                    [
+                        "description" => "Xem vai trò",
+                        "name" => self::ROLE_SHOW,
+                    ],
+                ]
+            ],
+            
+          
+            [
+                "group_permission" => "PERMISSION_CUSTOMER",
+                "group_description" => "Quyền khách hàng",
+                "permissions" => [
+                    [
+                        "description" => "Danh sách khách hàng",
+                        "name" => self::CUSTOMER_INDEX,
+                    ],
+                    [
+                        "description" => "Tạo khách hàng",
+                        "name" => self::CUSTOMER_CREATE,
+                    ],
+                    [
+                        "description" => "Sửa khách hàng",
+                        "name" => self::CUSTOMER_EDIT,
+                    ],
+                    [
+                        "description" => "Xoá khách hàng",
+                        "name" => self::CUSTOMER_DELETE,
+                    ],
+                    [
+                        "description" => "Xem khách hàng",
+                        "name" => self::CUSTOMER_SHOW,
+                    ],
+                ]
+            ],
 
-            // Permissions
-            self::PERMISSION_INDEX,
-            self::PERMISSION_CREATE,
-            self::PERMISSION_EDIT,
-            self::PERMISSION_DELETE,
-            self::PERMISSION_SHOW,
-            self::PERMISSION_UPDATE,
-            self::PERMISSION_STORE,
-
-            // Customers
-            self::CUSTOMER_INDEX,
-            self::CUSTOMER_CREATE,
-            self::CUSTOMER_EDIT,
-            self::CUSTOMER_DELETE,
-            self::CUSTOMER_SHOW,
-            self::CUSTOMER_UPDATE,
-            self::CUSTOMER_STORE,
-            self::CUSTOMER_RANK_STORE,
-
-            // Suppliers
-            self::SUPPLIER_INDEX,
-            self::SUPPLIER_CREATE,
-            self::SUPPLIER_STORE,
-
-            // Settings
-            self::SETTING_INDEX,
-            self::SETTING_UPDATE,
-
-            self::CATEGORY_INDEX,
-
-     
         ];
     }
 }

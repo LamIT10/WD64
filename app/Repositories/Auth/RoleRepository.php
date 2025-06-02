@@ -117,7 +117,7 @@ class RoleRepository extends BaseRepository
     {
         try {
             $data = [];
-            $data['permissions'] = $this->permissionRepository->getAll();
+            $data['permissions'] = $this->permissionRepository->getDateRenderCreateRole();
             return $data;
         } catch (\Throwable $th) {
             Log::error("Lấy quyền lỗi, " . $th->getMessage());
