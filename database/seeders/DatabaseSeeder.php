@@ -26,8 +26,8 @@ class DatabaseSeeder extends Seeder
             ProductVariantSeeder::class,
             ProductVariantAttributeSeeder::class,
             ProductUnitConversionSeeder::class,
-            CustomerSeeder::class,
             RankSeeder::class,
+            CustomerSeeder::class,
             WarehouseZoneSeeder::class,
             InventoryLocationSeeder::class,
             InventorySeeder::class,
@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
             InventoryAuditItemSeeder::class,
             ContactSeeder::class,
             DamagedExpiredProductSeeder::class,
+            PermissionSeeder::class,
         ]);
     }
 }
