@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
+                'permissions' => session('permissions', []),
             ],
             'recaptchaSiteKey' => config('nocaptcha.sitekey'),
             'flash' => [
