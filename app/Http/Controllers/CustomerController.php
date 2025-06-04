@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\StoreRankRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
-
+use App\Models\Rank;
 use App\Repositories\CustomerRepository;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CustomerController extends Controller
@@ -22,8 +22,7 @@ class CustomerController extends Controller
     public function index()
     {
         $perPage = request()->get('perPage', 10);
-
-        $customers = $this->customerRepo->getAllWithRanks($perPage);
+        $customers = $this->customerRepo->getAll($perPage);
 
         return Inertia::render('admin/Customers/Index', [
             'customers' => $customers,
@@ -33,26 +32,31 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         return Inertia::render('admin/Customers/Show', [
-            'customer' => $customer->load('ranks'),
+            'customer' => $customer->load('rank'),
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('admin/Customers/Create');
+        return Inertia::render('admin/Customers/Create', [
+            'rankTemplates' => Rank::all()->toArray(),
+        ]);
     }
 
     public function store(StoreCustomerRequest $request)
     {
-        $data = $this->customerRepo->createCustomer($request->validated());
+        $this->customerRepo->createCustomer($request->validated());
 
-        return $this->returnInertia($data, "Thêm thành công", 'admin.customers.index');
+        return redirect()->route('admin.customers.index')->with('success', 'Thêm khách hàng mới thành công');
     }
 
     public function edit(Customer $customer)
     {
+        Log::info('Customer data:', ['customer' => $customer->toArray()]);
+
         return Inertia::render('admin/Customers/Edit', [
-            'customer' => $customer->load('ranks'),
+            'customer' => $customer->load('rank'),
+            'rankTemplates' => Rank::all()->toArray(),
         ]);
     }
 
@@ -72,12 +76,5 @@ class CustomerController extends Controller
         $this->customerRepo->deleteCustomer($customer);
 
         return redirect()->route('admin.customers.index')->with('success', 'Xóa khách hàng thành công.');
-    }
-
-    public function storeRank(StoreRankRequest $request, Customer $customer)
-    {
-        $this->customerRepo->storeRank($customer, $request->validated());
-
-        return redirect()->route('admin.customers.edit', $customer)->with('success', 'Thêm hạng khách hàng thành công.');
     }
 }

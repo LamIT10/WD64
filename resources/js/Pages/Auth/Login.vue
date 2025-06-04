@@ -1,39 +1,97 @@
 <template>
   <AuthLayout>
-    <form @submit.prevent="submitForm" class="bg-white px-10 h-full">
-      <h1 class="text-2xl mb-5">Đăng nhập</h1>
-      <div class="social-icons flex gap-2 my-5">
-        <a href="/auth/google"
-          class="icon border border-gray-300 rounded-[20%] flex items-center justify-center w-10 h-10">
-          <img class="items-center justify-center" src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google" style="width:20px;vertical-align:middle;">
-        </a>
-      </div>
-      <span class="text-xs">hoặc đăng nhập bằng </span>
-      <input id="email" v-model="form.email" type="text" placeholder="Nhập email của bạn"
-        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
-      <div class="w-full text-left" v-if="errors.email">
-        <span class="text-red-600 text-left">{{ errors.email }}</span>
-      </div>
-      <input id="password" v-model="form.password" type="password" placeholder="Nhập mật khẩu của bạn"
-        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
-      <div class="w-full text-left" v-if="errors.password">
-        <span class="text-red-600">{{ errors.password }}</span>
-      </div>
-      <div class="form-group recaptcha-container">
-        <vue-recaptcha ref="recaptcha" :sitekey="siteKey" @verify="onVerify" @expired="onExpired"></vue-recaptcha>
-        <div class="w-full text-left" v-if="errors['g-recaptcha-response']">
-          <span class="text-red-600">{{ errors['g-recaptcha-response'] }}</span>
+    <div class="relative">
+      <!-- Form -->
+      <form @submit.prevent="submitForm" class="space-y-6 animate-fade-in-up">
+        <h1 class="text-3xl font-extrabold text-indigo-700 text-center mb-6 tracking-tight">Đăng nhập</h1>
+        <p class="text-sm text-gray-500 text-center mb-6">Truy cập hệ thống quản lý kho SUVAN</p>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+          <input id="email" v-model="form.email" type="email"
+            class="w-full px-4 py-3 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 shadow-sm hover:shadow-md"
+            placeholder="email@example.com">
+          <div class="w-full text-left text-xs mt-1" v-if="errors.email || form.errors.email">
+            <span class="text-red-500">{{ errors.email || form.errors.email }}</span>
+          </div>
         </div>
-      </div>
-      <Link :href="route('password.request')" @click.prevent="showForgot = true"
-        class="text-gray-700 text-xs my-3 block text-right"> Quên mật khẩu? </Link>
-      <button
-        class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer"
-        :disabled="form.processing">
-        Đăng nhập
-      </button>
-    </form>
+
+        <!-- Password -->
+        <div>
+          <div class="flex justify-between mb-1.5">
+            <label class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+            <Link :href="route('password.request')" @click.prevent="showForgot = true"
+              class="text-xs text-indigo-600 hover:text-indigo-500 font-medium transition">Quên mật khẩu?</Link>
+          </div>
+          <div class="relative">
+            <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
+              class="w-full px-4 py-3 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 shadow-sm hover:shadow-md"
+              placeholder="••••••••">
+            <button type="button" @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700">
+              <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
+          <div class="w-full text-left text-xs mt-1" v-if="errors.password || form.errors.password">
+            <span class="text-red-500">{{ errors.password || form.errors.password }}</span>
+          </div>
+        </div>
+
+        <!-- reCAPTCHA -->
+        <div class="form-group recaptcha-container">
+          <vue-recaptcha class="w-full" ref="recaptcha" :sitekey="siteKey" @verify="onVerify" @expired="onExpired"></vue-recaptcha>
+          <div class="w-full text-left text-xs mt-1" v-if="errors['g-recaptcha-response'] || form.errors['g-recaptcha-response']">
+            <span class="text-red-500">{{ errors['g-recaptcha-response'] || form.errors['g-recaptcha-response'] }}</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" :disabled="form.processing"
+          class="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.02] flex items-center justify-center">
+          <span v-if="!form.processing">ĐĂNG NHẬP</span>
+          <svg v-else class="w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </button>
+
+        <!-- Divider -->
+        <div class="relative my-6">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-200"></div>
+          </div>
+          <div class="relative flex justify-center">
+            <span class="px-3 bg-white text-xs text-gray-500 font-medium">hoặc tiếp tục với</span>
+          </div>
+        </div>
+
+        <!-- Google Login -->
+        <a :href="route('google.login')"
+          class="w-full flex items-center justify-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200 transform hover:scale-[1.02]">
+          <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.153-2.675-6.735-2.675-5.522 0-10 4.477-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.167-0.007-0.333-0.020-0.500h-9.980z" />
+          </svg>
+          Đăng nhập với Google
+        </a>
+      </form>
+
+      <!-- Success Message -->
+      <transition name="fade">
+        <div v-if="form.isSuccessful" class="mt-6 p-4 bg-green-100 text-green-700 text-sm rounded-lg flex items-center gap-2 animate-pulse">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Đăng nhập thành công! Đang chuyển hướng...
+        </div>
+      </transition>
+    </div>
   </AuthLayout>
 </template>
 
@@ -47,8 +105,9 @@ import Toast from '../components/Toast.vue';
 import AuthLayout from "./AuthLayout.vue";
 
 const showForgot = ref(false);
+const showPassword = ref(false);
 const siteKey = "6LccsEErAAAAABih7tLBLalq7fbEgVICF-gGn7Gk";
-const recaptcha = ref(null)
+const recaptcha = ref(null);
 
 const form = useForm({
   email: "",
@@ -68,7 +127,6 @@ function validate() {
   errors.password = "";
   errors["g-recaptcha-response"] = "";
 
-  // Email
   if (!form.email) {
     errors.email = "Vui lòng nhập email.";
     valid = false;
@@ -77,7 +135,6 @@ function validate() {
     valid = false;
   }
 
-  // Password
   if (!form.password) {
     errors.password = "Vui lòng nhập mật khẩu.";
     valid = false;
@@ -86,7 +143,6 @@ function validate() {
     valid = false;
   }
 
-  // reCAPTCHA
   if (!form["g-recaptcha-response"]) {
     errors["g-recaptcha-response"] = "Vui lòng xác minh reCAPTCHA.";
     valid = false;
@@ -97,7 +153,7 @@ function validate() {
 
 function submitForm() {
   if (!validate()) return;
-  form.post("/login", {
+  form.post(route('login'), {
     onSuccess: () => {
       resetForm();
     },
@@ -125,227 +181,20 @@ function resetForm() {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
+/* Animation cho form */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+/* Transition cho success message */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
-}
-
-/* ...giữ nguyên toàn bộ style cũ của bạn ở dưới... */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-}
-
-body {
-  background-color: #c9d6ff;
-  background: linear-gradient(to right, #e2e2e2, #c9d6ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.container {
-  background-color: #fff;
-  border-radius: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-  width: 768px;
-  max-width: 100%;
-  min-height: 480px;
-}
-
-.container p {
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0.3px;
-  margin: 20px 0;
-}
-
-.container span {
-  font-size: 12px;
-}
-
-.container a {
-  color: #333;
-  font-size: 13px;
-  text-decoration: none;
-  margin: 15px 0 10px;
-}
-
-.container button {
-  background-color: #2da0a8;
-  color: #fff;
-  font-size: 12px;
-  padding: 10px 45px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.container button.hidden {
-  background-color: transparent;
-  border-color: #fff;
-}
-
-.container form {
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 40px;
-  height: 100%;
-}
-
-.container input {
-  background-color: #eee;
-  border: none;
-  margin: 8px 0;
-  padding: 10px 15px;
-  font-size: 13px;
-  border-radius: 8px;
-  width: 100%;
-  outline: none;
-}
-
-.form-container {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition: all 0.6s ease-in-out;
-}
-
-.sign-in {
-  left: 0;
-  width: 50%;
-  z-index: 2;
-}
-
-.container.active .sign-in {
-  transform: translateX(100%);
-}
-
-.sign-up {
-  left: 0;
-  width: 50%;
-  opacity: 0;
-  z-index: 1;
-}
-
-.container.active .sign-up {
-  transform: translateX(100%);
-  opacity: 1;
-  z-index: 5;
-  animation: move 0.6s;
-}
-
-@keyframes move {
-
-  0%,
-  49.99% {
-    opacity: 0;
-    z-index: 1;
-  }
-
-  50%,
-  100% {
-    opacity: 1;
-    z-index: 5;
-  }
-}
-
-.social-icons {
-  margin: 20px 0;
-}
-
-.social-icons a {
-  border: 1px solid #ccc;
-  border-radius: 20%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 3px;
-  width: 40px;
-  height: 40px;
-}
-
-.toggle-container {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-  transition: all 0.6s ease-in-out;
-  border-radius: 150px 0 0 100px;
-  z-index: 1000;
-}
-
-.container.active .toggle-container {
-  transform: translateX(-100%);
-  border-radius: 0 150px 100px 0;
-}
-
-.toggle {
-  background-color: #2da0a8;
-  height: 100%;
-  background: linear-gradient(to right, #5c6bc0, #2da0a8);
-  color: #fff;
-  position: relative;
-  left: -100%;
-  height: 100%;
-  width: 200%;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.container.active .toggle {
-  transform: translateX(50%);
-}
-
-.toggle-panel {
-  position: absolute;
-  width: 50%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 30px;
-  text-align: center;
-  top: 0;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.toggle-left {
-  transform: translateX(-200%);
-}
-
-.container.active .toggle-left {
-  transform: translateX(0);
-}
-
-.toggle-right {
-  right: 0;
-  transform: translateX(0);
-}
-
-.container.active .toggle-right {
-  transform: translateX(200%);
 }
 </style>

@@ -4,7 +4,7 @@
             <!-- Header -->
             <div class="p-4 bg-white rounded-lg shadow border border-gray-200 mb-6">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <h1 class="text-xl font-bold text-purple-700">
+                    <h1 class="text-xl font-bold text-indigo-700">
                         Thêm Mới Danh Mục
                     </h1>
 
@@ -27,7 +27,7 @@
                                     Tên Danh Mục <span class="text-red-500">*</span>
                                 </label>
                                 <input type="text" v-model="form.name"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                     placeholder="Nhập tên danh mục" />
                                 <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
                             </div>
@@ -36,7 +36,7 @@
                                     Mô tả
                                 </label>
                                 <textarea v-model="form.description"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                     placeholder="Nhập mô tả chi tiết" rows="5"></textarea>
                                 <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}
                                 </p>
@@ -71,7 +71,7 @@
                         Hủy bỏ
                     </button>
                     <button type="button" @click="submitForm" :disabled="form.processing"
-                        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fas fa-save mr-2"></i>
                         <span v-if="form.processing">Đang lưu...</span>
                         <span v-else>Lưu danh mục</span>
