@@ -1,35 +1,50 @@
 <template>
-    <Toast />
-    <div class="flex items-center justify-center min-h-screen">
-  <div
-    class="container bg-white rounded-[30px] shadow-lg relative overflow-hidden h-[600px] w-[788px] max-w-full min-h-[580px]"
-    id="container">
-    <!-- Form Đăng nhập -->
-    <div key="login"
-      class="form-container sign-in absolute top-0 left-0 h-full w-1/2 z-2 transition-all duration-600 ease-in-out">
-       <slot />
-    </div>
-
-    <!-- Toggle Container giữ nguyên -->
-    <div
-      class="toggle-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-600 ease-in-out rounded-[150px_0_0_100px] z-[1000]">
-      <div
-        class="toggle bg-gradient-to-r from-indigo-500 to-teal-600 text-white relative left-[-100%] h-full w-[200%] transform translate-x-0 transition-all duration-600 ease-in-out">
-        <div
-          class="toggle-panel toggle-right absolute w-1/2 h-full flex items-center justify-center flex-col px-8 text-center top-0 right-0 transform translate-x-0 transition-all duration-600 ease-in-out">
-          <h1 class="text-2xl mb-5">SUVAN xin chào!</h1>
-          <p class="text-sm leading-5 mb-5">Đăng nhập để tiếp tục công việc của bạn.</p>
+  <Toast />
+  <div class="font-sans bg-gradient-to-br from-indigo-100 via-gray-50 to-purple-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-500 hover:scale-[1.01]">
+      <!-- Ảnh kho hàng bên trái -->
+      <div class="w-full md:w-1/2 relative animate-fade-in-left">
+        <img :src="chotImg"
+             class="w-full h-full object-cover"
+             alt="Kho hàng giấy in">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-transparent to-transparent"></div>
+        <div class="absolute bottom-4 left-4 text-white">
+          <h2 class="text-xl font-semibold">SUVAN</h2>
+          <p class="text-sm opacity-80">Quản lý kho hàng thông minh</p>
         </div>
+      </div>
+      
+      <!-- Form đăng nhập bên phải -->
+      <div class="w-full md:w-1/2 p-8 animate-fade-in-right">
+        <!-- <div class="text-center mb-8">
+          <h1 class="text-3xl font-extrabold text-indigo-700 tracking-tight">Đăng nhập</h1>
+          <p class="text-sm text-gray-500 mt-1">Truy cập hệ thống quản lý kho chuyên nghiệp</p>
+        </div> -->
+        <slot />
       </div>
     </div>
   </div>
-  </div>
 </template>
-
 
 <script setup>
 import Toast from '../components/Toast.vue';
-
+import chotImg from '@/assets/images/chot.jpg';
 </script>
+
 <style scoped>
+/* Animation cho hình ảnh và form */
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-fade-in-left {
+  animation: fadeInLeft 0.6s ease-out;
+}
+.animate-fade-in-right {
+  animation: fadeInRight 0.6s ease-out;
+}
 </style>
