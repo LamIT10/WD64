@@ -27,7 +27,7 @@ class SupplierController extends Controller
        return inertia('admin/Supplier/Create');
     }
     public function store(SupplierRequest $request){
-        $data = $request->validate();
+        $data = $request->validated();
         $supplier = $this->supplierRepository->createData($data);
         return $this->returnInertia($supplier, 'Create Supplier Success', 'admin.suppliers.index');
     }
