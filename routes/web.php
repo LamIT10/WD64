@@ -52,7 +52,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::group(['prefix' => 'suppliers', 'as' => 'suppliers.'], function () {
         Route::get('/', [SupplierController::class, 'getList'])->name('index');
         Route::get('create', [SupplierController::class, 'create'])->name('create');
-        Route::get('store', [SupplierController::class, 'store'])->name('store');
+        Route::patch('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
+        Route::post('store', [SupplierController::class, 'store'])->name('store');
     });
     
     
@@ -67,7 +68,7 @@ Route::get('/dashboard', function () {
 Route::get('/', function () {
     return Inertia::render('Dashboard');
 });
-
+// Authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -83,4 +84,7 @@ Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
-
+// Route Profile
+Route::get('profile', function () {
+    return Inertia::render('Auth/Profile');
+})->name('profile');

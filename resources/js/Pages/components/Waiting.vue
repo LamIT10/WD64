@@ -11,7 +11,7 @@ const props = defineProps({
   },
   color: {
     type: String,
-    default: 'bg-purple-500 hover:bg-purple-700 text-white'
+    default: 'bg-indigo-500 hover:bg-indigo-700 text-white'
   }
 })
 
@@ -35,7 +35,7 @@ function navigate() {
     type="button"
     :disabled="loading"
     @click="navigate"
-    :class="`px-4 py-2 rounded transition duration-200 ${color} disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`"
+    :class="`px-3 py-2 rounded transition duration-200 ${color} disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`"
   >
     <template v-if="loading">
       <!-- Spinner quay -->
