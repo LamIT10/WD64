@@ -24,9 +24,16 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = $this->userRepo->allWithPaginate();
+        $status = request()->query('status', 'active');  
+        $filters = [
+            'absoluteFilter' => [
+                'status' => $status,
+            ],
+        ];    
+        $users = $this->userRepo->allWithPaginate($filters);
         return Inertia::render('admin/users/Index', [
-            'users' => $users
+            'users' => $users,
+            'status' => $status,
         ]);
     }
 
