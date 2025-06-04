@@ -3,6 +3,10 @@ const Ziggy = {
     port: null,
     defaults: {},
     routes: {
+        "sanctum.csrf-cookie": {
+            uri: "sanctum/csrf-cookie",
+            methods: ["GET", "HEAD"],
+        },
         "admin.": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
         "admin.categories.index": {
             uri: "admin/categories",
@@ -88,7 +92,7 @@ const Ziggy = {
         },
         "admin.customers.update": {
             uri: "admin/customers/{customer}",
-            methods: ["PUT", "PATCH"],
+            methods: ["PATCH"],
             parameters: ["customer"],
             bindings: { customer: "id" },
         },
@@ -98,11 +102,34 @@ const Ziggy = {
             parameters: ["customer"],
             bindings: { customer: "id" },
         },
-        "admin.customers.ranks.store": {
-            uri: "admin/customers/{customer}/ranks",
-            methods: ["POST"],
-            parameters: ["customer"],
-            bindings: { customer: "id" },
+        "admin.ranks.index": { uri: "admin/ranks", methods: ["GET", "HEAD"] },
+        "admin.ranks.create": {
+            uri: "admin/ranks/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.ranks.store": { uri: "admin/ranks", methods: ["POST"] },
+        "admin.ranks.show": {
+            uri: "admin/ranks/{rank}",
+            methods: ["GET", "HEAD"],
+            parameters: ["rank"],
+        },
+        "admin.ranks.edit": {
+            uri: "admin/ranks/{rank}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["rank"],
+            bindings: { rank: "id" },
+        },
+        "admin.ranks.update": {
+            uri: "admin/ranks/{rank}",
+            methods: ["PATCH"],
+            parameters: ["rank"],
+            bindings: { rank: "id" },
+        },
+        "admin.ranks.destroy": {
+            uri: "admin/ranks/{rank}",
+            methods: ["DELETE"],
+            parameters: ["rank"],
+            bindings: { rank: "id" },
         },
         "admin.permission.index": {
             uri: "admin/permission",
@@ -170,9 +197,14 @@ const Ziggy = {
             uri: "admin/suppliers/create",
             methods: ["GET", "HEAD"],
         },
+        "admin.suppliers.edit": {
+            uri: "admin/suppliers/{id}/edit",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
         "admin.suppliers.store": {
             uri: "admin/suppliers/store",
-            methods: ["GET", "HEAD"],
+            methods: ["POST"],
         },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {
@@ -192,7 +224,7 @@ const Ziggy = {
         },
         "admin.users.update": {
             uri: "admin/users/{user}",
-            methods: ["PUT", "PATCH"],
+            methods: ["PUT"],
             parameters: ["user"],
         },
         "admin.users.destroy": {
@@ -202,7 +234,7 @@ const Ziggy = {
         },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
-        logout: { uri: "logout", methods: ["GET", "HEAD"] },
+        logout: { uri: "logout", methods: ["POST"] },
         "password.request": {
             uri: "forgot-password",
             methods: ["GET", "HEAD"],
@@ -215,6 +247,7 @@ const Ziggy = {
         },
         "password.update": { uri: "reset-password", methods: ["POST"] },
         "google.login": { uri: "auth/google", methods: ["GET", "HEAD"] },
+        profile: { uri: "profile", methods: ["GET", "HEAD"] },
         "storage.local": {
             uri: "storage/{path}",
             methods: ["GET", "HEAD"],

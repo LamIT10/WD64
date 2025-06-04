@@ -112,7 +112,20 @@
 
 <script setup>
 import AppLayout from './admin/Layouts/AppLayout.vue';
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { usePage } from '@inertiajs/vue3';
+const page = usePage();
 
+const authStore = useAuthStore();
+
+onMounted(() => {
+  if (page.props.auth.permissions) {
+    authStore.setPermissions(page.props.auth.permissions);
+  }
+});
+
+const hasPermission = (permission) => authStore.hasPermission(permission);
 
 </script>
 

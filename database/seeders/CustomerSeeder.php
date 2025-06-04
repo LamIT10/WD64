@@ -16,11 +16,10 @@ class CustomerSeeder extends Seeder
     public function run()
     {
         $now = Carbon::now();
-        
+
         DB::table('customers')->insert([
             [
                 'name' => 'Nguyễn Văn Nam',
-                'contact_person' => 'Nguyễn Văn Nam',
                 'phone' => '0912345678',
                 'email' => 'nguyenvannam@gmail.com',
                 'password' => Hash::make('123456'),
@@ -28,10 +27,10 @@ class CustomerSeeder extends Seeder
                 'current_debt' => 0.00,
                 'created_at' => $now,
                 'updated_at' => $now,
+                'rank_id' => 1,
             ],
             [
                 'name' => 'Trần Thị Hoa',
-                'contact_person' => 'Trần Thị Hoa',
                 'phone' => '0912345679',
                 'email' => 'tranthihoa@gmail.com',
                 'password' => Hash::make('123456'),
@@ -39,10 +38,10 @@ class CustomerSeeder extends Seeder
                 'current_debt' => 2500000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
+                'rank_id' => 2,
             ],
             [
                 'name' => 'Công ty TNHH Minh Anh',
-                'contact_person' => 'Lê Minh Anh',
                 'phone' => '0281112233',
                 'email' => 'info@minhanh.com',
                 'password' => Hash::make('123456'),
@@ -50,10 +49,10 @@ class CustomerSeeder extends Seeder
                 'current_debt' => 15000000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
+                'rank_id' => 3,
             ],
             [
                 'name' => 'Phạm Thanh Tùng',
-                'contact_person' => 'Phạm Thanh Tùng',
                 'phone' => '0912345680',
                 'email' => 'phamthanhtung@yahoo.com',
                 'password' => Hash::make('123456'),
@@ -61,6 +60,7 @@ class CustomerSeeder extends Seeder
                 'current_debt' => 0.00,
                 'created_at' => $now,
                 'updated_at' => $now,
+                'rank_id' => 1,
             ],
         ]);
     }

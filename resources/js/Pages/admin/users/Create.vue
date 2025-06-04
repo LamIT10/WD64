@@ -73,6 +73,24 @@
                                     <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.email }}
                                     </p>
+                            
+                                </div>
+                                <!-- Position - Toggle Switch Version -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <!-- Toggle for Manager -->
+                                        <div v-for="role in listRoles" :key="role.id" class="flex items-center">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" @change="handleRole(role.id)" class="sr-only peer">
+                                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.position }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu *</label>
@@ -254,23 +272,35 @@ import Waiting from '../../components/Waiting.vue';
 import { ref } from 'vue';
 
 const showAdditionalInfo = ref(false);
-
+const {listRoles} = defineProps({
+    listRoles: {},
+})
 const form = useForm({
-    employee_code: '',
+     employee_code: '',
+
+
+  
+    
+   
+    roles: [],
+    avatar: null,
+  
+
+    note: '',
     password: '',
     password_confirmation: '',
     name: '',
     phone: '',
     start_date: '',
     position: '',
-    note: '',
+  
     identity_number: '',
     birthday: '',
     gender: '',
     facebook: '',
     email: '',
     address: '',
-    avatar: '',
+  
 
 
 });
@@ -279,7 +309,16 @@ function toggleAdditionalInfo() {
     showAdditionalInfo.value = !showAdditionalInfo.value;
 }
 
+const handleRole = (id) => {
+    console.log(id)
+    if (form.roles.includes(id)) {
+        form.roles = form.roles.filter(permissionId => permissionId !== id);
+    } else {
+        form.roles = [...form.roles, id];
+    }
+}
 function submit() {
+    console.log(form);
     form.post(route('admin.users.store'), {
         onError: (errors) => {
             console.error(errors);

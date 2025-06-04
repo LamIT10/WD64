@@ -27,12 +27,7 @@ class StoreUserRequest extends FormRequest
             'start_date' => 'nullable|date',
             'identity_number' => 'nullable|string|max:20',
             'note' => 'nullable|string|max:500',
-            'employee_code' => [
-                'nullable',
-                'string',
-                'max:10',
-                Rule::unique('users', 'employee_code')->whereNotNull('employee_code'),
-            ],
+            'roles' => 'required'
         ];
     }
 
