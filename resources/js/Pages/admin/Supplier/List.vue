@@ -115,16 +115,16 @@
                                         {{ supplier.address }}
                                     </td>
                                     <td class="px-4 py-2">
-                                        <!-- <Waiting
+                                        <Waiting
                                             route-name="admin.suppliers.edit"
                                             :route-params="{
-                                                supplier: supplier.id,
+                                                id: supplier.id,
                                             }"
                                             :color="'bg-blue-500 hover:bg-green-700 text-white'"
                                         >
                                             <i class="fas fa-edit mr-1"></i>
                                             Sửa
-                                        </Waiting> -->
+                                        </Waiting>
                                     </td>
                                 </tr>
                             </tbody>

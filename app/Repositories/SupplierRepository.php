@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SupplierRepository extends BaseRepository
 {
@@ -35,7 +36,31 @@ class SupplierRepository extends BaseRepository
             return $supplier;
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("Lỗi khi tạo nhà cung cấp, " . $th->getMessage());
             return $this->returnError("Lỗi khi tạo nhà cung cấp");
+        }
+    }
+    public function updateData($id, $data){
+        try {
+            $supplier = $this->handleModel->find($id);
+            if(!$supplier){
+                return $this->returnError("Không tìm thấy nhà cung cấp");
+            }
+            DB::beginTransaction();
+            $supplierUpdate = [];
+            $supplierUpdate['name'] = $data['name'] ?? null;
+            $newSupplier['phone'] = $data['phone'] ?? null;
+            $newSupplier['address'] = $data['address'] ?? null;
+            $newSupplier['email'] = $data['email'] ?? null;
+            $newSupplier['contact_person'] = $data['contact_person'] ?? null;
+
+            $supplier->update($supplierUpdate);
+            DB::commit();
+            return $supplier;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Lỗi khi cập nhật nhà cung cấp, " . $th->getMessage());
+            return $this->returnError("Lỗi khi cập nhật nhà cung cấp");
         }
     }
 }
