@@ -1,88 +1,87 @@
 <template>
   <AppLayout>
-    <div class="bg-gray-50 p-6">
-      <!-- Header -->
+    <div class="bg-gradient-to-b from-gray-100 to-gray-50 p-6 min-h-screen">
       <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200">
-        <h5 class="text-lg text-purple-700 font-semibold">Quản lý khách hàng</h5>
+        <h5 class="text-lg text-indigo-700 font-semibold">Quản lý khách hàng</h5>
         <div class="flex items-center space-x-3">
-          <!-- Search bar -->
           <div class="relative">
             <input type="text" placeholder="Tìm kiếm khách hàng..."
-              class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" />
+              class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
           <Link :href="route('admin.customers.create')"
-            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2">
-          <i class="fas fa-plus"></i>
-          <span>Thêm khách hàng</span>
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Thêm khách hàng</span>
           </Link>
         </div>
       </div>
 
       <!-- Customer Table -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-gray-50/80 backdrop-blur-sm">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   #
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Tên
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   SĐT
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Email
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Công nợ
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Hạng
                 </th>
-                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Hành động
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-100">
               <tr v-for="(customer, index) in customers.data || []" :key="customer.id"
-                class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ index + 1 + ((customers.meta?.current_page || 1) - 1) * (customers.meta?.per_page || 10) }}
+                class="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                  {{ index + 1 + ((customers.current_page || 1) - 1) * (customers.per_page || 10) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-md flex items-center justify-center">
-                      <i class="fas fa-user text-purple-600"></i>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ customer.name }}</div>
-                      <div class="text-sm text-gray-500">{{ customer.email || '-' }}</div>
+                  <div class="flex items-center space-x-3">
+                    <img :src="customer.avatar ? `/storage/${customer.avatar}` : 'https://via.placeholder.com/40'"
+                      alt="Avatar"
+                      class="h-10 w-10 rounded-full object-cover border border-indigo-200">
+                    <div>
+                      <div class="text-sm font-semibold text-gray-900">{{ customer.name }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ customer.phone || '-' }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {{ customer.phone || 'Chưa cập nhật' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ customer.email || '-' }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {{ customer.email || 'Chưa cập nhật' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ customer.current_debt }}
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  {{ customer.current_debt || 0 }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
-                    v-if="customer.rank">
-                    {{ customer.rank.name }}
-                  </span>
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800"
-                    v-else>
-                    -
+                  <span class="px-3 py-1 text-xs font-semibold rounded-full shadow-sm"
+                    :class="{
+                      'bg-gray-200 text-gray-800': customer.rank?.name === 'Sắt',
+                      'bg-amber-200 text-amber-800': customer.rank?.name === 'Đồng',
+                      'bg-slate-200 text-slate-800': customer.rank?.name === 'Bạc',
+                      'bg-yellow-200 text-yellow-800': customer.rank?.name === 'Vàng',
+                      'bg-blue-100 text-blue-800': customer.rank?.name === 'Bạch Kim',
+                      'bg-gray-100 text-gray-700': !customer.rank
+                    }">
+                    {{ customer.rank ? customer.rank.name : 'Chưa có hạng' }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -96,17 +95,17 @@
                       <div class="py-1">
                         <Link :href="route('admin.customers.show', customer.id)"
                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                        <i class="fas fa-info-circle mr-2 text-green-600"></i>
-                        Chi tiết
+                          <i class="fas fa-eye mr-2 text-blue-600"></i>
+                          Chi tiết
                         </Link>
                         <Link :href="route('admin.customers.edit', customer.id)"
                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                        <i class="fas fa-edit mr-2 text-purple-600"></i>
-                        Sửa
+                          <i class="fas fa-edit mr-2 text-indigo-600"></i>
+                          Sửa
                         </Link>
                         <button @click="handleDelete(customer.id)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                          <i class="fas fa-trash-alt mr-2 text-red-500"></i>
+                          <i class="fas fa-trash mr-2 text-red-500"></i>
                           Xóa
                         </button>
                       </div>
@@ -119,21 +118,33 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div class="text-sm text-gray-500">
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
+          <div class="text-sm text-gray-600 font-medium">
             Hiển thị
-            <span class="font-medium">{{ customers.meta?.from || 1 }}</span> đến
-            <span class="font-medium">{{ customers.meta?.to || 0 }}</span> của
-            <span class="font-medium">{{ customers.meta?.total || 0 }}</span> kết quả
+            <span class="font-semibold">{{ customers.from || 1 }}</span> đến
+            <span class="font-semibold">{{ customers.to || 0 }}</span> của
+            <span class="font-semibold">{{ customers.total || 0 }}</span> kết quả
           </div>
-          <div class="flex space-x-1">
-            <button v-for="(link, index) in customers.links" :key="index"
-              class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50"
-              :class="{ 'bg-purple-600 text-white': link.active, 'disabled:opacity-50': !link.url }"
-              :disabled="!link.url">
-              <Link v-if="link.url" :href="link.url" v-html="formatLabel(link.label)" class="block" />
-              <span v-else v-html="formatLabel(link.label)" class="block text-gray-500" />
-            </button>
+          <div class="flex items-center space-x-2">
+            <Link v-if="customers.prev_page_url" :href="customers.prev_page_url"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
+              <i class="fas fa-chevron-left"></i>
+            </Link>
+            <span v-else
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+              <i class="fas fa-chevron-left"></i>
+            </span>
+            <span class="text-sm text-gray-600">
+              Trang {{ customers.current_page || 1 }} / {{ customers.last_page || 1 }}
+            </span>
+            <Link v-if="customers.next_page_url" :href="customers.next_page_url"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
+              <i class="fas fa-chevron-right"></i>
+            </Link>
+            <span v-else
+              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+              <i class="fas fa-chevron-right"></i>
+            </span>
           </div>
         </div>
       </div>
@@ -159,18 +170,10 @@ const toggleDropdown = (id) => {
 const handleDelete = (id) => {
   if (confirm('Bạn có chắc muốn xóa khách hàng này không?')) {
     useForm({}).delete(route('admin.customers.destroy', id), {
-      onSuccess: () => { },
+      onSuccess: () => {},
     });
   }
 };
-
-function formatLabel(label) {
-  return label
-    .replace(/«/g, '<i class="fas fa-chevron-left"></i>')
-    .replace(/»/g, '<i class="fas fa-chevron-right"></i>')
-    .replace(/Previous/i, '')
-    .replace(/Next/i, '');
-}
 </script>
 
 <style scoped>
@@ -190,5 +193,14 @@ function formatLabel(label) {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -48,7 +48,6 @@ class CustomerRepository extends BaseRepository
                 ]);
             }
             $newCustomer['rank_id'] = $defaultRank->id;
-            dd($newCustomer);
 
             $customer = $this->handleModel::create($newCustomer);
             if (!$customer) {
