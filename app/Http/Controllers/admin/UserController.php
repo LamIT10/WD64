@@ -24,12 +24,12 @@ class UserController extends Controller
 
     public function index()
     {
-        $status = request()->query('status', 'active');  
+        $status = request()->query('status', 'active');
         $filters = [
             'absoluteFilter' => [
                 'status' => $status,
             ],
-        ];    
+        ];
         $users = $this->userRepo->allWithPaginate($filters);
         return Inertia::render('admin/users/Index', [
             'users' => $users,
@@ -55,9 +55,13 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $data = $request->validated();
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = $request->file('avatar');
+        }
         unset($data['password_confirmation']);
         $user = $this->userRepo->createUser($data);
-        return $this->returnInertia($user, 'Tạo mới người dùng thành công', 'admin.users.index');
+ 
+        return $this->returnInertia($user, 'Tạo mới nhân viên thành công', 'admin.users.index');
     }
 
     public function edit($id)
@@ -73,13 +77,45 @@ class UserController extends Controller
     {
         $data = $request->validated();
         $user = $this->userRepo->updateUser((int)$id, $data);
-        return $this->returnInertia($user, 'Cập nhật người dùng thành công', 'admin.users.index');
+        return $this->returnInertia($user, 'Cập nhật nhân viên thành công', 'admin.users.index');
     }
 
+
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'integer|exists:users,id',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $userIds = $request->input('user_ids');
+        $newStatus = $request->input('status');
+
+        $this->userRepo->bulkUpdateStatus($userIds, $newStatus);
+        return $this->returnInertia(null, 'Cập nhật trạng thái nhân viên thành công', 'admin.users.index', [
+            'status' => $request->query('status', 'inactive')
+        ]);
+    }
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'integer|exists:users,id',
+        ]);
+
+        $userIds = $request->input('user_ids');
+
+        $this->userRepo->bulkDelete($userIds);
+
+        return $this->returnInertia(null, 'Xóa nhân viên thành công', 'admin.users.index', [
+            'status' => $request->query('status', 'inactive')
+        ]);
+    }
     public function destroy($id)
     {
         $user = $this->userRepo->deleteUser((int)$id);
 
-        return $this->returnInertia($user, 'Xóa người dùng thành công', 'admin.users.index');
+        return $this->returnInertia($user, 'Xóa nhân viên thành công', 'admin.users.index');
     }
 }

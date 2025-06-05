@@ -21,10 +21,17 @@
                     <!-- Left Panel - Photo Upload -->
                     <div class="w-full md:w-1/4 mb-6 md:mb-0 md:pr-6">
                         <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                            <div class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
+                            <div v-if="!previewUrl"
+                                class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
                                 <i class="fas fa-camera text-gray-400 text-2xl"></i>
                             </div>
-                            <button
+                            <img v-if="previewUrl" :src="previewUrl" alt="Avatar"
+                                class="w-32 h-32 mx-auto object-cover rounded-full" />
+
+                            <input type="file" ref="avatarInput" @change="handleFileChange" accept="image/*"
+                                class="hidden" />
+
+                            <button type="button" @click="triggerInput"
                                 class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
@@ -73,25 +80,10 @@
                                     <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.email }}
                                     </p>
-                            
+
                                 </div>
                                 <!-- Position - Toggle Switch Version -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
-                                    <div class="flex flex-wrap gap-4">
-                                        <!-- Toggle for Manager -->
-                                        <div v-for="role in listRoles" :key="role.id" class="flex items-center">
-                                            <label class="inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" @change="handleRole(role.id)" class="sr-only peer">
-                                                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name }}</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.position }}
-                                    </p>
-                                </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu *</label>
                                     <input v-model="form.password" type="password"
@@ -112,6 +104,24 @@
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors.password }}
                                     </p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ *</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <!-- Toggle for Manager -->
+                                        <div v-for="role in listRoles" :key="role.id" class="flex items-center">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" @change="handleRole(role.id)"
+                                                    class="sr-only peer">
+                                                <div
+                                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                                </div>
+                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name
+                                                }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -242,8 +252,8 @@
                 <!-- Additional Info Button -->
                 <div class="px-6 pb-6">
                     <button type="button" @click="toggleAdditionalInfo"
-                        class="text-indigo-600 hover:text-indigo-800 flex items-center">
-                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2"></i>
+                        class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">
+                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2 text-sm"></i>
                         {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
                     </button>
                 </div>
@@ -272,20 +282,13 @@ import Waiting from '../../components/Waiting.vue';
 import { ref } from 'vue';
 
 const showAdditionalInfo = ref(false);
-const {listRoles} = defineProps({
+const { listRoles } = defineProps({
     listRoles: {},
 })
 const form = useForm({
-     employee_code: '',
-
-
-  
-    
-   
+    employee_code: '',
     roles: [],
     avatar: null,
-  
-
     note: '',
     password: '',
     password_confirmation: '',
@@ -293,16 +296,12 @@ const form = useForm({
     phone: '',
     start_date: '',
     position: '',
-  
     identity_number: '',
     birthday: '',
     gender: '',
     facebook: '',
     email: '',
     address: '',
-  
-
-
 });
 
 function toggleAdditionalInfo() {
@@ -321,8 +320,34 @@ function submit() {
     console.log(form);
     form.post(route('admin.users.store'), {
         onError: (errors) => {
-            console.error(errors);
-        }
+            console.error(errors); // In lỗi nếu có
+        },
+        onSuccess: () => {
+            console.log('Tạo nhân viên thành công!');
+            form.reset(); // Đặt lại form
+            previewUrl.value = null; // Xóa ảnh xem trước
+        },
     });
 }
+const avatarInput = ref(null);
+const previewUrl = ref(null);
+
+const triggerInput = () => {
+    avatarInput.value.click();
+};
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.avatar = file; // Lưu file vào form
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewUrl.value = e.target.result; // Cập nhật ảnh xem trước
+        };
+        reader.readAsDataURL(file);
+    } else {
+        form.avatar = null; // Xóa file nếu không có file nào được chọn
+        previewUrl.value = null; // Xóa ảnh xem trước
+    }
+};
 </script>
