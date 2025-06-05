@@ -16,11 +16,13 @@ class UserRepository extends BaseRepository
         $this->handleModel = $user;
     }
 
-    public function allWithPaginate($filter=[],$limit = 10)    
+    public function allWithPaginate($filter = [], $limit = 10)
     {
-            $query=$this->handleModel->query();
-            $query=$this->filterData($query, $filter);
-             return $query->orderBy('created_at', 'desc')->paginate($limit);
+        $query = $this->handleModel->query();
+        $query = $query->with("roles");
+        $query = $this->filterData($query, $filter);
+        
+        return $query->orderBy('created_at', 'desc')->paginate($limit);
     }
 
     public function createUser(array $data)
@@ -54,7 +56,7 @@ class UserRepository extends BaseRepository
             }
 
             $user = $this->handleModel->create($dataUser);
-           
+
             if (!$user) {
                 throw new \Exception('Có lỗi khi thêm nhân viên');
             }
@@ -82,7 +84,7 @@ class UserRepository extends BaseRepository
                 throw new \Exception('Không tìm thấy người dùng');
             }
             DB::beginTransaction();
-             $dataUser = [];
+            $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
             $dataUser['address'] = $data['address'] ?? null;
@@ -94,7 +96,7 @@ class UserRepository extends BaseRepository
             $dataUser['gender'] = $data['gender'] ?? null;
             $dataUser['start_date'] = $data['start_date'] ?? null;
             $dataUser['identity_number'] = $data['identity_number'] ?? null;
-                 // Tự sinh employee_code nếu không nhập
+            // Tự sinh employee_code nếu không nhập
             if (empty($data['employee_code'])) {
                 $lastUser = $this->handleModel->orderByDesc('id')->first();
                 $nextNumber = $lastUser ? $lastUser->id + 1 : 1;
@@ -103,6 +105,14 @@ class UserRepository extends BaseRepository
                 $dataUser['employee_code'] = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
             } else {
                 $dataUser['employee_code'] = $data['employee_code'];
+            }
+            if ($data['role']) {
+                $role = $user->syncRoles(($data['role']));
+                if (!$role) {
+                    throw new \Exception('Có lỗi khi thêm vai trò người dùng');
+                }
+            }else{
+                $role = $user->syncRoles([]);
             }
             $user->update($dataUser);
             DB::commit();
@@ -130,5 +140,12 @@ class UserRepository extends BaseRepository
             DB::rollBack();
             return $this->returnError($th->getMessage());
         }
+    }
+    public function getDataRenderEdit(int $id)
+    {
+        $query = $this->handleModel::where("id", $id)->firstOrFail();
+        $query['role'] = array_values($query->roles->pluck("id")->toArray());
+
+        return $query;
     }
 }

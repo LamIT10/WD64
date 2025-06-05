@@ -11,7 +11,8 @@
                 <!-- Tabs -->
                 <div class="border-b border-gray-200">
                     <nav class="flex space-x-4 px-6 pt-4">
-                        <button class="pb-2 px-1 border-b-2 border-indigo-600 text-indigo-600 font-medium">Thông tin</button>
+                        <button class="pb-2 px-1 border-b-2 border-indigo-600 text-indigo-600 font-medium">Thông
+                            tin</button>
                     </nav>
                 </div>
 
@@ -23,7 +24,8 @@
                             <div class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
                                 <i class="fas fa-camera text-gray-400 text-2xl"></i>
                             </div>
-                            <button class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            <button
+                                class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
                         </div>
@@ -39,7 +41,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Mã nhân viên</label>
                                     <input v-model="form.employee_code" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
-                                        placeholder="Mã nhân viên tự động"/>
+                                        placeholder="Mã nhân viên tự động" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhân viên *</label>
@@ -48,7 +50,7 @@
                                         placeholder="Nhập tên nhân viên..." />
                                     <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.name }}
-                                    </p> 
+                                    </p>
                                 </div>
                             </div>
 
@@ -72,6 +74,26 @@
                                         {{ form.errors.email }}
                                     </p>
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <!-- Toggle for Manager -->
+                                        <div v-for="role in props.listRoles" :key="role.id" class="flex items-center">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" @change="handleRole(role.id)"
+                                                    :checked="props.user.role.includes(role.id)" class="sr-only peer">
+                                                <div
+                                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                                </div>
+                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name
+                                                    }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.position }}
+                                    </p>
+                                </div>
                             </div>
 
                             <!-- Additional Information Section -->
@@ -82,7 +104,8 @@
                                     <!-- Row 3: Start Date + Position -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu làm việc</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu làm
+                                                việc</label>
                                             <input v-model="form.start_date" type="date"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                                             <p v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">
@@ -90,7 +113,8 @@
                                             </p>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Chức danh</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Chức
+                                                danh</label>
                                             <select v-model="form.position"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
                                                 <option value="" disabled>Chọn chức danh...</option>
@@ -120,7 +144,8 @@
                                     <!-- Row 5: ID Number + Date of Birth -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Số CMND/CCCD</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Số
+                                                CMND/CCCD</label>
                                             <input v-model="form.identity_number" type="text"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                                 placeholder="Nhập số CMND/CCCD..." />
@@ -129,7 +154,8 @@
                                             </p>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày
+                                                sinh</label>
                                             <input v-model="form.birthday" type="date"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                                             <p v-if="form.errors.birthday" class="text-red-500 text-sm mt-1">
@@ -141,7 +167,8 @@
                                     <!-- Row 6: Gender -->
                                     <div class="grid grid-cols-1 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Giới
+                                                tính</label>
                                             <div class="flex space-x-4">
                                                 <label class="flex items-center">
                                                     <input v-model="form.gender" type="radio" value="male"
@@ -193,7 +220,8 @@
 
                 <!-- Additional Info Button -->
                 <div class="px-6 pb-6">
-                    <button type="button" @click="toggleAdditionalInfo" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                    <button type="button" @click="toggleAdditionalInfo"
+                        class="text-indigo-600 hover:text-indigo-800 flex items-center">
                         <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2"></i>
                         {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
                     </button>
@@ -203,7 +231,7 @@
                 <div class="flex justify-end space-x-3 p-6 bg-gray-50 border-t border-gray-200">
                     <Link :href="route('admin.users.index')"
                         class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                        Bỏ qua
+                    Bỏ qua
                     </Link>
                     <button type="button" @click="submit"
                         class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
@@ -225,9 +253,10 @@ import Waiting from '../../components/Waiting.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
-    user: Object
+    user: Object,
+    listRoles: Object
 });
-
+console.log(props.user);
 const showAdditionalInfo = ref(false);
 
 const form = useForm({
@@ -235,6 +264,7 @@ const form = useForm({
     name: props.user.name || '',
     phone: props.user.phone || '',
     email: props.user.email || '',
+    role: props.user.role || '',
     start_date: props.user.start_date || '',
     position: props.user.position || '',
     note: props.user.note || '',
@@ -249,6 +279,15 @@ function toggleAdditionalInfo() {
     showAdditionalInfo.value = !showAdditionalInfo.value;
 }
 
+function handleRole(id) {
+    if (form.role.includes(id)) {
+        form.role = form.role.filter(x => x != id);
+    } else {
+        form.role = [...form.role,id];
+    }
+
+    console.log(form.role);
+}
 function submit() {
     form.put(route('admin.users.update', props.user.id), {
         onError: (errors) => {

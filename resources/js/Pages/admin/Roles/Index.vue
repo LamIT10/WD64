@@ -16,7 +16,7 @@
                     </button>
                     <!-- Add Role Button -->
               
-                    <Waiting v-can="'admin.permission.create'" route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
+                    <Waiting v-can="'admin.role.create'" route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus"></i>
                         <span>Thêm vai trò</span>
                     </Waiting>
@@ -51,7 +51,7 @@
                                 <select v-model="searchForm.permission"
                                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all">
                                     <option value="">Tất cả quyền hạn</option>
-                                    <option v-for="permission in permissions" :value="permission.id"
+                                    <option class="text-black" v-for="permission in props.permissions" :value="permission.id"
                                         :key="permission.id">
                                         {{ permission.name }}
                                     </option>

@@ -116,7 +116,16 @@
                                     <i class="fas fa-briefcase text-indigo-500"></i>
                                     <label class="text-sm font-medium text-gray-700">Chức vụ</label>
                                 </div>
-                                <div class="mt-2 text-gray-600 text-sm">{{ user.position || 'Chưa cập nhật' }}</div>
+                                <div class="mt-4 p-2 rounded-lg">
+                                    <div class="text-gray-700 text-sm grid grid-cols-7 gap-2">
+                                        <div 
+                                            v-for="role in props.user.roles" 
+                                            :key="role.id"
+                                        >
+                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-green-800">{{ role }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="bg-gray-50 border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
                                 <div class="flex items-center space-x-2">
@@ -194,7 +203,7 @@ import Waiting from '../../components/Waiting.vue';
 const props = defineProps({
     user: Object
 });
-
+console.log(props.user);
 function formatDate(date) {
     if (!date) return null;
     const d = new Date(date);
