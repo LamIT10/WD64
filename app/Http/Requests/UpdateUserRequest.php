@@ -26,6 +26,7 @@ class UpdateUserRequest extends FormRequest
             'start_date' => 'nullable|date',
             'identity_number' => 'nullable|string|max:20',
             'note' => 'nullable|string|max:500',
+            'role' => "nullable",
             'email' => [
                 'required',
                 'email',

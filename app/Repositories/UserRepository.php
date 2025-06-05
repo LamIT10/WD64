@@ -120,6 +120,14 @@ class UserRepository extends BaseRepository
             } else {
                 $dataUser['employee_code'] = $data['employee_code'];
             }
+                if ($data['role']) {
+                $role = $user->syncRoles(($data['role']));
+                if (!$role) {
+                    throw new \Exception('Có lỗi khi thêm vai trò người dùng');
+                }
+            }else{
+                $role = $user->syncRoles([]);
+            }
             $user->update($dataUser);
             DB::commit();
             return $user;
@@ -132,23 +140,7 @@ class UserRepository extends BaseRepository
 
    public function bulkUpdateStatus(array $userIds, string $status)
     {
-        try {
-            DB::beginTransaction();
-            $users = $this->handleModel->whereIn('id', $userIds)->get();
-            if ($users->isEmpty()) {
-                throw new \Exception('Không tìm thấy người dùng để cập nhật trạng thái');
-            }
-            foreach ($users as $user) {
-                $user->status = $status;
-                $user->save();
-            }
-            DB::commit();
-            return $users;
-        } catch (\Throwable $th) {
-            Log::error("Cập nhật trạng thái người dùng lỗi, " . $th->getMessage());
-            DB::rollBack();
-            return $this->returnError($th->getMessage());
-        }
+        return $this->handleModel->whereIn('id', $userIds)->update(['status' => $status]);
     }
 
     public function bulkDelete(array $userIds)
@@ -170,6 +162,12 @@ class UserRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
+     public function getDataRenderEdit(int $id)
+    {
+        $query = $this->handleModel::where("id", $id)->firstOrFail();
+        $query['role'] = array_values($query->roles->pluck("id")->toArray());
 
- 
+        return $query;
+    }
+   
 }

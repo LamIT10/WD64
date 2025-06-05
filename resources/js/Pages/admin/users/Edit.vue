@@ -35,6 +35,7 @@
 
                             <!-- Nút chọn ảnh -->
                             <button type="button" @click="triggerInput"
+                       
                                 class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
@@ -86,6 +87,26 @@
                                         placeholder="Nhập email..." />
                                     <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.email }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                                    <div class="flex flex-wrap gap-4">
+                                        <!-- Toggle for Manager -->
+                                        <div v-for="role in props.listRoles" :key="role.id" class="flex items-center">
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" @change="handleRole(role.id)"
+                                                    :checked="props.user.role.includes(role.id)" class="sr-only peer">
+                                                <div
+                                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                                </div>
+                                                <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name
+                                                    }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.position }}
                                     </p>
                                 </div>
                             </div>
@@ -216,7 +237,9 @@
                 <div class="px-6 pb-6">
                     <button type="button" @click="toggleAdditionalInfo"
                         class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">
-                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2 text-sm"></i>
+                       
+                       
+                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2"></i>
                         {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
                     </button>
                 </div>
@@ -246,9 +269,10 @@ import Waiting from '../../components/Waiting.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
-    user: Object
+    user: Object,
+    listRoles: Object
 });
-
+console.log(props.user);
 const showAdditionalInfo = ref(false);
 const avatarInput = ref(null);
 const previewUrl = ref(null);
@@ -259,6 +283,7 @@ const form = useForm({
     name: props.user.name || '',
     phone: props.user.phone || '',
     email: props.user.email || '',
+    role: props.user.role || '',
     start_date: props.user.start_date || '',
     position: props.user.position || '',
     note: props.user.note || '',
@@ -302,6 +327,15 @@ function toggleAdditionalInfo() {
 }
 
 // Gửi form cập nhật
+function handleRole(id) {
+    if (form.role.includes(id)) {
+        form.role = form.role.filter(x => x != id);
+    } else {
+        form.role = [...form.role,id];
+    }
+
+    console.log(form.role);
+}
 function submit() {
     console.log(form);
     form.post(route('admin.users.update', props.user.id), {

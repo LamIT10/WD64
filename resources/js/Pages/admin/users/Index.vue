@@ -204,7 +204,9 @@
                                 </td>
                                 <td v-if="visibleColumns.includes('position')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ user.position || '-' }}
+                                    <p class="rounded-2xl bg-blue-500 p-1 text-center m-0.5 text-white" v-for="role in user.roles">
+                                        {{ role.name }}
+                                    </p>
                                 </td>
                                 <td v-if="visibleColumns.includes('facebook')"
                                     class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
@@ -278,7 +280,7 @@ const props = defineProps({
     users: Object,
     status: String,
 });
-
+console.log(props.users);
 // Tab control
 const activeTab = ref(props.status || 'active');
 

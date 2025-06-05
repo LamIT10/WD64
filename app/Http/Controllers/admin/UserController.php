@@ -39,8 +39,10 @@ class UserController extends Controller
 
     public function show($id)
     {
+        $user = $this->userRepo->getById((int)$id);
+        $user['roles'] = $user->roles()->pluck('name')->toArray();
         return Inertia::render('admin/users/Show', [
-            'user' => $this->userRepo->getById((int)$id)
+            'user' => $user
         ]);
     }
 
@@ -64,8 +66,10 @@ class UserController extends Controller
 
     public function edit($id)
     {
+        $listRoles = $this->roleRepo->getAll();
         return Inertia::render('admin/users/Edit', [
-            'user' => $this->userRepo->getById((int)$id)
+            'user' => $this->userRepo->getDataRenderEdit((int)$id),
+            'listRoles' => $listRoles
         ]);
     }
 
