@@ -70,6 +70,67 @@
                                 </span>
                             </div>
                         </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-money-bill-wave text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Công nợ</label>
+                            </div>
+                            <div class="mt-2 text-gray-600">
+                                {{ customer.current_debt || 0 }}
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-shopping-cart text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Tổng chi tiêu</label>
+                            </div>
+                            <div class="mt-2 text-gray-600">
+                                {{ customer.total_spent || 0 }}
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-credit-card text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Giới hạn công nợ</label>
+                            </div>
+                            <div class="mt-2 text-gray-600">
+                                {{ customer.max_debt_limit || 0 }}
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-info-circle text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Trạng thái</label>
+                            </div>
+                            <div class="mt-2">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                                    :class="{
+                                        'bg-green-100 text-green-800': customer.status === 'active',
+                                        'bg-red-100 text-red-800': customer.status === 'inactive',
+                                        'bg-gray-100 text-gray-800': customer.status === 'blocked'
+                                    }">
+                                    {{ customer.status === 'active' ? 'Hoạt động' : customer.status === 'inactive' ? 'Không hoạt động' : 'Bị khóa' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-calendar-plus text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Ngày tạo</label>
+                            </div>
+                            <div class="mt-2 text-gray-600">
+                                {{ customer.created_at || 'Chưa cập nhật' }}
+                            </div>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-calendar-check text-indigo-600"></i>
+                                <label class="text-sm font-semibold text-gray-700">Ngày cập nhật</label>
+                            </div>
+                            <div class="mt-2 text-gray-600">
+                                {{ customer.updated_at || 'Chưa cập nhật' }}
+                            </div>
+                        </div>
                         <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow md:col-span-2">
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-map-marker-alt text-indigo-600"></i>
