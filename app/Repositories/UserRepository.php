@@ -16,27 +16,47 @@ class UserRepository extends BaseRepository
         $this->handleModel = $user;
     }
 
-    public function allWithPaginate($limit = 10)
+    public function allWithPaginate($filter = [], $limit = 10)
     {
-        return $this->handleModel->orderBy('created_at', 'desc')->paginate($limit);
+        $query = $this->handleModel->query();
+        $query = $query->with("roles");
+        $query = $this->filterData($query, $filter);
+        
+        return $query->orderBy('created_at', 'desc')->paginate($limit);
     }
 
     public function createUser(array $data)
     {
         try {
             DB::beginTransaction();
+
             $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
-            $dataUser['status'] = $data['status'] ?? 'active';
             $dataUser['address'] = $data['address'] ?? null;
             $dataUser['position'] = $data['position'] ?? null;
             $dataUser['phone'] = $data['phone'] ?? null;
             $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['facebook'] = $data['facebook'] ?? null;
+            $dataUser['birthday'] = $data['birthday'] ?? null;
             $dataUser['gender'] = $data['gender'] ?? null;
+            $dataUser['start_date'] = $data['start_date'] ?? null;
+            $dataUser['identity_number'] = $data['identity_number'] ?? null;
             $dataUser['password'] = Hash::make($data['password']);
+
+            // Tự sinh employee_code nếu không nhập
+            if (empty($data['employee_code'])) {
+                $lastUser = $this->handleModel->orderByDesc('id')->first();
+                $nextNumber = $lastUser ? $lastUser->id + 1 : 1;
+
+                // Đảm bảo mã theo định dạng NV001, NV002, ...
+                $dataUser['employee_code'] = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            } else {
+                $dataUser['employee_code'] = $data['employee_code'];
+            }
+
             $user = $this->handleModel->create($dataUser);
-           
+
             if (!$user) {
                 throw new \Exception('Có lỗi khi thêm nhân viên');
             }
@@ -55,6 +75,7 @@ class UserRepository extends BaseRepository
         }
     }
 
+
     public function updateUser(int $id, array $data)
     {
         try {
@@ -66,12 +87,33 @@ class UserRepository extends BaseRepository
             $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
-            $dataUser['status'] = $data['status'] ?? 'active';
             $dataUser['address'] = $data['address'] ?? null;
             $dataUser['position'] = $data['position'] ?? null;
             $dataUser['phone'] = $data['phone'] ?? null;
             $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['facebook'] = $data['facebook'] ?? null;
+            $dataUser['birthday'] = $data['birthday'] ?? null;
             $dataUser['gender'] = $data['gender'] ?? null;
+            $dataUser['start_date'] = $data['start_date'] ?? null;
+            $dataUser['identity_number'] = $data['identity_number'] ?? null;
+            // Tự sinh employee_code nếu không nhập
+            if (empty($data['employee_code'])) {
+                $lastUser = $this->handleModel->orderByDesc('id')->first();
+                $nextNumber = $lastUser ? $lastUser->id + 1 : 1;
+
+                // Đảm bảo mã theo định dạng NV001, NV002, ...
+                $dataUser['employee_code'] = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            } else {
+                $dataUser['employee_code'] = $data['employee_code'];
+            }
+            if ($data['role']) {
+                $role = $user->syncRoles(($data['role']));
+                if (!$role) {
+                    throw new \Exception('Có lỗi khi thêm vai trò người dùng');
+                }
+            }else{
+                $role = $user->syncRoles([]);
+            }
             $user->update($dataUser);
             DB::commit();
             return $user;
@@ -98,5 +140,12 @@ class UserRepository extends BaseRepository
             DB::rollBack();
             return $this->returnError($th->getMessage());
         }
+    }
+    public function getDataRenderEdit(int $id)
+    {
+        $query = $this->handleModel::where("id", $id)->firstOrFail();
+        $query['role'] = array_values($query->roles->pluck("id")->toArray());
+
+        return $query;
     }
 }
