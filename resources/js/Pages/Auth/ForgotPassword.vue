@@ -1,18 +1,49 @@
 <template>
   <AuthLayout>
-    <form @submit.prevent="submitForm" class="bg-white px-10 h-full">
-      <h1 class="text-2xl mb-5">Quên mật khẩu</h1>
-      <input id="email" v-model="form.email" type="text" placeholder="Nhập email của bạn"
-        class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
-      <div class="w-full text-left" v-if="form.errors.email">
-        <span class="text-red-600 text-left">{{ form.errors.email }}</span>
-      </div>
-      <!-- <Link :href="route('password.request')" @click.prevent="showForgot = true" class="text-gray-700 text-xs my-3 block text-right" > Quay lại? </Link> -->
-      <button
-        class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer">
-        Gửi liên kết
-      </button>
-    </form>
+    <div class="relative">
+      <!-- Form -->
+      <form @submit.prevent="submitForm" class="space-y-6 animate-fade-in-up">
+        <h1 class="text-3xl font-extrabold text-indigo-700 text-center mb-6 tracking-tight">Khôi phục mật khẩu</h1>
+        <p class="text-sm text-gray-500 text-center mb-6">Nhập email của bạn để nhận mã khôi phục</p>
+
+        <!-- Email Input -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+          <input id="email" v-model="form.email" type="email"
+            class="w-full px-4 py-3 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 shadow-sm hover:shadow-md"
+            placeholder="email@example.com">
+          <div class="w-full text-left text-xs mt-1" v-if="errors.email || form.errors.email">
+            <span class="text-red-500">{{ errors.email || form.errors.email }}</span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link :href="route('login')"
+            class="w-full sm:w-auto py-3 px-6 bg-white text-indigo-600 border-2 border-indigo-200 text-sm font-semibold rounded-lg shadow-sm hover:bg-indigo-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.02]">
+            Quay lại
+          </Link>
+          <button type="submit" :disabled="form.processing"
+            class="w-full sm:w-auto py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.02] flex items-center justify-center">
+            <span v-if="!form.processing">Gửi mã</span>
+            <svg v-else class="w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <transition name="fade">
+        <div v-if="form.isSuccessful" class="mt-6 p-4 bg-green-100 text-green-700 text-sm rounded-lg flex items-center gap-2 animate-pulse">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Mã khôi phục đã được gửi đến email của bạn!
+        </div>
+      </transition>
+    </div>
   </AuthLayout>
 </template>
 
@@ -29,235 +60,51 @@ const form = useForm({
   email: "",
 });
 
-function submitForm() {
-  form.post("/forgot-password");
+const errors = ref({
+  email: "",
+});
+
+function validate() {
+  errors.value.email = "";
+  if (!form.email) {
+    errors.value.email = "Vui lòng nhập email.";
+    return false;
+  }
+  if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
+    errors.value.email = "Email không hợp lệ.";
+    return false;
+  }
+  return true;
 }
 
+function submitForm() {
+  if (!validate()) return;
+  form.post(route('password.email'), {
+    onSuccess: () => {
+      errors.value.email = "";
+    },
+    onError: (serverErrors) => {
+      errors.value.email = serverErrors.email || "";
+    },
+  });
+}
 </script>
 
-
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
+/* Animation cho form */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+/* Transition cho success message */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
-}
-
-/* ...giữ nguyên toàn bộ style cũ của bạn ở dưới... */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-}
-
-body {
-  background-color: #c9d6ff;
-  background: linear-gradient(to right, #e2e2e2, #c9d6ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.container {
-  background-color: #fff;
-  border-radius: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-  width: 768px;
-  max-width: 100%;
-  min-height: 480px;
-}
-
-.container p {
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0.3px;
-  margin: 20px 0;
-}
-
-.container span {
-  font-size: 12px;
-}
-
-.container a {
-  color: #333;
-  font-size: 13px;
-  text-decoration: none;
-  margin: 15px 0 10px;
-}
-
-.container button {
-  background-color: #2da0a8;
-  color: #fff;
-  font-size: 12px;
-  padding: 10px 45px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.container button.hidden {
-  background-color: transparent;
-  border-color: #fff;
-}
-
-.container form {
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 40px;
-  height: 100%;
-}
-
-.container input {
-  background-color: #eee;
-  border: none;
-  margin: 8px 0;
-  padding: 10px 15px;
-  font-size: 13px;
-  border-radius: 8px;
-  width: 100%;
-  outline: none;
-}
-
-.form-container {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition: all 0.6s ease-in-out;
-}
-
-.sign-in {
-  left: 0;
-  width: 50%;
-  z-index: 2;
-}
-
-.container.active .sign-in {
-  transform: translateX(100%);
-}
-
-.sign-up {
-  left: 0;
-  width: 50%;
-  opacity: 0;
-  z-index: 1;
-}
-
-.container.active .sign-up {
-  transform: translateX(100%);
-  opacity: 1;
-  z-index: 5;
-  animation: move 0.6s;
-}
-
-@keyframes move {
-
-  0%,
-  49.99% {
-    opacity: 0;
-    z-index: 1;
-  }
-
-  50%,
-  100% {
-    opacity: 1;
-    z-index: 5;
-  }
-}
-
-.social-icons {
-  margin: 20px 0;
-}
-
-.social-icons a {
-  border: 1px solid #ccc;
-  border-radius: 20%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 3px;
-  width: 40px;
-  height: 40px;
-}
-
-.toggle-container {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-  transition: all 0.6s ease-in-out;
-  border-radius: 150px 0 0 100px;
-  z-index: 1000;
-}
-
-.container.active .toggle-container {
-  transform: translateX(-100%);
-  border-radius: 0 150px 100px 0;
-}
-
-.toggle {
-  background-color: #2da0a8;
-  height: 100%;
-  background: linear-gradient(to right, #5c6bc0, #2da0a8);
-  color: #fff;
-  position: relative;
-  left: -100%;
-  height: 100%;
-  width: 200%;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.container.active .toggle {
-  transform: translateX(50%);
-}
-
-.toggle-panel {
-  position: absolute;
-  width: 50%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 30px;
-  text-align: center;
-  top: 0;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.toggle-left {
-  transform: translateX(-200%);
-}
-
-.container.active .toggle-left {
-  transform: translateX(0);
-}
-
-.toggle-right {
-  right: 0;
-  transform: translateX(0);
-}
-
-.container.active .toggle-right {
-  transform: translateX(200%);
 }
 </style>
