@@ -11,7 +11,8 @@
                 <!-- Tabs -->
                 <div class="border-b border-gray-200">
                     <nav class="flex space-x-4 px-6 pt-4">
-                        <button class="pb-2 px-1 border-b-2 border-indigo-600 text-indigo-600 font-medium">Thông tin</button>
+                        <button class="pb-2 px-1 border-b-2 border-indigo-600 text-indigo-600 font-medium">Thông
+                            tin</button>
                     </nav>
                 </div>
 
@@ -20,12 +21,27 @@
                     <!-- Left Panel - Photo Upload -->
                     <div class="w-full md:w-1/4 mb-6 md:mb-0 md:pr-6">
                         <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                            <div class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
+                            <!-- Hiển thị ảnh hiện tại hoặc ảnh xem trước -->
+                            <div v-if="!previewUrl && !form.current_avatar"
+                                class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
                                 <i class="fas fa-camera text-gray-400 text-2xl"></i>
                             </div>
-                            <button class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                            <img v-else :src="previewUrl || `/storage/${form.current_avatar}`" alt="Avatar"
+                                class="w-32 h-32 mx-auto object-cover rounded-full" />
+
+                            <!-- Input file ẩn -->
+                            <input type="file" ref="avatarInput" @change="handleFileChange" accept="image/*"
+                                class="hidden" />
+
+                            <!-- Nút chọn ảnh -->
+                            <button type="button" @click="triggerInput"
+                                class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
+                             <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.avatar }}
+                                    </p>
+
                         </div>
                     </div>
 
@@ -39,7 +55,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Mã nhân viên</label>
                                     <input v-model="form.employee_code" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
-                                        placeholder="Mã nhân viên tự động"/>
+                                        placeholder="Mã nhân viên tự động" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhân viên *</label>
@@ -48,7 +64,7 @@
                                         placeholder="Nhập tên nhân viên..." />
                                     <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.name }}
-                                    </p> 
+                                    </p>
                                 </div>
                             </div>
 
@@ -82,7 +98,8 @@
                                     <!-- Row 3: Start Date + Position -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu làm việc</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày bắt đầu làm
+                                                việc</label>
                                             <input v-model="form.start_date" type="date"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                                             <p v-if="form.errors.start_date" class="text-red-500 text-sm mt-1">
@@ -90,7 +107,8 @@
                                             </p>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Chức danh</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Chức
+                                                danh</label>
                                             <select v-model="form.position"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
                                                 <option value="" disabled>Chọn chức danh...</option>
@@ -120,7 +138,8 @@
                                     <!-- Row 5: ID Number + Date of Birth -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Số CMND/CCCD</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Số
+                                                CMND/CCCD</label>
                                             <input v-model="form.identity_number" type="text"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                                 placeholder="Nhập số CMND/CCCD..." />
@@ -129,7 +148,8 @@
                                             </p>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày
+                                                sinh</label>
                                             <input v-model="form.birthday" type="date"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                                             <p v-if="form.errors.birthday" class="text-red-500 text-sm mt-1">
@@ -141,7 +161,8 @@
                                     <!-- Row 6: Gender -->
                                     <div class="grid grid-cols-1 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Giới
+                                                tính</label>
                                             <div class="flex space-x-4">
                                                 <label class="flex items-center">
                                                     <input v-model="form.gender" type="radio" value="male"
@@ -193,8 +214,9 @@
 
                 <!-- Additional Info Button -->
                 <div class="px-6 pb-6">
-                    <button type="button" @click="toggleAdditionalInfo" class="text-indigo-600 hover:text-indigo-800 flex items-center">
-                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2"></i>
+                    <button type="button" @click="toggleAdditionalInfo"
+                        class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">
+                        <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2 text-sm"></i>
                         {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
                     </button>
                 </div>
@@ -203,7 +225,7 @@
                 <div class="flex justify-end space-x-3 p-6 bg-gray-50 border-t border-gray-200">
                     <Link :href="route('admin.users.index')"
                         class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-                        Bỏ qua
+                    Bỏ qua
                     </Link>
                     <button type="button" @click="submit"
                         class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
@@ -220,7 +242,6 @@
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
 import Waiting from '../../components/Waiting.vue';
 import { ref } from 'vue';
 
@@ -229,7 +250,10 @@ const props = defineProps({
 });
 
 const showAdditionalInfo = ref(false);
+const avatarInput = ref(null);
+const previewUrl = ref(null);
 
+// Khởi tạo form với dữ liệu người dùng hiện tại
 const form = useForm({
     employee_code: props.user.employee_code || '',
     name: props.user.name || '',
@@ -242,18 +266,55 @@ const form = useForm({
     birthday: props.user.birthday || '',
     gender: props.user.gender || '',
     address: props.user.address || '',
-    facebook: props.user.facebook || ''
+    facebook: props.user.facebook || '',
+    avatar: null, // Ban đầu không cần gán giá trị avatar từ props
+    current_avatar: props.user.avatar || null, // Lưu avatar hiện tại riêng
+    remove_avatar: false, // Đánh dấu nếu xóa ảnh
+    _method: 'PUT',
 });
 
+// Kích hoạt input file
+const triggerInput = () => {
+    avatarInput.value.click();
+};
+
+// Xử lý khi chọn file ảnh
+
+const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        form.avatar = file; // Gán file mới
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewUrl.value = e.target.result; // Cập nhật ảnh xem trước
+        };
+        reader.readAsDataURL(file);
+    } else {
+        form.avatar = null; // Xóa file nếu không chọn
+        previewUrl.value = form.current_avatar ? `/storage/${form.current_avatar}` : null; // Giữ ảnh hiện tại nếu có
+    }
+};
+
+
+// Chuyển đổi hiển thị thông tin bổ sung
 function toggleAdditionalInfo() {
     showAdditionalInfo.value = !showAdditionalInfo.value;
 }
 
+// Gửi form cập nhật
 function submit() {
-    form.put(route('admin.users.update', props.user.id), {
+    console.log(form);
+    form.post(route('admin.users.update', props.user.id), {
+        forceFormData: true, // Cần thiết để gửi file
+        preserveState: true, // Giữ trạng thái form (tránh reset)
         onError: (errors) => {
-            console.error(errors);
-        }
+            console.error(errors); // In lỗi nếu có
+        },
+        onSuccess: () => {
+            console.log('Cập nhật nhân viên thành công!');
+            form.reset(); // Đặt lại form
+            previewUrl.value = null; // Xóa ảnh xem trước
+        },
     });
 }
 </script>
