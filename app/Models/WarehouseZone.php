@@ -11,8 +11,13 @@ class WarehouseZone extends Model
 
     protected $fillable = ['name', 'description'];
 
-    public function inventoryLocations()
+    public function inventories()
     {
-        return $this->hasMany(InventoryLocation::class, 'zone_id');
+        return $this->hasMany(Inventory::class);
+    }
+
+    public function locations()
+    {
+        return $this->hasMany(InventoryLocation::class);
     }
 }
