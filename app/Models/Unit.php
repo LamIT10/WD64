@@ -11,9 +11,8 @@ class Unit extends Model
 
     protected $fillable = ['name', 'symbol'];
 
-    public function productUnitConversions()
+    public function conversions()
     {
-        return $this->hasMany(ProductUnitConversion::class, 'from_unit_id')
-            ->orWhere('to_unit_id', $this->id);
+        return $this->hasMany(ProductUnitConversion::class);
     }
 }
