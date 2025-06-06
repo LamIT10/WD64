@@ -159,4 +159,5 @@ const toggleAllPermissions = (permissionItems) => {
         form.permissions = newPermissions;
     }
 }
+console.log(form.permissions);
 </script>

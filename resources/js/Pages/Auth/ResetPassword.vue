@@ -1,63 +1,101 @@
 <template>
-  <Toast />
-  <div
-    class="container bg-white rounded-[30px] shadow-lg relative overflow-hidden h-[600px] w-[788px] max-w-full min-h-[580px]"
-    id="container">
-    <!-- Form Đăng nhập -->
-    <div key="login"
-      class="form-container sign-in absolute top-0 left-0 h-full w-1/2 z-2 transition-all duration-600 ease-in-out">
-      <form @submit.prevent="submit" class="bg-white px-10 h-full flex flex-col justify-center">
-        <h1 class="text-2xl mb-5">Đặt lại mật khẩu</h1>
+  <AuthLayout>
+    <div class="relative">
+      <!-- Form -->
+      <form @submit.prevent="submit" class="space-y-6 animate-fade-in-up">
+        <h1 class="text-3xl font-extrabold text-indigo-700 text-center mb-6 tracking-tight">Đặt lại mật khẩu</h1>
+        <p class="text-sm text-gray-500 text-center mb-6">Nhập mật khẩu mới để khôi phục tài khoản của bạn</p>
+
+        <!-- Hidden Inputs -->
         <input type="hidden" v-model="form.token" />
         <input type="hidden" v-model="form.email" />
-        <div v-if="form.errors.email" class="w-full text-left mb-2">
-          <span class="text-red-600">{{ form.errors.email }}</span>
+        <div v-if="form.errors.email" class="w-full text-left text-xs mt-1">
+          <span class="text-red-500">{{ form.errors.email }}</span>
+        </div>
+        <div v-if="form.errors.token" class="w-full text-left text-xs mt-1">
+          <span class="text-red-500">{{ form.errors.token }}</span>
         </div>
 
-        <div v-if="form.errors.token" class="w-full text-left mb-2">
-          <span class="text-red-600">{{ form.errors.token }}</span>
-        </div>
-        <div class="w-full text-left mb-3">
-          <label for="password" class="block text-sm font-medium mb-1">Mật khẩu mới</label>
-          <input id="password" v-model="form.password" type="password" placeholder="Nhập mật khẩu mới"
-            class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
+        <!-- Password Input -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu mới</label>
+          <div class="relative">
+            <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
+              class="w-full px-4 py-3 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 shadow-sm hover:shadow-md"
+              placeholder="Nhập mật khẩu mới">
+            <button type="button" @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700">
+              <svg v-if="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
+          <div v-if="form.errors.password" class="w-full text-left text-xs mt-1">
+            <span class="text-red-500">{{ form.errors.password }}</span>
+          </div>
         </div>
 
-        <div class="w-full text-left mb-3">
-          <label for="password_confirmation" class="block text-sm font-medium mb-1">Xác nhận mật khẩu</label>
-          <input id="password_confirmation" v-model="form.password_confirmation" type="password"
-            placeholder="Nhập lại mật khẩu mới"
-            class="bg-gray-200 border-none p-3 text-sm rounded-lg w-full outline-none" />
+        <!-- Password Confirmation Input -->
+        <div>
+          <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">Xác nhận mật khẩu</label>
+          <div class="relative">
+            <input id="password_confirmation" v-model="form.password_confirmation" :type="showPasswordConfirm ? 'text' : 'password'"
+              class="w-full px-4 py-3 text-sm rounded-lg border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200 shadow-sm hover:shadow-md"
+              placeholder="Nhập lại mật khẩu mới">
+            <button type="button" @click="showPasswordConfirm = !showPasswordConfirm"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700">
+              <svg v-if="showPasswordConfirm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="roundBW" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div v-if="form.errors.password" class="w-full text-left mb-2">
-          <span class="text-red-600">{{ form.errors.password }}</span>
+
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link :href="route('login')"
+            class="w-full sm:w-auto py-3 px-6 bg-white text-indigo-600 border-2 border-indigo-200 text-sm font-semibold rounded-lg shadow-sm hover:bg-indigo-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.02]">
+            Quay lại
+          </Link>
+          <button type="submit" :disabled="form.processing"
+            class="w-full sm:w-auto py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition duration-200 transform hover:scale-[1.02] flex items-center justify-center">
+            <span v-if="!form.processing">Đặt lại mật khẩu</span>
+            <svg v-else class="w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </button>
         </div>
-        <button type="submit" :disabled="form.processing"
-          class="bg-teal-600 text-white text-xs py-3 px-10 border border-transparent rounded-lg font-semibold uppercase mt-3 cursor-pointer">
-          Đặt lại mật khẩu
-        </button>
       </form>
-    </div>
 
-    <!-- Toggle Container giữ nguyên -->
-    <div
-      class="toggle-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-600 ease-in-out rounded-[150px_0_0_100px] z-[1000]">
-      <div
-        class="toggle bg-gradient-to-r from-indigo-500 to-teal-600 text-white relative left-[-100%] h-full w-[200%] transform translate-x-0 transition-all duration-600 ease-in-out">
-        <div
-          class="toggle-panel toggle-right absolute w-1/2 h-full flex items-center justify-center flex-col px-8 text-center top-0 right-0 transform translate-x-0 transition-all duration-600 ease-in-out">
-          <h1 class="text-2xl mb-5">SUVAN xin chào!</h1>
-          <p class="text-sm leading-5 mb-5">Đăng nhập để tiếp tục công việc của bạn.</p>
+      <!-- Success Message -->
+      <transition name="fade">
+        <div v-if="form.isSuccessful" class="mt-6 p-4 bg-green-100 text-green-700 text-sm rounded-lg flex items-center gap-2 animate-pulse">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Mật khẩu của bạn đã được đặt lại thành công!
         </div>
-      </div>
+      </transition>
     </div>
-  </div>
+  </AuthLayout>
 </template>
-
 
 <script setup>
 import { useForm } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
+import { ref } from "vue";
+import { Link } from '@inertiajs/vue3';
+import { route } from "ziggy-js";
+import AuthLayout from "./AuthLayout.vue";
 import Toast from '../components/Toast.vue';
 
 const page = usePage();
@@ -69,234 +107,33 @@ const form = useForm({
   password_confirmation: "",
 });
 
+const showPassword = ref(false);
+const showPasswordConfirm = ref(false);
+
 function submit() {
-  form.post("/reset-password");
+  form.post(route('password.update'), {
+    onSuccess: () => {
+      form.reset('password', 'password_confirmation');
+    },
+  });
 }
 </script>
 
-
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
+/* Animation cho form */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+/* Transition cho success message */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
-}
-
-/* ...giữ nguyên toàn bộ style cũ của bạn ở dưới... */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-}
-
-body {
-  background-color: #c9d6ff;
-  background: linear-gradient(to right, #e2e2e2, #c9d6ff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.container {
-  background-color: #fff;
-  border-radius: 30px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-  width: 768px;
-  max-width: 100%;
-  min-height: 480px;
-}
-
-.container p {
-  font-size: 14px;
-  line-height: 20px;
-  letter-spacing: 0.3px;
-  margin: 20px 0;
-}
-
-.container span {
-  font-size: 12px;
-}
-
-.container a {
-  color: #333;
-  font-size: 13px;
-  text-decoration: none;
-  margin: 15px 0 10px;
-}
-
-.container button {
-  background-color: #2da0a8;
-  color: #fff;
-  font-size: 12px;
-  padding: 10px 45px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.container button.hidden {
-  background-color: transparent;
-  border-color: #fff;
-}
-
-.container form {
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 40px;
-  height: 100%;
-}
-
-.container input {
-  background-color: #eee;
-  border: none;
-  margin: 8px 0;
-  padding: 10px 15px;
-  font-size: 13px;
-  border-radius: 8px;
-  width: 100%;
-  outline: none;
-}
-
-.form-container {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition: all 0.6s ease-in-out;
-}
-
-.sign-in {
-  left: 0;
-  width: 50%;
-  z-index: 2;
-}
-
-.container.active .sign-in {
-  transform: translateX(100%);
-}
-
-.sign-up {
-  left: 0;
-  width: 50%;
-  opacity: 0;
-  z-index: 1;
-}
-
-.container.active .sign-up {
-  transform: translateX(100%);
-  opacity: 1;
-  z-index: 5;
-  animation: move 0.6s;
-}
-
-@keyframes move {
-
-  0%,
-  49.99% {
-    opacity: 0;
-    z-index: 1;
-  }
-
-  50%,
-  100% {
-    opacity: 1;
-    z-index: 5;
-  }
-}
-
-.social-icons {
-  margin: 20px 0;
-}
-
-.social-icons a {
-  border: 1px solid #ccc;
-  border-radius: 20%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 3px;
-  width: 40px;
-  height: 40px;
-}
-
-.toggle-container {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 50%;
-  height: 100%;
-  overflow: hidden;
-  transition: all 0.6s ease-in-out;
-  border-radius: 150px 0 0 100px;
-  z-index: 1000;
-}
-
-.container.active .toggle-container {
-  transform: translateX(-100%);
-  border-radius: 0 150px 100px 0;
-}
-
-.toggle {
-  background-color: #2da0a8;
-  height: 100%;
-  background: linear-gradient(to right, #5c6bc0, #2da0a8);
-  color: #fff;
-  position: relative;
-  left: -100%;
-  height: 100%;
-  width: 200%;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.container.active .toggle {
-  transform: translateX(50%);
-}
-
-.toggle-panel {
-  position: absolute;
-  width: 50%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 30px;
-  text-align: center;
-  top: 0;
-  transform: translateX(0);
-  transition: all 0.6s ease-in-out;
-}
-
-.toggle-left {
-  transform: translateX(-200%);
-}
-
-.container.active .toggle-left {
-  transform: translateX(0);
-}
-
-.toggle-right {
-  right: 0;
-  transform: translateX(0);
-}
-
-.container.active .toggle-right {
-  transform: translateX(200%);
 }
 </style>
