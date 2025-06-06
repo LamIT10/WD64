@@ -21,7 +21,7 @@
                     <Waiting route-name="admin.users.create" :route-params="{}">
                         <i class="fa fa-sign-in icon-btn"></i> Nhập file
                     </Waiting>
-                    <Waiting route-name="admin.users.create" :route-params="{}">
+                    <Waiting route-name="admin-users.create" :route-params="{}">
                         <i class="fa fa-file-export icon-btn"></i> Xuất file
                     </Waiting>
                     <div ref="dropdownRef" class="relative">
@@ -47,54 +47,55 @@
             </div>
 
             <!-- Tab Navigation -->
- <div class="mb-4 border-b border-gray-200">
-    <div class="flex items-center">
-        <ul class="flex flex-wrap -mb-px">
-            <li class="mr-2">
-                <button @click="activeTab = 'active'"
-                    :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'active', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'active' }"
-                    class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                    Nhân viên đang làm việc
-                </button>
-            </li>
-            <li class="mr-2">
-                <button @click="activeTab = 'inactive'"
-                    :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'inactive', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'inactive' }"
-                    class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                    Nhân viên đã nghỉ việc
-                </button>
-            </li>
-        </ul>
-        
-        <div class="relative ml-2" v-if="selectedUsers.length > 0" ref="actionDropdownRef">
-            <button @click="toggleActionDropdown"
-                class="px-3 py-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-1.5">
-                <i class="fa fa-bars icon-btn"></i>
-                Hành động
-            </button>
-            <div v-if="showActionDropdown"
-                class="absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-md py-1">
-                <template v-if="activeTab === 'active'">
-                    <button @click="bulkUpdateStatus('inactive')"
-                        class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
-                        <i class="fas fa-user-slash mr-2 text-xs"></i> Ngừng làm việc
-                    </button>
-                </template>
-                <template v-else>
-                    <button @click="bulkUpdateStatus('active')"
-                        class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
-                        <i class="fas fa-user-check mr-2 text-xs"></i> Kích hoạt lại
-                    </button>
-                    <div class="border-t border-gray-100 my-1"></div>
-                    <button @click="bulkDelete"
-                        class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50">
-                        <i class="fas fa-trash-alt mr-2 text-xs"></i> Xóa
-                    </button>
-                </template>
+            <div class="mb-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <ul class="flex flex-wrap -mb-px">
+                        <li class="mr-2">
+                            <button @click="activeTab = 'active'"
+                                :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'active', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'active' }"
+                                class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
+                                Nhân viên đang làm việc
+                            </button>
+                        </li>
+                        <li class="mr-2">
+                            <button @click="activeTab = 'inactive'"
+                                :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'inactive', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'inactive' }"
+                                class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
+                                Nhân viên đã nghỉ việc
+                            </button>
+                        </li>
+                    </ul>
+                    <!-- Dropdown thao tác-->
+                    <div class="relative ml-2" v-if="selectedUsers.length > 0" ref="actionDropdownRef">
+                        <button @click="toggleActionDropdown"
+                            class="px-3 py-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-1.5">
+                            <i class="fa fa-bars icon-btn"></i>
+                            Thao tác
+                        </button>
+                        <div v-if="showActionDropdown"
+                            class="absolute right-0 z-20 mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-md py-1">
+                            <template v-if="activeTab === 'active'">
+                                <button @click="bulkUpdateStatus('inactive')"
+                                    class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                                    <i class="fas fa-user-slash mr-2 text-xs"></i> Ngừng làm việc
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button @click="bulkUpdateStatus('active')"
+                                    class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                                    <i class="fas fa-user-check mr-2 text-xs"></i> Quay lại làm việc
+                                </button>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button @click="bulkDelete"
+                                    class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-trash-alt mr-2 text-xs"></i> Xóa
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
+
             <!-- User Table -->
             <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-fade-in">
                 <div class="overflow-x-auto">
@@ -106,7 +107,6 @@
                                     <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </th>
-
                                 <th v-if="visibleColumns.includes('name')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     <div class="flex items-center justify-center space-x-1">
@@ -168,7 +168,6 @@
                                     <input type="checkbox" :value="user.id" v-model="selectedUsers"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </td>
-
                                 <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <img :src="user.avatar ? `/storage/${user.avatar}` : 'https://cdn-media.sforum.vn/storage/app/media/ctv_seo3/meme-meo-cuoi-51.jpg'"
@@ -181,59 +180,50 @@
                                         </div>
                                     </div>
                                 </td>
-
                                 <td v-if="visibleColumns.includes('employee_code')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 font-medium">
                                     {{ user.employee_code || '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('email')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ user.email }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('phone')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                     {{ user.phone || '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('gender')"
                                     class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span class="px-2.5 py-0.5 rounded-full  text-gray-500 ">
+                                    <span class="px-2.5 py-0.5 rounded-full text-gray-500">
                                         {{ user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : '-' }}
                                     </span>
                                 </td>
-
                                 <td v-if="visibleColumns.includes('address')"
                                     class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                                     {{ user.address || '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('position')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ user.position || '-' }}
+                                    <p class="rounded-2xl bg-blue-500 p-1 text-center m-0.5 text-white" v-for="role in user.roles">
+                                        {{ role.name }}
+                                    </p>
                                 </td>
-
                                 <td v-if="visibleColumns.includes('facebook')"
                                     class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                                     {{ user.facebook || '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('identity_number')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                     {{ user.identity_number || '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('start_date')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                     {{ user.start_date ? new Date(user.start_date).toLocaleDateString('vi-VN') : '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('birthday')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                                     {{ user.birthday ? new Date(user.birthday).toLocaleDateString('vi-VN') : '-' }}
                                 </td>
-
                                 <td v-if="visibleColumns.includes('note')"
                                     class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                                     {{ user.note || '-' }}
@@ -244,16 +234,15 @@
                 </div>
 
                 <!-- Pagination -->
-                <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
                     <div class="text-sm text-gray-600 font-medium">
                         Hiển thị
-                        <span class="font-semibold">{{ users.from }}</span> đến
-                        <span class="font-semibold">{{ users.to }}</span> của
-                        <span class="font-semibold">{{ users.total }}</span> kết quả
+                        <span class="font-semibold">{{ props.users.from }}</span> đến
+                        <span class="font-semibold">{{ props.users.to }}</span> của
+                        <span class="font-semibold">{{ props.users.total }}</span> kết quả
                     </div>
                     <div class="flex items-center space-x-2">
-                        <Link v-if="users.prev_page_url" :href="addStatusToUrl(users.prev_page_url)"
+                        <Link v-if="props.users.prev_page_url" :href="addStatusToUrl(props.users.prev_page_url)"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
                         <i class="fas fa-chevron-left"></i>
                         </Link>
@@ -262,9 +251,9 @@
                             <i class="fas fa-chevron-left"></i>
                         </span>
                         <span class="text-sm text-gray-600">
-                            Trang {{ users.current_page }} / {{ users.last_page }}
+                            Trang {{ props.users.current_page }} / {{ props.users.last_page }}
                         </span>
-                        <Link v-if="users.next_page_url" :href="addStatusToUrl(users.next_page_url)"
+                        <Link v-if="props.users.next_page_url" :href="addStatusToUrl(props.users.next_page_url)"
                             class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
                         <i class="fas fa-chevron-right"></i>
                         </Link>
@@ -278,25 +267,24 @@
         </div>
     </AppLayout>
 </template>
+
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
+import { route } from 'ziggy-js';
 
 // Props
 const props = defineProps({
     users: Object,
     status: String,
 });
-
+console.log(props.users);
 // Tab control
 const activeTab = ref(props.status || 'active');
 
 // Cột hiển thị
-const visibleColumns = ref([
-    'name', 'employee_code', 'email', 'phone', 'gender', 'address', 'position', 'start_date', 'facebook', 'identity_number', 'birthday', 'note'
-]);
 
 const columnOptions = [
     'name', 'employee_code', 'email', 'phone', 'gender', 'address', 'position', 'start_date', 'facebook', 'identity_number', 'birthday', 'note'
@@ -316,7 +304,19 @@ const columnLabels = {
     identity_number: 'Số CMND/CCCD',
     birthday: 'Ngày sinh'
 };
+const visibleColumns = ref(
+    localStorage.getItem('visibleColumns')
+        ? JSON.parse(localStorage.getItem('visibleColumns'))
+        : [
+              'name', 'employee_code', 'email', 'phone', 'gender', 'address',
+              'position', 'start_date', 'facebook', 'identity_number', 'birthday', 'note'
+          ]
+);
 
+// Lưu visibleColumns vào localStorage khi thay đổi
+watch(visibleColumns, (newColumns) => {
+    localStorage.setItem('visibleColumns', JSON.stringify(newColumns));
+}, { deep: true });
 // --- Dropdown hiển thị cột ---
 const showColumnDropdown = ref(false);
 const dropdownRef = ref(null);
@@ -331,12 +331,28 @@ const handleClickOutside = (event) => {
     }
 };
 
+// --- Dropdown hành động ---
+const showActionDropdown = ref(false);
+const actionDropdownRef = ref(null);
+
+const toggleActionDropdown = () => {
+    showActionDropdown.value = !showActionDropdown.value;
+};
+
+const handleActionClickOutside = (event) => {
+    if (actionDropdownRef.value && !actionDropdownRef.value.contains(event.target)) {
+        showActionDropdown.value = false;
+    }
+};
+
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleActionClickOutside);
 });
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('click', handleActionClickOutside);
 });
 
 // --- Checkbox chọn người dùng ---
@@ -352,7 +368,7 @@ const toggleSelectAll = () => {
 };
 
 watch(selectedUsers, (newVal) => {
-    if (newVal.length === props.users.data.length) {
+    if (newVal.length === props.users.data.length && newVal.length > 0) {
         selectAll.value = true;
     } else {
         selectAll.value = false;
@@ -378,12 +394,67 @@ watch(() => props.status, (newStatus) => {
     activeTab.value = newStatus || 'active';
 });
 
+// Cập nhật trạng thái hàng loạt
+const bulkUpdateStatus = (newStatus) => {
+
+    if (!confirm(`Bạn có chắc muốn chuyển ${selectedUsers.value.length} người dùng sang trạng thái ${newStatus === 'active' ? 'Hoạt động' : 'Ngừng làm việc'}?`)) {
+        return;
+    }
+    router.post(
+        route('admin.users.bulk-update-status'),
+        {
+            user_ids: selectedUsers.value,
+            status: newStatus,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                selectedUsers.value = [];
+                selectAll.value = false;
+                showActionDropdown.value = false;
+            },
+        }
+    );
+};
+
+// Xóa người dùng hàng loạt
+const bulkDelete = () => {
+  
+    if (!confirm(`Bạn có chắc muốn xóa ${selectedUsers.value.length} người dùng? Hành động này không thể hoàn tác!`)) {
+        return;
+    }
+    router.post(
+        route('admin.users.bulk-delete'),
+        {
+            user_ids: selectedUsers.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                selectedUsers.value = [];
+                selectAll.value = false;
+                showActionDropdown.value = false;
+            },
+        }
+    );
+};
+
 // Hàm thêm query parameter 'status' vào URL phân trang
 const addStatusToUrl = (url) => {
     const urlObj = new URL(url);
     urlObj.searchParams.set('status', activeTab.value);
     return urlObj.toString();
 };
+
+// Hiển thị thông báo từ server
+const page = usePage();
+watch(() => page.props.flash, (flash) => {
+    if (flash.success) {
+        alert(flash.success); // Có thể thay bằng toast notification
+    }
+});
 </script>
 
 <style lang="css" scoped>
