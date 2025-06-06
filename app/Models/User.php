@@ -72,13 +72,16 @@ class User extends Authenticatable
 
     public function inventoryAudits()
     {
-        return $this->hasMany(InventoryAudit::class);
+        return $this->hasMany(InventoryAudit::class, 'user_id');
     }
 
     public function damagedExpiredProducts()
     {
         return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
-
+      public function approvedAudits()
+    {
+        return $this->hasMany(InventoryAudit::class, 'approved_by');
+    }
 
 }

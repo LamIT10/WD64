@@ -1,6 +1,7 @@
 <?php
 
 use App\Constant\PermissionConstant;
+use App\Http\Controllers\Admin\InventoryAuditController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\RankController;
+use App\Models\InventoryAudit;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -25,6 +27,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     });
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+    Route::resource('inventory-audit', InventoryAuditController::class);
 
 
     Route::group([

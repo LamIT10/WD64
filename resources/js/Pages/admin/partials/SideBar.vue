@@ -63,7 +63,7 @@
                         </div>
                         <span class="text-xs">Xuất kho</span>
                     </a>
-                    <a href="inventory.html"
+                    <a href="/admin/inventory-audit"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
