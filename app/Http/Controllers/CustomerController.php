@@ -7,6 +7,8 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\Rank;
 use App\Repositories\CustomerRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
@@ -16,7 +18,6 @@ class CustomerController extends Controller
     public function __construct(CustomerRepository $customerRepo)
     {
         $this->customerRepo = $customerRepo;
-        // $this->middleware('auth:admin')->only(['destroy']);
     }
 
     public function index()
@@ -26,8 +27,14 @@ class CustomerController extends Controller
             'search' => request()->only(['name', 'phone', 'email']),
             'absoluteFilter' => request()->only(['status']),
             'between' => [
-                'total_spent' => request()->only(['total_spent_min', 'total_spent_max']),
-                'current_debt' => request()->only(['current_debt_min', 'current_debt_max']),
+                'total_spent' => [
+                    'min' => request()->input('total_spent_min'),
+                    'max' => request()->input('total_spent_max'),
+                ],
+                'current_debt' => [
+                    'min' => request()->input('current_debt_min'),
+                    'max' => request()->input('current_debt_max'),
+                ],
             ],
             'relation' => [
                 'rank' => request()->input('rank_name') ? [
@@ -42,6 +49,7 @@ class CustomerController extends Controller
                 ] : null,
             ],
         ];
+
         $customers = $this->customerRepo->getAll($perPage, $filters);
         return $this->renderView(['customers' => $customers], 'admin/Customers/Index');
     }
@@ -61,12 +69,17 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         $result = $this->customerRepo->createCustomer($request->validated());
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.customers.index');
+        }
         return $this->returnInertia($result, 'Thêm khách hàng mới thành công', 'admin.customers.index');
     }
 
     public function edit(Customer $customer)
     {
-        Log::info('Customer data:', ['customer' => $customer->toArray()]);
+        if (config('app.debug')) {
+            Log::info('Customer data:', ['customer' => $customer->toArray()]);
+        }
         return $this->renderView([
             'customer' => $customer->load('rank'),
             'rankTemplates' => Rank::where('status', 'active')->get()->toArray(),
@@ -76,6 +89,9 @@ class CustomerController extends Controller
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
         $result = $this->customerRepo->updateCustomer($customer, $request->validated());
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.customers.index');
+        }
         return $this->returnInertia($result, 'Cập nhật khách hàng thành công', 'admin.customers.index');
     }
 
@@ -88,11 +104,36 @@ class CustomerController extends Controller
                 'admin.customers.index'
             );
         }
+
         $result = $this->customerRepo->deleteCustomer($customer);
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.customers.index');
+        }
         return $this->returnInertia(
             $result,
             'Khách hàng đã được xóa thành công',
             'admin.customers.index'
         );
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $customerIds = $request->input('customer_ids', []);
+        try {
+            DB::beginTransaction();
+            $customers = Customer::whereIn('id', $customerIds)->get();
+            foreach ($customers as $customer) {
+                if ($customer->salesOrders()->exists()) {
+                    throw new \Exception("Không thể xóa khách hàng {$customer->name} vì có đơn hàng liên quan.");
+                }
+                $this->customerRepo->deleteCustomer($customer);
+            }
+            DB::commit();
+            return $this->returnInertia(['status' => true], 'Xóa hàng loạt thành công', 'admin.customers.index');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi xóa hàng loạt: ' . $th->getMessage());
+            return $this->returnInertia(['status' => false, 'message' => $th->getMessage()], '', 'admin.customers.index');
+        }
     }
 }

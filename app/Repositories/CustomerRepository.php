@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Rank;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerRepository extends BaseRepository
 {
@@ -30,21 +30,21 @@ class CustomerRepository extends BaseRepository
             DB::beginTransaction();
             $newCustomer = [
                 'name' => $data['name'] ?? '',
-                'phone' => $data['phone'] ?? '',
-                'email' => $data['email'] ?? '',
-                'address' => $data['address'] ?? '',
-                'current_debt' => $data['current_debt'] ?? 0,
-                'total_spent' => $data['total_spent'] ?? 0,
-                'max_debt_limit' => 0,
+                'phone' => $data['phone'] ?? null,
+                'email' => $data['email'] ?? null,
+                'password' => !empty($data['password']) ? Hash::make($data['password']) : null,
+                'address' => $data['address'] ?? null,
+                'current_debt' => $data['current_debt'] ?? 0.00,
+                'total_spent' => $data['total_spent'] ?? 0.00,
+                'max_debt_limit' => 0.00,
                 'status' => $data['status'] ?? 'active',
+                'rank_id' => $data['rank_id'] ?? null,
             ];
-            if (!empty($data['password'])) {
-                $newCustomer['password'] = Hash::make($data['password']);
-            }
+
             if (!empty($data['avatar'])) {
-                $newCustomer['avatar'] = app(Controller::class)->handleUploadOneFile($data['avatar'], 'public', 'avatars');
+                $newCustomer['avatar'] = $this->handleUploadOneFile($data['avatar']);
             }
-            $newCustomer['rank_id'] = $data['rank_id'] ?? null;
+
             if (empty($newCustomer['rank_id'])) {
                 $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
                 if (!$defaultRank) {
@@ -59,16 +59,17 @@ class CustomerRepository extends BaseRepository
                 }
                 $newCustomer['rank_id'] = $defaultRank->id;
             }
+
             $newCustomer['rank_id'] = $this->assignRankBasedOnTotalSpent($newCustomer['total_spent'], $newCustomer['rank_id']);
             $customer = $this->handleModel::create($newCustomer);
             if (!$customer) {
                 throw new \Exception('Không thể tạo khách hàng');
             }
+
             $customer->max_debt_limit = $this->calculateMaxDebtLimit($customer);
-            if ($newCustomer['current_debt'] > $customer->max_debt_limit) {
-                throw new \Exception('Số nợ hiện tại vượt quá giới hạn công nợ');
-            }
+            $this->updateCustomerStatus($customer);
             $customer->save();
+
             DB::commit();
             return $customer;
         } catch (\Throwable $th) {
@@ -89,31 +90,36 @@ class CustomerRepository extends BaseRepository
                 'address' => $data['address'] ?? $customer->address,
                 'current_debt' => $data['current_debt'] ?? $customer->current_debt,
                 'total_spent' => $data['total_spent'] ?? $customer->total_spent,
-                'status' => $data['status'] ?? $customer->status,
                 'rank_id' => $data['rank_id'] ?? $customer->rank_id,
             ];
+
             if (!empty($data['password'])) {
                 $newCustomer['password'] = Hash::make($data['password']);
             }
+
             if (!empty($data['avatar'])) {
-                $newCustomer['avatar'] = app(Controller::class)->handleUpdateFile($data['avatar'], $customer->avatar, 'public', 'avatars');
+                $newCustomer['avatar'] = $this->handleUpdateFile($data['avatar'], $customer->avatar);
+            } elseif ($customer->avatar && !Storage::disk('public')->exists($customer->avatar)) {
+                $newCustomer['avatar'] = null;
             }
+
             if (!empty($data['rank_id'])) {
                 $rank = Rank::where('id', $data['rank_id'])->where('status', 'active')->first();
                 if (!$rank) {
-                    throw new \Exception('Hạng khách hàng không hợp lệ hoặc không hoạt động');
+                    throw new \Exception('Hạng khách hàng không hợp lệ hoặc không tồn tại');
                 }
             }
+
             $newCustomer['rank_id'] = $this->assignRankBasedOnTotalSpent($newCustomer['total_spent'], $newCustomer['rank_id']);
             $updated = $customer->update($newCustomer);
             if (!$updated) {
                 throw new \Exception('Không thể cập nhật khách hàng');
             }
+
             $customer->max_debt_limit = $this->calculateMaxDebtLimit($customer);
-            if ($newCustomer['current_debt'] > $customer->max_debt_limit) {
-                throw new \Exception('Số nợ hiện tại vượt quá giới hạn công nợ');
-            }
+            $this->updateCustomerStatus($customer); // Cập nhật trạng thái tự động
             $customer->save();
+
             DB::commit();
             return $customer;
         } catch (\Throwable $th) {
@@ -126,18 +132,14 @@ class CustomerRepository extends BaseRepository
     public function deleteCustomer(Customer $customer)
     {
         try {
-            DB::beginTransaction();
-            $customer = $this->handleModel->findOrFail($customer->id);
             if ($customer->avatar) {
-                app(Controller::class)->deleteFile($customer->avatar, 'public');
+                $this->deleteFile($customer->avatar);
             }
             if (!$customer->delete()) {
                 throw new \Exception('Không thể xóa khách hàng');
             }
-            DB::commit();
             return $customer;
         } catch (\Throwable $th) {
-            DB::rollBack();
             Log::error('Lỗi xóa khách hàng: ' . $th->getMessage());
             return $this->returnError('Lỗi xóa khách hàng: ' . $th->getMessage());
         }
@@ -145,19 +147,56 @@ class CustomerRepository extends BaseRepository
 
     protected function assignRankBasedOnTotalSpent($totalSpent, $currentRankId)
     {
+        if ($totalSpent < 0) {
+            $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
+            return $defaultRank ? $defaultRank->id : $currentRankId;
+        }
+
         $rank = Cache::remember('active_ranks', 3600, function () {
             return Rank::where('status', 'active')
                 ->orderBy('min_total_spent', 'desc')
                 ->get();
         })->firstWhere('min_total_spent', '<=', $totalSpent);
-        return $rank ? $rank->id : $currentRankId;
+
+        if (!$rank) {
+            $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
+            return $defaultRank ? $defaultRank->id : $currentRankId;
+        }
+        return $rank->id;
     }
 
     protected function calculateMaxDebtLimit(Customer $customer)
     {
-        if (!$customer->rank) {
-            return 0;
+        if (!$customer->rank || $customer->total_spent < 0) {
+            Log::warning('Không thể tính giới hạn công nợ', [
+                'customer_id' => $customer->id,
+                'rank' => $customer->rank,
+                'total_spent' => $customer->total_spent,
+            ]);
+            return 0.00;
         }
         return $customer->total_spent * ($customer->rank->credit_percent / 100);
+    }
+
+    protected function updateCustomerStatus(Customer $customer)
+    {
+        $validStatuses = ['active', 'inactive', 'debt_exceeded'];
+        $currentStatus = in_array($customer->status, $validStatuses) ? $customer->status : 'active';
+
+        $newStatus = $currentStatus;
+        if ($customer->current_debt > $customer->max_debt_limit) {
+            $newStatus = 'debt_exceeded';
+        } elseif ($currentStatus === 'debt_exceeded' && $customer->current_debt <= $customer->max_debt_limit) {
+            $newStatus = 'active';
+        }
+
+        if ($newStatus !== $currentStatus) {
+            Log::info('Cập nhật trạng thái khách hàng', [
+                'customer_id' => $customer->id,
+                'old_status' => $currentStatus,
+                'new_status' => $newStatus,
+            ]);
+            $customer->status = $newStatus;
+        }
     }
 }

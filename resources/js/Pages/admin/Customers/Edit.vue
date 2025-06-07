@@ -1,191 +1,400 @@
 <template>
   <AppLayout>
-    <div class="bg-gradient-to-b from-gray-100 to-gray-50 p-6 min-h-screen">
-      <div v-if="!customer" class="mx-auto bg-white rounded-xl shadow-lg p-6">
+    <div class="bg-gray-50 p-6">
+      <div v-if="!customer" class="mx-auto bg-white rounded shadow-md p-6">
         <p class="text-red-500">Không tìm thấy khách hàng.</p>
+        <Link :href="route('admin.customers.index')" class="mt-4 inline-block px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          Quay lại danh sách khách hàng
+        </Link>
       </div>
-      <div v-else class="mx-auto bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
-        <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200">
+      <div v-else class="mx-auto bg-white rounded shadow-md overflow-hidden">
+        <!-- Header -->
+        <div class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center">
           <h5 class="text-lg text-indigo-700 font-semibold">Cập nhật khách hàng</h5>
-          <Link :href="route('admin.customers.index')" class="px-4 py-2 bg-indigo-50 rounded hover:text-indigo-500 text-indigo-600 transition-colors">
-            <i class="fas fa-arrow-left"></i> Quay lại
-          </Link>
+          <Waiting route-name="admin.customers.index" :route-params="{}" :color="'bg-indigo-50 text-indigo-700'">
+            <i class="fas fa-arrow-left mr-1"></i> Quay lại
+          </Waiting>
         </div>
 
-        <div class="flex flex-col md:flex-row">
-          <div class="w-full p-6">
-            <form @submit.prevent="submit" class="space-y-6">
-              <!-- Name + Email -->
+        <!-- Tabs -->
+        <div class="border-b border-gray-200">
+          <nav class="flex space-x-4 px-6 pt-4">
+            <button class="pb-2 px-1 border-b-2 border-indigo-600 text-indigo-600 font-medium">Thông tin</button>
+          </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col md:flex-row p-6">
+          <!-- Left Panel - Photo Upload -->
+          <div class="w-full md:w-1/4 mb-6 md:mb-0 md:pr-6">
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+              <div v-if="!previewUrl && !form.current_avatar" class="w-32 h-32 mx-auto bg-gray-100 rounded flex items-center justify-center">
+                <i class="fas fa-camera text-gray-400 text-2xl"></i>
+              </div>
+              <img v-else :src="previewUrl || `/storage/${form.current_avatar}`" alt="Avatar" class="w-32 h-32 mx-auto object-cover rounded-full" />
+              <input type="file" accept="image/*" ref="avatarInput" @change="handleFileChange" class="hidden" />
+              <button type="button" @click="triggerInput" class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                Chọn ảnh
+              </button>
+              <div v-if="form.current_avatar" class="mt-3">
+                <p class="text-sm text-gray-700 mb-1">Ảnh hiện tại:</p>
+                <img :src="`/storage/${form.current_avatar}`" alt="Ảnh cũ" class="w-24 h-24 mx-auto object-cover rounded-full border border-gray-300" />
+              </div>
+              <p v-else class="mt-3 text-sm text-gray-500">Chưa có ảnh hiện tại</p>
+              <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">{{ form.errors.avatar }}</p>
+            </div>
+          </div>
+
+          <!-- Right Panel - Fields -->
+          <div class="w-full md:w-3/4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Thông tin cơ bản</h3>
+            <div class="space-y-6">
+              <!-- Row 1: Name + Email -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng *</label>
-                  <input v-model="form.name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập tên khách hàng..." />
+                  <input v-model="form.name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập tên khách hàng..." />
                   <p v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input v-model="form.email" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập địa chỉ email..." />
+                  <input v-model="form.email" type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập địa chỉ email..." />
                   <p v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</p>
                 </div>
               </div>
 
-              <!-- Phone + Rank -->
+              <!-- Row 2: Phone + Rank -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                  <input v-model="form.phone" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập số điện thoại..." />
+                  <input v-model="form.phone" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập số điện thoại..." />
                   <p v-if="form.errors.phone" class="text-red-500 text-sm mt-1">{{ form.errors.phone }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Hạng khách hàng</label>
-                  <select v-model="form.rank_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    <option value="" disabled>Chọn hạng...</option>
-                    <option v-for="rank in rankTemplates" :key="rank.id" :value="rank.id">{{ rank.name }}</option>
+                  <select v-model="form.status" :disabled="form.current_debt > computedMaxDebtLimit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
+                    <option value="debt_exceeded" v-if="form.current_debt > computedMaxDebtLimit">Vượt công nợ</option>
+                    <option value="active" v-else>Hoạt động</option>
+                    <option value="inactive" v-else>Không hoạt động</option>
                   </select>
+
+                  <p class="text-sm text-gray-500 mt-1">Hạng sẽ tự động cập nhật dựa trên tổng chi tiêu.</p>
                   <p v-if="form.errors.rank_id" class="text-red-500 text-sm mt-1">{{ form.errors.rank_id }}</p>
                 </div>
               </div>
 
-              <!-- Address + Debt -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                  <input v-model="form.address" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập địa chỉ..." />
-                  <p v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Công nợ</label>
-                  <input v-model="form.current_debt" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập công nợ..." />
-                  <p v-if="form.errors.current_debt" class="text-red-500 text-sm mt-1">{{ form.errors.current_debt }}</p>
-                </div>
-              </div>
-
-              <!-- Total Spent + Max Debt Limit -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Tổng chi tiêu</label>
-                  <input v-model="form.total_spent" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập tổng chi tiêu..." />
-                  <p v-if="form.errors.total_spent" class="text-red-500 text-sm mt-1">{{ form.errors.total_spent }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Giới hạn công nợ</label>
-                  <input :value="customer.max_debt_limit" type="number" step="0.01" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" />
-                </div>
-              </div>
-
-              <!-- Status -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                  <select v-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Không hoạt động</option>
-                    <option value="blocked">Bị khóa</option>
-                  </select>
-                  <p v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</p>
-                </div>
-              </div>
-
-              <!-- Avatar -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện</label>
-                <div v-if="customer.avatar" class="mb-2">
-                  <img :src="`/storage/${customer.avatar}`" alt="Avatar" class="h-20 w-20 rounded-full object-cover border border-indigo-200" />
-                </div>
-                <input type="file" accept="image/*" @change="form.avatar = $event.target.files[0]" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
-                <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">{{ form.errors.avatar }}</p>
-              </div>
-
-              <!-- Password + Confirm -->
+              <!-- Row 3: Password + Confirm Password -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu mới</label>
-                  <input v-model="form.password" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập mật khẩu mới..." />
+                  <input v-model="form.password" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập mật khẩu mới..." />
                   <p v-if="form.errors.password && !form.errors.password.toLowerCase().includes('khớp')" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu</label>
-                  <input v-model="form.password_confirmation" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập lại mật khẩu..." />
+                  <input v-model="form.password_confirmation" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập lại mật khẩu..." />
                   <p v-if="form.errors.password && form.errors.password.toLowerCase().includes('khớp')" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</p>
                 </div>
               </div>
-            </form>
+
+              <!-- Additional Information Section -->
+              <div v-if="showAdditionalInfo">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-6">Thông tin bổ sung</h3>
+                <div class="space-y-6">
+                  <!-- Row 4: Address + Current Debt -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                      <input v-model="form.address" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập địa chỉ..." />
+                      <p v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Công nợ</label>
+                      <input v-model.number="form.current_debt" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập công nợ..." />
+                      <p v-if="form.errors.current_debt" class="text-red-500 text-sm mt-1">{{ form.errors.current_debt }}</p>
+                      <p v-if="form.current_debt > computedMaxDebtLimit" class="text-yellow-600 text-sm mt-1">
+                        Trạng thái sẽ được đặt thành "Vượt công nợ" do công nợ vượt giới hạn {{ formatNumber(computedMaxDebtLimit) }}.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Row 5: Total Spent + Status -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Tổng chi tiêu</label>
+                      <input v-model.number="form.total_spent" type="number" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập tổng chi tiêu..." />
+                      <p v-if="form.errors.total_spent" class="text-red-500 text-sm mt-1">{{ form.errors.total_spent }}</p>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                      <select v-model="form.status" :disabled="form.current_debt > computedMaxDebtLimit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="debt_exceeded" v-if="form.current_debt > computedMaxDebtLimit">Vượt công nợ</option>
+                        <option value="active" v-else>Hoạt động</option>
+                        <option value="inactive" v-else>Không hoạt động</option>
+                      </select>
+                      <p v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Row 6: Max Debt Limit -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Giới hạn công nợ</label>
+                      <input :value="formatNumber(computedMaxDebtLimit)" type="text" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-0" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
+        <!-- Additional Info Button -->
+        <div class="px-6 pb-6">
+          <button type="button" @click="toggleAdditionalInfo" class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">
+            <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2 text-sm"></i>
+            {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
+          </button>
+        </div>
+
+        <!-- Footer Actions -->
         <div class="flex justify-end space-x-3 p-6 bg-gray-50 border-t border-gray-200">
-          <Link :href="route('admin.customers.index')" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            Hủy bỏ
-          </Link>
-          <button type="submit" @click="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md" :disabled="form.processing">
-            <i class="fas fa-save mr-2"></i> Cập nhật khách hàng
+          <button type="reset" @click="resetForm" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            Bỏ qua
+          </button>
+          <button type="button" @click="confirmSubmit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md" :disabled="form.processing">
+            <i class="fas fa-save mr-2"></i> Cập nhật
           </button>
         </div>
       </div>
     </div>
+    <Toast />
   </AppLayout>
 </template>
 
 <script setup>
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
+import Waiting from '../../components/Waiting.vue';
+import Toast from '../../components/Toast.vue';
+import { ref, watch, computed, onMounted } from 'vue';
+import { route } from 'ziggy-js';
 
 const { customer, rankTemplates } = defineProps({
   customer: Object,
   rankTemplates: Array,
 });
 
+onMounted(() => {
+  console.log('Danh sách rank khả dụng:', rankTemplates);
+  console.log('Rank hiện tại của khách hàng:', form.rank_id);
+  console.log('Khách hàng:', customer);
+});
+
+const showAdditionalInfo = ref(true);
+const avatarInput = ref(null);
+const previewUrl = ref(null);
+
 const form = useForm({
   name: customer?.name || '',
   phone: customer?.phone || '',
-  email: customer?.email || '',
-  address: customer?.address || '',
+  email: customer?.email || null,
+  address: customer?.address || null,
   current_debt: customer?.current_debt || 0,
   total_spent: customer?.total_spent || 0,
   rank_id: customer?.rank_id || '',
   avatar: null,
+  current_avatar: customer?.avatar || null,
   password: '',
   password_confirmation: '',
   status: customer?.status || 'active',
+  _method: 'PATCH',
 });
+
+const computedRankId = computed(() => {
+  if (!rankTemplates.length) {
+    console.warn('Không có rankTemplates khả dụng');
+    return null;
+  }
+  if (!form.total_spent || form.total_spent < 0) {
+    const defaultRank = rankTemplates.find((r) => r.name === 'Sắt' && r.status === 'active');
+    console.log('Gán hạng mặc định:', defaultRank);
+    return defaultRank ? defaultRank.id : null;
+  }
+  const sortedRanks = [...rankTemplates]
+    .filter((r) => r.status === 'active')
+    .sort((a, b) => b.min_total_spent - a.min_total_spent);
+  const rank = sortedRanks.find((r) => r.min_total_spent <= form.total_spent);
+  if (!rank) {
+    console.warn('Không tìm thấy hạng phù hợp cho total_spent:', form.total_spent);
+  }
+  return rank ? rank.id : null;
+});
+
+const computedMaxDebtLimit = computed(() => {
+  if (!rankTemplates.length || !form.rank_id || form.total_spent < 0) {
+    console.warn('Không thể tính max_debt_limit', {
+      rank_id: form.rank_id,
+      total_spent: form.total_spent,
+      rankTemplates: rankTemplates.length,
+    });
+    return 0;
+  }
+  const rank = rankTemplates.find((r) => r.id === Number(form.rank_id));
+  if (!rank) {
+    console.warn('Rank không tồn tại:', form.rank_id);
+    return 0;
+  }
+  return Number(form.total_spent) * (rank.credit_percent / 100);
+});
+
+watch(() => form.total_spent, (newTotalSpent) => {
+  form.rank_id = computedRankId.value;
+});
+
+watch([() => form.current_debt, () => computedMaxDebtLimit.value], ([newDebt, newMaxDebtLimit]) => {
+  if (newDebt > newMaxDebtLimit) {
+    form.status = 'debt_exceeded';
+    const toast = document.querySelector('toast');
+    if (toast && toast.showLocalToast) {
+      toast.showLocalToast('Trạng thái đã được đặt thành "Vượt công nợ" vì công nợ vượt giới hạn.', 'warning');
+    }
+  } else if (form.status === 'debt_exceeded') {
+    form.status = 'active';
+    const toast = document.querySelector('toast');
+    if (toast && toast.showLocalToast) {
+      toast.showLocalToast('Công nợ trong giới hạn, trạng thái được đặt lại thành "Hoạt động".', 'success');
+    }
+  }
+});
+
+watch(() => form.rank_id, () => {
+  if (form.current_debt === 0) {
+    form.status = 'inactive';
+    const toast = document.querySelector('toast');
+    if (toast && toast.showLocalToast) {
+      toast.showLocalToast('Công nợ bằng 0, trạng thái được đặt thành "Không hoạt động".', 'info');
+    }
+  }
+  else if (form.current_debt > computedMaxDebtLimit.value) {
+    form.status = 'debt_exceeded';
+    const toast = document.querySelector('toast');
+    if (toast && toast.showLocalToast) {
+      toast.showLocalToast('Trạng thái đã được đặt thành "Vượt công nợ" vì công nợ vượt giới hạn.', 'warning');
+    }
+  }
+  else if (form.status === 'debt_exceeded') {
+    form.status = 'active';
+    const toast = document.querySelector('toast');
+    if (toast && toast.showLocalToast) {
+      toast.showLocalToast('Công nợ trong giới hạn, trạng thái được đặt lại thành "Hoạt động".', 'success');
+    }
+  }
+});
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined || isNaN(Number(value))) {
+    return '0.00';
+  }
+  return Number(value).toFixed(2);
+};
+
+const triggerInput = () => {
+  avatarInput.value.click();
+};
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      form.errors.avatar = 'Chỉ hỗ trợ định dạng JPEG hoặc PNG';
+      avatarInput.value.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      form.errors.avatar = 'Kích thước ảnh không được vượt quá 2MB';
+      avatarInput.value.value = '';
+      return;
+    }
+    form.avatar = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    form.avatar = null;
+    previewUrl.value = form.current_avatar ? `/storage/${form.current_avatar}` : null;
+  }
+};
+
+function toggleAdditionalInfo() {
+  showAdditionalInfo.value = !showAdditionalInfo.value;
+}
+
+function resetForm() {
+  form.reset();
+  form.name = customer?.name || '';
+  form.phone = customer?.phone || '';
+  form.email = customer?.email || null;
+  form.address = customer?.address || null;
+  form.current_debt = customer?.current_debt || 0;
+  form.total_spent = customer?.total_spent || 0;
+  form.rank_id = customer?.rank_id || '';
+  form.status = customer?.status || 'active';
+  form.current_avatar = customer?.avatar || null;
+  previewUrl.value = form.current_avatar ? `/storage/${form.current_avatar}` : null;
+  form.errors = {};
+}
+
+function confirmSubmit() {
+  if (form.current_debt > computedMaxDebtLimit.value) {
+    form.status = 'debt_exceeded'; // Ép buộc trạng thái thành "vượt công nợ" trước khi gửi
+  }
+  submit();
+}
 
 const submit = () => {
   if (!customer?.id) {
     console.error('Customer ID không tồn tại');
     return;
   }
-
-  form.put(route('admin.customers.update', customer.id), {
+  form.post(route('admin.customers.update', customer.id), {
+    forceFormData: true,
+    preserveState: true,
     onSuccess: () => {
+      const toast = document.querySelector('toast');
+      if (toast && toast.showLocalToast) {
+        toast.showLocalToast('Cập nhật khách hàng thành công!', 'success');
+      }
       form.reset('password', 'password_confirmation', 'avatar');
+      previewUrl.value = form.current_avatar ? `/storage/${form.current_avatar}` : null;
+      router.reload({
+        only: ['customer'],
+        onSuccess: ({ props }) => {
+          const updatedCustomer = props.customer;
+          form.name = updatedCustomer?.name || '';
+          form.phone = updatedCustomer?.phone || '';
+          form.email = updatedCustomer?.email || null;
+          form.address = updatedCustomer?.address || null;
+          form.current_debt = updatedCustomer?.current_debt || 0;
+          form.total_spent = updatedCustomer?.total_spent || 0;
+          form.rank_id = updatedCustomer?.rank_id || '';
+          form.status = updatedCustomer?.status || 'active';
+          form.current_avatar = updatedCustomer?.avatar || null;
+          previewUrl.value = form.current_avatar ? `/storage/${form.current_avatar}` : null;
+        },
+      });
     },
     onError: (errors) => {
-      console.error(errors);
+      console.error('Lỗi từ backend:', errors);
+      form.errors = errors; // Gán lỗi từ backend vào form
+      const toast = document.querySelector('toast');
+      if (toast && toast.showLocalToast) {
+        toast.showLocalToast('Lỗi khi cập nhật khách hàng: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
+      }
     },
   });
 };
 </script>
-
-<style scoped>
-::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-::-webkit-scrollbar-thumb {
-  background: #c4c4c4;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #a0a0a0;
-}
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>

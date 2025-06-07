@@ -15,7 +15,6 @@ class RankController extends Controller
     public function __construct(RankRepository $rankRepo)
     {
         $this->rankRepo = $rankRepo;
-        // $this->middleware('auth:admin')->only(['destroy']);
     }
 
     public function index()
@@ -25,14 +24,24 @@ class RankController extends Controller
             'search' => request()->only(['name', 'note']),
             'absoluteFilter' => request()->only(['status']),
             'between' => [
-                'min_total_spent' => request()->only(['min_total_spent_min', 'min_total_spent_max']),
-                'discount_percent' => request()->only(['discount_percent_min', 'discount_percent_max']),
-                'credit_percent' => request()->only(['credit_percent_min', 'credit_percent_max']),
+                'min_total_spent' => [
+                    'min' => request()->input('min_total_spent_min'),
+                    'max' => request()->input('min_total_spent_max'),
+                ],
+                'discount_percent' => [
+                    'min' => request()->input('discount_percent_min'),
+                    'max' => request()->input('discount_percent_max'),
+                ],
+                'credit_percent' => [
+                    'min' => request()->input('credit_percent_min'),
+                    'max' => request()->input('credit_percent_max'),
+                ],
             ],
         ];
-        $ranks = Cache::remember('ranks_page_' . request()->get('page', 1), 3600, function () use ($perPage, $filters) {
-            return $this->rankRepo->getAll($perPage, $filters);
-        });
+
+        $ranks = $this->rankRepo->getAll($perPage, $filters);
+        Log::info('Dữ liệu ranks trả về:', ['ranks' => $ranks->toArray()]);
+
         return $this->renderView(['ranks' => $ranks], 'admin/Ranks/Index');
     }
 
@@ -43,33 +52,46 @@ class RankController extends Controller
 
     public function store(StoreRankRequest $request)
     {
+        Log::info('Dữ liệu đầu vào store:', $request->all());
+        Log::info('Dữ liệu validated trong store:', $request->validated());
         $result = $this->rankRepo->createRank($request->validated());
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
+        }
         return $this->returnInertia($result, 'Thêm hạng mới thành công', 'admin.ranks.index');
     }
 
     public function edit(Rank $rank)
     {
-        Log::info('Chỉnh sửa hạng', ['rank' => $rank->toArray()]);
+        if (config('app.debug')) {
+            Log::info('Chỉnh sửa hạng', ['rank' => $rank->toArray()]);
+        }
         return $this->renderView(['rank' => $rank], 'admin/Ranks/Edit');
     }
 
     public function update(StoreRankRequest $request, Rank $rank)
     {
+        Log::info('Dữ liệu đầu vào update:', $request->all());
+        Log::info('Dữ liệu validated trong update:', $request->validated());
         $result = $this->rankRepo->updateRank($rank, $request->validated());
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
+        }
         return $this->returnInertia($result, 'Cập nhật hạng thành công', 'admin.ranks.index');
     }
 
     public function destroy(Rank $rank)
     {
-        if ($rank->name === 'Sắt') {
+        if (strtolower($rank->name) === 'sắt') {
             return $this->returnInertia(
                 ['status' => false, 'message' => 'Không thể xóa hạng mặc định "Sắt"'],
                 '',
                 'admin.ranks.index'
             );
         }
+
         if ($rank->customers()->exists()) {
-            $defaultRank = Rank::where('name', 'Sắt')->first();
+            $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
             if (!$defaultRank) {
                 return $this->returnInertia(
                     ['status' => false, 'message' => 'Không tìm thấy hạng mặc định "Sắt"'],
@@ -79,7 +101,11 @@ class RankController extends Controller
             }
             $rank->customers()->update(['rank_id' => $defaultRank->id]);
         }
+
         $result = $this->rankRepo->deleteRank($rank);
+        if (is_array($result) && isset($result['status']) && !$result['status']) {
+            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
+        }
         return $this->returnInertia($result, 'Xóa hạng thành công', 'admin.ranks.index');
     }
 }

@@ -81,6 +81,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
         Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RoleController::class, 'show'])->name('show');
+        Route::post('admin/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('admin.customers.bulk-delete');
+        Route::get('admin/customers/import', [CustomerController::class, 'import'])->name('admin.customers.import');
+        Route::get('admin/customers/export', [CustomerController::class, 'export'])->name('admin.customers.export');
     });
 
 
@@ -105,7 +108,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
         Route::put('/{user}', [UserController::class, 'update'])->name('update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+        Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
+
 });
 
 Route::get('/dashboard', function () {

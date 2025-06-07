@@ -21,7 +21,7 @@ return new class extends Migration
             }
 
             if (!Schema::hasColumn('customers', 'status')) {
-                $table->enum('status', ['active', 'inactive'])->default('active')->after('current_debt');
+                $table->enum('status', ['active', 'inactive', 'debt_exceeded'])->default('active')->after('current_debt');
             }
 
             if (!Schema::hasColumn('customers', 'avatar')) {
