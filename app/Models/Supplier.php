@@ -9,19 +9,8 @@ class Supplier extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'contact_person',
-        'phone',
-        'email',
-        'address',
-        'current_debt'
-    ];
+    protected $fillable = ['name', 'contact_person', 'phone', 'email', 'address', 'current_debt'];
 
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
 
     public function purchaseOrders()
     {
@@ -36,5 +25,13 @@ class Supplier extends Model
     public function contacts()
     {
         return $this->hasMany(Contact::class, 'entity_id')->where('type', 'supplier');
+    }
+    public function supplierVariants()
+    {
+        return $this->hasMany(SupplierProductVariant::class);
+    }
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
     }
 }

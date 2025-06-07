@@ -7,24 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-     use HasFactory;
+    use HasFactory;
 
-    protected $fillable = [
-        'name', 'min_stock', 'supplier_id', 'description', 
-        'category_id', 'expiration_date', 'production_date'
-    ];
+    protected $fillable = ['name', 'code', 'min_stock', 'description', 'category_id', 'expiration_date', 'production_date'];
+
 
     protected $casts = [
         'expiration_date' => 'date',
         'production_date' => 'date',
     ];
 
-    public function images() {
-        return $this->morphMany(Image::class,'imageable');
-    }
-    public function supplier()
+    public function images()
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->morphMany(Image::class, 'imageable');
     }
 
     public function category()
@@ -45,5 +40,9 @@ class Product extends Model
     public function inventoryLocations()
     {
         return $this->hasMany(InventoryLocation::class);
+    }
+    public function supplierVariants()
+    {
+        return $this->hasManyThrough(SupplierProductVariant::class, ProductVariant::class);
     }
 }

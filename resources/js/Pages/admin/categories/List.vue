@@ -46,24 +46,18 @@
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div class="text-sm text-gray-500">
-            Hiển thị <span class="font-medium">1</span> đến
-            <span class="font-medium">2</span> của
-            <span class="font-medium">10</span> kết quả
+            Hiển thị <span class="font-medium">{{ categories.from }}</span> đến
+            <span class="font-medium">{{ categories.to }}</span> của
+            <span class="font-medium">{{ categories.total }}</span> kết quả
           </div>
           <div class="flex space-x-1">
-            <button
-              class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="px-3 py-1 bg-purple-600 text-white rounded-md">
-              1
-            </button>
-            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
-              2
-            </button>
-            <button class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+            <template v-for="(link, index) in categories.links" :key="index">
+              <button v-if="link.url" :class="[
+                'px-3 py-1 rounded-md border',
+                link.active ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100 border-gray-300'
+            ]" @click.prevent="router.visit(link.url)" v-html="link.label" />
+              <span v-else class="px-3 py-1 text-gray-400" v-html="link.label"></span>
+            </template>
           </div>
         </div>
       </div>

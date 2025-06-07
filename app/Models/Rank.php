@@ -10,12 +10,12 @@ class Rank extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id', 'name', 'min_total_spent', 
+        'name', 'min_total_spent', 
         'discount_percent', 'credit_percent', 'note'
     ];
 
-    public function customer()
+    public function customers()
     {
-        return $this->belongsTo(Customer::class);
+        return $this->hasMany(Customer::class);
     }
 }

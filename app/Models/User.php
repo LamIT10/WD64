@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name', 'password', 'email', 'phone','status', 'address', 'position','note','gender'
+        'name', 'password', 'email', 'phone','status', 'address', 'position','note','gender', 'avatar', 'last_login_at', 'facebook', 'birthday', 'start_date', 'employee_code', 'identity_number','avatar'
     ];
 
     /**
@@ -52,32 +52,32 @@ class User extends Authenticatable
 
     public function activityLogs()
     {
-        return $this->hasMany(ActivityLog::class);
+        return $this->hasMany(ActivityLog::class, 'user_id')->onDelete('cascade');
     }
 
     public function purchaseOrders()
     {
-        return $this->hasMany(PurchaseOrder::class);
+        return $this->hasMany(PurchaseOrder::class,'user_id')->onDelete('cascade');
     }
 
     public function receiving()
     {
-        return $this->hasMany(Receiving::class);
+        return $this->hasMany(Receiving::class,'user_id')->onDelete('cascade');
     }
 
     public function shipping()
     {
-        return $this->hasMany(Shipping::class);
+        return $this->hasMany(Shipping::class,'user_id')->onDelete('cascade');
     }
 
     public function inventoryAudits()
     {
-        return $this->hasMany(InventoryAudit::class);
+        return $this->hasMany(InventoryAudit::class,'user_id')->onDelete('cascade');
     }
 
     public function damagedExpiredProducts()
     {
-        return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
+        return $this->hasMany(DamagedExpiredProduct::class, 'reported_by')->onDelete('cascade');
     }
 
 

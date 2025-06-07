@@ -62,39 +62,32 @@
                         enter-to-class="transform opacity-100 scale-100"
                         leave-active-class="transition ease-in duration-75"
                         leave-from-class="transform opacity-100 scale-100"
-                        leave-to-class="transform opacity-0 scale-95"
-                    >
-                        <div
-                            v-if="dropdownOpen"
+                        leave-to-class="transform opacity-0 scale-95">
+                        <div v-if="dropdownOpen"
                             class="origin-top-right right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-                            ref="dropdown"
-                            @click.stop
-                        >
+                            ref="dropdown" @click.stop>
                             <div class="py-1">
-                                <a
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150"
-                                >
-                                    <i
-                                        class="fas fa-edit mr-3 text-blue-500 w-4 text-center"
-                                    ></i>
-                                    <span>Sửa danh mục</span>
-                                </a>
-                                <a
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150"
-                                >
-                                    <i
-                                        class="fas fa-plus-circle mr-3 text-green-500 w-4 text-center"
-                                    ></i>
-                                    <span>Thêm con</span>
-                                </a>
-                                <a
-                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150"
-                                >
-                                    <i
-                                        class="fas fa-trash-alt mr-3 text-red-500 w-4 text-center"
-                                    ></i>
-                                    <span>Xóa</span>
-                                </a>
+                                <Link :href="route('admin.categories.edit', category.id)"
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
+                                <i class="fas fa-edit mr-3 text-blue-500 w-4 text-center"></i>
+                                <span>Sửa danh mục</span>
+                                </Link>
+                                <Link :href="route('admin.categories.show', category.id)"
+                                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
+                                <i class="fas fa-plus-circle mr-3 text-green-500 w-4 text-center"></i>
+                                <span>Chi tiết</span>
+                                </Link>
+                                <form :action="route('admin.categories.destroy', category.id)" method="POST"
+                                    @submit.prevent="() => $inertia.delete(route('admin.categories.destroy', category.id))">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="_token" :value="csrf">
+
+                                    <button type="submit"
+                                        class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
+                                        <i class="fas fa-trash-alt mr-3 text-red-500 w-4 text-center"></i>
+                                        <span>Xóa</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </transition>

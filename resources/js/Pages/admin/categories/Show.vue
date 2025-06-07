@@ -9,9 +9,9 @@
                 </h1>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="#" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                        <span>Quay Lại Danh Sách</span>
-                    </a>
+                    <Link :href="route('admin.categories.index')" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                        <span>Quay Lại</span>
+                    </Link>
                 </div>
             </div>
         </div>
@@ -95,6 +95,7 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue'
 
 </script>
