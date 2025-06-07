@@ -16,10 +16,17 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'employee_code' => [
+                'nullable',
+                'string',
+                'max:20',
+                'unique:users,employee_code' => Rule::unique('users', 'employee_code')->whereNotNull('employee_code'),
+            ],
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6|confirmed',
             'phone' => 'required|string|max:12',
             'address' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'position' => 'nullable|string|max:100',
             'gender' => 'nullable|in:male,female',
             'birthday' => 'nullable|date',

@@ -107,7 +107,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
         Route::put('/{user}', [UserController::class, 'update'])->name('update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+        Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
+
 });
 
 Route::get('/dashboard', function () {

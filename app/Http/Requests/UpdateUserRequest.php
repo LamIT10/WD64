@@ -15,6 +15,7 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:12',
             'address' => 'nullable|string|max:255',
@@ -25,6 +26,7 @@ class UpdateUserRequest extends FormRequest
             'start_date' => 'nullable|date',
             'identity_number' => 'nullable|string|max:20',
             'note' => 'nullable|string|max:500',
+            'role' => "nullable",
             'email' => [
                 'required',
                 'email',
