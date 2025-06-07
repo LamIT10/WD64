@@ -10,9 +10,11 @@
                         <i class="fas fa-edit"></i>
                         <span>Chỉnh sửa</span>
                     </Waiting>
-                     <Waiting route-name="admin.users.index" :route-params="{}" :color="'bg-indigo-50 text-indigo-700'">
-                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
-                </Waiting>
+                    <Waiting route-name="admin.users.index" :route-params="{}" 
+                        class="bg-indigo-50 text-indigo-700 px-3 py-2 rounded flex items-center space-x-1 transition-colors duration-200">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Quay lại</span>
+                    </Waiting>
                 </div>
             </div>
 
@@ -126,26 +128,23 @@
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-briefcase text-indigo-500"></i>
                                 <label class="text-sm font-medium text-gray-700">Chức vụ</label>
-                    <div class="mb-8">
-                        <h6 class="text-md font-semibold text-indigo-600 border-b border-gray-200 pb-2 mb-4">Thông tin công việc</h6>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-gray-50 border border-gray-100 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-briefcase text-indigo-500"></i>
-                                    <label class="text-sm font-medium text-gray-700">Chức vụ</label>
-                                </div>
-                                <div class="mt-4 p-2 rounded-lg">
-                                    <div class="text-gray-700 text-sm grid grid-cols-7 gap-2">
-                                        <div 
-                                            v-for="role in props.user.roles" 
-                                            :key="role.id"
-                                        >
-                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-green-800">{{ role }}</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.position || 'Chưa cập nhật' }}</div>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user-tag text-indigo-500"></i>
+                                <label class="text-sm font-medium text-gray-700">Vai trò</label>
+                            </div>
+                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">
+                                <span v-if="user.roles && user.roles.length" class="flex flex-wrap gap-2">
+                                    <span v-for="role in user.roles" :key="role.id"
+                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                        {{ role.name || role }}
+                                    </span>
+                                </span>
+                                <span v-else>Chưa cập nhật</span>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center space-x-2">
@@ -164,9 +163,9 @@
                                     :class="{
                                         'bg-green-100 text-green-800': user.status === 'active',
                                         'bg-red-100 text-red-800': user.status === 'inactive',
-                                     
+                                        'bg-gray-100 text-gray-800': !user.status
                                     }">
-                                    {{ user.status === 'active' ? 'Đang làm việc' : 'Đã nghỉ làm' }}
+                                    {{ user.status === 'active' ? 'Đang làm việc' : user.status === 'inactive' ? 'Đã nghỉ làm' : 'Chưa cập nhật' }}
                                 </span>
                             </div>
                         </div>
@@ -185,47 +184,44 @@
                     </div>
 
                     <!-- Timestamps -->
+                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin hệ thống</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-sign-in-alt text-indigo-500"></i>
                                 <label class="text-sm font-medium text-gray-700">Đăng nhập lần cuối</label>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatDate(user.last_login_at) || 'Chưa đăng nhập' }}</div>
+                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.last_login_at ? formatDate(user.last_login_at) : 'Chưa đăng nhập' }}</div>
                         </div>
                         <div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-calendar-plus text-indigo-500"></i>
                                 <label class="text-sm font-medium text-gray-700">Ngày tạo</label>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatDate(user.created_at) || 'Chưa cập nhật' }}</div>
+                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.created_at ? formatDate(user.created_at) : 'Chưa cập nhật' }}</div>
                         </div>
                         <div>
                             <div class="flex items-center space-x-2">
                                 <i class="fas fa-calendar-check text-indigo-500"></i>
                                 <label class="text-sm font-medium text-gray-700">Ngày cập nhật</label>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatDate(user.updated_at) || 'Chưa cập nhật' }}</div>
+                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.updated_at ? formatDate(user.updated_at) : 'Chưa cập nhật' }}</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-         </div>
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
 
 const props = defineProps({
     user: Object
 });
-console.log(props.user);
+
 function formatDate(date) {
     if (!date) return null;
     const d = new Date(date);

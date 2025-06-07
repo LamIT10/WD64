@@ -112,10 +112,5 @@ class UserController extends Controller
             'status' => $request->query('status', 'inactive')
         ]);
     }
-    // public function destroy($id)
-    // {
-    //     $user = $this->userRepo->deleteUser((int)$id);
-
-    //     return $this->returnInertia($user, 'Xóa nhân viên thành công', 'admin.users.index');
-    // }
+  
 }

@@ -9,18 +9,16 @@ class InventoryLocation extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'product_id', 'zone_id', 'custom_location_name'
-    ];
+    protected $fillable = ['product_variant_id', 'zone_id', 'custom_location_name'];
 
-    public function product()
+
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 
     public function zone()
     {
         return $this->belongsTo(WarehouseZone::class, 'zone_id');
     }
-
 }
