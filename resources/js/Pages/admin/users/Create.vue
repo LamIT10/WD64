@@ -120,6 +120,9 @@
                                                 }}</span>
                                             </label>
                                         </div>
+                                            <p v-if="form.errors.roles" class="text-red-500 text-sm mt-1">
+                                                {{ form.errors.roles }}
+                                            </p>
                                     </div>
 
                                 </div>

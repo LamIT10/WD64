@@ -90,7 +90,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ *</label>
                                     <div class="flex flex-wrap gap-4">
                                         <!-- Toggle for Manager -->
                                         <div v-for="role in props.listRoles" :key="role.id" class="flex items-center">
@@ -105,8 +105,8 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.position }}
+                                    <p v-if="form.errors.role" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.role }}
                                     </p>
                                 </div>
                             </div>
