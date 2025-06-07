@@ -120,6 +120,7 @@ class UserRepository extends BaseRepository
             } else {
                 $dataUser['employee_code'] = $data['employee_code'];
             }
+            // Câp nhật vai trò cho người dùng
                 if ($data['role']) {
                 $role = $user->syncRoles(($data['role']));
                 if (!$role) {
@@ -140,7 +141,23 @@ class UserRepository extends BaseRepository
 
    public function bulkUpdateStatus(array $userIds, string $status)
     {
-        return $this->handleModel->whereIn('id', $userIds)->update(['status' => $status]);
+        try {
+            DB::beginTransaction();
+            $users = $this->handleModel->whereIn('id', $userIds)->get();
+            if ($users->isEmpty()) {
+                throw new \Exception('Không tìm thấy người dùng để cập nhật trạng thái');
+            }
+            foreach ($users as $user) {
+                $user->status = $status;
+                $user->save();
+            }
+            DB::commit();
+            return $users;
+        } catch (\Throwable $th) {
+            Log::error("Cập nhật trạng thái người dùng lỗi, " . $th->getMessage());
+            DB::rollBack();
+            return $this->returnError($th->getMessage());
+        }
     }
 
     public function bulkDelete(array $userIds)

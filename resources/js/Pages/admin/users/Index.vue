@@ -161,14 +161,14 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(user, index) in props.users.data" :key="user.id"
-                                @click="$inertia.visit(route('admin.users.show', user.id))"
+                                    @click="handleClick(user.id)"  
                                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
                                 <!-- Checkbox for individual row -->
                                 <td class="px-4 py-4 whitespace-nowrap" @click.stop>
                                     <input type="checkbox" :value="user.id" v-model="selectedUsers"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </td>
-                                <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
+                                <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap" >
                                     <div class="flex items-center">
                                         <img :src="user.avatar ? `/storage/${user.avatar}` : 'https://cdn-media.sforum.vn/storage/app/media/ctv_seo3/meme-meo-cuoi-51.jpg'"
                                             alt="Avatar"
@@ -270,7 +270,7 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import { route } from 'ziggy-js';
@@ -355,7 +355,7 @@ onBeforeUnmount(() => {
     document.removeEventListener('click', handleActionClickOutside);
 });
 
-// --- Checkbox chọn người dùng ---
+// --- Checkbox chọn nhân viên ---
 const selectedUsers = ref([]);
 const selectAll = ref(false);
 
@@ -397,7 +397,7 @@ watch(() => props.status, (newStatus) => {
 // Cập nhật trạng thái hàng loạt
 const bulkUpdateStatus = (newStatus) => {
 
-    if (!confirm(`Bạn có chắc muốn chuyển ${selectedUsers.value.length} người dùng sang trạng thái ${newStatus === 'active' ? 'Hoạt động' : 'Ngừng làm việc'}?`)) {
+    if (!confirm(`Bạn có chắc muốn chuyển ${selectedUsers.value.length} nhân viên sang trạng thái ${newStatus === 'active' ? 'Đang làm việc' : 'Ngừng làm việc'}?`)) {
         return;
     }
     router.post(
@@ -418,10 +418,10 @@ const bulkUpdateStatus = (newStatus) => {
     );
 };
 
-// Xóa người dùng hàng loạt
+// Xóa nhân viên hàng loạt
 const bulkDelete = () => {
   
-    if (!confirm(`Bạn có chắc muốn xóa ${selectedUsers.value.length} người dùng? Hành động này không thể hoàn tác!`)) {
+    if (!confirm(`Bạn có chắc muốn xóa ${selectedUsers.value.length} nhân viên? Hành động này không thể hoàn tác!`)) {
         return;
     }
     router.post(
@@ -448,13 +448,16 @@ const addStatusToUrl = (url) => {
     return urlObj.toString();
 };
 
-// Hiển thị thông báo từ server
-const page = usePage();
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        alert(flash.success); // Có thể thay bằng toast notification
+// Xử lý sự kiện click vào hàng
+const handleClick = (userId) => {
+    // Kiểm tra xem có văn bản nào đang được chọn không
+    if (window.getSelection().toString()) {
+        // Nếu có, ngừng hành động click (không chuyển hướng)
+        return;
     }
-});
+    // Nếu không có văn bản đang được chọn, chuyển hướng
+    router.visit(route('admin.users.show', userId));
+};
 </script>
 
 <style lang="css" scoped>
