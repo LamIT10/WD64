@@ -8,14 +8,21 @@ use Illuminate\Support\Facades\Log;
 
 class SupplierRepository extends BaseRepository
 {
+    protected $purchaseOrderRepository;
     public function __construct(Supplier $supplier)
     {
         $this->handleModel = $supplier;
     }
 
-    public function getList()
+    public function getList($data)
     {
         $query = $this->handleModel->select(['*']);
+        $filters = [
+            'search' => [
+                'name' => $data->search ?? "",
+            ]
+        ];
+        $query = $this->filterData($query, $filters);
         $query->orderBy('id', 'desc'); 
         return $query->paginate(10);;
     }
@@ -61,6 +68,22 @@ class SupplierRepository extends BaseRepository
             DB::rollBack();
             Log::error("Lỗi khi cập nhật nhà cung cấp, " . $th->getMessage());
             return $this->returnError("Lỗi khi cập nhật nhà cung cấp");
+        }
+    }
+    public function deleteData($id){
+        try {
+            DB::beginTransaction();
+            $supplier = $this->handleModel->find($id);
+            if(!$supplier){
+                return $this->returnError("Không tìm thấy nhà cung cấp");
+            }
+            $supplier->delete();
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Lỗi khi xoá nhà cung cấp, " . $th->getMessage());
+            return $this->returnError("Lỗi khi xoá nhà cung cấp");
         }
     }
 }

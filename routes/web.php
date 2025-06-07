@@ -90,6 +90,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
         Route::post('store', [SupplierController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
+        Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
     });
 
 

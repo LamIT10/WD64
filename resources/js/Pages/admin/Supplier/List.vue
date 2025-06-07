@@ -1,25 +1,21 @@
 <template>
     <AppLayout>
         <div class="p-6">
-            <div
-            
-                class="p-3 bg-white mb-4 flex justify-between items-center"
-            >
+            <div class="p-3 bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Danh sách Nhà cung cấp
                 </h5>
                 <div class="flex items-center space-x-3">
-                    <!-- Search bar -->
-                    <div class="relative">
+                    <form @submit="submitSearch" class="relative">
+                        <button type="submit" class="">Tìm kiếm</button>
                         <input
                             type="text"
+                            name="search"
+                            v-model= "form.search"
                             placeholder="Tìm kiếm nhà cung cấp..."
                             class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                         />
-                        <i
-                            class="fas fa-search absolute left-3 top-3 text-gray-400"
-                        ></i>
-                    </div>
+                    </form>
                     <Waiting
                         route-name="admin.suppliers.create"
                         :route-params="{}"
@@ -29,18 +25,13 @@
                 </div>
             </div>
 
-            <div
-                class="bg-white overflow-hidden"
-            >
+            <div class="bg-white overflow-hidden">
                 <div class="overflow-x-auto">
-                    <div
-                        class="relative overflow-x-auto shadow-md"
-                    >
+                    <div class="relative overflow-x-auto shadow-md">
                         <table
-                            class="w-full text-left shadow-sm rtl:text-right text-gray-500 dark:text-gray-400"
+                            class="w-full text-left shadow-sm rtl:text-right text-gray-500 dark:text-gray-400 overflow-visible"
                         >
                             <thead
-                            
                                 class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
                             >
                                 <tr>
@@ -111,20 +102,86 @@
                                     <td class="px-4 py-2">
                                         {{ supplier.email }}
                                     </td>
-                                    <td class="px-4 py-2">
+                                    <td class="px-4 py-2" style="text-wrap: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis">
                                         {{ supplier.address }}
                                     </td>
-                                    <td class="px-4 py-2">
-                                        <Waiting
-                                            route-name="admin.suppliers.edit"
-                                            :route-params="{
-                                                id: supplier.id,
-                                            }"
-                                            :color="'bg-blue-500 hover:bg-green-700 text-white'"
+                                    <td
+                                        class="px-4 py-2 relative overflow-visible"
+                                    >
+                                        <button
+                                            @click="toggleMenu(supplier.id)"
+                                            :id="
+                                                'dropdownMenuIconButton-' +
+                                                supplier.id
+                                            "
+                                            class="inline-flex items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-2 focus:outline-none dark:text-white focus:ring-indigo-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                                            type="button"
                                         >
-                                            <i class="fas fa-edit mr-1"></i>
-                                            Sửa
-                                        </Waiting>
+                                            <svg
+                                                class="w-5 h-5"
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="currentColor"
+                                                viewBox="0 0 4 15"
+                                            >
+                                                <path
+                                                    d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
+                                                />
+                                            </svg>
+                                        </button>
+
+                                        <div
+                                            v-if="menuVisible[supplier.id]"
+                                            class="z-[10000] absolute top-0 right-[100%] bg-white divide-y divide-gray-100 rounded-lg w-max"
+                                            style="box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);"
+                                        >
+                                            <ul
+                                                class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                            >
+                                                <li>
+                                                    <Waiting
+                                                        route-name="admin.suppliers.edit"
+                                                        :route-params="{
+                                                            id: supplier.id,
+                                                        }"
+                                                        :color="'text-blue-700'"
+                                                    >
+                                                        <i
+                                                            class="fas fa-edit"
+                                                        ></i>
+                                                        Sửa
+                                                    </Waiting>
+                                                </li>
+                                                <li>
+                                                    <ConfirmModal
+                                                        :route-name="'admin.suppliers.destroy'"
+                                                        :route-params="{
+                                                            id: supplier.id,
+                                                        }"
+                                                        title="Xác nhận xóa nhà cung cấp"
+                                                        :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${supplier.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`"
+                                                    >
+                                                        <template
+                                                            #trigger="{
+                                                                openModal,
+                                                            }"
+                                                        >
+                                                            <button
+                                                                @click="
+                                                                    openModal
+                                                                "
+                                                                class="text-sm px-3 py-2 bg-white text-red-600"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-trash-alt mr-1"
+                                                                ></i>
+                                                                Xóa
+                                                            </button>
+                                                        </template>
+                                                    </ConfirmModal>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -162,16 +219,33 @@
         </div>
     </AppLayout>
 </template>
-
 <script setup>
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
+import ConfirmModal from "../../components/ConfirmModal.vue";
+import { reactive } from "vue";
+import { useForm } from "@inertiajs/vue3";
 
 const { suppliers } = defineProps({
     suppliers: {
-        default: () => {},
+        default: () => ({}),
     },
 });
+
+const menuVisible = reactive({});
+
+function toggleMenu(id) {
+    Object.keys(menuVisible).forEach((key) => {
+        if (key !== String(id)) menuVisible[key] = false;
+    });
+    menuVisible[id] = !menuVisible[id];
+}
+const form = useForm({
+    search: '',
+})
+const submitSearch = () => {
+    form.get(route('admin.suppliers.index'));
+}
 </script>
 <style lang="css" scoped>
 ::-webkit-scrollbar {
@@ -188,15 +262,5 @@ const { suppliers } = defineProps({
 ::-webkit-scrollbar-thumb:hover {
     background: #a0a0a0;
 }
-tr {
-    height: 20px; /* chiều cao cố định */
-    max-height: 40px;
-}
 
-td {
-    white-space: nowrap; /* không xuống dòng */
-    overflow: hidden;
-    text-overflow: ellipsis; /* hiện dấu ... nếu text dài */
-    max-width: 200px;
-}
 </style>
