@@ -7,72 +7,78 @@ use Illuminate\Validation\Rule;
 
 class StoreRankRequest extends FormRequest
 {
-    // Hằng số cho các ràng buộc xác thực
     private const NAME_MAX_LENGTH = 255;
     private const NOTE_MAX_LENGTH = 1000;
     private const PERCENT_MAX_VALUE = 100;
 
-    /**
-     * Xác định xem người dùng có được phép thực hiện yêu cầu này hay không.
-     *
-     * @return bool
-     */
     public function authorize(): bool
     {
-        return true; // Cập nhật logic quyền nếu cần
+        return true;
     }
 
-    /**
-     * Các quy tắc xác thực áp dụng cho yêu cầu.
-     *
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
             'name' => [
                 'required',
                 'string',
+                'min:3',
                 'max:' . self::NAME_MAX_LENGTH,
-                Rule::unique('ranks', 'name')->ignore($this->rank?->id),
+                Rule::unique('ranks', 'name')->ignore($this->route('rank')?->id),
+                'regex:/^[A-Za-z0-9\s+\-]+$/',
             ],
-            'min_total_spent' => ['required', 'numeric', 'min:0'],
-            'discount_percent' => ['required', 'numeric', 'min:0', 'max:' . self::PERCENT_MAX_VALUE],
-            'credit_percent' => ['required', 'numeric', 'min:0', 'max:' . self::PERCENT_MAX_VALUE],
+            'min_total_spent' => [
+                'required',
+                'numeric',
+                'min:1', // Yêu cầu lớn hơn 0
+            ],
+            'discount_percent' => [
+                'required',
+                'numeric',
+                'min:1',
+                'max:' . self::PERCENT_MAX_VALUE,
+            ],
+            'credit_percent' => [
+                'required',
+                'numeric',
+                'min:1',
+                'max:' . self::PERCENT_MAX_VALUE,
+            ],
             'note' => ['nullable', 'string', 'max:' . self::NOTE_MAX_LENGTH],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
         ];
     }
 
-    /**
-     * Thông báo lỗi tùy chỉnh.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
-            'name.required' => 'Tên cấp bậc là bắt buộc.',
-            'name.unique' => 'Tên cấp bậc đã tồn tại.',
+            'name.required' => 'Tên hạng là bắt buộc.',
+            'name.min' => 'Tên hạng phải có ít nhất 3 ký tự.',
+            'name.max' => 'Tên hạng không được vượt quá ' . self::NAME_MAX_LENGTH . ' ký tự.',
+            'name.unique' => 'Tên hạng đã tồn tại.',
+            'name.regex' => 'Tên hạng chỉ được chứa chữ cái, số, khoảng trắng hoặc dấu gạch ngang.',
             'min_total_spent.required' => 'Tổng chi tiêu tối thiểu là bắt buộc.',
-            'min_total_spent.min' => 'Tổng chi tiêu tối thiểu không được nhỏ hơn 0.',
+            'min_total_spent.min' => 'Tổng chi tiêu tối thiểu phải lớn hơn 0.',
             'discount_percent.required' => 'Phần trăm chiết khấu là bắt buộc.',
+            'discount_percent.min' => 'Phần trăm chiết khấu phải lớn hơn 0.',
             'discount_percent.max' => 'Phần trăm chiết khấu không được vượt quá ' . self::PERCENT_MAX_VALUE . '%.',
             'credit_percent.required' => 'Phần trăm tín dụng là bắt buộc.',
+            'credit_percent.min' => 'Phần trăm tín dụng phải lớn hơn 0.',
             'credit_percent.max' => 'Phần trăm tín dụng không được vượt quá ' . self::PERCENT_MAX_VALUE . '%.',
             'note.max' => 'Ghi chú không được vượt quá ' . self::NOTE_MAX_LENGTH . ' ký tự.',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'status.in' => 'Trạng thái không hợp lệ.',
         ];
     }
 
-    /**
-     * Chuẩn bị dữ liệu trước khi xác thực.
-     *
-     * @return void
-     */
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'name' => trim($this->input('name')),
+            'name' => trim($this->input('name') ?? ''),
             'note' => $this->input('note') ? trim($this->input('note')) : null,
+            'min_total_spent' => $this->input('min_total_spent') !== '' ? $this->input('min_total_spent') : null,
+            'discount_percent' => $this->input('discount_percent') !== '' ? $this->input('discount_percent') : null,
+            'credit_percent' => $this->input('credit_percent') !== '' ? $this->input('credit_percent') : null,
         ]);
     }
 }
