@@ -7,16 +7,13 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
-use App\Http\Controllers\admin\ProductController;
-use App\Http\Controllers\Admin\Authorization\PermissionController;
-use App\Http\Controllers\Admin\Authorization\RoleController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\ProxyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\SaleOrderController;
 
 
@@ -64,10 +61,14 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
         Route::get('/', [SaleOrderController::class, 'index'])->name('index');
+        Route::get('/create', [SaleOrderController::class, 'create'])->name('create');
         Route::post('/', [SaleOrderController::class, 'create'])->name('create');
     });
 });
-
+// API địa chỉ
+Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
+Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);
+Route::get('/proxy/wards/{districtId}', [ProxyController::class, 'getWards']);
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth'])->name('dashboard');

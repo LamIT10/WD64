@@ -41,7 +41,11 @@ class SaleOrderController extends Controller
             'units' => $units
         ]);
     }
-    public function create() {}
+    public function create()
+    {
+        $customers = $this->customerRepository->getList();
+        return inertia('admin/sale-orders/Create', ['customers' => $customers,]);
+    }
     public function export()
     {
         return Excel::download(new SaleOrderExport, 'DonHangXuat.xlsx');

@@ -21,12 +21,13 @@
         "@vitejs/plugin-vue": "^5.2.3",
         "@vueform/multiselect": "^2.6.11",
         "i": "^0.3.7",
+        "remixicon": "^4.6.0",
         "vue": "^3.5.14",
+        "vue-final-modal": "^4.5.5",
         "vue-recaptcha": "^3.0.0-alpha.6",
         "vue-recaptcha-v3": "^2.0.1",
         "vue3-recaptcha-v2": "^2.1.0",
         "vue3-recaptcha2": "^1.8.0",
-        "remixicon": "^4.6.0",
         "ziggy-js": "^2.5.2"
     }
 }
