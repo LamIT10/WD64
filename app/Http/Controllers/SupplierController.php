@@ -16,8 +16,8 @@ class SupplierController extends Controller
     {
         $this->supplierRepository = $supplierRepository;
     }
-    public function getList(){
-        $suppliers = $this->supplierRepository->getList();
+    public function getList(Request $request){
+        $suppliers = $this->supplierRepository->getList($request);
         return inertia('admin/Supplier/List', [
             'suppliers' => $suppliers
         ]);
@@ -29,9 +29,21 @@ class SupplierController extends Controller
     public function store(SupplierRequest $request){
         $data = $request->validated();
         $supplier = $this->supplierRepository->createData($data);
-        return $this->returnInertia($supplier, 'Create Supplier Success', 'admin.suppliers.index');
+        return $this->returnInertia($supplier, 'Tạo mới nhà cung cấp thành công', 'admin.suppliers.index');
     }
     public function edit($id){
-      dd(123);
+        $supplier = $this->supplierRepository->findById($id);
+        return inertia('admin/Supplier/Edit', [
+            'supplier' => $supplier
+        ]);
+    }
+    public function update(SupplierRequest $request, $id){
+        $data = $request->validated();
+        $supplier = $this->supplierRepository->updateData($id, $data);
+        return $this->returnInertia($supplier, 'Cập nhật nhà cung cấp thành công', 'admin.suppliers.edit', [$id]);
+    }
+    public function destroy($id){
+        $success = $this->supplierRepository->deleteData($id);
+        return $this->returnInertia($success, 'Xóa nhà cung cấp thông', 'admin.suppliers.index');
     }
 }
