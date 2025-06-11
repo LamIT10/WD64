@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
@@ -86,6 +87,14 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::group(['prefix' => 'suppliers', 'as' => 'suppliers.'], function () {
         Route::get('/', [SupplierController::class, 'getList'])->name('index');
+        Route::get('create', [SupplierController::class, 'create'])->name('create');
+        Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
+        Route::post('store', [SupplierController::class, 'store'])->name('store');
+        Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
+        Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+    });
+    Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
+        Route::get('/', [PurchaseOrderController::class, 'getList'])->name('index');
         Route::get('create', [SupplierController::class, 'create'])->name('create');
         Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
         Route::post('store', [SupplierController::class, 'store'])->name('store');
