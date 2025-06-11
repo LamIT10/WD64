@@ -35,13 +35,12 @@
 
                             <!-- Nút chọn ảnh -->
                             <button type="button" @click="triggerInput"
-                       
                                 class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
-                             <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.avatar }}
-                                    </p>
+                            <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">
+                                {{ form.errors.avatar }}
+                            </p>
 
                         </div>
                     </div>
@@ -57,6 +56,9 @@
                                     <input v-model="form.employee_code" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                         placeholder="Mã nhân viên tự động" />
+                                    <p v-if="form.errors.employee_code" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.employee_code }}
+                                    </p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhân viên *</label>
@@ -90,7 +92,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
                                     <div class="flex flex-wrap gap-4">
                                         <!-- Toggle for Manager -->
                                         <div v-for="role in props.listRoles" :key="role.id" class="flex items-center">
@@ -101,7 +103,7 @@
                                                     class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
                                                 </div>
                                                 <span class="ms-3 text-sm font-medium text-gray-700">{{ role.name
-                                                    }}</span>
+                                                }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -133,11 +135,15 @@
                                             <select v-model="form.position"
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
                                                 <option value="" disabled>Chọn chức danh...</option>
+                                                <option value="Giám đốc">Giám đốc</option>
+                                                <option value="Quản lý">Quản lý</option>
+                                                <option value="Nhân viên">Nhân viên</option>
                                             </select>
                                             <p v-if="form.errors.position" class="text-red-500 text-sm mt-1">
                                                 {{ form.errors.position }}
                                             </p>
                                         </div>
+
                                     </div>
                                     <!-- Row 4: Note -->
                                     <div class="grid grid-cols-1 gap-4">
@@ -237,8 +243,6 @@
                 <div class="px-6 pb-6">
                     <button type="button" @click="toggleAdditionalInfo"
                         class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm font-medium">
-                       
-                       
                         <i :class="showAdditionalInfo ? 'fas fa-minus' : 'fas fa-plus'" class="mr-2"></i>
                         {{ showAdditionalInfo ? 'Ẩn thông tin' : 'Thêm thông tin' }}
                     </button>
@@ -331,7 +335,7 @@ function handleRole(id) {
     if (form.role.includes(id)) {
         form.role = form.role.filter(x => x != id);
     } else {
-        form.role = [...form.role,id];
+        form.role = [...form.role, id];
     }
 
     console.log(form.role);

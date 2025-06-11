@@ -11,7 +11,8 @@
                 <div class="flex items-center space-x-3">
                     <!-- Search bar -->
                     <div class="relative">
-                        <input type="text" placeholder="Tìm theo mã, tên nhân viên..."
+                        <input type="text" placeholder="Tìm theo mã, tên nhân viên..." v-model="search"
+                            @keydown.enter="handleSearch"
                             class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
@@ -47,6 +48,9 @@
             </div>
 
             <!-- Tab Navigation -->
+            <div v-if="search" class="mb-2 text-sm text-gray-600 italic">
+                Kết quả tìm kiếm cho: "<span class="font-medium text-indigo-600">{{ search }}</span>"
+            </div>
             <div class="mb-4 border-b border-gray-200">
                 <div class="flex items-center">
                     <ul class="flex flex-wrap -mb-px">
@@ -160,19 +164,17 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="(user, index) in props.users.data" :key="user.id"
-                                    @click="handleClick(user.id)"  
+                            <tr v-for="(user, index) in props.users.data" :key="user.id" @click="handleClick(user.id)"
                                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
                                 <!-- Checkbox for individual row -->
                                 <td class="px-4 py-4 whitespace-nowrap" @click.stop>
                                     <input type="checkbox" :value="user.id" v-model="selectedUsers"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </td>
-                                <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap" >
+                                <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <img :src="user.avatar ? `/storage/${user.avatar}` : 'https://cdn-media.sforum.vn/storage/app/media/ctv_seo3/meme-meo-cuoi-51.jpg'"
-                                            alt="Avatar"
-                                            class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm">
+                                        <img :src="user.avatar ? `/storage/${user.avatar}` : '/images/default-ava.png'"
+                                            alt="Avatar" class="h-10 w-10 object-cover shadow-sm">
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">
                                                 {{ user.name }}
@@ -180,6 +182,7 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td v-if="visibleColumns.includes('employee_code')"
                                     class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 font-medium">
                                     {{ user.employee_code || '-' }}
@@ -204,7 +207,8 @@
                                 </td>
                                 <td v-if="visibleColumns.includes('position')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <p class="rounded-2xl bg-blue-500 p-1 text-center m-0.5 text-white" v-for="role in user.roles">
+                                    <p class="rounded-2xl bg-blue-500 p-1 text-center m-0.5 text-white"
+                                        v-for="role in user.roles">
                                         {{ role.name }}
                                     </p>
                                 </td>
@@ -279,8 +283,10 @@ import { route } from 'ziggy-js';
 const props = defineProps({
     users: Object,
     status: String,
+    search: String,
 });
-console.log(props.users);
+// const search = ref('');
+// console.log(props.users);
 // Tab control
 const activeTab = ref(props.status || 'active');
 
@@ -308,9 +314,9 @@ const visibleColumns = ref(
     localStorage.getItem('visibleColumns')
         ? JSON.parse(localStorage.getItem('visibleColumns'))
         : [
-              'name', 'employee_code', 'email', 'phone', 'gender', 'address',
-              'position', 'start_date', 'facebook', 'identity_number', 'birthday', 'note'
-          ]
+            'name', 'employee_code', 'email', 'phone', 'gender', 'address',
+            'position', 'start_date', 'facebook', 'identity_number', 'birthday', 'note'
+        ]
 );
 
 // Lưu visibleColumns vào localStorage khi thay đổi
@@ -420,7 +426,7 @@ const bulkUpdateStatus = (newStatus) => {
 
 // Xóa nhân viên hàng loạt
 const bulkDelete = () => {
-  
+
     if (!confirm(`Bạn có chắc muốn xóa ${selectedUsers.value.length} nhân viên? Hành động này không thể hoàn tác!`)) {
         return;
     }
@@ -458,6 +464,53 @@ const handleClick = (userId) => {
     // Nếu không có văn bản đang được chọn, chuyển hướng
     router.visit(route('admin.users.show', userId));
 };
+
+// Xử lý sự kiện tìm kiếm
+const handleSearch = () => {
+    const params = {
+        status: activeTab.value,
+    };
+
+    if (search.value) {
+        params.search = search.value;
+    }
+
+    router.get(route('admin.users.index'), params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+// giữ giá trị tìm kiếm khi chuyển tab
+watch(activeTab, (newTab) => {
+    const params = {
+        status: newTab,
+    };
+
+    if (search.value) {
+        params.search = search.value;
+    }
+
+    router.get(route('admin.users.index'), params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+});
+
+
+// reload mất search
+const search = ref('');
+onMounted(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('search')) {
+        params.delete('search');
+        const cleanUrl = params.toString()
+            ? `${window.location.pathname}?${params.toString()}`
+            : window.location.pathname;
+        window.location.replace(cleanUrl); // ← chuyển URL, reload lại ngay
+    }
+});
+
 </script>
 
 <style lang="css" scoped>
