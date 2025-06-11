@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->foreignId('rank_id')->nullable()->constrained('ranks')->onDelete('set null');
+        Schema::table('product_variants', function (Blueprint $table) {
+            $table->string('code')->nullable()->after('barcode');
         });
     }
 
@@ -21,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->dropForeign(['rank_id']);
-            $table->dropColumn('rank_id');
+        Schema::table('product_variants', function (Blueprint $table) {
+            $table->dropColumn('code');
         });
     }
 };
