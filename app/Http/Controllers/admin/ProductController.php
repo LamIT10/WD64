@@ -10,7 +10,7 @@ use Inertia\Inertia;
 class ProductController extends Controller
 {
     protected $productRepository;
-    private $categoryRepository;
+
     public function __construct(ProductRepository $productRepository) {
         $this->productRepository = $productRepository;
     }
@@ -31,8 +31,13 @@ class ProductController extends Controller
      */
     public function create()
     {
+        $data = $this->productRepository->getCreateData();
         
-        return Inertia::render('admin/products/CreteProduct', [
+        return Inertia::render('admin/products/CreateProduct', [
+            'categories' => $data['categories'],
+            'units' => $data['units'],
+            'attributes' => $data['attributes'],
+            'attributeValues' => $data['attributeValues'],
         ]);
     }
 
