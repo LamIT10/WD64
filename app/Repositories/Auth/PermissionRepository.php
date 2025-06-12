@@ -114,4 +114,8 @@ class PermissionRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
+    public function getDropDownPermission(){
+        return $this->handleModel->select(["id","description"])->get();
+       
+    }
 }

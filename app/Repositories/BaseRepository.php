@@ -120,4 +120,12 @@ class BaseRepository
         }
         return false;
     }
+    public function hasRole(string $role){
+        if(!session()->has('roles')) return false;
+        if(in_array($role, session('roles'))){
+
+            return true;
+        }
+        return false;
+    }
 }

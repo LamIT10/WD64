@@ -97,7 +97,7 @@
 
 <script setup>
 import { useForm } from "@inertiajs/vue3";
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import VueRecaptcha from "vue3-recaptcha2";
 import { Link } from '@inertiajs/vue3';
 import { route } from "ziggy-js";
@@ -178,6 +178,9 @@ function resetForm() {
   form["g-recaptcha-response"] = "";
   if (recaptcha.value) recaptcha.value.reset();
 }
+onMounted(() => {
+  localStorage.clear();
+})
 </script>
 
 <style scoped>
