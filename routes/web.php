@@ -8,10 +8,12 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\admin\CustomerTransactionController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
+
 use App\Http\Controllers\RankController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -51,6 +53,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         'prefix' => 'customers',
         'as' => 'customers.'
     ], function () {
+        Route::get('/transaction', [CustomerTransactionController::class, 'index'])->name('transaction');
         Route::get('/', [CustomerController::class, 'index'])->name('index');
         Route::get('/create', [CustomerController::class, 'create'])->name('create');
         Route::post('/', [CustomerController::class, 'store'])->name('store');
