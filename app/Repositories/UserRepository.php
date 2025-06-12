@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role as ModelsRole;
 
 class UserRepository extends BaseRepository
 {
@@ -17,83 +18,27 @@ class UserRepository extends BaseRepository
         $this->handleModel = $user;
     }
 
-    public function allWithPaginate($filter=[],$limit = 10)    
+    public function allWithPaginate($filter = [], $limit = 10)
     {
-            $query=$this->handleModel->query();
-            $query=$this->filterData($query, $filter);
-             return $query->orderBy('created_at', 'desc')->paginate($limit);
+        $query = $this->handleModel->query();
+        $query = $this->filterData($query, $filter);
+        return $query->orderBy('created_at', 'desc')->paginate($limit);
     }
 
+     public function getFilteredUsers(array $filters)
+    {
+        $query = $this->handleModel->query();
+
+        $query = $this->filterData($query, $filters);
+
+        return $query;
+    }
     public function createUser(array $data)
-{
-    try {
-        DB::beginTransaction();
-
-        $dataUser = [];
-        $dataUser['name'] = $data['name'] ?? null;
-        $dataUser['email'] = $data['email'] ?? null;
-        $dataUser['address'] = $data['address'] ?? null;
-        $dataUser['position'] = $data['position'] ?? null;
-        $dataUser['phone'] = $data['phone'] ?? null;
-        $dataUser['note'] = $data['note'] ?? null;
-        $dataUser['facebook'] = $data['facebook'] ?? null;
-        $dataUser['birthday'] = $data['birthday'] ?? null;
-        $dataUser['gender'] = $data['gender'] ?? null;
-        $dataUser['start_date'] = $data['start_date'] ?? null;
-        $dataUser['identity_number'] = $data['identity_number'] ?? null;
-        $dataUser['password'] = Hash::make($data['password']);
-
-        if (!empty($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
-            $dataUser['avatar'] = $this->handleUploadOneFile($data['avatar']);
-        }
-
-        // Tự sinh employee_code nếu không nhập
-        if (empty($data['employee_code'])) {
-            $lastUser = $this->handleModel->orderByDesc('id')->first();
-            $nextNumber = $lastUser ? $lastUser->id + 1 : 1;
-            $dataUser['employee_code'] = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-        } else {
-            $dataUser['employee_code'] = $data['employee_code'];
-        }
-
-        // Xóa dd để tiếp tục xử lý
-        // dd($dataUser);
-
-        $user = $this->handleModel->create($dataUser);
-
-        if (!$user) {
-            throw new \Exception('Có lỗi khi thêm nhân viên');
-        }
-
-        // Xử lý vai trò
-        if (!empty($data['roles'])) {
-            // Chuyển ID vai trò thành tên vai trò
-            $roleNames = Role::whereIn('id', $data['roles'])->pluck('name')->toArray();
-            if (empty($roleNames)) {
-                throw new \Exception('Không tìm thấy vai trò hợp lệ');
-            }
-            $user->syncRoles($roleNames); // Gán vai trò bằng tên
-        }
-
-        DB::commit();
-        return $user;
-    } catch (\Throwable $th) {
-        Log::error('Lỗi khi thêm mới người dùng: ' . $th->getMessage());
-        DB::rollBack();
-        return $this->returnError($th->getMessage());
-    }
-    }
-
-
-    public function updateUser(int $id, array $data)
     {
         try {
-            $user = $this->getById($id);
-            if (!$user) {
-                throw new \Exception('Không tìm thấy người dùng');
-            }
             DB::beginTransaction();
-             $dataUser = [];
+
+            $dataUser = [];
             $dataUser['name'] = $data['name'] ?? null;
             $dataUser['email'] = $data['email'] ?? null;
             $dataUser['address'] = $data['address'] ?? null;
@@ -105,28 +50,107 @@ class UserRepository extends BaseRepository
             $dataUser['gender'] = $data['gender'] ?? null;
             $dataUser['start_date'] = $data['start_date'] ?? null;
             $dataUser['identity_number'] = $data['identity_number'] ?? null;
-           
-                        // Xử lý cập nhật ảnh
+            $dataUser['password'] = Hash::make($data['password']);
+
+            if (!empty($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
+                $dataUser['avatar'] = $this->handleUploadOneFile($data['avatar']);
+            }
+
+            // Tự sinh employee_code nếu không nhập
+            if (empty($data['employee_code'])) {
+                $dataUser['employee_code'] = $this->generateUniqueEmployeeCode();
+            } else {
+                // Kiểm tra trùng mã khi người dùng nhập
+                $exists = $this->handleModel
+                    ->where('employee_code', $data['employee_code'])
+                    ->exists();
+
+                if ($exists) {
+                    throw new \Exception('Mã nhân viên đã tồn tại.');
+                }
+
+                $dataUser['employee_code'] = $data['employee_code'];
+            }
+            $user = $this->handleModel->create($dataUser);
+
+            if (!$user) {
+                throw new \Exception('Có lỗi khi thêm nhân viên');
+            }
+
+            // Xử lý vai trò
+            if (!empty($data['roles'])) {
+                // Chuyển ID vai trò thành tên vai trò
+                $roleNames = Role::whereIn('id', $data['roles'])->pluck('name')->toArray();
+                if (empty($roleNames)) {
+                    throw new \Exception('Không tìm thấy vai trò hợp lệ');
+                }
+                $user->syncRoles($roleNames); // Gán vai trò bằng tên
+            }
+
+            DB::commit();
+            return $user;
+        } catch (\Throwable $th) {
+            Log::error('Lỗi khi thêm mới người dùng: ' . $th->getMessage());
+            DB::rollBack();
+            return $this->returnError($th->getMessage());
+        }
+    }
+
+
+    public function updateUser(int $id, array $data)
+    {
+        try {
+            $user = $this->getById($id);
+            if (!$user) {
+                throw new \Exception('Không tìm thấy người dùng');
+            }
+            DB::beginTransaction();
+            $dataUser = [];
+            $dataUser['name'] = $data['name'] ?? null;
+            $dataUser['email'] = $data['email'] ?? null;
+            $dataUser['address'] = $data['address'] ?? null;
+            $dataUser['position'] = $data['position'] ?? null;
+            $dataUser['phone'] = $data['phone'] ?? null;
+            $dataUser['note'] = $data['note'] ?? null;
+            $dataUser['facebook'] = $data['facebook'] ?? null;
+            $dataUser['birthday'] = $data['birthday'] ?? null;
+            $dataUser['gender'] = $data['gender'] ?? null;
+            $dataUser['start_date'] = $data['start_date'] ?? null;
+            $dataUser['identity_number'] = $data['identity_number'] ?? null;
+
+            // Xử lý cập nhật ảnh
             if (!empty($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
                 $dataUser['avatar'] = $this->handleUpdateFile($data['avatar'], $user->avatar);
             }
-                 // Tự sinh employee_code nếu không nhập
+            // Tự sinh employee_code nếu không nhập
             if (empty($data['employee_code'])) {
-                $lastUser = $this->handleModel->orderByDesc('id')->first();
-                $nextNumber = $lastUser ? $lastUser->id + 1 : 1;
+                $dataUser['employee_code'] = $this->generateUniqueEmployeeCode($user->id);
+            } elseif ($data['employee_code'] !== $user->employee_code) {
+                // Nếu người dùng sửa mã, kiểm tra trùng
+                $exists = $this->handleModel
+                    ->where('employee_code', $data['employee_code'])
+                    ->where('id', '!=', $user->id)
+                    ->exists();
 
-                // Đảm bảo mã theo định dạng NV001, NV002, ...
-                $dataUser['employee_code'] = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-            } else {
+                if ($exists) {
+                    throw new \Exception('Mã nhân viên đã tồn tại.');
+                }
+
                 $dataUser['employee_code'] = $data['employee_code'];
+            } else {
+                // Giữ nguyên mã cũ nếu không thay đổi
+                $dataUser['employee_code'] = $user->employee_code;
             }
             // Câp nhật vai trò cho người dùng
-                if ($data['role']) {
-                $role = $user->syncRoles(($data['role']));
-                if (!$role) {
+            if (isset($data['role']) && !empty($data['role'])) {
+                // $role = $user->syncRoles(array_values($data['role']));
+                $roleIds = $data['role']; // Mảng ID role
+                $roles = ModelsRole::whereIn('id', $roleIds)->get();
+                $user->syncRoles($roles);
+                if (!$roles) {
                     throw new \Exception('Có lỗi khi thêm vai trò người dùng');
                 }
-            }else{
+            } else {
                 $role = $user->syncRoles([]);
             }
             $user->update($dataUser);
@@ -139,7 +163,7 @@ class UserRepository extends BaseRepository
         }
     }
 
-   public function bulkUpdateStatus(array $userIds, string $status)
+    public function bulkUpdateStatus(array $userIds, string $status)
     {
         try {
             DB::beginTransaction();
@@ -162,7 +186,7 @@ class UserRepository extends BaseRepository
 
     public function bulkDelete(array $userIds)
     {
-      try {
+        try {
             DB::beginTransaction();
             $users = $this->handleModel->whereIn('id', $userIds)->get();
             if ($users->isEmpty()) {
@@ -179,12 +203,11 @@ class UserRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
-     public function getDataRenderEdit(int $id)
+    public function getDataRenderEdit(int $id)
     {
         $query = $this->handleModel::where("id", $id)->firstOrFail();
         $query['role'] = array_values($query->roles->pluck("id")->toArray());
 
         return $query;
     }
-   
 }

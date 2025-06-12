@@ -37,36 +37,41 @@ class BaseRepository
     }
     public function filterData($query, array $filters)
     {
-        if (!empty($filters['search'])) {
+          if (!empty($filters['search'])) {
+        $query = $query->where(function ($q) use ($filters) {
             foreach ($filters['search'] as $field => $value) {
-                if(!empty($value)) $query = $this->likeTextFilter($query, $field, $value);
+                if (!empty($value)) {
+                    $q->orWhere($field, 'like', '%' . $value . '%');
+                }
             }
-        }
+        });
+    }
+
         if (!empty($filters['absoluteFilter'])) {
             foreach ($filters['absoluteFilter'] as $field => $value) {
-                if(!empty($value)) $query = $this->absoluteFilter($query, $field, $value);
+                if (!empty($value)) $query = $this->absoluteFilter($query, $field, $value);
             }
         }
         if (!empty($filters['between'])) {
             foreach ($filters['between'] as $field => $value) {
-               if(!empty($value) && !empty($value['min'] && !empty($value['max']))){
-                   $query = $this->between($query, $field, $value['min'], $value['max']);
+                if (!empty($value) && !empty($value['min'] && !empty($value['max']))) {
+                    $query = $this->between($query, $field, $value['min'], $value['max']);
                 }
             }
         }
-        if(!empty($filters['relation'])){
+        if (!empty($filters['relation'])) {
             foreach ($filters['relation'] as $key => $value) {
-                if(!empty($value)){
-                    $query = $query->with($key)->whereHas($key, function ($q) use ($value){
-                        $q->where($value['field'],"like","%" . $value['value'] . "%");
+                if (!empty($value)) {
+                    $query = $query->with($key)->whereHas($key, function ($q) use ($value) {
+                        $q->where($value['field'], "like", "%" . $value['value'] . "%");
                     });
                 }
             }
         }
-        if(!empty($filters['relationAbsolute'])){
+        if (!empty($filters['relationAbsolute'])) {
             foreach ($filters['relationAbsolute'] as $key => $value) {
-                if(!empty($value)){
-                    $query = $query->with($key)->whereHas($key, function ($q) use ($value){
+                if (!empty($value)) {
+                    $query = $query->with($key)->whereHas($key, function ($q) use ($value) {
                         $q->where($value['field'], $value['value']);
                     });
                 }
@@ -74,16 +79,18 @@ class BaseRepository
         }
         return $query;
     }
-    public function returnError($message){
-       return [
-           'status' => false,
-           'message' => $message
-       ];
+    public function returnError($message)
+    {
+        return [
+            'status' => false,
+            'message' => $message
+        ];
     }
-    public function findById($id){
+    public function findById($id)
+    {
         return $this->handleModel->findOrFail($id);
     }
-      public function handleUploadOneFile(object $file)
+    public function handleUploadOneFile(object $file)
     {
         $path = null;
         if ($file !== null) {
@@ -103,21 +110,40 @@ class BaseRepository
         }
     }
     // chỉ cần truyền file mới và đường đẫn file cũ sẽ xử lý để xoá cũ thêm mới trả về đường dẫn file mới
-   public function handleUpdateFile(object $file, ?string $old_file)
-{
-    if ($file instanceof \Illuminate\Http\UploadedFile) {
-        if (!empty($old_file) && Storage::disk('public')->exists($old_file)) {
-            $this->deleteFile($old_file);
+    public function handleUpdateFile(object $file, ?string $old_file)
+    {
+        if ($file instanceof \Illuminate\Http\UploadedFile) {
+            if (!empty($old_file) && Storage::disk('public')->exists($old_file)) {
+                $this->deleteFile($old_file);
+            }
+            return $this->handleUploadOneFile($file);
         }
-        return $this->handleUploadOneFile($file);
+        return $old_file;
     }
-    return $old_file;
-}
     public function deleteFile(string $path)
     {
         if (isset($path) && Storage::disk('public')->exists($path)) {
             return Storage::disk('public')->delete($path);
         }
         return false;
+    }
+    // Tạo mã nhân viên duy nhất
+    protected function generateUniqueEmployeeCode(?int $ignoreId = null): string
+    {
+        $nextNumber = 1;
+
+        do {
+            $code = 'NV' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
+            $query = $this->handleModel->where('employee_code', $code);
+            if ($ignoreId) {
+                $query->where('id', '!=', $ignoreId);
+            }
+
+            $exists = $query->exists();
+            $nextNumber++;
+        } while ($exists);
+
+        return $code;
     }
 }
