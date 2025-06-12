@@ -1,372 +1,481 @@
+<script setup>
+import { ref, computed } from "vue";
+import Multiselect from "@vueform/multiselect";
+import "@vueform/multiselect/themes/default.css";
+import AppLayout from "../Layouts/AppLayout.vue";
+import { route } from "ziggy-js";
+import axios from "axios";
+const { products } = defineProps(["products"]);
+const selectOptions = computed(() =>
+    products.map((p) => ({
+        label: p.name,
+        value: p.id,
+    }))
+);
+const variantOfProducts = ref([]);
+
+const selectedProduct = ref(null);
+const showModal = ref(false);
+const variantOptions = ref([]);
+const checkedVariants = ref([]);
+const selectedVariants = ref([]);
+
+function onProductSelect(productId) {
+    const url = route("admin.purchases.getVariants", { id: productId });
+    axios
+        .get(url)
+        .then((response) => {
+            variantOfProducts.value = response.data;
+
+            variantOptions.value = variantOfProducts.value.product_variants.map(
+                (v) => ({
+                    id: v.id,
+                    label: `${variantOfProducts.value.name} - ${v.attributes
+                        .map((attr) => attr.name)
+                        .join(" - ")}`,
+                    value: v.id,
+                })
+            );
+
+            checkedVariants.value = [...variantOptions.value];
+            showModal.value = true;
+        })
+        .catch((error) => {
+            console.error("Lỗi lấy biến thể:", error);
+        });
+}
+
+function toggleAllVariants(state) {
+    checkedVariants.value = state ? [...variantOptions.value] : [];
+}
+
+function confirmVariants() {
+    checkedVariants.value.forEach((v) => {
+        console.log(v.id);
+    });
+
+    if (checkedVariants.value.length === 0) return;
+
+    selectedVariants.value = checkedVariants.value.map((v) => ({
+        name: v.label,
+        vendor: "",
+        quantity: 1,
+        unit: "Cái",
+        price: 0,
+        total: 0,
+    }));
+
+    showModal.value = false;
+}
+
+function calculateTotal(variant) {
+    variant.total = variant.quantity * variant.price;
+}
+
+const finalItems = ref([]);
+function addToList() {
+    finalItems.value.push(
+        ...selectedVariants.value.filter(
+            (item) => item.vendor && item.quantity > 0 && item.price >= 0
+        )
+    );
+    selectedVariants.value = [];
+}
+
+function removeItem(index) {
+    finalItems.value.splice(index, 1);
+}
+
+const grandTotal = computed(() => {
+    return finalItems.value.reduce((sum, item) => sum + item.total, 0);
+});
+</script>
+
 <template>
     <AppLayout>
-        <div class="">
-            <div class="container mx-auto p-4 sm:p-6">
-                <div class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center">
-                <h5 class="text-lg text-indigo-700 font-semibold">
-                    Tạo mới đơn nhập kho
-                </h5>
-                <Waiting
-                    route-name="admin.suppliers.index"
-                    :route-params="{}"
-                    :color="'bg-indigo-50 text-indigo-700'"
-                >
-                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
-                </Waiting>
-            </div>
+        <div class="min-h-screen bg-gray-50 p-6">
+            <div class="mx-auto bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                    Tạo yêu cầu nhập hàng
+                </h2>
 
-                <!-- Form nhập sản phẩm -->
-                <div
-                    class="bg-white shadow rounded p-6 mb-8 border border-gray-100"
-                >
-                    <!-- Ô chọn sản phẩm -->
-                    <div class="mb-6">
-                        <label
-                            for="product"
-                            class="block text-sm font-medium text-gray-700 mb-2"
-                            >Sản phẩm</label
-                        >
-                        <select
-                            v-model="selectedProduct"
-                            id="product"
-                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                        >
-                            <option value="">Chọn sản phẩm</option>
-                            <option
-                                v-for="product in products"
-                                :key="product.id"
-                                :value="product.id"
-                            >
-                                {{ product.name }}
-                            </option>
-                        </select>
-                    </div>
+                <!-- Product Selection -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                        >Chọn sản phẩm</label
+                    >
+                    <Multiselect
+                        v-model="selectedProduct"
+                        :options="selectOptions"
+                        placeholder="Tìm kiếm hoặc chọn sản phẩm"
+                        label="label"
+                        track-by="value"
+                        :searchable="true"
+                        :close-on-select="true"
+                        :multiple="false"
+                        @select="onProductSelect"
+                        class="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
 
-                    <!-- Biến thể và nhà cung cấp -->
-                    <div v-if="selectedProduct && variants.length" class="mb-6">
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-3"
-                            >Biến thể và Nhà cung cấp</label
-                        >
-                        <div id="variant-options" class="space-y-4">
-                            <div
-                                v-for="(variant, index) in variants"
-                                :key="variant.id"
-                                class="border border-gray-200 rounded-lg p-4 flex justify-between items-center"
-                            >
-                                <div class="flex items-center">
-                                    <input
-                                        type="radio"
-                                        v-model="selectedVariant"
-                                        :value="variant.id"
-                                        class="mr-3"
-                                    />
-                                    <span class="font-medium text-gray-900">{{
-                                        variant.name
-                                    }}</span>
-                                </div>
-                                <div class="flex items-center space-x-4">
-                                    <select
-                                        v-model="selectedSuppliers[variant.id]"
-                                        :name="'supplier-' + variant.id"
-                                        class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                <!-- Selected Variants Table -->
+                <div class="mb-12">
+                    <div
+                        class="overflow-x-auto border border-gray-200 rounded-lg"
+                    >
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                     >
-                                        <option value="">
-                                            Chọn nhà cung cấp
-                                        </option>
-                                        <option
-                                            v-for="supplier in variant.suppliers"
-                                            :key="supplier.id"
-                                            :value="supplier.id"
+                                        Biến thể
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Nhà cung cấp
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Số lượng
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Đơn vị
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Giá tiền (VND)
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Thành tiền (VND)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr
+                                    v-if="!selectedVariants.length"
+                                    class="hover:bg-gray-50"
+                                >
+                                    <td
+                                        colspan="6"
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
+                                    >
+                                        Chưa có biến thể nào được chọn
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-for="(variant, i) in selectedVariants"
+                                    :key="i"
+                                    class="hover:bg-gray-50"
+                                >
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                    >
+                                        {{ variant.name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <select
+                                            v-model="variant.vendor"
+                                            class="block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                                         >
-                                            {{ supplier.name }} (Tồn kho:
-                                            {{ supplier.stock }})
-                                        </option>
-                                    </select>
+                                            <option disabled value="">
+                                                Chọn nhà cung cấp
+                                            </option>
+                                            <option>Nhà cung cấp A</option>
+                                            <option>Nhà cung cấp B</option>
+                                            <option>Nhà cung cấp C</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input
+                                            type="number"
+                                            v-model.number="variant.quantity"
+                                            @input="calculateTotal(variant)"
+                                            min="1"
+                                            class="block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        />
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                    >
+                                        {{ variant.unit }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input
+                                            type="number"
+                                            v-model.number="variant.price"
+                                            @input="calculateTotal(variant)"
+                                            min="0"
+                                            step="1000"
+                                            class="block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                        />
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium"
+                                    >
+                                        {{ variant.total.toLocaleString() }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button
+                        v-if="selectedVariants.length"
+                        @click="addToList"
+                        :disabled="
+                            selectedVariants.some(
+                                (v) =>
+                                    !v.vendor || v.quantity <= 0 || v.price < 0
+                            )
+                        "
+                        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Thêm vào danh sách
+                    </button>
+                </div>
+
+                <div
+                    v-if="showModal"
+                    class="fixed inset-0 z-50 flex items-center justify-center hihi"
+                    @click.self="showModal = false"
+                >
+                    <div
+                        class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4"
+                    >
+                        <div class="p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">
+                                Chọn biến thể cho sản phẩm
+                            </h3>
+                            <div class="flex justify-between mb-4">
+                                <button
+                                    @click="toggleAllVariants(true)"
+                                    class="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+                                >
+                                    Chọn tất cả
+                                </button>
+                                <button
+                                    @click="toggleAllVariants(false)"
+                                    class="text-sm text-red-600 hover:text-red-800 focus:outline-none"
+                                >
+                                    Bỏ chọn tất cả
+                                </button>
+                            </div>
+                            <div
+                                class="max-h-64 overflow-y-auto border border-gray-200 rounded-md p-2"
+                            >
+                                <div
+                                    v-for="v in variantOptions"
+                                    :key="v.id"
+                                    class="flex items-center mb-2 last:mb-0"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        :id="`variant-${v.id}`"
+                                        :value="v"
+                                        v-model="checkedVariants"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+                                    />
+                                    <label
+                                        :for="`variant-${v.id}`"
+                                        class="ml-2 block text-sm text-gray-700"
+                                    >
+                                        {{ v.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-gray-50 px-6 py-3 flex justify-end gap-3 rounded-lg"
+                        >
+                            <button
+                                @click="showModal = false"
+                                class="px-4 py-2 bg-white text-gray-700 rounded-md border hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                @click="confirmVariants"
+                                :disabled="checkedVariants.length === 0"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mx-auto bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-800 mb-4">
+                    Danh sách sản phẩm đã chọn
+                </h3>
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Biến thể
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Nhà cung cấp
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Số lượng
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Đơn vị
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Giá tiền
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Thành tiền
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                ></th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr
+                                v-if="!finalItems.length"
+                                class="hover:bg-gray-50"
+                            >
+                                <td
+                                    colspan="7"
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center"
+                                >
+                                    Chưa có sản phẩm nào được thêm
+                                </td>
+                            </tr>
+                            <tr
+                                v-for="(item, i) in finalItems"
+                                :key="i"
+                                class="hover:bg-gray-50"
+                            >
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                >
+                                    {{ item.name }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                >
+                                    {{ item.vendor }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                >
+                                    {{ item.quantity }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                >
+                                    {{ item.unit }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                >
+                                    {{ item.price.toLocaleString() }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium"
+                                >
+                                    {{ item.total.toLocaleString() }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                                >
                                     <button
-                                        @click="removeVariant(index)"
-                                        class="text-red-600 hover:text-red-800"
+                                        @click="removeItem(i)"
+                                        class="text-red-600 hover:text-red-900 focus:outline-none"
                                     >
                                         Xóa
                                     </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Số lượng, giá, thành tiền -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label
-                                for="quantity"
-                                class="block text-sm font-medium text-gray-700 mb-2"
-                                >Số lượng</label
-                            >
-                            <input
-                                v-model.number="quantity"
-                                type="number"
-                                id="quantity"
-                                min="1"
-                                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Nhập số lượng"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                for="price"
-                                class="block text-sm font-medium text-gray-700 mb-2"
-                                >Giá (VND)</label
-                            >
-                            <input
-                                v-model.number="price"
-                                type="number"
-                                id="price"
-                                min="0"
-                                step="1000"
-                                class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Nhập giá"
-                            />
-                        </div>
-                        <div>
-                            <label
-                                for="total"
-                                class="block text-sm font-medium text-gray-700 mb-2"
-                                >Thành tiền (VND)</label
-                            >
-                            <input
-                                v-model="total"
-                                readonly
-                                class="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-900"
-                                value="0"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Nút thêm sản phẩm -->
-                    <div>
-                        <button
-                            @click="addProduct"
-                            :disabled="!isFormValid"
-                            class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        >
-                            Thêm sản phẩm
-                        </button>
-                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <!-- Danh sách sản phẩm đã chọn -->
-                <div
-                    class="bg-white shadow rounded p-4"
-                >
-                    <h5 class="underline-custom text-lg text-indigo-700 font-semibold">
-                    Danh sách sản phẩm đã chọn
-                </h5>
-                    <div id="selected-products" class="space-y-4">
-                        <div
-                            v-for="(product, index) in selectedProducts"
-                            :key="index"
-                            class="border border-gray-200 rounded-lg p-4 flex justify-between items-center bg-gray-50"
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="text-lg font-medium text-gray-900">
+                        Tổng cộng:
+                        <span class="font-semibold"
+                            >{{ grandTotal.toLocaleString() }} VND</span
                         >
-                            <div>
-                                <p class="font-medium text-gray-900">
-                                    {{ product.name }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Biến thể: {{ product.variantName }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Nhà cung cấp: {{ product.supplierName }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Số lượng: {{ product.quantity }}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Giá:
-                                    {{
-                                        Number(product.price).toLocaleString()
-                                    }}
-                                    VND
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    Thành tiền:
-                                    {{
-                                        (
-                                            product.quantity * product.price
-                                        ).toLocaleString()
-                                    }}
-                                    VND
-                                </p>
-                            </div>
-                            <button
-                                @click="removeSelectedProduct(index)"
-                                class="text-red-600 hover:text-red-800"
-                            >
-                                Xóa
-                            </button>
-                        </div>
-                        <p
-                            v-if="!selectedProducts.length"
-                            id="no-products"
-                            class="text-gray-500 text-center"
-                        >
-                            Chưa có sản phẩm nào được thêm.
-                        </p>
                     </div>
+                    <button
+                        class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                        Tạo yêu cầu nhập hàng
+                    </button>
                 </div>
             </div>
         </div>
     </AppLayout>
 </template>
 
-<script setup>
-import { ref, computed, watch } from "vue";
-import AppLayout from "../Layouts/AppLayout.vue";
-import Waiting from "../../components/Waiting.vue";
-
-// Dữ liệu tĩnh
-const products = [
-    { id: "1", name: "Sản phẩm A" },
-    { id: "2", name: "Sản phẩm B" },
-    { id: "3", name: "Sản phẩm C" },
-];
-const productVariants = {
-    1: [
-        {
-            id: "1-1",
-            name: "Màu đỏ",
-            suppliers: [
-                { id: "s1", name: "Nhà cung cấp 1", stock: 50 },
-                { id: "s2", name: "Nhà cung cấp 2", stock: 30 },
-            ],
-        },
-        {
-            id: "1-2",
-            name: "Màu xanh",
-            suppliers: [
-                { id: "s2", name: "Nhà cung cấp 2", stock: 40 },
-                { id: "s3", name: "Nhà cung cấp 3", stock: 20 },
-            ],
-        },
-    ],
-    2: [
-        {
-            id: "2-1",
-            name: "Size S",
-            suppliers: [
-                { id: "s1", name: "Nhà cung cấp 1", stock: 60 },
-                { id: "s3", name: "Nhà cung cấp 3", stock: 25 },
-            ],
-        },
-        {
-            id: "2-2",
-            name: "Size M",
-            suppliers: [{ id: "s2", name: "Nhà cung cấp 2", stock: 50 }],
-        },
-    ],
-    3: [
-        {
-            id: "3-1",
-            name: "Loại A",
-            suppliers: [{ id: "s3", name: "Nhà cung cấp 3", stock: 15 }],
-        },
-        {
-            id: "3-2",
-            name: "Loại B",
-            suppliers: [
-                { id: "s1", name: "Nhà cung cấp 1", stock: 35 },
-                { id: "s2", name: "Nhà cung cấp 2", stock: 45 },
-            ],
-        },
-    ],
-};
-
-// Dữ liệu reactive
-const selectedProduct = ref("");
-const selectedVariant = ref("");
-const selectedSuppliers = ref({});
-const quantity = ref(0);
-const price = ref(0);
-const total = ref("0");
-const selectedProducts = ref([]);
-
-// Computed properties
-const variants = computed(() =>
-    selectedProduct.value ? productVariants[selectedProduct.value] : []
-);
-const isFormValid = computed(() => {
-    const hasVariant = variants.value.length > 0;
-    return (
-        selectedProduct.value &&
-        quantity.value > 0 &&
-        price.value > 0 &&
-        (!hasVariant ||
-            (selectedVariant.value &&
-                selectedSuppliers.value[selectedVariant.value]))
-    );
-});
-
-// Watchers
-watch(selectedProduct, () => {
-    selectedVariant.value = "";
-    selectedSuppliers.value = {};
-});
-watch([quantity, price], () => {
-    const totalValue = quantity.value * price.value;
-    total.value = totalValue.toLocaleString();
-});
-
-// Methods
-const removeVariant = (index) => {
-    variants.value.splice(index, 1);
-    if (!variants.value.length) {
-        selectedVariant.value = "";
-        selectedSuppliers.value = {};
-    }
-};
-
-const addProduct = () => {
-    const product = products.find((p) => p.id === selectedProduct.value);
-    const variant = variants.value.find((v) => v.id === selectedVariant.value);
-    const supplier = variant.suppliers.find(
-        (s) => s.id === selectedSuppliers.value[selectedVariant.value]
-    );
-    selectedProducts.value.push({
-        name: product.name,
-        variantName: variant.name,
-        supplierName: supplier.name,
-        quantity: quantity.value,
-        price: price.value,
-    });
-    resetForm();
-};
-
-const removeSelectedProduct = (index) => {
-    selectedProducts.value.splice(index, 1);
-};
-
-const resetForm = () => {
-    selectedProduct.value = "";
-    selectedVariant.value = "";
-    selectedSuppliers.value = {};
-    quantity.value = 0;
-    price.value = 0;
-    total.value = "0";
-};
-</script>
-
 <style scoped>
-h5.underline-custom {
-  display: inline-block; /* để giới hạn theo nội dung chữ */
-  position: relative;
+.multiselect {
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
 }
 
-h5.underline-custom::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  height: 2px;
-  width: 50%;
-  background: linear-gradient(45deg, #2010ff, #ae00ff);
+.multiselect:focus,
+.multiselect:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.multiselect-search {
+    font-size: 0.875rem;
+}
+
+.multiselect-placeholder {
+    color: #9ca3af;
+}
+
+.multiselect-single-label {
+    color: #374151;
+}
+
+.multiselect-option {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+}
+
+.multiselect-option.is-selected {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+}
+
+.multiselect-option.is-pointed {
+    background-color: #f3f4f6;
+}
+.hihi {
+    background-color: rgba(0, 0, 0, 0.5);
 }
 </style>

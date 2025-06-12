@@ -98,11 +98,12 @@ Route::prefix('admin')->as('admin.')->group(function () {
     });
     Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
         Route::get('/', [PurchaseOrderController::class, 'getList'])->name('index');
-        Route::get('create', [SupplierController::class, 'create'])->name('create');
+        Route::get('create', [PurchaseOrderController::class, 'create'])->name('create');
         Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
         Route::post('store', [SupplierController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+        Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
     });
 
 
