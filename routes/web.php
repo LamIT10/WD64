@@ -25,9 +25,28 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', action: function () {
         return Inertia::render('Dashboard');
     });
+    // Routes cho Categories (Danh mục)
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
 
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
+    // Routes cho Products (Sản phẩm)
+    Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+    });
+
 
 
     Route::group([
