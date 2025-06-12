@@ -23,8 +23,28 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', action: function () {
         return Inertia::render('Dashboard');
     });
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
+    // Routes cho Categories (Danh mục)
+    Route::prefix('categories')->as('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::get('/{category}', [CategoryController::class, 'show'])->name('show');
+        Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
+
+    // Routes cho Products (Sản phẩm)
+    Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+    });
+
 
 
     Route::group([
@@ -49,7 +69,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::patch('/{rank}', [RankController::class, 'update'])->name('update');  // Cập nhật rank
         Route::delete('/{rank}', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
     });
-    
+
     Route::prefix('permission')->as('permission.')->group(function () {
         Route::get('/', [PermissionController::class, 'index'])->name('index');
         Route::get('/create', [PermissionController::class, 'create'])->name('create');
@@ -113,7 +133,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
-
 });
 
 Route::get('/dashboard', function () {
