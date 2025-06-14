@@ -265,7 +265,7 @@ const props = defineProps({
         default: () => ({})
     }
 });
-console.log(props.permissions);
+
 // Thêm state cho dropdown
 const activeDropdowns = ref({});
 

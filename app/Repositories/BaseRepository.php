@@ -127,7 +127,6 @@ class BaseRepository
         }
         return false;
     }
-<<<<<<< HEAD
     public function hasRole(string $role){
         if(!session()->has('roles')) return false;
         if(in_array($role, session('roles'))){
@@ -136,8 +135,7 @@ class BaseRepository
         }
         return false;
     }
-}
-=======
+
     // Tạo mã nhân viên duy nhất
     protected function generateUniqueEmployeeCode(?int $ignoreId = null): string
     {
@@ -158,4 +156,3 @@ class BaseRepository
         return $code;
     }
 }
->>>>>>> a9b704aaf7dd1dd6bc008ea142f2ec1cb818c8ba
