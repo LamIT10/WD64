@@ -193,14 +193,14 @@
 
                 <div id="supplier-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <a href="purchase-orders.html"
+                        <Link :href="route('admin.suppliers.index')"    
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-shopping-cart text-xs"></i>
                         </div>
-                        <Link :href="route('admin.suppliers.index')" class="text-xs">Quản lý</Link>
-                    </a>
+                         <span class="text-xs">Quản lý</span></Link>
+                
                     <a href="sales-orders.html"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
@@ -244,14 +244,14 @@
                     </div>
                     <span class="text-xs">Quản lý hạng</span>
                     </Link>
-                    <a href="#"
+                    <Link :href="route('admin.customers.transaction')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
                             <i class="fas fa-file-invoice-dollar text-xs"></i>
                         </div>
                         <span class="text-xs">Công nợ khách hàng</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
 

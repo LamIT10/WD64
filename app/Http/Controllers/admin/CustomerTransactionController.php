@@ -20,23 +20,17 @@ class CustomerTransactionController extends Controller
     /**
      * Hiển thị danh sách công nợ (có lọc nâng cao)
      */
-    public function index(Request $request)
+  
+     public function index(Request $request)
     {
-        $filters = [
-            'search' => $request->input('search', []),                // ví dụ: ['description' => 'đơn hàng']
-            'absoluteFilter' => $request->input('absoluteFilter', []),// ví dụ: ['customer_id' => 1]
-            'between' => $request->input('between', []),              // ví dụ: ['credit_due_date' => ['min' => '2025-05-01', 'max' => '2025-06-30']]
-            'relation' => $request->input('relation', [])             // ví dụ: ['customer' => ['field' => 'name', 'value' => 'ABC']]
-        ];
-
-        $debts = $this->customerTransactionRepo->getOutstandingDebts($filters);
+    
+        $customerTransaction = $this->customerTransactionRepo->allWithPaginate();
+    //  dd($customerTransaction->toArray());
 
         return Inertia::render('admin/Customers/Transaction/Index', [
-            'debts' => $debts,
-            'filters' => $filters,
+           'customerTransaction' => $customerTransaction,
         ]);
     }
-
     /**
      * Ghi nhận thanh toán cho 1 công nợ
      */

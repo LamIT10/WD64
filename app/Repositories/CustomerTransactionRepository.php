@@ -11,7 +11,11 @@ class CustomerTransactionRepository extends BaseRepository
     {
         $this->handleModel = $model;
     }
-
+    public function allWithPaginate($filter = [], $limit = 10)
+    {
+        $query = $this->handleModel::with('customer')->with('salesOrder')->select(['*']);
+        return $query->orderBy('created_at', 'desc')->paginate($limit);
+    }
     /**
      * Danh sách công nợ chưa thanh toán / còn lại
      */
