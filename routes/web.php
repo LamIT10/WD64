@@ -84,14 +84,19 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
         Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RoleController::class, 'show'])->name('show');
+        Route::post('admin/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('admin.customers.bulk-delete');
+        Route::get('admin/customers/import', [CustomerController::class, 'import'])->name('admin.customers.import');
+        Route::get('admin/customers/export', [CustomerController::class, 'export'])->name('admin.customers.export');
     });
 
 
     Route::group(['prefix' => 'suppliers', 'as' => 'suppliers.'], function () {
         Route::get('/', [SupplierController::class, 'getList'])->name('index');
         Route::get('create', [SupplierController::class, 'create'])->name('create');
-        Route::patch('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
+        Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
         Route::post('store', [SupplierController::class, 'store'])->name('store');
+        Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
+        Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
     });
 
 

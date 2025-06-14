@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-start border border-gray-200">
         <div>
-          <h5 class="text-lg text-indigo-700 font-semibold mb-2">Danh sách Kiểm kê</h5>
+          <h5 class="text-lg text-indigo-700 font-semibold mb-2">Lịch sử Kiểm kho</h5>
         </div>
         <div class="flex items-center space-x-3">
           <!-- Search bar -->
@@ -16,12 +16,15 @@
           <Waiting route-name="admin.inventory-audit.create" :route-params="{}">
             <i class="fas fa-plus"></i> Tạo phiếu kiểm kê
           </Waiting>
-          <Waiting route-name="admin.inventory.import" :route-params="{}">
+          <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImportExcel" />
+          <button @click="$refs.importInput.click()"
+            class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
             <i class="fa fa-sign-in icon-btn"></i> Nhập file
-          </Waiting>
-          <Waiting route-name="admin.inventory.export" :route-params="{}">
+          </button>
+          <button @click="exportToExcel"
+            class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
             <i class="fa fa-file-export icon-btn"></i> Xuất file
-          </Waiting>
+          </button>
           <div ref="dropdownRef" class="relative">
             <button @click="toggleDropdown"
               class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
@@ -46,29 +49,36 @@
       <!-- Tab Navigation -->
       <div class="mb-4 border-b border-gray-200">
         <div class="flex items-center">
-          <ul class="flex flex-wrap -mb-px">
+          <!-- <ul class="flex flex-wrap -mb-px">
             <li class="mr-2">
               <button @click="activeTab = 'in_stock'"
                 :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'in_stock', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'in_stock' }"
                 class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                Đang có hàng
+                Tất cả
               </button>
             </li>
             <li class="mr-2">
               <button @click="activeTab = 'low_stock'"
                 :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'low_stock', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'low_stock' }"
                 class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                Sắp hết hàng
+                Có chênh lệch
               </button>
             </li>
             <li class="mr-2">
               <button @click="activeTab = 'out_of_stock'"
                 :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'out_of_stock', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'out_of_stock' }"
                 class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                Hết hàng
+                Không chênh lệch
               </button>
             </li>
-          </ul>
+             <li class="mr-2">
+              <button @click="activeTab = 'out_of_stock'"
+                :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'out_of_stock', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'out_of_stock' }"
+                class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
+                Không chênh lệch
+              </button>
+            </li>
+          </ul> -->
           <!-- Dropdown thao tác -->
           <div class="relative ml-2" v-if="selectedItems.length > 0" ref="actionDropdownRef">
             <button @click="toggleActionDropdown"
@@ -87,8 +97,7 @@
                 <i class="fas fa-times-circle mr-2 text-xs"></i> Đặt hết hàng
               </button>
               <div class="border-t border-gray-100 my-1"></div>
-              <button @click="bulkDelete"
-                class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50">
+              <button @click="bulkDelete" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50">
                 <i class="fas fa-trash-alt mr-2 text-xs"></i> Xóa
               </button>
             </div>
@@ -96,93 +105,112 @@
         </div>
       </div>
 
-      <!-- Inventory Table -->
+      <!-- audits Table -->
       <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-fade-in">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="w-12 px-4 py-3 text-left">
+                <!-- <th class="w-12 px-4 py-3 text-left">
                   <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"
                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                </th>
-                <th v-if="visibleColumns.includes('name')"
+                </th> -->
+                <th v-if="visibleColumns.includes('id')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Tên sản phẩm
+                  #ID
                 </th>
-                <th v-if="visibleColumns.includes('item_code')"
+                <th v-if="visibleColumns.includes('location')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Mã sản phẩm
+                  Khu vực
                 </th>
-                <th v-if="visibleColumns.includes('category')"
+                <th v-if="visibleColumns.includes('audit_date')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Danh mục
+                  Ngày kiểm
                 </th>
-                <th v-if="visibleColumns.includes('quantity')"
+                <th v-if="visibleColumns.includes('craeted_at')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Số lượng
+                  Ngày lưu
                 </th>
-                <th v-if="visibleColumns.includes('warehouse')"
+                <th v-if="visibleColumns.includes('user_name')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Kho
+                  Người tạo
                 </th>
                 <th v-if="visibleColumns.includes('status')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Trạng thái
                 </th>
-                <th v-if="visibleColumns.includes('last_updated')"
+                <th v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Cập nhật cuối
+                  Đồng bộ
+                </th>
+                <th v-if="visibleColumns.includes('action')"
+                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Hành động
                 </th>
               </tr>
             </thead>
-            <tbody v-if="props.inventory && props.inventory.data && props.inventory.data.length">
-              <tr v-for="item in props.inventory.data" :key="item.id"
-                @click="$inertia.visit(route('admin.inventory.show', item.id))"
+            <tbody v-if="props.audits && props.audits.data && props.audits.data.length">
+              <tr v-for="item in props.audits.data" :key="item.id"
+                @click="$inertia.visit(route('admin.audits.show', item.id))"
                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
-                <td class="px-4 py-4 whitespace-nowrap" @click.stop>
+                <!-- {{ item }} -->
+                <!-- <td class="px-4 py-4 whitespace-nowrap" @click.stop>
                   <input type="checkbox" :value="item.id" v-model="selectedItems"
                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                </td>
-                <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
+                </td> -->
+                <td v-if="visibleColumns.includes('id')" class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <img :src="item.image ? `/storage/${item.image}` : 'https://via.placeholder.com/40'"
-                      alt="Item Image"
-                      class="h-10 w-10 rounded-full object-cover border-2 border-white shadow-sm">
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+                      <div class="text-sm font-medium text-gray-900">{{ item.id }}</div>
                     </div>
                   </div>
                 </td>
-                <td v-if="visibleColumns.includes('item_code')"
+                <td v-if="visibleColumns.includes('location')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 font-medium">
-                  {{ item.item_code || '-' }}
+                  <div class="flex flex-wrap gap-1 justify-center">
+                    <span v-for="zone in item.audited_locations || []" :key="zone"
+                      class="inline-block bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full border border-indigo-200">
+                      {{ zone }}
+                    </span>
+                  </div>
                 </td>
-                <td v-if="visibleColumns.includes('category')"
+                <td v-if="visibleColumns.includes('audit_date')"
                   class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ item.category || '-' }}
+                  {{ item.audit_date ? new Date(new Date(item.audit_date).getTime() + 7 * 60 * 60 *
+                    1000).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
+                  minute: '2-digit' }) : '-' }}
                 </td>
-                <td v-if="visibleColumns.includes('quantity')"
+                <td v-if="visibleColumns.includes('created_at')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                  {{ item.quantity || 0 }}
+                  {{ item.created_at ? new Date(new Date(item.created_at).getTime() + 7 * 60 * 60 *
+                    1000).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
+                  minute: '2-digit' }) : '-' }}
                 </td>
-                <td v-if="visibleColumns.includes('warehouse')"
+                <td v-if="visibleColumns.includes('user_name')"
                   class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ item.warehouse || '-' }}
+                  {{ item.user?.name }} - {{ item.user?.id }}
                 </td>
                 <td v-if="visibleColumns.includes('status')" class="px-6 py-4 whitespace-nowrap text-center">
                   <span :class="{
                     'px-2.5 py-0.5 rounded-full text-xs': true,
-                    'bg-green-100 text-green-800': item.status === 'in_stock',
-                    'bg-yellow-100 text-yellow-800': item.status === 'low_stock',
-                    'bg-red-100 text-red-800': item.status === 'out_of_stock'
+                    'bg-green-100 text-green-800': item.status === 'completed',
+                    'bg-red-100 text-red-800': item.status === 'issues'
                   }">
-                    {{ statusLabels[item.status] || '-' }}
+                    {{ item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch' }}
                   </span>
                 </td>
-                <td v-if="visibleColumns.includes('last_updated')"
+                <td v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                  {{ item.last_updated ? new Date(item.last_updated).toLocaleDateString('vi-VN') : '-' }}
+                  <span v-if="item.status === 'completed'">--</span>
+                  <span v-else>{{ item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ' }}</span>
+                </td>
+                <td v-if="visibleColumns.includes('action')"
+                  class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                    <Link :href="route('admin.inventory-audit.show', item.id)" @click.stop title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                    </Link>
                 </td>
               </tr>
             </tbody>
@@ -197,32 +225,30 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="props.inventory && props.inventory.data && props.inventory.data.length"
+        <div v-if="props.audits && props.audits.data && props.audits.data.length"
           class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
           <div class="text-sm text-gray-600 font-medium">
             Hiển thị
-            <span class="font-semibold">{{ props.inventory.from }}</span> đến
-            <span class="font-semibold">{{ props.inventory.to }}</span> của
-            <span class="font-semibold">{{ props.inventory.total }}</span> kết quả
+            <span class="font-semibold">{{ props.audits.from }}</span> đến
+            <span class="font-semibold">{{ props.audits.to }}</span> của
+            <span class="font-semibold">{{ props.audits.total }}</span> kết quả
           </div>
           <div class="flex items-center space-x-2">
-            <Link v-if="props.inventory.prev_page_url" :href="addStatusToUrl(props.inventory.prev_page_url)"
+            <Link v-if="props.audits.prev_page_url" :href="addStatusToUrl(props.audits.prev_page_url)"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
-              <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-left"></i>
             </Link>
-            <span v-else
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+            <span v-else class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
               <i class="fas fa-chevron-left"></i>
             </span>
             <span class="text-sm text-gray-600">
-              Trang {{ props.inventory.current_page }} / {{ props.inventory.last_page }}
+              Trang {{ props.audits.current_page }} / {{ props.audits.last_page }}
             </span>
-            <Link v-if="props.inventory.next_page_url" :href="addStatusToUrl(props.inventory.next_page_url)"
+            <Link v-if="props.audits.next_page_url" :href="addStatusToUrl(props.audits.next_page_url)"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
               <i class="fas fa-chevron-right"></i>
             </Link>
-            <span v-else
-              class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+            <span v-else class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
               <i class="fas fa-chevron-right"></i>
             </span>
           </div>
@@ -238,10 +264,12 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import { route } from 'ziggy-js';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 // Props
 const props = defineProps({
-  inventory: Object,
+  audits: Object,
   status: String,
 });
 
@@ -249,33 +277,43 @@ const props = defineProps({
 const activeTab = ref(props.status || 'in_stock');
 
 // Column options and labels
-const columnOptions = ['name', 'item_code', 'category', 'quantity', 'warehouse', 'status', 'last_updated'];
+const columnOptions = [
+  'id',
+  'location',
+  'audit_date',
+  'created_at',
+  'user_name',
+  'status',
+  'adjusted',
+  'action',
+];
 
 const columnLabels = {
-  name: 'Tên sản phẩm',
-  item_code: 'Mã sản phẩm',
-  category: 'Danh mục',
-  quantity: 'Số lượng',
-  warehouse: 'Kho',
+  id: '#ID',
+  location: 'Khu vực',
+  audit_date: 'Ngày kiểm',
+  created_at: 'Ngày lưu',
+  user_name: 'Người tạo',
   status: 'Trạng thái',
-  last_updated: 'Cập nhật cuối',
+  adjusted: 'Đồng bộ',
+  action: 'Hành động',
 };
 
 const statusLabels = {
-  in_stock: 'Có hàng',
-  low_stock: 'Sắp hết',
-  out_of_stock: 'Hết hàng',
+  all: 'Tất cả',
+  difference: 'Có chênh lệch',
+  no_difference: 'Không chênh lệch',
 };
 
 const visibleColumns = ref(
-  localStorage.getItem('inventoryVisibleColumns')
-    ? JSON.parse(localStorage.getItem('inventoryVisibleColumns'))
-    : ['name', 'item_code', 'category', 'quantity', 'warehouse', 'status', 'last_updated']
+  localStorage.getItem('auditsVisibleColumns')
+    ? JSON.parse(localStorage.getItem('auditsVisibleColumns'))
+    : ['id', 'location', 'audit_date', 'created_at', 'user_name', 'status', 'adjusted', 'action']
 );
 
 // Save visibleColumns to localStorage
 watch(visibleColumns, (newColumns) => {
-  localStorage.setItem('inventoryVisibleColumns', JSON.stringify(newColumns));
+  localStorage.setItem('auditsVisibleColumns', JSON.stringify(newColumns));
 }, { deep: true });
 
 // Column dropdown
@@ -322,21 +360,21 @@ const selectAll = ref(false);
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedItems.value = props.inventory?.data.map(item => item.id) || [];
+    selectedItems.value = props.audits?.data.map(item => item.id) || [];
   } else {
     selectedItems.value = [];
   }
 };
 
 watch(selectedItems, (newVal) => {
-  selectAll.value = props.inventory?.data && newVal.length === props.inventory.data.length && newVal.length > 0;
+  selectAll.value = props.audits?.data && newVal.length === props.audits.data.length && newVal.length > 0;
 });
 
 watch(activeTab, () => {
   selectedItems.value = [];
   selectAll.value = false;
   router.get(
-    route('admin.inventory.index'),
+    route('admin.inventory-audit.index'),
     { status: activeTab.value },
     { preserveState: true, preserveScroll: true }
   );
@@ -344,55 +382,8 @@ watch(activeTab, () => {
 
 // Sync activeTab with props.status
 watch(() => props.status, (newStatus) => {
-  activeTab.value = newStatus || 'in_stock';
+  activeTab.value = newStatus;
 });
-
-// Bulk update status
-const bulkUpdateStatus = (newStatus) => {
-  if (!confirm(`Bạn có chắc muốn cập nhật trạng thái cho ${selectedItems.value.length} sản phẩm thành "${statusLabels[newStatus]}"?`)) {
-    return;
-  }
-  router.post(
-    route('admin.inventory.bulk-update-status'),
-    { item_ids: selectedItems.value, status: newStatus },
-    {
-      preserveState: true,
-      preserveScroll: true,
-      onSuccess: () => {
-        selectedItems.value = [];
-        selectAll.value = false;
-        showActionDropdown.value = false;
-      },
-    }
-  );
-};
-
-// Bulk delete
-const bulkDelete = () => {
-  if (!confirm(`Bạn có chắc muốn xóa ${selectedItems.value.length} sản phẩm? Hành động này không thể hoàn tác!`)) {
-    return;
-  }
-  router.post(
-    route('admin.inventory.bulk-delete'),
-    { item_ids: selectedItems.value },
-    {
-      preserveState: true,
-      preserveScroll: true,
-      onSuccess: () => {
-        selectedItems.value = [];
-        selectAll.value = false;
-        showActionDropdown.value = false;
-      },
-    }
-  );
-};
-
-// Add status to pagination URL
-const addStatusToUrl = (url) => {
-  const urlObj = new URL(url);
-  urlObj.searchParams.set('status', activeTab.value);
-  return urlObj.toString();
-};
 
 // Show server flash messages
 const page = usePage();
@@ -401,8 +392,34 @@ watch(() => page.props.flash, (flash) => {
     alert(flash.success); // Replace with toast notification if preferred
   }
 });
-</script>
 
+const exportToExcel = () => {
+  // Lấy dữ liệu hiện tại (props.audits.data)
+  const data = (props.audits?.data || []).map(item => ({
+    'ID': item.id,
+    'Khu vực': (item.audited_locations || []).join(', '),
+    'Ngày kiểm': item.audit_date,
+    'Ngày lưu': item.created_at,
+    'Người tạo': item.user?.name,
+    'Trạng thái': item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch',
+    'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'KiemKe');
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  // Lấy ngày hiện tại theo định dạng yyyy-mm-dd
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `kiemkho-${dateStr}.xlsx`);
+};
+
+
+</script>
 <style lang="css" scoped>
 ::-webkit-scrollbar {
   height: 8px;
