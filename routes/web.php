@@ -15,6 +15,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
 
 use App\Http\Controllers\RankController;
+use App\Http\Controllers\Admin\SupplierTransactionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -117,6 +118,24 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('store', [SupplierController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
+        Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
+        Route::get('create', [CustomerTransactionController::class, 'create'])->name('create');
+        Route::get('{id}/edit', [CustomerTransactionController::class, 'edit'])->name('edit');
+        Route::post('store', [CustomerTransactionController::class, 'store'])->name('store');
+        Route::patch('{id}/update', [CustomerTransactionController::class, 'update'])->name('update');
+        Route::delete('{id}', [CustomerTransactionController::class, 'destroy'])->name('destroy');
+    });
+    Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
+        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index');
+        Route::get('create', [SupplierTransactionController::class, 'create'])->name('create');
+        Route::get('{id}/edit', [SupplierTransactionController::class, 'edit'])->name('edit');
+        Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
+        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update');
+        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment');
+        Route::delete('{id}', [SupplierTransactionController::class, 'destroy'])->name('destroy');
     });
 
 

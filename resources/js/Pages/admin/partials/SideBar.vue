@@ -254,6 +254,41 @@
                     </Link>
                 </div>
             </div>
+            <!-- Customers transaction -->
+            <div class="mb-1">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    @click="toggleDropdown('customer-transaction-menu')">
+                    <div class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
+                        <i class="fas fa-money-bill-wave text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left">Quản lý giao dịch</span>
+                    <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="customer-transaction-icon"></i>
+                </button>
+
+                <div id="customer-transaction-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
+                    <Link :href="route('admin.customer-transaction.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                            <i class="fas fa-file-invoice-dollar text-xs"></i>
+                        </div>
+                        <span class="text-xs">Công nợ khách hàng</span>
+                    </Link>
+                    <Link :href="route('admin.supplier-transaction.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                            <i class="fas fa-file-invoice-dollar text-xs"></i>
+                        </div>
+                        <span class="text-xs">Công nợ nhà cung cấp</span>
+                    </Link>
+                   
+               
+                </div>
+            </div>
 
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">

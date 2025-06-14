@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Roles\RoleRequest;
+use App\Repositories\Auth\PermissionRepository;
 use App\Repositories\Auth\RoleRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,12 +12,14 @@ use Inertia\Inertia;
 
 class RoleController extends Controller
 {
+    private $permissionRepo;
     /**
      * @var  \App\Repositories\Auth\RoleRepository;
      */
-    public function __construct(RoleRepository $roleRepository)
+    public function __construct(RoleRepository $roleRepository, PermissionRepository $permissionRepo)
     {
         $this->handleRepository = $roleRepository;
+        $this->permissionRepo = $permissionRepo;
     }
 
     /**
@@ -27,15 +30,16 @@ class RoleController extends Controller
         $data = request()->all();
         $perPage = request()->get('perPage', 15);
         // lấy data cho ô tìm kiếm
-        $renderForm = $this->handleRepository->renderForm();
+        $permissions = $this->permissionRepo->getDropDownPermission();
         $listRoles = $this->handleRepository->getDataListRole($data, $perPage);
         return Inertia::render(
             "admin/Roles/Index",
             [
                 'listRoles' => $listRoles,
-                'permissions' => $renderForm['permissions']
+                'permissions' => $permissions
             ]
         );
+        
     }
     /**
      * Show the form for creating a new resource.

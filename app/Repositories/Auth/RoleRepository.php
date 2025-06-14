@@ -124,6 +124,7 @@ class RoleRepository extends BaseRepository
             return [];
         }
     }
+    
     public function getAll(){
         return $this->handleModel::all();
     }
