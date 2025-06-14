@@ -189,6 +189,18 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
+        "admin.role.admin.customers.bulk-delete": {
+            uri: "admin/role/admin/customers/bulk-delete",
+            methods: ["POST"],
+        },
+        "admin.role.admin.customers.import": {
+            uri: "admin/role/admin/customers/import",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.role.admin.customers.export": {
+            uri: "admin/role/admin/customers/export",
+            methods: ["GET", "HEAD"],
+        },
         "admin.suppliers.index": {
             uri: "admin/suppliers",
             methods: ["GET", "HEAD"],
@@ -199,12 +211,76 @@ const Ziggy = {
         },
         "admin.suppliers.edit": {
             uri: "admin/suppliers/{id}/edit",
-            methods: ["PATCH"],
+            methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
         "admin.suppliers.store": {
             uri: "admin/suppliers/store",
             methods: ["POST"],
+        },
+        "admin.suppliers.update": {
+            uri: "admin/suppliers/{id}/update",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.suppliers.destroy": {
+            uri: "admin/suppliers/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.customer-transaction.index": {
+            uri: "admin/customer-transaction",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customer-transaction.create": {
+            uri: "admin/customer-transaction/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customer-transaction.edit": {
+            uri: "admin/customer-transaction/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.customer-transaction.store": {
+            uri: "admin/customer-transaction/store",
+            methods: ["POST"],
+        },
+        "admin.customer-transaction.update": {
+            uri: "admin/customer-transaction/{id}/update",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.customer-transaction.destroy": {
+            uri: "admin/customer-transaction/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.supplier-transaction.index": {
+            uri: "admin/supplier-transaction",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.supplier-transaction.create": {
+            uri: "admin/supplier-transaction/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.supplier-transaction.edit": {
+            uri: "admin/supplier-transaction/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.supplier-transaction.store": {
+            uri: "admin/supplier-transaction/store",
+            methods: ["POST"],
+        },
+        "admin.supplier-transaction.update": {
+            uri: "admin/supplier-transaction/{id}/update",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.supplier-transaction.destroy": {
+            uri: "admin/supplier-transaction/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
         },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {
@@ -231,6 +307,14 @@ const Ziggy = {
             uri: "admin/users/{user}",
             methods: ["DELETE"],
             parameters: ["user"],
+        },
+        "admin.users.bulk-update-status": {
+            uri: "admin/users/update-status",
+            methods: ["POST"],
+        },
+        "admin.users.bulk-delete": {
+            uri: "admin/users/bulk-delete",
+            methods: ["POST"],
         },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },

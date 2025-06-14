@@ -15,8 +15,9 @@
                         <span>Tìm kiếm</span>
                     </button>
                     <!-- Add Role Button -->
-              
-                    <Waiting v-can="'admin.role.create'" route-name="admin.role.create" :route-params="{}" :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
+
+                    <Waiting v-can="'admin.role.create'" route-name="admin.role.create" :route-params="{}"
+                        :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus"></i>
                         <span>Thêm vai trò</span>
                     </Waiting>
@@ -49,11 +50,12 @@
                             </label>
                             <div class="relative">
                                 <select v-model="searchForm.permission"
-                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all">
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all"
+                                    style="max-height: 50px; overflow-y: auto;">
                                     <option value="">Tất cả quyền hạn</option>
-                                    <option class="text-black" v-for="permission in props.permissions" :value="permission.id"
-                                        :key="permission.id">
-                                        {{ permission.name }}
+                                    <option class="text-black" v-for="permission in props.permissions"
+                                        :value="permission.id" :key="permission.id">
+                                        {{ permission.description }}
                                     </option>
                                 </select>
                                 <i
@@ -137,7 +139,7 @@
                                             leave-from-class="opacity-100 translate-y-0"
                                             leave-to-class="opacity-0 translate-y-1">
                                             <div v-if="activeDropdowns[role.id]"
-                                                class="absolute z-10 mt-1 w-64 max-h-60 overflow-y-auto bg-white rounded-md shadow-lg border border-indigo-100 transform origin-top">
+                                                class="z-10 mt-1 w-64 max-h-60 overflow-y-auto bg-white rounded-md shadow-lg border border-indigo-100 transform origin-top">
                                                 <div class="py-1">
                                                     <div v-for="permission in role.permissions" :key="permission.id"
                                                         class="px-4 py-2 text-sm text-black hover:bg-indigo-50 transition-colors duration-100 ease-in-out">
@@ -154,18 +156,30 @@
                                         </transition>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
                                         <Link :href="route('admin.role.edit', role.id)"
                                             class="flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-600 rounded-md hover:bg-indigo-200 transition-colors">
                                         <i class="fas fa-edit text-sm"></i>
                                         <span>Sửa</span>
                                         </Link>
-                                        <button @click="handleDelete(role.id)"
-                                            class="flex items-center gap-1 px-3 py-1.5 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors">
-                                            <i class="fas fa-trash text-sm"></i>
-                                            <span>Xóa</span>
-                                        </button>
+                                        <ConfirmModal :route-name="'admin.role.destroy'" :route-params="{
+                                            id: role.id,
+                                        }" title="Xác nhận xóa nhà cung cấp"
+                                            :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${role.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
+
+                                            <template #trigger="{
+                                                openModal,
+                                            }">
+                                                <button @click="
+                                                    openModal
+                                                " class="text-sm px-3 py-2 bg-white text-red-600">
+                                                    <i class="fas fa-trash-alt mr-1"></i>
+                                                    Xóa
+                                                </button>
+                                            </template>
+
+                                        </ConfirmModal>
                                     </div>
                                 </td>
                             </tr>
@@ -231,7 +245,7 @@ import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { ref } from 'vue';
 import Waiting from '../../components/Waiting.vue'
-
+import ConfirmModal from '../../components/ConfirmModal.vue'
 const props = defineProps({
     listRoles: {
         type: Object,
@@ -251,6 +265,7 @@ const props = defineProps({
         default: () => ({})
     }
 });
+
 // Thêm state cho dropdown
 const activeDropdowns = ref({});
 
@@ -295,12 +310,7 @@ const resetSearch = () => {
 };
 
 // Handle delete role
-const handleDelete = (id) => {
-    if (confirm("Bạn có chắc chắn muốn xoá vai trò này?")) {
-        const formDelete = useForm({});
-        formDelete.delete(route('admin.role.destroy', id));
-    }
-};
+
 </script>
 
 <style lang="css" scoped>
