@@ -2,34 +2,58 @@
 
 namespace App\Repositories;
 
+use App\Models\Attribute;
 use App\Models\Product;
+use App\Models\Unit;
 
 class ProductRepository
 {
 
-    protected $model;
-
-    public function __construct(Product $product)
+    protected $handleModel;
+    protected $repositoryCategory;
+    public function __construct(Product $product, CategoryRepository $category)
     {
-        $this->model = $product;
+        $this->handleModel = $product;
+        $this->repositoryCategory = $category;
     }
 
-    public function getAll()
+    public function getAll($perPage = 15)
     {
-        return $this->model::with([
+        return $this->handleModel::with([
             'category',
-            'supplier',
+            'images',
             'productVariants' => function ($query) {
-                $query->with('attributeValues.attribute');
+                $query->with([
+                    'attributes',
+                    'inventory',
+                    'inventoryLocations.zone',
+                    'supplierVariants'
+                ]);
             },
-            'unitConversions' => function ($query) {
-                $query->with(['fromUnit', 'toUnit']);
-            }
-        ])->paginate(10);
+            'unitConversions.fromUnit',
+            'unitConversions.toUnit',
+        ])->paginate($perPage);
     }
 
     public function findById($id)
     {
-        return $this->model::with(['category'])->find($id);
+        return $this->handleModel::with(['category'])->find($id);
+    }
+
+    public function getCreateData()
+    {
+        $attributes = Attribute::with('values')->get();
+
+        $attributeValues = [];
+        foreach ($attributes as $attribute) {
+            $attributeValues[$attribute->id] = $attribute->values;
+        }
+
+        return [
+            'categories' => $this->repositoryCategory->getHierarchicalCategories(),
+            'units' => Unit::all(),
+            'attributes' => $attributes->makeHidden('values'), // tránh gửi lặp values trong attributes
+            'attributeValues' => $attributeValues,
+        ];
     }
 }

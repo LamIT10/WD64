@@ -90,7 +90,7 @@
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors">
                         <i class="fas fa-users sx-sm"></i>
                     </div>
-                    <span class="text-sm font-medium flex-1 text-left">Quản lý nhân viên</span>
+                    <span class="text-sm font-medium flex-1 text-left">Nhân viên</span>
                     <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
                         id="user-icon"></i>
                 </button>
