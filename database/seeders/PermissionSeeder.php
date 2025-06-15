@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+
 class PermissionSeeder extends Seeder
 {
     /**
@@ -18,45 +19,48 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        DB::table("roles")->delete();
-        DB::table("permissions")->delete();
+        // DB::table("roles")->delete();
+        // DB::table("permissions")->delete();
+        
         $now = now();
-        $data = [];
+        $newPermissionIds = [];
         foreach (PermissionConstant::all() as $item) {
             foreach ($item['permissions'] as $permission) {
-                $data[] = [
-                    'name' => $permission['name'],
-                    'description' => $permission['description'],
-                    'group_permission' => $item['group_permission'],
-                    "group_description" => $item['group_description'],
+                if (!Permission::where('name', $permission['name'])->first()) {
+                    $newPermission = [
+                        'name' => $permission['name'],
+                        'description' => $permission['description'],
+                        'group_permission' => $item['group_permission'],
+                        "group_description" => $item['group_description'],
+                        'guard_name' => 'web',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                    $newPermissionIds[] =  Permission::insertGetId($newPermission);
+                }
+            }
+        }
+
+ 
+        foreach (ExtendsionConstant::getConstantsAsArray(RoleConstant::class) as $value) {
+            if (!Role::where('name', $value['value'])->first()) {
+                $newRole = [
+                    'name' => $value['value'],
                     'guard_name' => 'web',
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
+                Role::create($newRole);
             }
         }
-        Permission::insert($data);
-
-        $insertIds = Permission::pluck('id');
-        $roles = [];
-        foreach (ExtendsionConstant::getConstantsAsArray(RoleConstant::class) as $value) {
-            $roles[] = [
-                'name' => $value['value'],
-                'guard_name' => 'web',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
-        Role::insert($roles);
-
         $admin = Role::where('name', 'admin')->first();
         // gán quyền mặc định toàn bộ permission cho role admin
-        $admin->syncPermissions($insertIds);
+        $admin->syncPermissions($newPermissionIds);
 
 
         // nếu tài khoản admin tồn tại thì xoá 
-        $user = User::where('name','admin')->first();
-        if(!$user){
+        $user = User::where('name', 'admin')->first();
+        if (!$user) {
             $userId = DB::table('users')->insertGetId([
                 'name' => 'admin',
                 'email' => 'admin@example.com',
@@ -72,10 +76,9 @@ class PermissionSeeder extends Seeder
                 'updated_at' => $now,
             ]);
             // tạo admin mặc định
-        
+
             $user = User::where('id', $userId)->first();
         }
         $user->syncRoles($admin->id);
-
     }
 }
