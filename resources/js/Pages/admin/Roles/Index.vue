@@ -16,11 +16,11 @@
                     </button>
                     <!-- Add Role Button -->
 
-                    <Waiting v-can="'admin.role.create'" route-name="admin.role.create" :route-params="{}"
+                    <!-- <Waiting v-can="'admin.role.create'" route-name="admin.role.create" :route-params="{}"
                         :color="' bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus"></i>
                         <span>Thêm vai trò</span>
-                    </Waiting>
+                    </Waiting> -->
                 </div>
             </div>
 
@@ -163,7 +163,7 @@
                                         <i class="fas fa-edit text-sm"></i>
                                         <span>Sửa</span>
                                         </Link>
-                                        <ConfirmModal :route-name="'admin.role.destroy'" :route-params="{
+                                        <!-- <ConfirmModal :route-name="'admin.role.destroy'" :route-params="{
                                             id: role.id,
                                         }" title="Xác nhận xóa nhà cung cấp"
                                             :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${role.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
@@ -179,7 +179,7 @@
                                                 </button>
                                             </template>
 
-                                        </ConfirmModal>
+                                        </ConfirmModal> -->
                                     </div>
                                 </td>
                             </tr>

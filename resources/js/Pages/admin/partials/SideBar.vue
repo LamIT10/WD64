@@ -213,7 +213,7 @@
             </div>
 
             <!-- Customers -->
-            <div class="mb-1">
+            <div class="mb-1" v-can="'admin.customers.index'">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('customer-menu')">

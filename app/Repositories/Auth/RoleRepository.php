@@ -101,7 +101,7 @@ class RoleRepository extends BaseRepository
     {
         try {
             $role  =  $this->findById($id);
-            $role->delete($id);
+            $role->delete();
             if (!$role) {
                 throw new \Exception("Có lỗi khi xoá vai trò");
             }
