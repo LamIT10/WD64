@@ -10,10 +10,9 @@ class CustomerTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id',
+  
         'sales_order_id',
         'paid_amount',
-        'remaining_amount',
         'transaction_date',
         'credit_due_date',
         'description'
@@ -24,13 +23,12 @@ class CustomerTransaction extends Model
         'credit_due_date' => 'date',
     ];
 
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
+ 
 
     public function salesOrder()
     {
         return $this->belongsTo(SaleOrder::class);
     }
+
+    
 }

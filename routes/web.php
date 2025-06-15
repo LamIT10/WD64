@@ -54,7 +54,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth', 'guest'])->group(funct
         'prefix' => 'customers',
         'as' => 'customers.'
     ], function () {
-        Route::get('/transaction', [CustomerTransactionController::class, 'index'])->name('transaction');
         Route::get('/', [CustomerController::class, 'index'])->name('index');
         Route::get('/create', [CustomerController::class, 'create'])->name('create');
         Route::post('/', [CustomerController::class, 'store'])->name('store');
@@ -125,7 +124,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth', 'guest'])->group(funct
         Route::get('create', [CustomerTransactionController::class, 'create'])->name('create');
         Route::get('{id}/edit', [CustomerTransactionController::class, 'edit'])->name('edit');
         Route::post('store', [CustomerTransactionController::class, 'store'])->name('store');
-        Route::patch('{id}/update', [CustomerTransactionController::class, 'update'])->name('update');
+Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('update');
         Route::delete('{id}', [CustomerTransactionController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
