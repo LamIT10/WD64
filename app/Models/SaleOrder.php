@@ -36,7 +36,15 @@ class SaleOrder extends Model
     {
         return $this->hasMany(CustomerTransaction::class);
     }
-
+    public function transactions()
+    {
+        return $this->hasMany(CustomerTransaction::class, 'sales_order_id');
+    }
+    public function latestTransaction()
+    {
+        return $this->hasOne(CustomerTransaction::class, 'sales_order_id')->latestOfMany();
+    }
+    
     public function shipping()
     {
         return $this->hasMany(Shipping::class);
