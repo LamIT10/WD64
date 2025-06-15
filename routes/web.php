@@ -124,7 +124,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth', 'guest'])->group(funct
         Route::get('create', [CustomerTransactionController::class, 'create'])->name('create');
         Route::get('{id}/edit', [CustomerTransactionController::class, 'edit'])->name('edit');
         Route::post('store', [CustomerTransactionController::class, 'store'])->name('store');
-Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('update');
+        Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('update');
         Route::delete('{id}', [CustomerTransactionController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
@@ -137,8 +137,6 @@ Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('upda
         Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment');
         Route::delete('{id}', [SupplierTransactionController::class, 'destroy'])->name('destroy');
     });
-
-
 
     Route::group([
         'prefix' => 'users',
@@ -159,11 +157,9 @@ Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('upda
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'guest'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
-Route::get('/', function () {
-    return Inertia::render('Dashboard');
-});
+
 // Authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
