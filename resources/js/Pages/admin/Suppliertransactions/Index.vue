@@ -216,7 +216,11 @@
                                     </th>
                                     <th scope="row"
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <Link :href="route('admin.supplier-transaction.show', {
+                                            id: item.purchase_order.supplier_id
+                                        })">
                                         {{ item.purchase_order.supplier.name }}
+                                        </Link>
                                     </th>
                                     <th scope="row"
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -305,10 +309,10 @@
                                     </td>
                                 </tr>
                                 <tr v-if="transactionSupplier.data.length === 0">
-                                <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                                  Không có công nợ nào được tìm thấy
-                                </td>
-                            </tr>
+                                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                                        Không có công nợ nào được tìm thấy
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -372,6 +376,7 @@ import Waiting from '../../components/Waiting.vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import ModalCreditDueDate from './ModalCreditDueDate.vue';
 import ModalPaymentTransaction from './ModalPaymentTransaction.vue';
+import { route } from 'ziggy-js';
 // xử lý lọc dữ liệu
 // Search form state
 const showSearchForm = ref(false);

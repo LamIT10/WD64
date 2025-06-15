@@ -39,7 +39,6 @@ class RoleController extends Controller
                 'permissions' => $permissions
             ]
         );
-        
     }
     /**
      * Show the form for creating a new resource.
@@ -81,6 +80,13 @@ class RoleController extends Controller
     {
         $data = $this->handleRepository->renderForm();
         $role = $this->handleRepository->findById($id);
+        if ($role->name == 'admin') {
+            $data = [
+                'status' => false,
+                'message' => 'Không thể cập nhật quyền của admin'
+            ];
+            return $this->returnInertia($data, 'Không thể cập nhật quyền của admin', 'admin.role.index');
+        }
         $role['permissions'] = $role->permissions()->pluck('id')->toArray();
         return Inertia::render("admin/Roles/EditRole", ['role' => $role, 'permissions' => $data['permissions']]);
     }

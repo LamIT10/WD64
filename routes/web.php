@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 
 
-Route::prefix('admin')->as('admin.')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware(['auth', 'guest'])->group(function () {
 
     Route::get('/dashboard', action: function () {
         return Inertia::render('Dashboard');
@@ -131,6 +131,7 @@ Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('upda
         Route::get('/', [SupplierTransactionController::class, 'index'])->name('index');
         Route::get('create', [SupplierTransactionController::class, 'create'])->name('create');
         Route::get('{id}/edit', [SupplierTransactionController::class, 'edit'])->name('edit');
+        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show');
         Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update');
         Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment');
@@ -158,7 +159,7 @@ Route::put('{id}', [CustomerTransactionController::class, 'update'])->name('upda
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth'])->name('dashboard');
+})->middleware(['auth', 'guest'])->name('dashboard');
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');

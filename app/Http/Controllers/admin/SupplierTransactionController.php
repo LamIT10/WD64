@@ -31,5 +31,9 @@ class SupplierTransactionController extends Controller
         $supplierTransaction = $this->handleRepository->hanldeUpdatePayment($id, request()->all());
         return $this->returnInertia($supplierTransaction, "Cập nhật hạn công nợ thành công", 'admin.supplier-transaction.index');
     }
+    public function show($id){
+        $supplierTransaction = $this->handleRepository->getDataForShowTransaction($id);
+        return Inertia::render('admin/Suppliertransactions/Show', ['supplierTransaction'=> $supplierTransaction]);
+    }
     
 }
