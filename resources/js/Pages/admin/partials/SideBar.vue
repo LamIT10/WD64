@@ -123,6 +123,14 @@
 
                 <div id="product-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
+                  <Link :href="route('admin.products.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-th text-xs"></i>
+                    </div>
+                    <span class="text-xs">Danh sách sản phẩm</span>
+                    </Link>
                     <a href="variants.html"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
@@ -201,14 +209,7 @@
                         </div>
                          <span class="text-xs">Quản lý</span></Link>
                 
-                    <a href="sales-orders.html"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
-                            <i class="fas fa-truck text-xs"></i>
-                        </div>
-                        <span class="text-xs">Công nợ</span>
-                    </a>
+                 
                 </div>
             </div>
 
@@ -244,14 +245,7 @@
                     </div>
                     <span class="text-xs">Quản lý hạng</span>
                     </Link>
-                    <Link :href="route('admin.customers.transaction')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                            <i class="fas fa-file-invoice-dollar text-xs"></i>
-                        </div>
-                        <span class="text-xs">Công nợ khách hàng</span>
-                    </Link>
+                   
                 </div>
             </div>
             <!-- Customers transaction -->
