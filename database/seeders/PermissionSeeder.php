@@ -19,11 +19,8 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        // DB::table("roles")->delete();
-        // DB::table("permissions")->delete();
-        
         $now = now();
-        $newPermissionIds = [];
+       
         foreach (PermissionConstant::all() as $item) {
             foreach ($item['permissions'] as $permission) {
                 if (!Permission::where('name', $permission['name'])->first()) {
@@ -36,7 +33,7 @@ class PermissionSeeder extends Seeder
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
-                    $newPermissionIds[] =  Permission::insertGetId($newPermission);
+                 Permission::insert($newPermission);
                 }
             }
         }
@@ -55,6 +52,7 @@ class PermissionSeeder extends Seeder
         }
         $admin = Role::where('name', 'admin')->first();
         // gán quyền mặc định toàn bộ permission cho role admin
+        $newPermissionIds = Permission::pluck(('id'));
         $admin->syncPermissions($newPermissionIds);
 
 

@@ -116,7 +116,6 @@ class PermissionRepository extends BaseRepository
         }
     }
     public function getDropDownPermission(){
-        dd(  $this->hasRole(RoleConstant::supper_admin['value']));
         return $this->handleModel->select(["id","description"])->get();
        
     }
