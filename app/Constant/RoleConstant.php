@@ -7,7 +7,7 @@ class RoleConstant{
         'text' => "Quản lý",
         'value' => "manager",
     ];
-    public const supper_admin = [
+    public const admin = [
         'text' => "Quản trị hệ thống",
         'value' => "admin",
     ];
