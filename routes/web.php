@@ -129,14 +129,12 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::delete('{id}', [CustomerTransactionController::class, 'destroy'])->name('destroy');
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
-        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index');
-        Route::get('create', [SupplierTransactionController::class, 'create'])->name('create');
-        Route::get('{id}/edit', [SupplierTransactionController::class, 'edit'])->name('edit');
-        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show');
+        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_INDEX);
+        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
         Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
-        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update');
-        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment');
-        Route::delete('{id}', [SupplierTransactionController::class, 'destroy'])->name('destroy');
+        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
+        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
+      
     });
 
 

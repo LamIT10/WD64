@@ -271,7 +271,7 @@
                         </div>
                         <span class="text-xs">Công nợ khách hàng</span>
                     </Link>
-                    <Link :href="route('admin.supplier-transaction.index')"
+                    <Link v-can="'admin.supplier_transaction.index'" :href="route('admin.supplier-transaction.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
