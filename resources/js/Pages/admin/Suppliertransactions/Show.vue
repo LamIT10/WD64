@@ -29,6 +29,9 @@
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                             Hết hạn
                         </span>
+                        <Waiting route-name="admin.supplier-transaction.index">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </Waiting>
                     </div>
                 </div>
 
@@ -37,30 +40,37 @@
                         <h2 class="text-sm font-semibold text-indigo-700">Thông tin liên hệ</h2>
                         <div class="mt-2 space-y-2 text-gray-800">
                             <p class="flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
                                 {{ supplierTransaction.infoTransaction.name_supplier }}
                             </p>
                             <p class="flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                    </path>
                                 </svg>
                                 {{ supplierTransaction.infoTransaction.phone }}
                             </p>
                             <p class="flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                    </path>
                                 </svg>
                                 {{ supplierTransaction.infoTransaction.email }}
                             </p>
                             <p class="flex items-start">
-                                <svg class="w-4 h-4 mr-2 mt-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 mt-1 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
@@ -70,17 +80,20 @@
                     </div>
 
                     <div class="bg-white p-4 rounded-lg shadow-sm">
-                        <h2 class="text-sm font-semibold text-indigo-700">Thông tin đơn hàng</h2>
+                        <h2 class="text-sm font-semibold text-indigo-700">Thông tin hạn công nợ</h2>
                         <div class="mt-2 space-y-2 text-gray-800">
                             <p class="flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
                                 </svg>
                                 Ngày giao dịch: {{ formatDate(supplierTransaction.infoTransaction.transaction_date) }}
                             </p>
                             <p class="flex items-center">
-                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -108,7 +121,8 @@
                 <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-600">
                     <h3 class="text-sm font-medium text-gray-700">Số tiền nợ</h3>
                     <p class="mt-2 text-2xl font-semibold text-red-700">
-                        {{ formatNumber(supplierTransaction.infoTransaction.total_amount - supplierTransaction.infoTransaction.paid_amount) }} VNĐ
+                        {{ formatNumber(supplierTransaction.infoTransaction.total_amount -
+                            supplierTransaction.infoTransaction.paid_amount) }} VNĐ
                     </p>
                 </div>
             </div>
@@ -122,19 +136,24 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Trạng thái
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Tổng tiền đơn hàng
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Đã thanh toán
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Số tiền nợ
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Ghi chú
                                 </th>
                             </tr>
@@ -166,7 +185,8 @@
                                     {{ formatNumber(supplierTransaction.infoTransaction.paid_amount) + " VNĐ" }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
-                                    {{ formatNumber(supplierTransaction.infoTransaction.total_amount - supplierTransaction.infoTransaction.paid_amount) + " VNĐ" }}
+                                    {{ formatNumber(supplierTransaction.infoTransaction.total_amount -
+                                        supplierTransaction.infoTransaction.paid_amount) + " VNĐ" }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-900">
                                     {{ supplierTransaction.infoTransaction.description || 'Không có ghi chú' }}
@@ -176,22 +196,88 @@
                     </table>
                 </div>
             </div>
+            <div class="bg-white rounded-lg shadow overflow-hidden mt-10">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-indigo-800">Chi tiết đơn hàng</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    STT
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Tên sản phẩm
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Số lượng đặt
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Số lượng thực tế
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Quy đổi
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Giá trên đơn vị
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Tổng giá
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50"
+                                v-for="(item, index) in supplierTransaction.infoTransaction.list_item_order">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ index }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                    {{ item.product_name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                    {{ item.quantity_ordered }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                    {{ item.quantity_received }}
+                                </td>
+                                <td class="px-6 py-4 text-gray-900">
+                                    <p v-for="value in item.convertion">
+                                        {{ value }}
+                                    </p>
+                                </td>
+                                <td class="px-6 py-4 text-gray-900">
+                                    {{ item.unit_price }}
+                                </td>
+                                <td class="px-6 py-4 text-gray-900">
+                                    {{ item.subtotal }}
+                                </td>
 
-            <!-- Notes section -->
-            <div class="mt-6 bg-indigo-50 rounded-lg p-4 border border-indigo-100">
-                <h3 class="text-sm font-medium text-indigo-700 mb-2">Thông tin bổ sung</h3>
-                <p class="text-gray-700">{{ supplierTransaction.infoTransaction.description || 'Không có ghi chú bổ sung' }}</p>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
         </div>
     </AppLayout>
 </template>
 
 <script setup>
+import Waiting from '../../components/Waiting.vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 const { supplierTransaction } = defineProps({
     supplierTransaction: Object,
 })
-
+console.log(supplierTransaction);
 const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('vi-VN');
 };
