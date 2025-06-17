@@ -18,7 +18,7 @@ class SupplierTransactionController extends Controller
     }
     public function index(){
         $data = request()->all();
-        $perPage = request()->get('perPage', 15);
+        $perPage = request()->get('perPage', 20);
         $transactionSupplier = $this->handleRepository->getData($data, $perPage);
         $listSuppliers = $this->supplierRepository->listSelectSupplier();
         return Inertia::render("admin/Suppliertransactions/Index", ["transactionSupplier"=> $transactionSupplier, 'listSuppliers' => $listSuppliers]);
@@ -29,7 +29,7 @@ class SupplierTransactionController extends Controller
     }
     public function updatePayment(int $id){
         $supplierTransaction = $this->handleRepository->hanldeUpdatePayment($id, request()->all());
-        return $this->returnInertia($supplierTransaction, "Cập nhật hạn công nợ thành công", 'admin.supplier-transaction.index');
+        return $this->returnInertia($supplierTransaction, "Cập nhật công nợ thành công", 'admin.supplier-transaction.index');
     }
     public function show($id){
         $supplierTransaction = $this->handleRepository->getDataForShowTransaction($id);

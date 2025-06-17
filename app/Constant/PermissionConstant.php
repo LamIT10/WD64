@@ -26,9 +26,36 @@ class PermissionConstant
     public const CUSTOMER_SHOW = 'admin.customers.show';
     public const CUSTOMER_RANK_STORE = 'admin.customers.ranks.store';
 
+//  Supplier transaction
+    public const SUPPLIER_TRANSACTION_INDEX = 'admin.supplier_transaction.index';
+    public const SUPPLIER_TRANSACTION_SHOW = 'admin.supplier_transaction.show';
+    public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE = 'admin.supplier_transaction.update_credit_due_date';
+    public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier_transaction.update_paid_amount';
     public static function all(): array
     {
         return [
+            [
+                'group_permission' => 'PERMISSION_SUPPLIER_TRANSACTION',
+                'group_description' => 'Quyền công nợ nhà cung cấp',
+                'permissions' => [
+                    [
+                        "description" => "Danh sách công nợ",
+                        "name" => self::SUPPLIER_TRANSACTION_INDEX,
+                    ],
+                    [
+                        "description" => "Chi tiết công nợ",
+                        "name" => self::SUPPLIER_TRANSACTION_SHOW,
+                    ],
+                    [
+                        "description" => "Cập nhật hạn công nợ",
+                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE,
+                    ],
+                    [
+                        "description" => "Cập nhật thành toán công nợ",
+                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT,
+                    ],
+                ]
+            ],
             // Users
             [
                 "group_permission" => "PERMISSION_USER",

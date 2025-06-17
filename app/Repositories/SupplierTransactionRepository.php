@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\SupplierTransaction;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
@@ -17,11 +19,11 @@ class SupplierTransactionRepository extends BaseRepository
     public function getData($data, $perPage)
     {
         $query = $this->handleModel::with("purchaseOrder")->with("purchaseOrder.supplier")->select(["*"]);
-
+      
         if (!empty($data)) {
             $query = $query->when(!empty($data['supplierFilter']), function ($query, $supplierFilter) use ($data) {
-                return $query->whereHas('purchaseOrder', function ($subQuery) use ($supplierFilter) {
-                    $subQuery->where('supplier_id', $supplierFilter);
+                return $query->whereHas('purchaseOrder', function ($subQuery) use ($data) {
+                    $subQuery->where('supplier_id', $data['supplierFilter']);
                 });
             });
 
@@ -84,6 +86,9 @@ class SupplierTransactionRepository extends BaseRepository
             if ($obj->transaction_date > $data["credit_due_date"]) {
                 throw new \Exception("Hạn công nợ cần lớn hơn ngày giao dịch");
             }
+            if ($obj->credit_due_date > $data["credit_due_date"]) {
+                throw new \Exception("Hạn công nợ cầh lớn hạn cũ");
+            }
             $newObj = [];
             $newObj["credit_due_date"] = $data["credit_due_date"];
             $obj = $obj->update($newObj);
@@ -102,9 +107,13 @@ class SupplierTransactionRepository extends BaseRepository
         try {
             $obj = $this->handleModel::with("purchaseOrder")->where("id", $id)->firstOrFail();
             $newObj = [];
+          
             $newObj["paid_amount"] = $obj['paid_amount'] + $data["payment"];
             if ($newObj["paid_amount"] > $obj->purchaseOrder->total_amount) {
                 throw new \Exception("Tổng tiền thanh toán đã vượt quá đơn hàng");
+            }
+            if ($data["payment"] <= 0) {
+                throw new \Exception("Số tiền thanh toán cần lớn 0");
             }
             $obj = $obj->update($newObj);
             if (!$obj) {
@@ -144,6 +153,29 @@ class SupplierTransactionRepository extends BaseRepository
         $data = [];
         $obj = $this->findById($id);
 
+
+        // lấy ra đơn hàng chi tiết
+        $purchase_order_item_detail = PurchaseOrderItem::with('productVariant.product')->where("purchase_order_id", $obj->purchase_order_id)->get();
+
+        $listItem = [];
+        foreach ($purchase_order_item_detail as $key => $value) {
+            $listUnit =  $value->productVariant->product->unitConversions->map(function ($convertion) {
+                return $convertion->toUnit->name;
+            })->toArray();
+            $listConversionFactor = $value->productVariant->product->unitConversions->pluck("conversion_factor")->toArray();
+            $listConvert = [];
+            for ($i = 0; $i < count($listUnit); $i++) {
+                $listConvert[$i] = "1 ". $value->unit->name . " = " . number_format($listConversionFactor[$i], 2, ",") ." ". $listUnit[$i];
+            };
+            $listItem[] = [
+                'product_name' => $value->productVariant->product->name . " - " . implode(" - ", $value->productVariant->attributes->pluck("name")->toArray()),
+                'quantity_ordered' => $value->quantity_ordered . " - " . $value->unit->name,
+                'convertion' => $listConvert,
+                'quantity_received' => $value->quantity_received . " - " . $value->unit->name,
+                'unit_price' => number_format($value->unit_price, 0, ".", ".") . " VNĐ",
+                'subtotal' => number_format($value->subtotal, 0,'.', ".") . " VNĐ",
+            ];
+        }
         $data['infoTransaction'] = [
             'name_supplier' => $obj->purchaseOrder->supplier->name,
             'contact_person' => $obj->purchaseOrder->supplier->contact_person,
@@ -158,7 +190,7 @@ class SupplierTransactionRepository extends BaseRepository
             'credit_due_date' => $obj->credit_due_date,
             'description' => $obj->description,
             'status' => $this->getStatusBySupplierTransaction($obj->id),
-
+            'list_item_order' => $listItem,
         ];
 
         return $data;

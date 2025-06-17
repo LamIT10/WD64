@@ -40,7 +40,6 @@ createInertiaApp({
                 el.style.display = 'none'; // Ẩn phần tử nếu không có quyền
             }
         });
-
         app.use(plugin).mount(el);
     },
 });
