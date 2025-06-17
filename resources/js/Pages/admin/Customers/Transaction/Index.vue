@@ -37,7 +37,7 @@
                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                 </th>
                 <th
-                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Mã đơn hàng
                 </th>
                 <th
@@ -97,7 +97,7 @@
                   <input type="checkbox" :value="debt.id" v-model="selectedcustomerTransaction"
                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 font-medium">
+                <td class="px-6 py-4 whitespace-nowrap text-left text-sm text-gray-500 font-medium">
                   {{ 'DH' + debt.id.toString().padStart(4, '0') }}
 
                 </td>
