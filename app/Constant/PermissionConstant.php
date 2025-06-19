@@ -13,10 +13,7 @@ class PermissionConstant
 
     // ==== ROLES ====
     public const ROLE_INDEX = 'admin.role.index';
-    public const ROLE_CREATE = 'admin.role.create';
     public const ROLE_EDIT = 'admin.role.edit';
-    public const ROLE_DELETE = 'admin.role.delete';
-    public const ROLE_SHOW = 'admin.role.show';
 
     // ==== CUSTOMERS ====
     public const CUSTOMER_INDEX = 'admin.customers.index';
@@ -92,21 +89,10 @@ class PermissionConstant
                         "description" => "Danh sách vai trò",
                         "name" => self::ROLE_INDEX,
                     ],
-                    [
-                        "description" => "Tạo vai trò",
-                        "name" => self::ROLE_CREATE,
-                    ],
+                  
                     [
                         "description" => "Sửa vai trò",
                         "name" => self::ROLE_EDIT,
-                    ],
-                    [
-                        "description" => "Xoá vai trò",
-                        "name" => self::ROLE_DELETE,
-                    ],
-                    [
-                        "description" => "Xem vai trò",
-                        "name" => self::ROLE_SHOW,
                     ],
                 ]
             ],

@@ -19,7 +19,7 @@ class SupplierTransactionRepository extends BaseRepository
     public function getData($data, $perPage)
     {
         $query = $this->handleModel::with("purchaseOrder")->with("purchaseOrder.supplier")->select(["*"]);
-      
+
         if (!empty($data)) {
             $query = $query->when(!empty($data['supplierFilter']), function ($query, $supplierFilter) use ($data) {
                 return $query->whereHas('purchaseOrder', function ($subQuery) use ($data) {
@@ -71,9 +71,16 @@ class SupplierTransactionRepository extends BaseRepository
                 }
             }
         }
+        $query = $query->orderBy("credit_due_date", "asc")->paginate($perPage);
 
+        $query->getCollection()->transform(function ($item) {
+            $item->outstanding_amount = $this->formatNumberInt($item->purchaseOrder->total_amount - $item->paid_amount);
+            $item->paid_amount = $this->formatNumberInt($item->paid_amount);
+            $item->purchaseOrder->total_amount = $this->formatNumberInt($item->purchaseOrder->total_amount);
+            return $item;
+        });
 
-        return $query->orderBy("credit_due_date", "asc")->paginate($perPage);
+        return $query;
     }
     public function hanldeUpdateCreditDueDate($id, $data)
     {
@@ -107,7 +114,7 @@ class SupplierTransactionRepository extends BaseRepository
         try {
             $obj = $this->handleModel::with("purchaseOrder")->where("id", $id)->firstOrFail();
             $newObj = [];
-          
+
             $newObj["paid_amount"] = $obj['paid_amount'] + $data["payment"];
             if ($newObj["paid_amount"] > $obj->purchaseOrder->total_amount) {
                 throw new \Exception("Tổng tiền thanh toán đã vượt quá đơn hàng");
@@ -150,50 +157,57 @@ class SupplierTransactionRepository extends BaseRepository
     }
     public function getDataForShowTransaction($id)
     {
-        $data = [];
-        $obj = $this->findById($id);
-
-
-        // lấy ra đơn hàng chi tiết
-        $purchase_order_item_detail = PurchaseOrderItem::with('productVariant.product')->where("purchase_order_id", $obj->purchase_order_id)->get();
-
-        $listItem = [];
-        foreach ($purchase_order_item_detail as $key => $value) {
-            $listUnit =  $value->productVariant->product->unitConversions->map(function ($convertion) {
-                return $convertion->toUnit->name;
+        // Eager load tất cả relationships cần thiết trong một truy vấn
+        $obj = $this->handleModel->with([
+            'purchaseOrder.supplier',
+            'purchaseOrder.items.productVariant.product.unitConversions.toUnit'
+        ])->findOrFail($id);
+    
+        // Lấy items và transform ngay trong query
+        $listItem = $obj->purchaseOrder->items->map(function ($item) {
+            $variant = $item->productVariant;
+            $product = $variant->product;
+            
+            // Tạo danh sách conversion
+            $conversions = $product->unitConversions->map(function ($conversion) use ($item) {
+                return sprintf(
+                    "1 %s = %s %s",
+                    $item->unit->name,
+                    $this->formatNumberDemical($conversion->conversion_factor),
+                    $conversion->toUnit->name
+                );
             })->toArray();
-            $listConversionFactor = $value->productVariant->product->unitConversions->pluck("conversion_factor")->toArray();
-            $listConvert = [];
-            for ($i = 0; $i < count($listUnit); $i++) {
-                $listConvert[$i] = "1 ". $value->unit->name . " = " . number_format($listConversionFactor[$i], 2, ",") ." ". $listUnit[$i];
-            };
-            $listItem[] = [
-                'product_name' => $value->productVariant->product->name . " - " . implode(" - ", $value->productVariant->attributes->pluck("name")->toArray()),
-                'quantity_ordered' => $value->quantity_ordered . " - " . $value->unit->name,
-                'convertion' => $listConvert,
-                'quantity_received' => $value->quantity_received . " - " . $value->unit->name,
-                'unit_price' => number_format($value->unit_price, 0, ".", ".") . " VNĐ",
-                'subtotal' => number_format($value->subtotal, 0,'.', ".") . " VNĐ",
+    
+            return [
+                'product_name' => sprintf(
+                    "%s - %s",
+                    $product->name,
+                    $variant->attributes->pluck('name')->implode(' - ')
+                ),
+                'quantity_ordered' => "{$item->quantity_ordered} - {$item->unit->name}",
+                'convertion' => $conversions,
+                'quantity_received' => "{$item->quantity_received} - {$item->unit->name}",
+                'unit_price' => $this->formatNumberInt($item->unit_price) . " ₫",
+                'subtotal' => $this->formatNumberInt($item->subtotal) . " ₫",
             ];
-        }
-        $data['infoTransaction'] = [
-            'name_supplier' => $obj->purchaseOrder->supplier->name,
-            'contact_person' => $obj->purchaseOrder->supplier->contact_person,
-            'phone' => $obj->purchaseOrder->supplier->phone,
-            'email' => $obj->purchaseOrder->supplier->email,
-            'address' => $obj->purchaseOrder->supplier->address,
-            'order_code' => 'MDH - ' . $obj->purchaseOrder->id,
-            'order_date' => $obj->purchaseOrder->order_date,
-            'total_amount' => $obj->purchaseOrder->total_amount,
-            'paid_amount' => $obj->paid_amount,
-            'transaction_date' => $obj->transaction_date,
-            'credit_due_date' => $obj->credit_due_date,
-            'description' => $obj->description,
-            'status' => $this->getStatusBySupplierTransaction($obj->id),
-            'list_item_order' => $listItem,
+        })->toArray();
+    
+        return [
+                'name_supplier' => $obj->purchaseOrder->supplier->name,
+                'contact_person' => $obj->purchaseOrder->supplier->contact_person,
+                'phone' => $obj->purchaseOrder->supplier->phone,
+                'email' => $obj->purchaseOrder->supplier->email,
+                'address' => $obj->purchaseOrder->supplier->address,
+                'order_code' => 'MDH - ' . $obj->purchaseOrder->id,
+                'order_date' => $this->formatDate($obj->purchaseOrder->order_date),
+                'total_amount' => $obj->purchaseOrder->total_amount,
+                'paid_amount' => $obj->paid_amount,
+                'transaction_date' => $this->formatDate($obj->transaction_date),
+                'credit_due_date' => $this->formatDate($obj->credit_due_date),
+                'description' => $obj->description,
+                'status' => $this->getStatusBySupplierTransaction($obj->id),
+                'list_item_order' => $listItem,
         ];
-
-        return $data;
     }
     private function getStatusBySupplierTransaction($id)
     {

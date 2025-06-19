@@ -300,7 +300,7 @@
 
                 <div id="admin-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <Link :href="route('admin.role.index')"
+                    <Link :href="route('admin.role.index')" v-can="'admin.role.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">

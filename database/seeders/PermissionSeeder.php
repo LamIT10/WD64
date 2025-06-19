@@ -20,9 +20,10 @@ class PermissionSeeder extends Seeder
     public function run()
     {
         $now = now();
-       
+        $listPermissionByConst = [];
         foreach (PermissionConstant::all() as $item) {
             foreach ($item['permissions'] as $permission) {
+                $listPermissionByConst[] = $permission['name'];
                 if (!Permission::where('name', $permission['name'])->first()) {
                     $newPermission = [
                         'name' => $permission['name'],
@@ -37,7 +38,11 @@ class PermissionSeeder extends Seeder
                 }
             }
         }
-
+        foreach (Permission::all() as $key => $value) {
+           if(!in_array($value['name'], $listPermissionByConst)){
+               Permission::where('name', $value['name'])->delete();
+           }
+        }
  
         foreach (ExtendsionConstant::getConstantsAsArray(RoleConstant::class) as $value) {
             if (!Role::where('name', $value['value'])->first()) {

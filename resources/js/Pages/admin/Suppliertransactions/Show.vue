@@ -6,26 +6,26 @@
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl font-bold text-indigo-900 mb-2">
-                            Công nợ nhà cung cấp: {{ supplierTransaction.infoTransaction.name_supplier }}
+                            Công nợ nhà cung cấp: {{ supplierTransaction.name_supplier }}
                         </h1>
                         <p class="text-indigo-800 font-medium">
-                            Đơn hàng: {{ supplierTransaction.infoTransaction.order_code }}
+                            Đơn hàng: {{ supplierTransaction.order_code }}
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span v-if="supplierTransaction.infoTransaction.status == 4"
+                        <span v-if="supplierTransaction.status == 4"
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             Đã thanh toán
                         </span>
-                        <span v-else-if="supplierTransaction.infoTransaction.status == 3"
+                        <span v-else-if="supplierTransaction.status == 3"
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                             Sắp hết hạn
                         </span>
-                        <span v-else-if="supplierTransaction.infoTransaction.status == 2"
+                        <span v-else-if="supplierTransaction.status == 2"
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             Còn hạn
                         </span>
-                        <span v-else-if="supplierTransaction.infoTransaction.status == 1"
+                        <span v-else-if="supplierTransaction.status == 1"
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                             Hết hạn
                         </span>
@@ -45,7 +45,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                                {{ supplierTransaction.infoTransaction.name_supplier }}
+                                {{ supplierTransaction.name_supplier }}
                             </p>
                             <p class="flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
@@ -54,7 +54,7 @@
                                         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
                                     </path>
                                 </svg>
-                                {{ supplierTransaction.infoTransaction.phone }}
+                                {{ supplierTransaction.phone }}
                             </p>
                             <p class="flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
@@ -63,7 +63,7 @@
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                {{ supplierTransaction.infoTransaction.email }}
+                                {{ supplierTransaction.email }}
                             </p>
                             <p class="flex items-start">
                                 <svg class="w-4 h-4 mr-2 mt-1 text-indigo-500" fill="none" stroke="currentColor"
@@ -74,7 +74,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                {{ supplierTransaction.infoTransaction.address }}
+                                {{ supplierTransaction.address }}
                             </p>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                Ngày giao dịch: {{ formatDate(supplierTransaction.infoTransaction.transaction_date) }}
+                                Ngày giao dịch: {{ supplierTransaction.transaction_date }}
                             </p>
                             <p class="flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
@@ -97,7 +97,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Hạn công nợ: {{ formatDate(supplierTransaction.infoTransaction.credit_due_date) }}
+                                Hạn công nợ: {{ supplierTransaction.credit_due_date }}
                             </p>
                         </div>
                     </div>
@@ -109,20 +109,20 @@
                 <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
                     <h3 class="text-sm font-medium text-gray-700">Tổng tiền đơn hàng</h3>
                     <p class="mt-2 text-2xl font-semibold text-indigo-700">
-                        {{ formatNumber(supplierTransaction.infoTransaction.total_amount) }} VNĐ
+                        {{ formatNumber(supplierTransaction.total_amount) }} ₫
                     </p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
                     <h3 class="text-sm font-medium text-gray-700">Đã thanh toán</h3>
                     <p class="mt-2 text-2xl font-semibold text-green-700">
-                        {{ formatNumber(supplierTransaction.infoTransaction.paid_amount) }} VNĐ
+                        {{ formatNumber(supplierTransaction.paid_amount) }} ₫
                     </p>
                 </div>
                 <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-600">
                     <h3 class="text-sm font-medium text-gray-700">Số tiền nợ</h3>
                     <p class="mt-2 text-2xl font-semibold text-red-700">
-                        {{ formatNumber(supplierTransaction.infoTransaction.total_amount -
-                            supplierTransaction.infoTransaction.paid_amount) }} VNĐ
+                        {{ formatNumber(supplierTransaction.total_amount -
+                            supplierTransaction.paid_amount) }} ₫
                     </p>
                 </div>
             </div>
@@ -161,35 +161,35 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span v-if="supplierTransaction.infoTransaction.status == 4"
+                                    <span v-if="supplierTransaction.status == 4"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                         Đã thanh toán
                                     </span>
-                                    <span v-else-if="supplierTransaction.infoTransaction.status == 3"
+                                    <span v-else-if="supplierTransaction.status == 3"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                                         Sắp hết hạn
                                     </span>
-                                    <span v-else-if="supplierTransaction.infoTransaction.status == 2"
+                                    <span v-else-if="supplierTransaction.status == 2"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                         Còn hạn
                                     </span>
-                                    <span v-else-if="supplierTransaction.infoTransaction.status == 1"
+                                    <span v-else-if="supplierTransaction.status == 1"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                                         Hết hạn
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
-                                    {{ formatNumber(supplierTransaction.infoTransaction.total_amount) + " VNĐ" }}
+                                    {{ formatNumber(supplierTransaction.total_amount) + " ₫" }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
-                                    {{ formatNumber(supplierTransaction.infoTransaction.paid_amount) + " VNĐ" }}
+                                    {{ formatNumber(supplierTransaction.paid_amount) + " ₫" }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
-                                    {{ formatNumber(supplierTransaction.infoTransaction.total_amount -
-                                        supplierTransaction.infoTransaction.paid_amount) + " VNĐ" }}
+                                    {{ formatNumber(supplierTransaction.total_amount -
+                                        supplierTransaction.paid_amount) + " ₫" }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-900">
-                                    {{ supplierTransaction.infoTransaction.description || 'Không có ghi chú' }}
+                                    {{ supplierTransaction.description || 'Không có ghi chú' }}
                                 </td>
                             </tr>
                         </tbody>
@@ -236,7 +236,7 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr class="hover:bg-gray-50"
-                                v-for="(item, index) in supplierTransaction.infoTransaction.list_item_order">
+                                v-for="(item, index) in supplierTransaction.list_item_order">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ index }}
                                 </td>

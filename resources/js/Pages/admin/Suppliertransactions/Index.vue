@@ -140,7 +140,7 @@
                                             class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all"
                                             style="max-height: 50px; overflow-y: auto;" />
                                         <i
-                                        class="fa-solid fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                            class="fa-solid fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
 
                                     </div>
                                 </div>
@@ -166,20 +166,12 @@
                 </form>
             </div>
 
-            <div class="bg-white overflow-hidden">
-
+            <div class="bg-white">
                 <div class="">
-                    <table class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400 overflow-visible">
+                    <table class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
                         <thead
                             class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
-                                <!-- <th scope="col" class="p-4">
-                                        <div class="flex items-center">
-                                            <input id="checkbox-all-search" type="checkbox"
-                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                            <label for="checkbox-all-search" class="sr-only">checkbox</label>
-                                        </div>
-                                    </th> -->
                                 <th scope="col" class="px-4 py-2 w-[100px]">
                                     Mã đơn hàng
                                 </th>
@@ -189,12 +181,6 @@
                                 <th scope="col" class="px-4 py-2">
                                     Trạng thái
                                 </th>
-                                <!-- <th scope="col" class="px-4 py-2">
-                                        Tổng tiền đơn hàng
-                                    </th>
-                                    <th scope="col" class="px-4 py-2">
-                                        Số tiền đã thanh toán
-                                    </th> -->
                                 <th scope="col" class="px-4 py-2">
                                     Số tiền nợ
                                 </th>
@@ -215,13 +201,6 @@
                         <tbody>
                             <tr v-for="(item, index) in transactionSupplier.data" :key="item.id"
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                <!-- <td class="w-4 p-4">
-                                        <div class="flex items-center">
-                                            <input id="checkbox-table-search-1" type="checkbox"
-                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
-                                        </div>
-                                    </td> -->
                                 <th scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                     {{ "MDH - " + item.purchase_order_id }}
@@ -233,40 +212,30 @@
                                     })">
                                     {{ item.purchase_order.supplier.name }}
                                     </Link>
-                                    <span v-else>  {{ item.purchase_order.supplier.name }}</span>
+                                    <span v-else>{{ item.purchase_order.supplier.name }}</span>
                                 </th>
                                 <th scope="row"
-                                    class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-
-
-                                    <span v-if="item.purchase_order.total_amount - item.paid_amount == 0"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold">
+                                    <span v-if="item.outstanding_amount == 0"
+                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold  bg-green-100 text-green-700 mt-1">
                                         Đã thanh toán
                                     </span>
                                     <span v-else-if="CheckDate(item.credit_due_date) == 3"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-700 mt-1">
                                         Sắp hết hạn
                                     </span>
                                     <span v-else-if="CheckDate(item.credit_due_date) == 2"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700 mt-1">
                                         Còn hạn
                                     </span>
                                     <span v-else-if="CheckDate(item.credit_due_date) == 1"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-700 mt-1" >
                                         Hết hạn
                                     </span>
                                 </th>
-                                <!-- <th scope="row"
-                                        class="px-4 py-2 font-medium text-gray-900 auto-format-number whitespace-nowrap dark:text-white">
-                                        {{ item.purchase_order.total_amount }}
-                                    </th>
-                                    <th scope="row"
-                                        class="px-4 py-2 font-medium text-gray-900 auto-format-number whitespace-nowrap dark:text-white">
-                                        {{ item.paid_amount }}
-                                    </th> -->
                                 <th scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 auto-format-number whitespace-nowrap dark:text-white">
-                                    {{ item.purchase_order.total_amount - item.paid_amount }}
+                                    {{ item.outstanding_amount + " ₫" }}
                                 </th>
                                 <th scope="row"
                                     class="px-4 py-2 font-medium auto-format-date text-gray-900 whitespace-nowrap dark:text-white">
@@ -280,25 +249,11 @@
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                     {{ item.description }}
                                 </th>
-                                <!-- <td class="px-4 py-2">
-                                        {{ supplier.contact_person }}
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        {{ supplier.phone }}
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        {{ supplier.email }}
-                                    </td>
-                                    <td class="px-4 py-2"
-                                        style="text-wrap: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis">
-                                        {{ supplier.address }}
-                                    </td> -->
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative"
-                                    style="overflow: visible;">
-                                    <button @click="toggleActionPopup(index)"
-                                        :disabled="item.purchase_order.total_amount - item.paid_amount <= 0"
-                                        class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                <td class="px-4 py-3 text-sm text-gray-500 relative">
+                                    <button @click="toggleActionPopup(index)" :disabled="item.outstanding_amount <= 0"
+                                        class="text-gray-500 hover:text-gray-700 focus:outline-none disabled:opacity-50"
+                                        aria-label="Action menu">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
                                             fill="currentColor">
                                             <path
                                                 d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -306,19 +261,31 @@
                                     </button>
 
                                     <!-- Popup hành động -->
-                                    <div v-if="activePopup === index" :id="'popup' + (index + 1)"
-                                        class="absolute right-2 z-50 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                        <div class="py-1">
-                                            <p @click="OpenEditCreditDueDate(item)" v-can="'admin.supplier_transaction.update_credit_due_date'"
-                                                v-if="item.purchase_order.total_amount - item.paid_amount > 0"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cập
-                                                nhật hạn công nợ</p>
-                                            <p @click="openPayment(item)"
-                                                v-if="item.purchase_order.total_amount - item.paid_amount > 0" v-can="'admin.supplier_transaction.update_paid_amount'"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                Cập nhật thanh toán</p>
+                                    <transition enter-active-class="transition ease-out duration-100"
+                                        enter-from-class="transform opacity-0 scale-95"
+                                        enter-to-class="transform opacity-100 scale-100"
+                                        leave-active-class="transition ease-in duration-75"
+                                        leave-from-class="transform opacity-100 scale-100"
+                                        leave-to-class="transform opacity-0 scale-95">
+                                        <div v-if="activePopup === index" :id="'popup' + (index + 1)"
+                                            class="absolute right-0 top-8 z-[1000] w-44 max-h-64 bg-white rounded-lg shadow-md ring-1 ring-gray-200 overflow-y-auto popup"
+                                            v-click-outside="closePopup">
+                                            <div class="py-1 text-sm">
+                                                <button v-if="item.outstanding_amount != 0"
+                                                    v-can="'admin.supplier_transaction.update_credit_due_date'"
+                                                    @click="OpenEditCreditDueDate(item)"
+                                                    class="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                                    Cập nhật hạn công nợ
+                                                </button>
+                                                <button v-if="item.outstanding_amount != 0"
+                                                    v-can="'admin.supplier_transaction.update_paid_amount'"
+                                                    @click="openPayment(item)"
+                                                    class="w-full text-left px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors">
+                                                    Cập nhật thanh toán
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </transition>
                                 </td>
                             </tr>
                             <tr v-if="transactionSupplier.data.length === 0">
@@ -524,44 +491,9 @@ class DateFormatter {
         }
     }
 }
-class NumberFormatter {
-    constructor() {
-        // Tìm tất cả các element có class 'auto-format-number'
-        this.elements = document.querySelectorAll('.auto-format-number');
-        this.init();
-    }
 
-    init() {
-        this.elements.forEach(element => {
-            // Lấy nội dung số từ element
-            const rawNumber = element.textContent.trim();
-            // Format số và cập nhật nội dung
-            const formattedNumber = this.formatNumber(rawNumber);
-            element.textContent = formattedNumber;
-        });
-    }
-
-    formatNumber(rawNumber) {
-        try {
-            // Chuyển đổi chuỗi thành số
-            const number = parseFloat(rawNumber);
-            if (isNaN(number)) {
-                return rawNumber; // Trả về nguyên gốc nếu không phải số
-            }
-            // Format số với dấu chấm phân tách hàng nghìn
-            return number.toLocaleString('vi-VN', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).replace(/,/g, '.');
-        } catch (error) {
-            console.error('Error formatting number:', error);
-            return rawNumber; // Trả về nguyên gốc nếu có lỗi
-        }
-    }
-}
 onMounted(() => {
     new DateFormatter();
-    new NumberFormatter();
     document.addEventListener('click', handleOutsideClick);
 });
 onUpdated(() => {
@@ -575,4 +507,17 @@ onUnmounted(() => {
 
 
 </script>
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.popup::-webkit-scrollbar {
+    width: 6px;
+}
+
+.popup::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.popup::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+</style>

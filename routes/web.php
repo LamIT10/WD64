@@ -98,16 +98,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     // });
 
     Route::prefix('role')->as('role.')->group(function () {
-        Route::get('/', [RoleController::class, 'index'])->name('index');
-        Route::get('/create', [RoleController::class, 'create'])->name('create');
-        Route::post('', [RoleController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit');
-        Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
-        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}', [RoleController::class, 'show'])->name('show');
-        Route::post('admin/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('admin.customers.bulk-delete');
-        Route::get('admin/customers/import', [CustomerController::class, 'import'])->name('admin.customers.import');
-        Route::get('admin/customers/export', [CustomerController::class, 'export'])->name('admin.customers.export');
+        Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::ROLE_INDEX);
+        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('has_permission:' . PermissionConstant::ROLE_EDIT);
     });
 
 
