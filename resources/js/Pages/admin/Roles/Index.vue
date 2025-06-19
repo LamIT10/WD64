@@ -158,14 +158,14 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex justify-end space-x-2">
-                                        <Link :href="route('admin.role.edit', role.id)"
+                                        <Link :href="route('admin.role.edit', role.id)" v-can="'admin.role.edit'"
                                             class="flex items-center gap-1 px-3 py-1.5 bg-indigo-100 text-indigo-600 rounded-md hover:bg-indigo-200 transition-colors">
                                         <i class="fas fa-edit text-sm"></i>
                                         <span>Sửa</span>
                                         </Link>
                                         <!-- <ConfirmModal :route-name="'admin.role.destroy'" :route-params="{
                                             id: role.id,
-                                        }" title="Xác nhận xóa nhà cung cấp"
+                                        }" title="Xác nhận xóa nhà cung cấp"e
                                             :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${role.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
 
                                             <template #trigger="{
@@ -244,8 +244,6 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { ref } from 'vue';
-import Waiting from '../../components/Waiting.vue'
-import ConfirmModal from '../../components/ConfirmModal.vue'
 const props = defineProps({
     listRoles: {
         type: Object,

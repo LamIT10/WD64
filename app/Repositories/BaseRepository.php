@@ -155,4 +155,13 @@ class BaseRepository
 
         return $code;
     }
+    public function formatDate(string $date){
+        return date('d/m/Y', strtotime($date));
+    }
+    public function formatNumberInt($num){
+        return number_format($num,0,'.','.');
+    }
+    public function formatNumberDemical($num, $precision = 2){
+        return number_format($num, $precision,',','.');
+    }
 }
