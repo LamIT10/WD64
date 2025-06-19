@@ -38,7 +38,9 @@ class LoginRepository extends BaseRepository
             $user = User::find(Auth::check() ? Auth::user()->id : null);
             // xử lý các quyên hạng trùng nhau
             $permissions = $user->getPermissionsViaRoles()->pluck("name")->unique()->values();
+            $roles = $user->getRoleNames()->toArray();
             session(['permissions' => $permissions]);
+            session(['roles' => $roles]);
             DB::commit();
             return true;
         } catch (\Throwable $th) {
