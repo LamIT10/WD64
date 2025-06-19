@@ -44,50 +44,53 @@ class InventoryAuditController extends BaseApiController
 
     public function showInformationCreate(Request $request)
     {
-        $locations = $request->input('locations', []);
-        if (!is_array($locations) || empty($locations)) {
+        $zones = $request->input('zones', []);
+        if (!is_array($zones) || empty($zones)) {
             return response()->json([
                 'data' => [],
-                'message' => 'No locations provided',
+                'message' => 'No zones provided',
                 'status' => false,
-                'custom_location_name' => $locations
+                'zones' => $zones
             ], 200);
         }
+        // Lấy tất cả product_variant_id thuộc các zone này
+        $variantIds = InventoryLocation::whereIn('zone_id', function($query) use ($zones) {
+            $query->select('id')->from('warehouse_zones')->whereIn('name', $zones);
+        })->pluck('product_variant_id');
+
         $products = Product::with([
             'productVariants.attributes.attribute',
             'productVariants.inventory.unit',
-            'productVariants.inventoryLocations' => function ($query) use ($locations) {
-                $query->whereIn('custom_location_name', $locations)
-                      ->select('id', 'product_variant_id', 'custom_location_name');
-            },
+            'productVariants.inventoryLocations.zone',
         ])
-        ->whereHas('productVariants.inventoryLocations', function ($query) use ($locations) {
-            $query->whereIn('custom_location_name', $locations);
+        ->whereHas('productVariants.inventoryLocations.zone', function ($query) use ($zones) {
+            $query->whereIn('name', $zones);
         })
-        ->paginate(20);
+        ->paginate(100);
 
         $result = [];
         foreach ($products as $product) {
             foreach ($product->productVariants as $variant) {
-                $variantLocations = $variant->inventoryLocations->whereIn('custom_location_name', $locations);
-                if ($variantLocations->isEmpty()) continue;
+                // Lấy zone cho biến thể này
+                $zoneLocation = $variant->inventoryLocations->first(function($loc) use ($zones) {
+                    return $loc->zone && in_array($loc->zone->name, $zones);
+                });
+                if (!$zoneLocation) continue;
                 $attributes = $variant->attributes->map(function($attrVal) {
                     return [
                         'attribute' => $attrVal->attribute->name ?? null,
                         'value' => $attrVal->name
                     ];
                 });
-                foreach ($variantLocations as $location) {
-                    $result[] = [
-                        'id_product_variant' => $variant->id,
-                        'name_product' => $product->name,
-                        'variant_attributes' => $attributes,
-                        'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
-                        'code' => $variant->barcode ?? $product->code,
-                        'unit' => optional(optional($variant->inventory->first())->unit)->symbol,
-                        'custom_location_name' => $location->custom_location_name,
-                    ];
-                }
+                $result[] = [
+                    'id_product_variant' => $variant->id,
+                    'name_product' => $product->name,
+                    'variant_attributes' => $attributes,
+                    'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
+                    'code' => $variant->barcode ?? $product->code,
+                    'unit' => optional(optional($variant->inventory->first())->unit)->symbol,
+                    'zone' => $zoneLocation->zone->name,
+                ];
             }
         }
 
@@ -95,7 +98,7 @@ class InventoryAuditController extends BaseApiController
             'data' => $result,
             'message' => 'Information retrieved successfully',
             'status' => true,
-            'custom_location_name' => $locations
+            'zones' => $zones
         ], 200);
     }
 

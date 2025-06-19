@@ -69,16 +69,16 @@
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-clipboard-check text-xs"></i>
                         </div>
-                        <span class="text-xs">Kiểm kê</span>
+                        <span class="text-xs">Kiểm kho</span>
                     </a>
-                    <a href="stock.html"
+                    <Link :href="route('admin.inventory.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-boxes text-xs"></i>
                         </div>
                         <span class="text-xs">Tồn kho</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
             <!-- User Management -->

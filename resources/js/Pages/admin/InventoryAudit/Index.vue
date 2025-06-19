@@ -16,11 +16,6 @@
           <Waiting route-name="admin.inventory-audit.create" :route-params="{}">
             <i class="fas fa-plus"></i> Tạo phiếu kiểm kê
           </Waiting>
-          <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImportExcel" />
-          <button @click="$refs.importInput.click()"
-            class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
-            <i class="fa fa-sign-in icon-btn"></i> Nhập file
-          </button>
           <button @click="exportToExcel"
             class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
             <i class="fa fa-file-export icon-btn"></i> Xuất file
@@ -70,7 +65,6 @@
                 class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
                 Không chênh lệch
               </button>
-            </li>
              <li class="mr-2">
               <button @click="activeTab = 'out_of_stock'"
                 :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'out_of_stock', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'out_of_stock' }"
@@ -127,7 +121,7 @@
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Ngày kiểm
                 </th>
-                <th v-if="visibleColumns.includes('craeted_at')"
+                <th v-if="visibleColumns.includes('created_at')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Ngày lưu
                 </th>
@@ -139,10 +133,10 @@
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Trạng thái
                 </th>
-                <th v-if="visibleColumns.includes('adjusted')"
+                <!-- <th v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Đồng bộ
-                </th>
+                </th> -->
                 <th v-if="visibleColumns.includes('action')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Hành động
@@ -168,7 +162,7 @@
                 <td v-if="visibleColumns.includes('location')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 font-medium">
                   <div class="flex flex-wrap gap-1 justify-center">
-                    <span v-for="zone in item.audited_locations || []" :key="zone"
+                    <span v-for="zone in item.audited_zones || []" :key="zone"
                       class="inline-block bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full border border-indigo-200">
                       {{ zone }}
                     </span>
@@ -201,11 +195,11 @@
                     {{ item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch' }}
                   </span>
                 </td>
-                <td v-if="visibleColumns.includes('adjusted')"
+                <!-- <td v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                   <span v-if="item.status === 'completed'">--</span>
                   <span v-else>{{ item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ' }}</span>
-                </td>
+                </td> -->
                 <td v-if="visibleColumns.includes('action')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                     <Link :href="route('admin.inventory-audit.show', item.id)" @click.stop title="Xem chi tiết">
@@ -284,7 +278,7 @@ const columnOptions = [
   'created_at',
   'user_name',
   'status',
-  'adjusted',
+  // 'adjusted',
   'action',
 ];
 
@@ -295,7 +289,7 @@ const columnLabels = {
   created_at: 'Ngày lưu',
   user_name: 'Người tạo',
   status: 'Trạng thái',
-  adjusted: 'Đồng bộ',
+  // adjusted: 'Đồng bộ',
   action: 'Hành động',
 };
 
@@ -308,7 +302,8 @@ const statusLabels = {
 const visibleColumns = ref(
   localStorage.getItem('auditsVisibleColumns')
     ? JSON.parse(localStorage.getItem('auditsVisibleColumns'))
-    : ['id', 'location', 'audit_date', 'created_at', 'user_name', 'status', 'adjusted', 'action']
+    // , 'adjusted'
+    : ['id', 'location', 'audit_date', 'created_at', 'user_name', 'status', 'action']
 );
 
 // Save visibleColumns to localStorage
@@ -316,7 +311,6 @@ watch(visibleColumns, (newColumns) => {
   localStorage.setItem('auditsVisibleColumns', JSON.stringify(newColumns));
 }, { deep: true });
 
-// Column dropdown
 const showColumnDropdown = ref(false);
 const dropdownRef = ref(null);
 
@@ -397,12 +391,12 @@ const exportToExcel = () => {
   // Lấy dữ liệu hiện tại (props.audits.data)
   const data = (props.audits?.data || []).map(item => ({
     'ID': item.id,
-    'Khu vực': (item.audited_locations || []).join(', '),
+    'Khu vực': (item.audited_zones || []).join(', '),
     'Ngày kiểm': item.audit_date,
     'Ngày lưu': item.created_at,
     'Người tạo': item.user?.name,
     'Trạng thái': item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch',
-    'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
+    // 'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
   }));
 
   const ws = XLSX.utils.json_to_sheet(data);

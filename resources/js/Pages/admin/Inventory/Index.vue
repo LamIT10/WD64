@@ -3,16 +3,7 @@
     <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-6 md:p-8">
       <!-- Header Card -->
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-        <h5 class="text-xl font-bold text-indigo-800 tracking-tight">Tạo Phiếu Kiểm Kho</h5>
-      </div>
-      <!-- Thời gian tạo phiếu -->
-      <div class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-gray-100 text-center">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Ngày kiểm kho</label>
-          <input type="date" v-model="auditData.audit_date" :max="today"
-            class="border border-gray-200 rounded-lg py-2 px-3 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-            required />
-        </div>
+        <h5 class="text-xl font-bold text-indigo-800 tracking-tight">Danh sách sản phẩm trong kho</h5>
       </div>
       <!-- Form Phiếu Kiểm Kê -->
       <form @submit.prevent="submitForm">
@@ -31,12 +22,6 @@
               </div>
             </div>
           </div>
-          <div class="mt-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-            <textarea v-model="auditData.notes" rows="4"
-              class="block w-full border border-gray-200 rounded-lg py-2 px-3 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm resize-y transition-all duration-200"
-              placeholder="Nhập ghi chú nếu có"></textarea>
-          </div>
         </div>
         <!-- Danh sách Sản phẩm cần kiểm kê -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -49,15 +34,8 @@
                 <div @click="exportSampleExcel"
                   class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"
                   type="button">
-                  <i class="fa fa-download icon-btn"></i> Tải file mẫu
+                  <i class="fa fa-download icon-btn"></i> Tải file
                 </div>
-              </div>
-              <div>
-                <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
-                  @change="handleImportExcel" />
-                <div @click="$refs.importInput.click()"
-                  class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"> <i class="fa fa-sign-in icon-btn"></i> Nhập
-                  file</div>
               </div>
             </div>
           </div>
@@ -78,12 +56,6 @@
                     vị</th>
                   <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tồn
                     kho</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Thực
-                    tế</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">SL
-                    chênh</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Ghi chú
-                    chênh</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
@@ -104,31 +76,10 @@
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
-                  <td class="px-6 py-4 text-center">
-                    <input type="number" v-model="auditData.items[index].actual_quantity"
-                      class="w-24 border border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-                      min="0" required />
-                  </td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
-                  </td>
-                  <td class="px-6 py-4">
-                    <input type="text" v-model="auditData.items[index].discrepancy_reason"
-                      class="w-full border border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-                      placeholder="Lý do chênh lệch" />
-                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
-        <!-- Submit Button -->
-        <div class="flex justify-end">
-          <button type="submit"
-            class="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 hover:-translate-y-[1px] focus:ring-4 focus:ring-indigo-200 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            :disabled="!canSubmit">
-            Lưu Phiếu Kiểm Kho
-          </button>
         </div>
       </form>
     </div>
@@ -220,8 +171,6 @@ const handleImportExcel = async (event) => {
     rows.forEach(row => {
       const code = row[headers.indexOf('Mã hàng')] || '';
       const zone = row[headers.indexOf('Khu vực')] || '';
-      const actual_quantity = row[headers.indexOf('Thực tế')] ?? '';
-      const discrepancy_reason = row[headers.indexOf('Ghi chú chênh')] ?? '';
       // Tìm đúng item trong auditData.value.items để cập nhật
       const idx = products.findIndex(
         p => p.code === code && p.zone === zone
@@ -276,15 +225,13 @@ const filteredProducts = computed(() => products);
 
 const exportSampleExcel = () => {
   const sampleData = [
-    ['Khu vực', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', 'Thực tế', 'Ghi chú chênh'],
+    ['Khu vực', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho'],
     ...filteredProducts.value.map((product, idx) => [
       product.zone,
       product.code,
       product.name_product,
       product.unit,
       product.quantity_on_hand,
-      auditData.value.items[idx]?.actual_quantity || '',
-      auditData.value.items[idx]?.discrepancy_reason || ''
     ])
   ];
   const ws = XLSX.utils.aoa_to_sheet(sampleData);

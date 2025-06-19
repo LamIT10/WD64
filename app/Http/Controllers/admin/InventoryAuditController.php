@@ -22,15 +22,13 @@ class InventoryAuditController extends Controller
 
         foreach ($audits as $audit) {
             $variantIds = $audit->items->pluck('product_variant_id');
-
-            // Lấy các inventory_locations tương ứng với các sản phẩm kiểm kê
-            $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
-                ->whereNotNull('custom_location_name')
+            // Lấy các zone tương ứng với các sản phẩm kiểm kê
+            $zoneIds = InventoryLocation::whereIn('product_variant_id', $variantIds)
+                ->whereNotNull('zone_id')
                 ->distinct()
-                ->pluck('custom_location_name');
-
-            // Gắn vào audit
-            $audit->audited_locations = $locations;
+                ->pluck('zone_id');
+            $zones = \App\Models\WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+            $audit->audited_zones = $zones;
         }
 
         return Inertia::render('admin/InventoryAudit/Index', [
@@ -40,66 +38,72 @@ class InventoryAuditController extends Controller
 
     public function show($id)
     {
-        $audit = InventoryAudit::with(['items.productVariant.product', 'user'])
-            ->findOrFail($id);
+        $audit = InventoryAudit::with([
+            'items.productVariant.product',
+            'items.productVariant.inventory',
+            'items.productVariant.inventoryLocations',
+            'items.productVariant.attributes.attribute',
+            'user',
+        ])->findOrFail($id);
 
         $variantIds = $audit->items->pluck('product_variant_id');
-        $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
-            ->whereNotNull('custom_location_name')
+        // Lấy danh sách zone (A, B, C...) mà các sản phẩm thuộc về
+        $zoneIds = InventoryLocation::whereIn('product_variant_id', $variantIds)
+            ->whereNotNull('zone_id')
             ->distinct()
-            ->pluck('custom_location_name');
-        $audit->audited_locations = $locations;
+            ->pluck('zone_id');
+        $zones = \App\Models\WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+        $audit->audited_zones = $zones;
 
-        // Lấy grid giống như hàm create
-        $nameZones = WarehouseZone::pluck('name');
-        $maxCols = 9;
-        $grid = [];
-        foreach ($nameZones as $nameZone) {
-            $row = [];
-            for ($i = 0; $i <= $maxCols; $i++) {
-                $label = $nameZone . $i;
-                // Chỉ kiểm tra các custom_location_name đã được kiểm kê trong audit này
-                $row[] = [
-                    'exist' => $audit->audited_locations && $audit->audited_locations->contains($label),
-                    'label' => $label,
-                ];
+        // Không còn grid từng cell, chỉ trả về danh sách zone
+        $grid = $zones;
+
+        foreach ($audit->items as $item) {
+            // Lấy zone cho từng item
+            $location = InventoryLocation::where('product_variant_id', $item->product_variant_id)
+                ->whereNotNull('zone_id')
+                ->first();
+            $item->zone = $location ? optional($location->zone)->name : null;
+
+            $unit = null;
+            if ($item->productVariant && $item->productVariant->inventory && count($item->productVariant->inventory) > 0) {
+                $inv = $item->productVariant->inventory->first();
+                $unit = $inv->unit_id ? optional($inv->unit)->name : null;
             }
-            $grid[$nameZone] = $row;
+            if (!$unit && $item->productVariant && $item->productVariant->product) {
+                $unit = $item->productVariant->product->unit ?? null;
+            }
+            $item->unit = $unit;
+
+            $attributes = [];
+            if ($item->productVariant && $item->productVariant->attributes) {
+                foreach ($item->productVariant->attributes as $attrVal) {
+                    $attributes[] = [
+                        'attribute' => $attrVal->attribute->name ?? null,
+                        'value' => $attrVal->name
+                    ];
+                }
+            }
+            $item->attributes = $attributes;
         }
 
         return Inertia::render('admin/InventoryAudit/Show', [
             'audit' => $audit,
-            'grid' => $grid,
+            'zones' => $zones,
         ]);
     }
+
+
 
     public function create()
     {
-        // Lấy tất cả zone
-        $nameZones = WarehouseZone::pluck('name');
-
-        // Số cột tối đa (ví dụ: 6)
-        $maxCols = 9;
-        $grid = [];
-        foreach ($nameZones as $nameZone) {
-            $row = [];
-            // Lấy các location của zone này
-            for ($i = 0; $i <= $maxCols; $i++) {
-                $label = $nameZone . $i;
-                // Kiểm tra xem location có tồn tại trong cơ sở dữ liệu không
-                $location = InventoryLocation::where('custom_location_name', $label)->first();
-                $row[] = [
-                    'exist' => $location ? true : false,
-                    'label' => $label,
-                ];
-            }
-            $grid[$nameZone] = $row;
-        }
+        // Lấy tất cả zone (A, B, C...)
+        $zones = WarehouseZone::pluck('name');
         return Inertia::render('admin/InventoryAudit/Create', [
-            'grid' => $grid,
+            'zones' => $zones,
         ]);
     }
-    
+
     public function store(Request $request)
     {
         // Logic to store inventory audit data
@@ -129,10 +133,10 @@ class InventoryAuditController extends Controller
         ]);
         DB::transaction(function () use ($auditData, $request) {
             $audit = InventoryAudit::create([
-            'notes' => $auditData['notes'],
-            'audit_date' => $auditData['audit_date'],
-            'status' => $auditData['status'],
-            'user_id' => $request->user()->id
+                'notes' => $auditData['notes'],
+                'audit_date' => $auditData['audit_date'],
+                'status' => $auditData['status'],
+                'user_id' => $request->user()->id
             ]);
 
             // Tạo nhiều bản ghi con thông qua quan hệ
@@ -141,7 +145,7 @@ class InventoryAuditController extends Controller
 
         // Trả về thông báo thành công
         // Bạn có thể sử dụng flash message để hiển thị thông báo thành công
-        
+
         return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
     }
 
