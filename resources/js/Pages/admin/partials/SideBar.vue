@@ -21,14 +21,14 @@
         <nav class="mt-4 px-3 pb-3 overflow-y-auto h-[calc(100%-4rem)]">
             <!-- Dashboard -->
             <div class="mb-3">
-                <a href="index.html"
+                <Link :href="route('admin.dashboard')"
                     class="flex items-center p-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
                         <i class="fas fa-chart-pie text-sm"></i>
                     </div>
                     <span class="text-sm font-medium">Dashboard</span>
-                </a>
+                </Link>
             </div>
 
             <!-- Warehouse Operations -->
