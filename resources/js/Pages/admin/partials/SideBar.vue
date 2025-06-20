@@ -21,14 +21,14 @@
         <nav class="mt-4 px-3 pb-3 overflow-y-auto h-[calc(100%-4rem)]">
             <!-- Dashboard -->
             <div class="mb-3">
-                <a href="index.html"
+                <Link :href="route('admin.dashboard')"
                     class="flex items-center p-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
                         <i class="fas fa-chart-pie text-sm"></i>
                     </div>
                     <span class="text-sm font-medium">Dashboard</span>
-                </a>
+                </Link>
             </div>
 
             <!-- Warehouse Operations -->
@@ -63,22 +63,22 @@
                         </div>
                         <span class="text-xs">Xuất kho</span>
                     </a>
-                    <a href="inventory.html"
+                    <a href="/admin/inventory-audit"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-clipboard-check text-xs"></i>
                         </div>
-                        <span class="text-xs">Kiểm kê</span>
+                        <span class="text-xs">Kiểm kho</span>
                     </a>
-                    <a href="stock.html"
+                    <Link :href="route('admin.inventory.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-boxes text-xs"></i>
                         </div>
                         <span class="text-xs">Tồn kho</span>
-                    </a>
+                    </Link>
                 </div>
             </div>
             <!-- User Management -->
@@ -300,7 +300,7 @@
 
                 <div id="admin-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <Link :href="route('admin.role.index')"
+                    <Link :href="route('admin.role.index')" v-can="'admin.role.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">

@@ -22,14 +22,18 @@
         "@unhead/vue": "^2.0.9",
         "@vitejs/plugin-vue": "^5.2.3",
         "@vueform/multiselect": "^2.6.11",
+        "chart.js": "^4.5.0",
+        "file-saver": "^2.0.5",
         "i": "^0.3.7",
         "pinia": "^3.0.2",
         "remixicon": "^4.6.0",
         "vue": "^3.5.14",
+        "vue-chartjs": "^5.3.2",
         "vue-recaptcha": "^3.0.0-alpha.6",
         "vue-recaptcha-v3": "^2.0.1",
         "vue3-recaptcha-v2": "^2.1.0",
         "vue3-recaptcha2": "^1.8.0",
+        "xlsx": "^0.18.5",
         "ziggy-js": "^2.5.2"
     }
 }

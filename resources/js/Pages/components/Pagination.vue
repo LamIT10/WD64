@@ -1,5 +1,5 @@
 <template>
-    <div class="px-6 py-4 mt-3 border-t border-gray-200 flex items-center justify-between">
+    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <div class="text-sm text-gray-500">
             Hiển thị <span class="font-medium">{{ data.from }}</span> đến
             <span class="font-medium">{{ data.to }}</span> của
