@@ -1,95 +1,114 @@
 <template>
-  <div v-if="visible" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl relative animate-fade-in-up">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-indigo-700">Cập nhật công nợ</h2>
-        <button @click="close" class="text-gray-500 hover:text-gray-700 text-xl">
-          &times;
-        </button>
-      </div>
+  <div v-if="visible">
+    <div class="fixed inset-0 bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-r from-indigo-600 to-purple-600">
+          <h3 class="text-xl font-bold text-white uppercase tracking-wide">Cập nhật thanh toán công nợ</h3>
+        </div>
 
-      <!-- Nội dung form -->
-      <div class="space-y-4">
-        <div>
-          <label class="text-sm font-medium text-gray-700 mb-1">Khách hàng</label>
-          <div class="text-gray-900 font-semibold">
-            {{ debt.customer?.name|| '-' }}
+        <!-- Form Content -->
+        <div class="p-6 space-y-6">
+          <!-- Current Debt -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nợ hiện tại</label>
+            <input 
+              type="number" 
+              :value="props.debt?.remaining_amount ?? 0" 
+              disabled
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 font-mono cursor-not-allowed"
+            />
+          </div>
+
+          <!-- Payment Amount -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền thanh toán</label>
+            <input 
+              type="number" 
+              v-model="form.paid_amount"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition-all"
+              placeholder="Nhập số tiền thanh toán"
+            />
+          </div>
+
+          <!-- Transaction Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày giao dịch</label>
+            <input 
+              type="date" 
+              v-model="form.transaction_date"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            />
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+            <textarea 
+              v-model="form.description" 
+              maxlength="250" 
+              rows="4"
+              class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize-none transition-all"
+              placeholder="Ghi chú cho điều chỉnh này (tùy chọn)"
+            ></textarea>
           </div>
         </div>
 
-        <div>
-          <label class="text-sm font-medium text-gray-700">Mã đơn hàng</label>
-          <div class="text-gray-900 font-semibold">
-         {{ 'DH' + debt.id.toString().padStart(4, '0') }}
-          </div>
+        <!-- Footer -->
+        <div class="p-6 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
+          <button
+            class="px-6 py-2.5 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all font-medium"
+            @click="handleCloseModal()"
+          >
+            Huỷ bỏ
+          </button>
+          <button 
+            class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-medium"
+            @click="handleSubmit()"
+          >
+            Đồng ý
+          </button>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Số tiền đã trả</label>
-          <input type="number" v-model="form.paid_amount"
-            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-indigo-200" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Hạn công nợ</label>
-          <input type="date" v-model="form.credit_due_date"
-            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-indigo-200" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Ngày giao dịch</label>
-          <input type="date" v-model="form.transaction_date"
-            class="w-full px-3 py-2 border rounded-md focus:ring focus:ring-indigo-200" />
-        </div>
-      </div>
-
-      <!-- Nút hành động -->
-      <div class="mt-6 flex justify-end space-x-3">
-        <button @click="close" class="px-4 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300">
-          Huỷ
-        </button>
-        <button @click="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-          Cập nhật
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
-import { useForm } from '@inertiajs/vue3'
+import { router, useForm } from '@inertiajs/vue3'
+import { route } from 'ziggy-js'
+import { watch } from 'vue'
 
 const props = defineProps({
   visible: Boolean,
   debt: Object
 })
-const emit = defineEmits(['close'])
+
+const emit = defineEmits(['closeModal'])
 
 const form = useForm({
   paid_amount: 0,
-  credit_due_date: '',
-  transaction_date: ''
+  transaction_date: new Date().toISOString().slice(0, 10),
+  description: ''
 })
 
+// Reset form mỗi khi modal mở lại
 watch(() => props.debt, (newDebt) => {
   if (newDebt) {
-    form.paid_amount = newDebt.paid_amount ?? 0
-    form.credit_due_date = newDebt.credit_due_date ?? ''
-    form.transaction_date = newDebt.transaction_date ?? new Date().toISOString().slice(0, 10)
+    form.paid_amount = 0
+    form.transaction_date = new Date().toISOString().slice(0, 10)
+    form.description = ''
   }
 }, { immediate: true })
 
-const close = () => emit('close')
-
-const submit = () => {
-  router.put(`/admin/customer-transactions/${props.debt.id}`, form, {
-    onSuccess: () => {
-      close()
-    },
-    onError: () => alert('Có lỗi xảy ra khi cập nhật công nợ.')
+const handleSubmit = () => {
+  router.post(route('admin.customer-transaction.add', props.debt.id), form, {
+    onSuccess: () => emit('closeModal'),
+    onError: () => alert('Có lỗi xảy ra khi thêm giao dịch.'),
   })
+}
+
+const handleCloseModal = () => {
+  emit('closeModal')
 }
 </script>
