@@ -27,9 +27,8 @@ use Inertia\Inertia;
 
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', action: function () {
-        return Inertia::render('Dashboard');
-    });
+    Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('inventory-audit', InventoryAuditController::class);
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
