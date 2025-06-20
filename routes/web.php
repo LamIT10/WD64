@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\admin\CustomerTransactionController;
+use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
@@ -26,9 +27,8 @@ use Inertia\Inertia;
 
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', action: function () {
-        return Inertia::render('Dashboard');
-    });
+    Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('inventory-audit', InventoryAuditController::class);
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
@@ -158,14 +158,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
 });
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-Route::get('/', function () {
-    return Inertia::render('Dashboard');
-});
+Route::get("/", function (){
+    return redirect("/login");
+})->middleware('auth');
 // Authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

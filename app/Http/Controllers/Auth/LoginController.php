@@ -28,11 +28,12 @@ class LoginController extends Controller
     /**
      * Xử lý đăng nhập.
      */
+
     public function login(LoginRequest $request)
     {
         $data = $request->validated();
         $status = $this->loginRepository->login($data);
-        return $this->returnInertia($status, 'Đăng nhập thành công', 'dashboard', ['permissions' => session("permissions"), 'roles' => session('roles')] );
+        return $this->returnInertia($status, 'Đăng nhập thành công', 'admin.dashboard' );
     }
     /**
      * Xử lý đăng xuất.
