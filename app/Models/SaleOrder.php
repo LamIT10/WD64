@@ -14,7 +14,8 @@ class SaleOrder extends Model
         'order_date',
         'expected_ship_date',
         'status',
-        'total_amount'
+        'total_amount',
+        'credit_due_date',
     ];
 
     protected $casts = [
@@ -27,11 +28,15 @@ class SaleOrder extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function items()
+    public function saleOrderDetails()
     {
         return $this->hasMany(SaleOrderItem::class);
     }
 
+    public function items()
+    {
+        return $this->hasMany(SaleOrderItem::class, 'sales_order_id');
+    }
     public function customerTransactions()
     {
         return $this->hasMany(CustomerTransaction::class);
@@ -44,7 +49,7 @@ class SaleOrder extends Model
     {
         return $this->hasOne(CustomerTransaction::class, 'sales_order_id')->latestOfMany();
     }
-    
+
     public function shipping()
     {
         return $this->hasMany(Shipping::class);
