@@ -63,23 +63,23 @@
         </button>
 
         <!-- Divider -->
-        <div class="relative my-6">
+        <!-- <div class="relative my-6">
           <div class="absolute inset-0 flex items-center">
             <div class="w-full border-t border-gray-200"></div>
           </div>
           <div class="relative flex justify-center">
             <span class="px-3 bg-white text-xs text-gray-500 font-medium">hoặc tiếp tục với</span>
           </div>
-        </div>
+        </div> -->
 
         <!-- Google Login -->
-        <a :href="route('google.login')"
+        <!-- <a :href="route('google.login')"
           class="w-full flex items-center justify-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-400 transition duration-200 transform hover:scale-[1.02]">
           <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.153-2.675-6.735-2.675-5.522 0-10 4.477-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.167-0.007-0.333-0.020-0.500h-9.980z" />
           </svg>
           Đăng nhập với Google
-        </a>
+        </a> -->
       </form>
 
       <!-- Success Message -->
@@ -97,17 +97,20 @@
 
 <script setup>
 import { useForm } from "@inertiajs/vue3";
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import VueRecaptcha from "vue3-recaptcha2";
-import { Link } from '@inertiajs/vue3';
+import { usePage, Link } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import Toast from '../components/Toast.vue';
 import AuthLayout from "./AuthLayout.vue";
+import ToastClient from '@/Pages/components/ToastClient.vue'
 
 const showForgot = ref(false);
 const showPassword = ref(false);
 const siteKey = "6LccsEErAAAAABih7tLBLalq7fbEgVICF-gGn7Gk";
 const recaptcha = ref(null);
+const toastRef = ref(null)
+const page = usePage()
 
 const form = useForm({
   email: "",
@@ -144,7 +147,7 @@ function validate() {
   }
 
   if (!form["g-recaptcha-response"]) {
-    errors["g-recaptcha-response"] = "Vui lòng xác minh reCAPTCHA.";
+    toastRef.value.triggerToast('Vui lòng xác minh reCAPTCHA.', 'error')
     valid = false;
   }
 
@@ -178,6 +181,9 @@ function resetForm() {
   form["g-recaptcha-response"] = "";
   if (recaptcha.value) recaptcha.value.reset();
 }
+onMounted(() => {
+  localStorage.clear();
+})
 </script>
 
 <style scoped>

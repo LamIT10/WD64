@@ -22,6 +22,6 @@ class GoogleController extends Controller
             return redirect()->route("login")->with('error', "Email Google của bạn chưa được đăng ký trong hệ thống!");
         }
         Auth::login($user);
-        return $this->returnInertia(['status' => true], 'Đăng nhập thành công!', 'dashboard');
+        return redirect()->route('dashboard')->with('success', 'Đăng nhập thành công!');
     }
 }

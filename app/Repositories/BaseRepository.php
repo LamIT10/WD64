@@ -127,6 +127,15 @@ class BaseRepository
         }
         return false;
     }
+    public function hasRole(string $role){
+        if(!session()->has('roles')) return false;
+        if(in_array($role, session('roles'))){
+
+            return true;
+        }
+        return false;
+    }
+
     // Tạo mã nhân viên duy nhất
     protected function generateUniqueEmployeeCode(?int $ignoreId = null): string
     {
@@ -145,5 +154,14 @@ class BaseRepository
         } while ($exists);
 
         return $code;
+    }
+    public function formatDate(string $date){
+        return date('d/m/Y', strtotime($date));
+    }
+    public function formatNumberInt($num){
+        return number_format($num,0,'.','.');
+    }
+    public function formatNumberDemical($num, $precision = 2){
+        return number_format($num, $precision,',','.');
     }
 }

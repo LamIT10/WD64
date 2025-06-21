@@ -61,4 +61,8 @@ class ProductVariant extends Model
     {
         return $this->hasMany(DamagedExpiredProduct::class);
     }
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }

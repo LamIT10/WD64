@@ -32,7 +32,14 @@ createInertiaApp({
                 el.style.display = 'none'; // Ẩn phần tử nếu không có quyền
             }
         });
-
+        // Thêm directive v-can
+        app.directive('has', (el, binding) => {
+            const authStore = useAuthStore();
+            const role = binding.value;
+            if (!authStore.hasRole(role)) {
+                el.style.display = 'none'; // Ẩn phần tử nếu không có quyền
+            }
+        });
         app.use(plugin).mount(el);
     },
 });

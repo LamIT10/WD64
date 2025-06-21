@@ -1,6 +1,7 @@
 <?php
 
 use App\Constant\PermissionConstant;
+use App\Http\Controllers\Admin\InventoryAuditController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -8,22 +9,35 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\InventoryController;
+use App\Http\Controllers\admin\CustomerTransactionController;
+use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
+
 use App\Http\Controllers\RankController;
+use App\Models\InventoryAudit;
+use App\Http\Controllers\Admin\SupplierTransactionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
 
 
-Route::prefix('admin')->as('admin.')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', action: function () {
-        return Inertia::render('Dashboard');
-    });
-    // Routes cho Categories (Danh mục)
+    Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('inventory-audit', InventoryAuditController::class);
+    Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+    Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::get('inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::get('inventory/{id}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+    Route::put('inventory/{id}', [InventoryController::class, 'update'])->name('inventory.update');
+    Route::delete('inventory/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    // Routes cho Categories (Danh mục) // Tao  xử lí cònlic
     Route::prefix('categories')->as('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
         Route::get('/create', [CategoryController::class, 'create'])->name('create');
@@ -94,16 +108,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // });
 
     Route::prefix('role')->as('role.')->group(function () {
-        Route::get('/', [RoleController::class, 'index'])->name('index');
-        Route::get('/create', [RoleController::class, 'create'])->name('create');
-        Route::post('', [RoleController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit');
-        Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
-        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}', [RoleController::class, 'show'])->name('show');
-        Route::post('admin/customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('admin.customers.bulk-delete');
-        Route::get('admin/customers/import', [CustomerController::class, 'import'])->name('admin.customers.import');
-        Route::get('admin/customers/export', [CustomerController::class, 'export'])->name('admin.customers.export');
+        Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::ROLE_INDEX);
+        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('has_permission:' . PermissionConstant::ROLE_EDIT);
     });
 
 
@@ -114,6 +120,22 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('store', [SupplierController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
+        Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
+        Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
+        Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
+        Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
+
+    });
+    Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
+        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_INDEX);
+        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
+        Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
+        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
+        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
+      
     });
 
 
@@ -134,14 +156,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
 });
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-Route::get('/', function () {
-    return Inertia::render('Dashboard');
-});
+Route::get("/", function (){
+    return redirect("/login");
+})->middleware('auth');
 // Authentication routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

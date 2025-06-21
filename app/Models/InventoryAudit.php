@@ -10,7 +10,7 @@ class InventoryAudit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'audit_date', 'status', 'notes'
+        'user_id', 'audit_date', 'status', 'notes', 'is_adjusted','approved_by'
     ];
 
     protected $casts = [
@@ -25,5 +25,9 @@ class InventoryAudit extends Model
     public function items()
     {
         return $this->hasMany(InventoryAuditItem::class, 'audit_id');
+    }
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }
