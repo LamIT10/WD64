@@ -269,7 +269,7 @@
                                         leave-to-class="transform opacity-0 scale-95">
                                         <div v-if="activePopup === index" :id="'popup' + (index + 1)"
                                             class="absolute right-0 top-8 z-[1000] w-44 max-h-64 bg-white rounded-lg shadow-md ring-1 ring-gray-200 overflow-y-auto popup"
-                                            v-click-outside="closePopup">
+                                          >
                                             <div class="py-1 text-sm">
                                                 <button v-if="item.outstanding_amount != 0"
                                                     v-can="'admin.supplier_transaction.update_credit_due_date'"

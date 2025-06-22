@@ -24,6 +24,7 @@
         "@vueform/multiselect": "^2.6.11",
         "chart.js": "^4.5.0",
         "file-saver": "^2.0.5",
+        "flatpickr": "^4.6.13",
         "i": "^0.3.7",
         "pinia": "^3.0.2",
         "remixicon": "^4.6.0",
