@@ -65,7 +65,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         'prefix' => 'customers',
         'as' => 'customers.'
     ], function () {
-        Route::get('/transaction', [CustomerTransactionController::class, 'index'])->name('transaction');
         Route::get('/', [CustomerController::class, 'index'])->name('index');
         Route::get('/create', [CustomerController::class, 'create'])->name('create');
         Route::post('/', [CustomerController::class, 'store'])->name('store');
@@ -125,11 +124,10 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
         Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
-        Route::get('create', [CustomerTransactionController::class, 'create'])->name('create');
-        Route::get('{id}/edit', [CustomerTransactionController::class, 'edit'])->name('edit');
-        Route::post('store', [CustomerTransactionController::class, 'store'])->name('store');
-        Route::patch('{id}/update', [CustomerTransactionController::class, 'update'])->name('update');
-        Route::delete('{id}', [CustomerTransactionController::class, 'destroy'])->name('destroy');
+        Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
+        Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
+        Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
+
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
         Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_INDEX);

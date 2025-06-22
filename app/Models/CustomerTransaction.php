@@ -10,7 +10,6 @@ class CustomerTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
-  
         'sales_order_id',
         'paid_amount',
         'transaction_date',
