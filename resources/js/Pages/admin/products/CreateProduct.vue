@@ -42,7 +42,8 @@
                                                 <p class="mb-2 text-sm text-gray-500">
                                                     <span class="font-semibold">Click để tải lên</span> hoặc kéo thả
                                                 </p>
-                                                <p class="text-xs text-gray-500">PNG, JPG (Tối đa 2MB/ảnh, tối đa 4 ảnh)</p>
+                                                <p class="text-xs text-gray-500">PNG, JPG (Tối đa 2MB/ảnh, tối đa 4 ảnh)
+                                                </p>
                                             </div>
                                             <input id="dropzone-file" type="file" class="hidden" accept="image/*"
                                                 multiple @change="handleImageUpload" />
@@ -62,7 +63,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <p v-if="form.errors.images" class="text-red-500 text-sm mt-1">{{ form.errors.images }}</p>
+                                <p v-if="form.errors.images" class="text-red-500 text-sm mt-1">{{ form.errors.images }}
+                                </p>
                             </div>
                         </div>
                         <div class="col-span-1">
@@ -90,7 +92,8 @@
                                     :close-on-select="true" :can-clear="true" value-prop="id" label="formattedName"
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
-                                        <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName }}</span>
+                                        <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
+                                            }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -347,7 +350,9 @@
                                                     @create-option="(val) => handleCreateAttributeValue(attribute.attribute_id, val)" />
                                                 <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_value_ids`]"
                                                     class="text-red-500 text-sm mt-1">
-                                                    {{ form.errors[`variants.${index}.attributes.${attrIndex}.attribute_value_ids`] }}
+                                                    {{
+                                                        form.errors[`variants.${index}.attributes.${attrIndex}.attribute_value_ids`]
+                                                    }}
                                                 </p>
                                             </div>
                                             <button type="button" @click="removeVariantAttribute(index, attrIndex)"
@@ -424,7 +429,8 @@
                                     <select v-model="item.data.warehouse_zone_id"
                                         class="w-full px-2 py-1 border rounded border-gray-300 text-sm">
                                         <option value="">Chọn vị trí</option>
-                                        <option v-for="z in warehouseZones" :key="z.id" :value="z.id">{{ z.name }}</option>
+                                        <option v-for="z in warehouseZones" :key="z.id" :value="z.id">{{ z.name }}
+                                        </option>
                                     </select>
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.warehouse_zone_id`]"
                                         class="text-red-500 text-sm mt-1">
@@ -561,6 +567,12 @@ watch(hasVariant, (newVal) => {
         }
     } else {
         form.variants = [];
+        form.simple_sale_price = '';
+        form.simple_quantity = '';
+        form.simple_barcode = '';
+        form.supplier_ids = [];
+        form.warehouse_zone_id = null;
+        form.custom_location_name = null;
     }
 });
 
@@ -610,7 +622,10 @@ const generateCombinations = (attributes) => {
     const values = attributes
         .map((attr) => attr.attribute_value_ids)
         .filter((arr) => Array.isArray(arr) && arr.length > 0);
-    if (values.length === 0) return [];
+
+    // Nếu không đủ thuộc tính hợp lệ, trả về rỗng
+    if (values.length === 0 || values.length !== attributes.length) return [];
+
     return values.reduce((acc, curr) => {
         const result = [];
         acc.forEach((a) => {
@@ -619,13 +634,18 @@ const generateCombinations = (attributes) => {
             });
         });
         return result;
-    }, [[]]);
+    }, [[]]).filter(combo => combo.length === attributes.length); // Chỉ giữ tổ hợp đầy đủ
 };
 
 const variantCombinations = computed(() => {
     if (!form.variants.length) return [];
     return form.variants.map((variant, index) => {
+        console.log(`▶️ Dữ liệu attributes cho variant ${index}:`, JSON.stringify(variant.attributes, null, 2));
+
         const attributeCombinations = generateCombinations(variant.attributes);
+        console.log('🧪 Kết quả generateCombinations:', JSON.stringify(attributeCombinations, null, 2));
+
+
         return attributeCombinations.map((combo) => {
             const key = combo.join('-');
             if (deletedCombinationKeys.value.includes(key)) return null;
@@ -670,27 +690,33 @@ const removeCombinationItem = (key) => {
 const transformFormBeforeSubmit = () => {
     if (hasVariant.value) {
         form.variants.forEach((variant) => {
-            if (!variant.combinationData) return;
             const combinations = [];
-            for (const key in variant.combinationData) {
-                if (deletedCombinationKeys.value.includes(key)) continue;
+
+            const validKeys = generateCombinations(variant.attributes)
+                .map((ids) => ids.join('-'))
+                .filter((key) => !deletedCombinationKeys.value.includes(key));
+
+            validKeys.forEach((key) => {
                 const valueIds = key.split('-').map((id) => parseInt(id));
-                const comboData = variant.combinationData[key];
-                if (valueIds.length === 0) continue;
+                const comboData = variant.combinationData?.[key];
+                if (!comboData) return; // bỏ qua nếu combo đã bị xoá
+
                 combinations.push({
                     attribute_value_ids: valueIds,
-                    code: comboData.code || `VAR-${key}`,
-                    barcode: comboData.barcode || `BAR-${key}`,
+                    code: comboData.code || '',
+                    barcode: comboData.barcode || '',
                     sale_price: Number(comboData.sale_price) || 0,
                     quantity_on_hand: Number(comboData.quantity_on_hand) || 0,
                     supplier_ids: Array.isArray(comboData.supplier_ids) ? comboData.supplier_ids : [],
                     warehouse_zone_id: comboData.warehouse_zone_id || null,
                     custom_location_name: comboData.custom_location_name || null,
                 });
-            }
+            });
+
             variant.combinations = combinations;
             delete variant.combinationData;
         });
+
         form.simple_sale_price = null;
         form.simple_quantity = null;
         form.simple_barcode = null;
@@ -700,8 +726,9 @@ const transformFormBeforeSubmit = () => {
     } else {
         form.variants = [];
         form.unit_conversions = form.unit_conversions.filter((uc) => uc.to_unit_id && uc.conversion_factor);
-        form.simple_sale_price = Number(form.simple_sale_price) || 0;
-        form.simple_quantity = Number(form.simple_quantity) || 0;
+        // Không gán mặc định 0, giữ nguyên giá trị từ input
+        form.simple_sale_price = form.simple_sale_price ? Number(form.simple_sale_price) : null;
+        form.simple_quantity = form.simple_quantity ? Number(form.simple_quantity) : null;
         form.supplier_ids = Array.isArray(form.supplier_ids) ? form.supplier_ids : [];
         form.simple_barcode = form.simple_barcode || null;
         form.custom_location_name = form.custom_location_name || null;

@@ -28,7 +28,7 @@ class UpdateProductRequest extends FormRequest
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'code' => [
-                'nullable',
+                'required',
                 'string',
                 'max:100',
                 Rule::unique('products', 'code')->ignore($productId),
@@ -62,11 +62,11 @@ class UpdateProductRequest extends FormRequest
             $rules['variants.*.combinations'] = ['required', 'array'];
             $rules['variants.*.combinations.*.attribute_value_ids'] = ['required', 'array'];
             $rules['variants.*.combinations.*.attribute_value_ids.*'] = ['required', 'exists:attribute_values,id'];
-            $rules['variants.*.combinations.*.code'] = ['nullable', 'string', 'max:100'];
+            $rules['variants.*.combinations.*.code'] = ['required', 'string', 'max:100'];
             $rules['variants.*.combinations.*.barcode'] = ['nullable', 'string', 'max:100'];
             $rules['variants.*.combinations.*.sale_price'] = ['required', 'numeric', 'min:0'];
             $rules['variants.*.combinations.*.quantity_on_hand'] = ['required', 'numeric', 'min:0'];
-            $rules['variants.*.combinations.*.supplier_ids'] = ['nullable', 'array'];
+            $rules['variants.*.combinations.*.supplier_ids'] = ['required', 'array']; // Có thể đổi thành 'nullable' nếu không bắt buộc
             $rules['variants.*.combinations.*.supplier_ids.*'] = ['exists:suppliers,id'];
             $rules['variants.*.combinations.*.warehouse_zone_id'] = ['nullable', 'exists:warehouse_zones,id'];
             $rules['variants.*.combinations.*.custom_location_name'] = ['nullable', 'string', 'max:100'];
@@ -75,7 +75,7 @@ class UpdateProductRequest extends FormRequest
             $rules['simple_sale_price'] = ['required', 'numeric', 'min:0'];
             $rules['simple_quantity'] = ['required', 'numeric', 'min:0'];
             $rules['simple_barcode'] = ['nullable', 'string', 'max:100'];
-            $rules['supplier_ids'] = ['nullable', 'array'];
+            $rules['supplier_ids'] = ['required', 'array'];
             $rules['supplier_ids.*'] = ['exists:suppliers,id'];
             $rules['warehouse_zone_id'] = ['nullable', 'exists:warehouse_zones,id'];
             $rules['custom_location_name'] = ['nullable', 'string', 'max:100'];
@@ -97,6 +97,7 @@ class UpdateProductRequest extends FormRequest
             'name.max' => 'Tên sản phẩm không được vượt quá 255 ký tự.',
 
             // Mã sản phẩm
+            'code.required' => 'Vui lòng nhập mã sản phẩm.',
             'code.max' => 'Mã sản phẩm không được vượt quá 100 ký tự.',
             'code.unique' => 'Mã sản phẩm đã tồn tại.',
 
@@ -148,6 +149,7 @@ class UpdateProductRequest extends FormRequest
             'simple_barcode.string' => 'Mã vạch phải là chuỗi.',
             'simple_barcode.max' => 'Mã vạch không được vượt quá 100 ký tự.',
 
+            'supplier_ids.required' => 'Hãy chọn nhà cung cấp.',
             'supplier_ids.array' => 'Danh sách nhà cung cấp không hợp lệ.',
             'supplier_ids.*.exists' => 'Nhà cung cấp không hợp lệ.',
             'warehouse_zone_id.exists' => 'Khu vực kho không hợp lệ.',
@@ -173,6 +175,7 @@ class UpdateProductRequest extends FormRequest
             'variants.*.combinations.*.attribute_value_ids.array' => 'Danh sách giá trị tổ hợp không hợp lệ.',
             'variants.*.combinations.*.attribute_value_ids.*.exists' => 'Một số giá trị trong tổ hợp không hợp lệ.',
 
+            'variants.*.combinations.*.code.required' => 'Vui lòng nhập mã SKU cho tổ hợp.',
             'variants.*.combinations.*.code.string' => 'Mã SKU phải là chuỗi.',
             'variants.*.combinations.*.code.max' => 'Mã SKU không được vượt quá 100 ký tự.',
 
@@ -187,6 +190,7 @@ class UpdateProductRequest extends FormRequest
             'variants.*.combinations.*.quantity_on_hand.numeric' => 'Tồn kho phải là số.',
             'variants.*.combinations.*.quantity_on_hand.min' => 'Tồn kho không được âm.',
 
+            'variants.*.combinations.*.supplier_ids.required' => 'Vui lòng chọn ít nhất một nhà cung cấp cho tổ hợp.',
             'variants.*.combinations.*.supplier_ids.array' => 'Danh sách nhà cung cấp không hợp lệ.',
             'variants.*.combinations.*.supplier_ids.*.exists' => 'Nhà cung cấp cho tổ hợp không hợp lệ.',
             'variants.*.combinations.*.warehouse_zone_id.exists' => 'Khu vực kho cho tổ hợp không hợp lệ.',
