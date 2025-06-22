@@ -24,6 +24,7 @@ class SupplierTransactionController extends Controller
         return Inertia::render("admin/Suppliertransactions/Index", ["transactionSupplier"=> $transactionSupplier, 'listSuppliers' => $listSuppliers]);
     }
     public function update(int $id){
+        // dd(request()->all());
         $supplierTransaction = $this->handleRepository->hanldeUpdateCreditDueDate($id, request()->all());
         return $this->returnInertia($supplierTransaction, "Cập nhật hạn công nợ thành công", 'admin.supplier-transaction.index');
     }

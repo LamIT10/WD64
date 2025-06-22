@@ -36,13 +36,12 @@ const chartInstance = ref(null);
 const chartCanvas = ref(null);
 const chartData = ref([]);
 
-// Lấy 7 ngày gần nhất (từ 14/06/2025 đến 20/06/2025)
+// Lấy 7 ngày gần nhất
 const getLast7Days = () => {
     const days = [];
-    const currentDate = new Date(); 
-    const timestamp = currentDate. getTime()
+    const currentDate = new Date();
     for (let i = 6; i >= 0; i--) {
-        const date = new Date(timestamp);
+        const date = new Date(currentDate);
         date.setDate(date.getDate() - i);
         days.push(date.toISOString().split('T')[0]); // Định dạng YYYY-MM-DD
     }
@@ -52,10 +51,8 @@ const getLast7Days = () => {
 // Xử lý dữ liệu từ props
 const processChartData = () => {
     const days = getLast7Days();
-    // Khởi tạo mảng total_orders với giá trị 0 cho tất cả 7 ngày
     const totalOrders = days.map(() => 0);
 
-    // Ánh xạ dữ liệu từ props vào các ngày tương ứng
     props.purchaseChangeInSevenDay.forEach((item) => {
         const index = days.indexOf(item.date);
         if (index !== -1) {
@@ -142,12 +139,18 @@ const renderChart = () => {
     });
 };
 
-
+// Xử lý resize cửa sổ
+const handleResize = () => {
+    if (chartInstance.value) {
+        chartInstance.value.resize();
+    }
+};
 
 // Khởi tạo khi mounted
 onMounted(() => {
     processChartData();
     renderChart();
+    window.addEventListener('resize', handleResize);
 });
 
 // Theo dõi thay đổi props.purchaseChangeInSevenDay
@@ -160,21 +163,30 @@ watch(
     { deep: true }
 );
 
-// Hủy biểu đồ trước khi unmount
+// Hủy biểu đồ và listener trước khi unmount
 onBeforeUnmount(() => {
     if (chartInstance.value) {
         chartInstance.value.destroy();
     }
+    window.removeEventListener('resize', handleResize);
 });
 </script>
 
 <style scoped>
 .chart-container {
     width: 100%;
-    max-width: 800px;
+    height: 50vh; /* Chiều cao linh hoạt dựa trên viewport */
+    min-height: 300px; /* Chiều cao tối thiểu */
+    max-height: 600px; /* Chiều cao tối đa */
     margin: 0 auto;
     position: relative;
-    height: 400px;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .refresh-btn {
@@ -193,5 +205,13 @@ onBeforeUnmount(() => {
 
 .refresh-btn:hover {
     background-color: #3aa8a8;
+}
+
+/* Media query cho màn hình nhỏ */
+@media (max-width: 600px) {
+    .chart-container {
+        height: 40vh;
+        min-height: 250px;
+    }
 }
 </style>
