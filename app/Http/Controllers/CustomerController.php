@@ -24,7 +24,7 @@ class CustomerController extends Controller
     {
         $perPage = request()->get('perPage', 10);
         $filters = [
-            'search' => request()->only(['name', 'phone', 'email']),
+            'search' => ['search' => request()->input('search')],
             'absoluteFilter' => request()->only(['status']),
             'between' => [
                 'total_spent' => [
@@ -53,7 +53,6 @@ class CustomerController extends Controller
         $customers = $this->customerRepo->getAll($perPage, $filters);
         return $this->renderView(['customers' => $customers], 'admin/Customers/Index');
     }
-
     public function show(Customer $customer)
     {
         return $this->renderView(['customer' => $customer->load('rank')], 'admin/Customers/Show');

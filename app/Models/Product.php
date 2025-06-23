@@ -48,4 +48,8 @@ class Product extends Model
     public function unitDefault(){
         return $this->belongsTo(Unit::class, 'default_unit_id', 'id');
     }
+    public function defaultUnit()
+    {
+        return $this->belongsTo(Unit::class, 'default_unit_id');
+    }
 }

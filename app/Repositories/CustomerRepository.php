@@ -20,7 +20,22 @@ class CustomerRepository extends BaseRepository
     public function getAll($perPage = 10, array $filters = [])
     {
         $query = $this->handleModel::with('rank');
+
+        // Xử lý tìm kiếm tổng quát
+        if (!empty($filters['search']['search'])) {
+            $search = $filters['search']['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+            // Loại bỏ 'search' để không áp dụng likeTextFilter trong filterData
+            unset($filters['search']['search']);
+        }
+
+        // Áp dụng các bộ lọc khác từ BaseRepository
         $query = $this->filterData($query, $filters);
+
         return $query->paginate($perPage);
     }
 
@@ -117,7 +132,7 @@ class CustomerRepository extends BaseRepository
             }
 
             $customer->max_debt_limit = $this->calculateMaxDebtLimit($customer);
-            $this->updateCustomerStatus($customer); // Cập nhật trạng thái tự động
+            $this->updateCustomerStatus($customer);
             $customer->save();
 
             DB::commit();

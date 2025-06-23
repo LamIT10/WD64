@@ -274,7 +274,7 @@
         <h1>404</h1>
         <h2>Không tìm thấy trang</h2>
         <p>Rất tiếc! Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển. Hãy quay lại trang chủ để tiếp tục trải nghiệm.</p>
-        <a href="/admin/suppliers" class="btn">Trở về Trang chủ</a>
+        <a href="/admin/dashboard" class="btn">Trở về Trang chủ</a>
     </div>
 
     <script>

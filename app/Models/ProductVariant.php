@@ -9,7 +9,7 @@ class ProductVariant extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['product_id', 'barcode'];
+    protected $fillable = ['product_id', 'barcode', 'sale_price', 'code', 'unit_id'];
 
     public function product()
     {
@@ -63,5 +63,9 @@ class ProductVariant extends Model
     }
     public function suppliers(){
         return $this->belongsToMany(Supplier::class, 'supplier_product_variants', 'product_variant_id', 'supplier_id');
+    }
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

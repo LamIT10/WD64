@@ -79,6 +79,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
-
+      public function approvedAudits()
+    {
+        return $this->hasMany(InventoryAudit::class, 'approved_by');
+    }
 
 }
