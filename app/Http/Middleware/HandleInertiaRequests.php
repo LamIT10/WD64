@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'permissions' => session('permissions', []),
+                'roles' => session('roles', []),
             ],
             'recaptchaSiteKey' => config('nocaptcha.sitekey'),
             'flash' => [

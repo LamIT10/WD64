@@ -23,12 +23,12 @@ class SupplierRepository extends BaseRepository
             ]
         ];
         $query = $this->filterData($query, $filters);
-        $query->orderBy('id', 'desc');  
+        $query->orderBy('id', 'desc');
         return $query->paginate(10);;
     }
     public function createData($data = [])
     {
-        
+
         try {
             $newSupplier = [];
             DB::beginTransaction();
@@ -47,10 +47,11 @@ class SupplierRepository extends BaseRepository
             return $this->returnError("Lỗi khi tạo nhà cung cấp");
         }
     }
-    public function updateData($id, $data){
+    public function updateData($id, $data)
+    {
         try {
             $supplier = $this->handleModel->find($id);
-            if(!$supplier){
+            if (!$supplier) {
                 return $this->returnError("Không tìm thấy nhà cung cấp");
             }
             DB::beginTransaction();
@@ -70,11 +71,12 @@ class SupplierRepository extends BaseRepository
             return $this->returnError("Lỗi khi cập nhật nhà cung cấp");
         }
     }
-    public function deleteData($id){
+    public function deleteData($id)
+    {
         try {
             DB::beginTransaction();
             $supplier = $this->handleModel->find($id);
-            if(!$supplier){
+            if (!$supplier) {
                 return $this->returnError("Không tìm thấy nhà cung cấp");
             }
             $supplier->delete();
@@ -85,5 +87,10 @@ class SupplierRepository extends BaseRepository
             Log::error("Lỗi khi xoá nhà cung cấp, " . $th->getMessage());
             return $this->returnError("Lỗi khi xoá nhà cung cấp");
         }
+    }
+    public function listSelectSupplier()
+    {
+        $data = $this->handleModel->select(['id', 'name'])->get()->toArray();
+        return $data;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Auth;
 
+use App\Constant\RoleConstant;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -102,7 +103,7 @@ class PermissionRepository extends BaseRepository
     {
         try {
             $permission = $this->findById($id);
-            $permission->delete($id);
+            $permission->delete();
             if (!$permission) {
                 throw new \Exception("Có lỗi khi xoá quyền");
             }
@@ -113,5 +114,9 @@ class PermissionRepository extends BaseRepository
             DB::rollBack();
             return $this->returnError($th->getMessage());
         }
+    }
+    public function getDropDownPermission(){
+        return $this->handleModel->select(["id","description"])->get();
+       
     }
 }

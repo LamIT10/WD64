@@ -2,75 +2,156 @@
 
 namespace App\Repositories;
 
-use App\Models\CustomerTransaction;
+use App\Models\SaleOrder;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class CustomerTransactionRepository extends BaseRepository
 {
-    public function __construct(CustomerTransaction $model)
+  
+    public function getDebtSummaryByOrder($filter = [], $limit = 10)
     {
-        $this->handleModel = $model;
+        $query = SaleOrder::with(['customer', 'latestTransaction'])
+            ->where('status', 'shipped') // chỉ lấy đơn đã giao hàng
+            // Cộng dồn tất cả các giao dịch 
+            ->withSum('transactions as total_paid', 'paid_amount')
+            ->orderBy('created_at', 'desc');
+
+        $paginated = $query->paginate($limit);
+
+        return $paginated->through(function ($order) {
+            $total = $order->total_amount ?? 0;
+            $paid = $order->total_paid ?? 0;
+            $remaining = $total - $paid;
+
+            //  Tính hạn trả nợ từ đơn hàng (nếu có cột riêng credit_due_date trong sale_orders)
+            $dueDate = $order->credit_due_date
+                ? Carbon::parse($order->credit_due_date)
+                : Carbon::parse($order->created_at)->addDays(30);
+
+            $isOverdue = $dueDate->lt(now()) && $remaining > 0;
+
+            // Trạng thái công nợ
+            $status = match (true) {
+                $remaining <= 0 => 'Đã thanh toán',
+                $isOverdue => 'Đã quá hạn',
+                default => 'Chưa thanh toán',
+            };
+
+            return [
+                'id' => $order->id,
+                'total_amount' => $total,
+                'paid_amount' => $paid,
+                'remaining_amount' => $remaining,
+                'credit_due_date' => $dueDate,
+                'transaction_date' => optional($order->latestTransaction)->transaction_date,
+                'status' => $status,
+                'customer' => [
+                    'name' => $order->customer->name ?? null,
+                    'phone' => $order->customer->phone ?? null,
+                ],
+            ];
+        });
     }
 
-    /**
-     * Danh sách công nợ chưa thanh toán / còn lại
-     */
-    public function getOutstandingDebts(array $filters = [])
+
+    public function getDebtDetailByOrderId($orderId)
     {
-        $query = $this->handleModel->query()
-            ->where('remaining_amount', '>', 0)
-            ->orderByDesc('credit_due_date');
+        $order = SaleOrder::with([
+            'customer',
+            'transactions',
+            'items.productVariant.product', // load đến cả tên sản phẩm nếu cần
+            'items.unit'
+        ])->findOrFail($orderId);
 
-        return $this->filterData($query, $filters)->get();
-    }
+        $total = $order->total_amount ?? 0;
+        $paid = $order->transactions->sum('paid_amount');
+        $remaining = $total - $paid;
 
-    /**
-     * Danh sách công nợ quá hạn
-     */
-    public function getOverdueDebts(array $filters = [])
-    {
-        $query = $this->handleModel->query()
-            ->where('remaining_amount', '>', 0)
-            ->whereDate('credit_due_date', '<', now());
+           $dueDate = $order->credit_due_date
+                ? Carbon::parse($order->credit_due_date)
+                : Carbon::parse($order->created_at)->addDays(30);
 
-        return $this->filterData($query, $filters)->get();
-    }
+            $isOverdue = $dueDate->lt(now()) && $remaining > 0;
 
-    /**
-     * Ghi nhận thanh toán vào một giao dịch công nợ
-     */
-    public function recordPayment(int $id, float $amount): array
-    {
-        $transaction = $this->handleModel->findOrFail($id);
-
-        if ($amount <= 0) {
-            return $this->returnError("Số tiền thanh toán phải lớn hơn 0.");
-        }
-
-        if ($transaction->remaining_amount <= 0) {
-            return $this->returnError("Giao dịch đã được thanh toán đủ.");
-        }
-
-        $transaction->paid_amount += $amount;
-        $transaction->remaining_amount = max(0, $transaction->remaining_amount - $amount);
-        $transaction->transaction_date = Carbon::now();
-        $transaction->save();
+            //  Trạng thái công nợ
+            $status = match (true) {
+                $remaining <= 0 => 'Đã thanh toán',
+                $isOverdue => 'Đã quá hạn',
+                default => 'Chưa thanh toán',
+            };
 
         return [
-            'status' => true,
-            'message' => 'Thanh toán thành công',
-            'data' => $transaction
+            'id' => $order->id,
+            'order_code' => 'DH' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+            'total_amount' => $total,
+            'paid_amount' => $paid,
+            'status' => $status,
+            'remaining_amount' => $remaining,
+            'credit_due_date' => $dueDate,
+            'transaction_date' => optional($order->transactions->last())->transaction_date,
+            'customer' => [
+                'name' => $order->customer->name ?? null,
+                'phone' => $order->customer->phone ?? null,
+                'email' => $order->customer->email ?? null,
+            ],
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'product_variant_id' => $item->product_variant_id,
+                    'product_name' => optional($item->productVariant->product)->name ?? 'Không xác định',
+                    'quantity_ordered' => $item->quantity_ordered,
+                    'quantity_shipped' => $item->quantity_shipped,
+                    'unit_price' => $item->unit_price,
+                    'subtotal' => $item->subtotal,
+                    'unit_name' => optional($item->unit)->name ?? '-',
+                ];
+            }),
+            'payment_history' => $order->transactions
+                ->whereNotNull('paid_amount')
+                ->where('paid_amount', '>', 0)
+                ->sortByDesc('transaction_date') // sắp xếp mới nhất trước
+                ->values()
+                ->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'paid_amount' => $t->paid_amount,
+                        'transaction_date' => $t->transaction_date,
+                        'note' => $t->description,
+                    ];
+                }),
         ];
     }
 
-    /**
-     * Tổng hợp công nợ theo khách hàng
-     */
-    public function summaryByCustomer()
+
+
+
+    public function updateTransaction($orderId, array $data)
     {
-        return $this->handleModel
-            ->selectRaw('customer_id, SUM(paid_amount) as total_paid, SUM(remaining_amount) as total_debt')
-            ->groupBy('customer_id')
-            ->get();
+        $order = SaleOrder::findOrFail($orderId);
+        $newPaid = $data['paid_amount'];
+        $total = $order->total_amount;
+
+        //  Tính tổng đã thanh toán trước đó
+        $paidSoFar = $order->transactions()->sum('paid_amount');
+
+        //  Kiểm tra tổng thanh toán không vượt quá giá trị đơn hàng
+        if (($paidSoFar + $newPaid) > $total) {
+            throw new \Exception('Tổng thanh toán vượt quá giá trị đơn hàng.');
+        }
+
+        //  Tạo giao dịch thanh toán mới
+        return $order->transactions()->create([
+            'paid_amount' => $newPaid,
+            'transaction_date' => $data['transaction_date'],
+            'description' => $data['description'] ?? null,
+        ]);
+    }
+
+    public function updateDueDate($orderId, string $newDueDate)
+    {
+        $order = SaleOrder::findOrFail($orderId);
+        $order->credit_due_date = $newDueDate;
+        $order->save();
+        return $order;
     }
 }

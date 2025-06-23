@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentRequest;
+use App\Http\Requests\UpdateCustommerTransactionRequest;
 use App\Repositories\CustomerTransactionRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,67 +18,43 @@ class CustomerTransactionController extends Controller
         $this->customerTransactionRepo = $customerTransactionRepo;
     }
 
-    /**
-     * Hiển thị danh sách công nợ (có lọc nâng cao)
-     */
+
     public function index(Request $request)
     {
-        $filters = [
-            'search' => $request->input('search', []),                // ví dụ: ['description' => 'đơn hàng']
-            'absoluteFilter' => $request->input('absoluteFilter', []),// ví dụ: ['customer_id' => 1]
-            'between' => $request->input('between', []),              // ví dụ: ['credit_due_date' => ['min' => '2025-05-01', 'max' => '2025-06-30']]
-            'relation' => $request->input('relation', [])             // ví dụ: ['customer' => ['field' => 'name', 'value' => 'ABC']]
-        ];
-
-        $debts = $this->customerTransactionRepo->getOutstandingDebts($filters);
-
+        $customerTransaction = $this->customerTransactionRepo->getDebtSummaryByOrder();
+        // dd($customerTransaction->toArray());
         return Inertia::render('admin/Customers/Transaction/Index', [
-            'debts' => $debts,
-            'filters' => $filters,
+            'customerTransaction' => $customerTransaction,
+        ]);
+    }
+    public function show($orderId)
+    {
+        $detail = $this->customerTransactionRepo->getDebtDetailByOrderId($orderId);
+ 
+        return Inertia::render('admin/Customers/Transaction/ShowTransaction', [
+            'debt' => $detail,
         ]);
     }
 
-    /**
-     * Ghi nhận thanh toán cho 1 công nợ
-     */
-    public function storePayment(StorePaymentRequest $request)
+    public function addTransaction(Request $request, $orderId)
     {
-        $result = $this->customerTransactionRepo->recordPayment(
-            $request->transaction_id,
-            $request->amount
-        );
-
-        if (!$result['status']) {
-            return redirect()->back()->with('error', $result['message']);
-        }
-
-        return redirect()->back()->with('success', $result['message']);
-    }
-
-    /**
-     * Danh sách công nợ quá hạn
-     */
-    public function overdue(Request $request)
-    {
-        $filters = $request->only(['search', 'absoluteFilter', 'between', 'relation']);
-
-        $debts = $this->customerTransactionRepo->getOverdueDebts($filters);
-
-        return Inertia::render('Debt/Overdue', [
-            'debts' => $debts,
-            'filters' => $filters,
+        $validated = $request->validate([
+            'paid_amount' => ['required', 'numeric', 'min:0'],
+            'transaction_date' => ['required', 'date'],
+            'description' => ['nullable', 'string', 'max:250'],
         ]);
+
+       $customer= $this->customerTransactionRepo->updateTransaction($orderId, $validated);
+        return $this-> returnInertia($customer, 'Thêm giao dịch thành công', 'admin.customer-transaction.index');
     }
-
-    /**
-     * Tổng hợp công nợ theo khách hàng
-     */
-    public function summary()
+    public function updateDueDate(Request $request, $orderId)
     {
-        $summary = $this->customerTransactionRepo->summaryByCustomer();
-
-        return Inertia::render('Debt/Summary', [
-            'summary' => $summary,
+        $request->validate([
+            'credit_due_date' => ['required', 'date'],
         ]);
+
+        $customer=$this->customerTransactionRepo->updateDueDate($orderId, $request->credit_due_date);
+
+        return $this->returnInertia($customer, 'Cập nhật hạn công nợ thành công', 'admin.customer-transaction.index');
     }
 }
