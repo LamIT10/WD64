@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'min_stock', 'description', 'category_id', 'expiration_date', 'production_date'];
+    protected $fillable = ['name', 'code', 'min_stock', 'description', 'category_id', 'expiration_date', 'production_date', 'default_unit_id'];
 
 
     protected $casts = [
@@ -44,5 +44,9 @@ class Product extends Model
     public function supplierVariants()
     {
         return $this->hasManyThrough(SupplierProductVariant::class, ProductVariant::class);
+    }
+    public function defaultUnit()
+    {
+        return $this->belongsTo(Unit::class, 'default_unit_id');
     }
 }
