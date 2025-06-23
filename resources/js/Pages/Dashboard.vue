@@ -47,7 +47,8 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng xuất đơn hàng</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_sale_order.count_sale_order_in_month }}
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{
+                  data.statistical_sale_order.count_sale_order_in_month }}
                 </p>
                 <!-- <p class="text-xs text-gray-400 mt-1">Trong tháng</p> -->
               </div>
@@ -323,153 +324,75 @@
       </div>
 
       <!-- Net Revenue Chart -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-semibold text-gray-800">Net Revenue</h3>
-          <div class="flex space-x-2">
-            <select
-              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              <option>Daily</option>
-              <option selected>Weekly</option>
-              <option>Monthly</option>
-              <option>Quarterly</option>
-            </select>
-            <button class="text-sm bg-indigo-600 text-white px-3 py-1 rounded-lg hover:bg-indigo-700">Export</button>
-          </div>
-        </div>
-        <div class="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
-          <!-- Placeholder for revenue chart -->
-          <div class="text-center">
-            <svg class="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-              </path>
-            </svg>
-            <p class="mt-2 text-gray-500">Net revenue chart visualization</p>
-            <p class="text-xs text-gray-400">Showing weekly revenue trends</p>
-          </div>
-        </div>
-        <div class="mt-4 grid grid-cols-3 gap-4 text-center">
-          <div class="bg-blue-50 p-3 rounded-lg">
-            <p class="text-sm text-blue-600">This Week</p>
-            <p class="font-bold text-blue-800">₫42.8M</p>
-          </div>
-          <div class="bg-green-50 p-3 rounded-lg">
-            <p class="text-sm text-green-600">Last Week</p>
-            <p class="font-bold text-green-800">₫38.5M</p>
-          </div>
-          <div class="bg-purple-50 p-3 rounded-lg">
-            <p class="text-sm text-purple-600">Change</p>
-            <p class="font-bold text-purple-800">+11.2%</p>
-          </div>
-        </div>
-      </div>
+    <RevenueChart :data="data.net_revenue" />
 
       <!-- Top 10 Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-20">
         <!-- Top 10 Best Selling Products -->
+
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Top 10 Best Selling Products</h3>
-            <select
-              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              <option>This Week</option>
-              <option selected>This Month</option>
-              <option>This Quarter</option>
-              <option>This Year</option>
+            <select v-model="selectedPeriod"
+              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
             </select>
           </div>
-          <div class="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
-            <!-- Placeholder for top products chart -->
-            <div class="text-center w-full px-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">1. A4 70gsm - White</span>
-                <span class="text-sm font-bold text-indigo-700">1,250 units</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 100%"></div>
-              </div>
 
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">2. A3 80gsm - Yellow</span>
-                <span class="text-sm font-bold text-indigo-700">980 units</span>
+          <div class="h-80 overflow-y-auto pr-2">
+            <div class="text-center w-full px-2" v-if="topProducts.length">
+              <div v-for="(item, index) in topProducts" :key="item.variant_id" class="mb-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium text-gray-700">{{ index + 1 }}. {{ item.full_variant_name }}</span>
+                  <span class="text-sm font-bold text-indigo-700">{{ formatNumber(item.total_quantity) }} units</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="bg-indigo-600 h-2.5 rounded-full"
+                    :style="{ width: getBarWidth(item.total_quantity) + '%' }"></div>
+                </div>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 78%"></div>
-              </div>
-
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">3. A5 100gsm - Blue</span>
-                <span class="text-sm font-bold text-indigo-700">750 units</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 60%"></div>
-              </div>
-
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">4. A4 80gsm - Pink</span>
-                <span class="text-sm font-bold text-indigo-700">620 units</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 50%"></div>
-              </div>
-
-              <p class="text-xs text-gray-500 mt-4">Showing top 4 of 10 products</p>
+              <p class="text-xs text-gray-500 mt-2">Showing top {{ topProducts.length }} of 10 products</p>
             </div>
+            <div v-else class="text-sm text-gray-500 text-center">No data available</div>
           </div>
         </div>
 
+
+
         <!-- Top 10 Customers -->
+
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Top 10 Customers</h3>
-            <select
-              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              <option>This Week</option>
-              <option selected>This Month</option>
-              <option>This Quarter</option>
-              <option>This Year</option>
+            <select v-model="selectedCustomerPeriod"
+              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+              <option value="week">This Week</option>
+              <option value="month" selected>This Month</option>
+              <option value="year">This Year</option>
             </select>
           </div>
-          <div class="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
-            <!-- Placeholder for top customers chart -->
-            <div class="text-center w-full px-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">1. Công ty TNHH ABC</span>
-                <span class="text-sm font-bold text-green-700">₫15.2M</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-green-600 h-2.5 rounded-full" style="width: 100%"></div>
-              </div>
 
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">2. Trường học XYZ</span>
-                <span class="text-sm font-bold text-green-700">₫12.8M</span>
+          <div class="h-80 overflow-y-auto pr-2">
+            <div class="text-center w-full px-2" v-if="topCustomers.length">
+              <div v-for="(item, index) in topCustomers" :key="item.customer_id" class="mb-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-medium text-gray-700">{{ index + 1 }}. {{ item.customer_name }}</span>
+                  <span class="text-sm font-bold text-green-700">{{ formatCurrency(item.total_spent) }}</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="bg-green-600 h-2.5 rounded-full" :style="{ width: getBarWidthCustomer(item.total_spent) + '%' }">
+                  </div>
+                </div>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-green-600 h-2.5 rounded-full" style="width: 84%"></div>
-              </div>
-
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">3. Nhà sách MNP</span>
-                <span class="text-sm font-bold text-green-700">₫9.5M</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-green-600 h-2.5 rounded-full" style="width: 62%"></div>
-              </div>
-
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">4. Cửa hàng QRS</span>
-                <span class="text-sm font-bold text-green-700">₫7.1M</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                <div class="bg-green-600 h-2.5 rounded-full" style="width: 47%"></div>
-              </div>
-
-              <p class="text-xs text-gray-500 mt-4">Showing top 4 of 10 customers</p>
+              <p class="text-xs text-gray-500 mt-2">Showing top {{ topCustomers.length }} of 10 customers</p>
             </div>
+            <div v-else class="text-sm text-gray-500 text-center">No data available</div>
           </div>
         </div>
+
+
       </div>
 
       <!-- Inventory Charts and Low Stock Section -->
@@ -643,9 +566,56 @@
 import { Link } from '@inertiajs/vue3';
 import AppLayout from './admin/Layouts/AppLayout.vue';
 import { route } from 'ziggy-js';
+import { ref, computed } from 'vue';
 import ChangePurchaseSevenDayAgo from './components/ChangePurchaseSevenDayAgo.vue';
+import RevenueChart from './components/RevenueChart.vue';
 const { data } = defineProps({
   data: Object,
 })
 console.log(data);
+
+const selectedPeriod = ref('month')
+
+const topProducts = computed(() => {
+  return data?.top_10_product_variants?.[selectedPeriod.value] ?? []
+})
+
+const maxQuantity = computed(() => {
+  if (!topProducts.value.length) return 1
+  return Math.max(...topProducts.value.map(p => p.total_quantity))
+})
+
+const getBarWidth = (quantity) => {
+  return Math.round((quantity / maxQuantity.value) * 100)
+}
+
+const formatNumber = (val) => {
+  return new Intl.NumberFormat().format(val)
+}
+const selectedCustomerPeriod = ref('month')
+
+const topCustomers = computed(() => {
+  return data?.top_10_customers?.[selectedCustomerPeriod.value] ?? []
+})
+
+const maxTotalSpent = computed(() => {
+  if (!topCustomers.value.length) return 1
+  return Math.max(...topCustomers.value.map(c => Number(c.total_spent) || 0))
+})
+
+const getBarWidthCustomer = (value) => {
+  const numericValue = Number(value) || 0
+  const max = Number(maxTotalSpent.value) || 1
+  return Math.round((numericValue / max) * 100)
+}
+
+const formatCurrency = (val) => {
+  const number = Number(val) || 0
+  return '₫' + (number / 1_000_000).toFixed(1) + 'M'
+}
+
+
+
+
+
 </script>

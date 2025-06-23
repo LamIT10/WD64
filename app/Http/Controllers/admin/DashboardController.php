@@ -16,7 +16,6 @@ class DashboardController extends Controller
     public function index(){
         $query = request()->all();
         $data = $this->handleRepository->getDataForDashBoard($query);
-   
         return Inertia::render("Dashboard", ['data' => $data]);
     }
 }
