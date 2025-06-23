@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
 
         $this->call([
+            Top10VariantSeeder::class,
             SettingSeeder::class,
             UserSeeder::class,
             CategorySeeder::class,
