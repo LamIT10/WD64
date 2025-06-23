@@ -15,82 +15,81 @@ class ProductVariantSeeder extends Seeder
     public function run()
     {
         $now = Carbon::now();
-        
+
         DB::table('product_variants')->insert([
-            // iPhone 15 Pro variants
+            // Gạo Nếp variants
             [
                 'product_id' => 1,
-                'stock' => 25,
-                'price' => 28000000.00,
-                'sale_price' => 32000000.00,
+                'barcode' => 'GN001-01',
+                'sale_price' => 25000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_id' => 1,
-                'stock' => 15,
-                'price' => 32000000.00,
-                'sale_price' => 36000000.00,
+                'barcode' => 'GN001-02',
+                'sale_price' => 27000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            // Samsung Galaxy S24 variants
+            // Coca Cola variants
             [
                 'product_id' => 2,
-                'stock' => 20,
-                'price' => 18000000.00,
-                'sale_price' => 22000000.00,
+                'barcode' => 'CC001-01',
+                'sale_price' => 12000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_id' => 2,
-                'stock' => 12,
-                'price' => 22000000.00,
-                'sale_price' => 26000000.00,
+                'barcode' => 'CC001-02',
+                'sale_price' => 13000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            // MacBook Pro M3 variant
+            // Bột Ngọt variants
             [
                 'product_id' => 3,
-                'stock' => 8,
-                'price' => 45000000.00,
-                'sale_price' => 52000000.00,
+                'barcode' => 'BN001-01',
+                'sale_price' => 6000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            // Áo sơ mi nam variants
+            // Thịt Bò Đông Lạnh variants
             [
                 'product_id' => 4,
-                'stock' => 30,
-                'price' => 200000.00,
-                'sale_price' => 350000.00,
+                'barcode' => 'TB001-01',
+                'sale_price' => 180000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_id' => 4,
-                'stock' => 25,
-                'price' => 200000.00,
-                'sale_price' => 350000.00,
+                'barcode' => 'TB001-02',
+                'sale_price' => 190000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            // Giày thể thao Nike variants
+            // Bột Ớt variants
             [
                 'product_id' => 5,
-                'stock' => 18,
-                'price' => 1800000.00,
-                'sale_price' => 2500000.00,
+                'barcode' => 'BO001-01',
+                'sale_price' => 4000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_id' => 5,
-                'stock' => 22,
-                'price' => 1800000.00,
-                'sale_price' => 2500000.00,
+                'barcode' => 'BO001-02',
+                'sale_price' => 4500.00,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            // Nước Suối Lavie variants
+            [
+                'product_id' => 6,
+                'barcode' => 'NSL001-01',
+                'sale_price' => 9000.00,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],

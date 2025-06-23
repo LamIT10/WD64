@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SupplierRequest;
+use App\Repositories\ProductRepository;
 use App\Repositories\SupplierRepository;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
     protected $supplierRepository;
+    protected $productRepository;  
     public function __construct
     (
-     SupplierRepository $supplierRepository
+     SupplierRepository $supplierRepository,
+     ProductRepository $productRepository
     )
     {
         $this->supplierRepository = $supplierRepository;
+        $this->productRepository = $productRepository;
     }
     public function getList(Request $request){
         $suppliers = $this->supplierRepository->getList($request);
@@ -46,4 +50,20 @@ class SupplierController extends Controller
         $success = $this->supplierRepository->deleteData($id);
         return $this->returnInertia($success, 'Xóa nhà cung cấp thông', 'admin.suppliers.index');
     }
+
+    public function getProducts($id)
+    {
+        $supplier = $this->supplierRepository->findById($id);
+        if (!$supplier) {
+            return redirect()->route('admin.suppliers.index')->with('error', 'Không tìm thấy nhà cung cấp');
+        }
+
+        $products = $this->productRepository->getProductsBySupplier($id);
+
+        return inertia('admin/Supplier/Products', [
+            'supplier' => $supplier,
+            'products' => $products
+        ]);
+    }
+
 }

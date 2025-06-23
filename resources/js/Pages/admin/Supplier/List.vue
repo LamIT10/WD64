@@ -180,6 +180,18 @@
                                                         </template>
                                                     </ConfirmModal>
                                                 </li>
+                                                <li>
+                                                    <Waiting
+                                                        route-name="admin.suppliers.products"
+                                                        :route-params="{
+                                                            id: supplier.id,
+                                                        }"
+                                                        :color="'text-green-700'"
+                                                    >
+                                                        <i class="fas fa-box-open"></i>
+                                                        Quản lý sản phẩm
+                                                    </Waiting>
+                                                </li>
                                             </ul>
                                         </div>
                                     </td>
