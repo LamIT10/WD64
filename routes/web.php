@@ -156,14 +156,13 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
 });
-Route::get("/", function (){
-    return redirect("/login");
-})->middleware('auth');
+
 // Authentication routes
-Route::middleware('guest')->group(function () {
+Route::middleware('check_logined')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });
+
 Route::middleware('auth')->group(function () {
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
