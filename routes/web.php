@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\GoodReceiptController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
@@ -119,11 +120,18 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
         Route::get('/', [PurchaseOrderController::class, 'getList'])->name('index');
         Route::get('create', [PurchaseOrderController::class, 'create'])->name('create');
-        Route::get('{id}/edit', [SupplierController::class, 'edit'])->name('edit');
-        Route::post('store', [SupplierController::class, 'store'])->name('store');
-        Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
-        Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/approve', [PurchaseOrderController::class, 'approve'])->name('approve');
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
+        Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
+        Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
+    });
+    Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
+        Route::get('/', [GoodReceiptController::class, 'getList'])->name('index');
+        Route::get('{id}/create', [GoodReceiptController::class, 'createFromPurchaseOrder'])->name('create');
+        Route::post('{id}/approve', [PurchaseOrderController::class, 'approve'])->name('approve');
+        Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
+        Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
+        Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
     });
 
 

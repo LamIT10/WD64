@@ -47,14 +47,22 @@
 
                 <div id="warehouse-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <a href="import.html"
+                    <div
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-arrow-down text-xs"></i>
                         </div>
-                        <span class="text-xs">Nhập kho</span>
-                    </a>
+                        <Link :href="route('admin.purchases.index')" class="text-xs">Đặt hàng nhập</Link>
+                    </div>
+                    <div
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                            <i class="fas fa-arrow-down text-xs"></i>
+                        </div>
+                        <Link :href="route('admin.receiving.index')" class="text-xs">Phiếu nhập kho</Link>
+                    </div>
                     <a href="export.html"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
@@ -193,14 +201,14 @@
 
                 <div id="supplier-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <a href="purchase-orders.html"
+                    <div
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-shopping-cart text-xs"></i>
                         </div>
                         <Link :href="route('admin.suppliers.index')" class="text-xs">Quản lý</Link>
-                    </a>
+                    </div>
                     <a href="sales-orders.html"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
