@@ -403,9 +403,9 @@
                     :style="{ width: getBarWidth(item.total_quantity) + '%' }"></div>
                 </div>
               </div>
-              <p class="text-xs text-gray-500 mt-2">Showing top {{ topProducts.length }} of 10 products</p>
+              <p class="text-xs text-gray-500 mt-2">Hiển thị top {{ topProducts.length }} trong số 10 sản phẩm</p>
             </div>
-            <div v-else class="text-sm text-gray-500 text-center">No data available</div>
+            <div v-else class="text-sm text-gray-500 text-center">Không có dữ liệu</div>
           </div>
         </div>
 
@@ -436,9 +436,9 @@
                   </div>
                 </div>
               </div>
-              <p class="text-xs text-gray-500 mt-2">Showing top {{ topCustomers.length }} of 10 customers</p>
+              <p class="text-xs text-gray-500 mt-2">Hiển thị top {{ topCustomers.length }} trong số 10 khách hàng</p>
             </div>
-            <div v-else class="text-sm text-gray-500 text-center">No data available</div>
+            <div v-else class="text-sm text-gray-500 text-center">Không có dữ liệu</div>
           </div>
         </div>
 
