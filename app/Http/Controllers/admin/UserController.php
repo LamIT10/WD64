@@ -21,21 +21,30 @@ class UserController extends Controller
         $this->userRepo = $userRepo;
         $this->roleRepo = $roleRepository;
     }
-
-    public function index()
+    public function index(Request $request)
     {
-        $status = request()->query('status', 'active');
+        $search = $request->query('search');
+        $status = $request->query('status', 'active');
+
         $filters = [
-            'absoluteFilter' => [
-                'status' => $status,
-            ],
+            'absoluteFilter' => ['status' => $status],
         ];
+
+        if (!empty(trim($search))) {
+            $filters['search'] = [
+                'name' => $search,
+                'employee_code' => $search,
+            ];
+        }
         $users = $this->userRepo->allWithPaginate($filters);
-        return Inertia::render('admin/users/Index', [
+
+        return Inertia::render('admin/users/Index', array_merge([
             'users' => $users,
             'status' => $status,
-        ]);
+        ], !empty(trim($search)) ? ['search' => $search] : []));
     }
+
+
 
     public function show($id)
     {
@@ -60,7 +69,7 @@ class UserController extends Controller
         }
         unset($data['password_confirmation']);
         $user = $this->userRepo->createUser($data);
- 
+
         return $this->returnInertia($user, 'Tạo mới nhân viên thành công', 'admin.users.index');
     }
 
@@ -112,5 +121,4 @@ class UserController extends Controller
             'status' => $request->query('status', 'inactive')
         ]);
     }
-  
 }

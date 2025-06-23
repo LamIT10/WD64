@@ -23,7 +23,7 @@ class SupplierRepository extends BaseRepository
             ]
         ];
         $query = $this->filterData($query, $filters);
-        $query->orderBy('id', 'desc'); 
+        $query->orderBy('id', 'desc');  
         return $query->paginate(10);;
     }
     public function createData($data = [])
