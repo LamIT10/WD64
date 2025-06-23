@@ -18,8 +18,8 @@
                         <div class="p-6 space-y-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Ngày hạn công nợ</label>
                             <input
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm"
-                                type="date" v-model="form.credit_due_date">
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm date-picker"
+                                type="text" v-model="form.sub_credit_due_date" v-date-picker>
                         </div>
 
                         <!-- Footer modal với nút bấm được thiết kế lại -->
@@ -44,31 +44,49 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import { route } from 'ziggy-js';
+
 
 const { transactionSupplierEdit } = defineProps({
     transactionSupplierEdit: Object,
-})
+});
 
+// Hàm định dạng ngày từ YYYY-MM-DD sang d/m/Y
+const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+};
+
+// Hàm chuyển d/m/Y sang YYYY-MM-DD
+const formatDateForSubmit = (dateString) => {
+    if (!dateString) return '';
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month}-${day}`;
+};
+
+// Khởi tạo form với giá trị ngày định dạng d/m/Y
 const form = useForm({
-    credit_due_date: transactionSupplierEdit.credit_due_date.replace("T00:00:00.000000Z", ""),
-})
+    sub_credit_due_date: formatDateForDisplay(transactionSupplierEdit.credit_due_date),
+    credit_due_date: ""
+});
 
 const handleSubmit = () => {
+   form.credit_due_date = formatDateForSubmit(form.sub_credit_due_date)
     form.patch(route('admin.supplier-transaction.update', {
         id: transactionSupplierEdit.id,
-    }), {
+    }),{
         onSuccess: () => {
             emit('closeModal');
         }
     });
-}
+};
 
 const emit = defineEmits();
 
 const handleCloseModal = () => {
     emit('closeModal');
-}
+};
 </script>
 
 <style scoped>

@@ -8,14 +8,24 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-   
+
     public function __construct(DashboardRepository $dashboardRepository)
     {
         $this->handleRepository = $dashboardRepository;
     }
-    public function index(){
+    public function index()
+    {
         $query = request()->all();
+
         $data = $this->handleRepository->getDataForDashBoard($query);
+
         return Inertia::render("Dashboard", ['data' => $data]);
+    }
+    public function filterDataForSaleOrder()
+    {
+        $query = request()->all();
+        return response()->json([
+            'data' => $this->handleRepository->getDataForDashBoard($query),
+        ], 200);
     }
 }

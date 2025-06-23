@@ -31,12 +31,36 @@
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn xuất</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình xuất hàng trong tháng</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500">Tháng hiện tại</span>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
+          <div class="flex items-center justify-between p-2  rounded-lg shadow">
+
+            <!-- Phần chọn ngày bắt đầu và kết thúc -->
+            <div class="flex items-center space-x-4">
+              <!-- Ô ngày bắt đầu -->
+              <div class="flex items-center space-x-2">
+                <label for="start-date" class="text-xs text-indigo-600">Từ ngày</label>
+                <input type="text" id="start-date"
+                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
+                  v-model="dataFilterDateSaleOrder.sub_from_date" v-date-picker @change="handleFilterPurchase">
+              </div>
+
+              <!-- Ô ngày kết thúc -->
+              <div class="flex items-center space-x-2">
+                <label for="end-date" class="text-xs text-indigo-600">Đến ngày</label>
+                <input type="text" id="end-date"
+                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
+                  v-model="dataFilterDateSaleOrder.sub_to_date" v-date-picker @change="handleFilterPurchase">
+              </div>
+
+              <!-- Nút reset -->
+              <button @click="resetDateFilterSaleOrder"
+                class="p-1 text-indigo-400 hover:text-indigo-600 transition-colors" title="Reset">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -112,7 +136,8 @@
               <div class="bg-red-50 p-3 rounded-lg">
                 <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                  </path>
                 </svg>
               </div>
             </div>
@@ -146,12 +171,35 @@
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn nhập kho hàng</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình nhập hàng trong tháng</p>
           </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500">Tháng hiện tại</span>
-            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
+          <div class="flex items-center justify-between p-2  rounded-lg shadow">
+
+            <!-- Phần chọn ngày bắt đầu và kết thúc -->
+            <div class="flex items-center space-x-4">
+              <!-- Ô ngày bắt đầu -->
+              <div class="flex items-center space-x-2">
+                <label for="start-date" class="text-xs text-indigo-600">Từ ngày</label>
+                <input type="text" id="start-date"
+                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
+                  v-model="dataFilterDatePurchase.sub_from_date" v-date-picker @change="handleFilterPurchase">
+              </div>
+
+              <!-- Ô ngày kết thúc -->
+              <div class="flex items-center space-x-2">
+                <label for="end-date" class="text-xs text-indigo-600">Đến ngày</label>
+                <input type="text" id="end-date"
+                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
+                  v-model="dataFilterDatePurchase.sub_to_date" v-date-picker @change="handleFilterPurchase">
+              </div>
+              <!-- Nút reset -->
+              <button @click="resetDateFilterPurchase"
+                class="p-1 text-indigo-400 hover:text-indigo-600 transition-colors" title="Reset">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -162,7 +210,8 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng đơn hàng</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_purchase.count_purchase_in_month }}
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_purchase.count_purchase_in_month
+                }}
                 </p>
                 <!-- <p class="text-xs text-gray-400 mt-1">Trong tháng</p> -->
               </div>
@@ -226,7 +275,8 @@
               <div class="bg-red-50 p-3 rounded-lg">
                 <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                  </path>
                 </svg>
               </div>
             </div>
@@ -332,12 +382,12 @@
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">Top 10 Best Selling Products</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Top 10 Sản phẩm bán chạy</h3>
             <select v-model="selectedPeriod"
               class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
+              <option value="week">Tuần này</option>
+              <option value="month">Tháng này</option>
+              <option value="year">Năm này</option>
             </select>
           </div>
 
@@ -346,7 +396,7 @@
               <div v-for="(item, index) in topProducts" :key="item.variant_id" class="mb-3">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-sm font-medium text-gray-700">{{ index + 1 }}. {{ item.full_variant_name }}</span>
-                  <span class="text-sm font-bold text-indigo-700">{{ formatNumber(item.total_quantity) }} units</span>
+                  <span class="text-sm font-bold text-indigo-700">{{ formatNumber(item.total_quantity) }} sản phẩm</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                   <div class="bg-indigo-600 h-2.5 rounded-full"
@@ -365,12 +415,12 @@
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">Top 10 Customers</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Top 10 Khách hàng</h3>
             <select v-model="selectedCustomerPeriod"
               class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-              <option value="week">This Week</option>
-              <option value="month" selected>This Month</option>
-              <option value="year">This Year</option>
+              <option value="week">Tuần này</option>
+              <option value="month" selected>Tháng này</option>
+              <option value="year">Năm này</option>
             </select>
           </div>
 
@@ -485,9 +535,11 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee
+                </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity
+                </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               </tr>
@@ -563,14 +615,59 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from './admin/Layouts/AppLayout.vue';
 import { route } from 'ziggy-js';
 import { ref, computed } from 'vue';
 import ChangePurchaseSevenDayAgo from './components/ChangePurchaseSevenDayAgo.vue';
 import RevenueChart from './components/RevenueChart.vue';
+import { reactive } from 'vue';
 const { data } = defineProps({
   data: Object,
+});
+const formatDateForSubmit = (dateString) => {
+  if (!dateString) return '';
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month}-${day}`;
+};
+const formatDateForDisplay = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+};
+const url = new URL(window.location.href);
+// Lấy tất cả tham số từ query string
+const params = new URLSearchParams(url.search);
+const queryData = reactive({
+  fromDatePurchase: "",
+  toDatePurchase: "",
+  fromDateSaleOrder: "",
+  toDateSaleOrder: "",
+});
+
+params.forEach((value, key) => {
+  if (key == "perPage") {
+    formPerpage.perPage = value;
+  } else {
+    queryData[key] = value;
+  }
+});
+
+
+const formFilterDatePurchaseAndSaleOrder = useForm({
+  fromDatePurchase: queryData.fromDatePurchase ?? "",
+  toDatePurchase: queryData.toDatePurchase ?? "",
+  toDateSaleOrder: queryData.toDateSaleOrder ?? "",
+  fromDateSaleOrder: queryData.fromDateSaleOrder ?? "",
+});
+const dataFilterDatePurchase = reactive({
+  sub_from_date: formatDateForDisplay(formFilterDatePurchaseAndSaleOrder.fromDatePurchase) ?? "",
+  sub_to_date: formatDateForDisplay(formFilterDatePurchaseAndSaleOrder.toDatePurchase) ?? "",
+});
+const dataFilterDateSaleOrder = reactive({
+  sub_from_date: formatDateForDisplay(formFilterDatePurchaseAndSaleOrder.fromDateSaleOrder) ?? "",
+  sub_to_date: formatDateForDisplay(formFilterDatePurchaseAndSaleOrder.toDateSaleOrder) ?? "",
 })
 console.log(data);
 
@@ -614,8 +711,23 @@ const formatCurrency = (val) => {
   return '₫' + (number / 1_000_000).toFixed(1) + 'M'
 }
 
+const handleFilterPurchase = () => {
+  formFilterDatePurchaseAndSaleOrder.toDatePurchase = formatDateForSubmit(dataFilterDatePurchase.sub_to_date);
+  formFilterDatePurchaseAndSaleOrder.fromDatePurchase = formatDateForSubmit(dataFilterDatePurchase.sub_from_date);
+  formFilterDatePurchaseAndSaleOrder.toDateSaleOrder = formatDateForSubmit(dataFilterDateSaleOrder.sub_to_date);
+  formFilterDatePurchaseAndSaleOrder.fromDateSaleOrder = formatDateForSubmit(dataFilterDateSaleOrder.sub_from_date);
+  formFilterDatePurchaseAndSaleOrder.get(route("admin.dashboard"));
+}
 
-
-
+const resetDateFilterSaleOrder = () => {
+  dataFilterDateSaleOrder.sub_from_date = "",
+    dataFilterDateSaleOrder.sub_to_date = "",
+    handleFilterPurchase();
+}
+const resetDateFilterPurchase = () => {
+  dataFilterDatePurchase.sub_from_date = "",
+    dataFilterDatePurchase.sub_to_date = "",
+    handleFilterPurchase();
+}
 
 </script>

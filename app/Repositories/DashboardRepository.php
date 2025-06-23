@@ -46,7 +46,7 @@ class DashboardRepository extends BaseRepository
                 $totalPurchaseInMonth->where('order_date', ">=", $query['fromDatePurchase']);
             }
             if (!empty($query['toDatePurchase'])) {
-                $totalPurchaseInMonth->where('order_date', ">=", $query['fromDatePurchase']);
+                $totalPurchaseInMonth->where('order_date', "<=", $query['toDatePurchase']);
             }
         } else {
             $totalPurchaseInMonth->whereMonth('order_date', $currentMonth)
@@ -60,7 +60,7 @@ class DashboardRepository extends BaseRepository
         $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('status', 'pending')->count();
         $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('status', 'received')->count();
         $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('status', 'closed')->count();
-        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->sum('total_amount');
+        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('status', 'received')->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
         $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
@@ -76,7 +76,7 @@ class DashboardRepository extends BaseRepository
                 $totalSaleOrderInMonth->where('order_date', ">=", $query['fromDateSaleOrder']);
             }
             if (!empty($query['toDateSaleOrder'])) {
-                $totalSaleOrderInMonth->where('order_date', ">=", $query['fromDateSaleOrder']);
+                $totalSaleOrderInMonth->where('order_date', "<=", $query['toDateSaleOrder']);
             }
         } else {
             $totalSaleOrderInMonth->whereMonth('order_date', $currentMonth)
@@ -92,7 +92,7 @@ class DashboardRepository extends BaseRepository
         $countSaleOrderInMonthClosed = (clone $totalSaleOrderInMonth)->where('status', 'closed')->count();
 
         // Tổng giá trị
-        $sumValueSaleOrderInMonth = (clone $totalSaleOrderInMonth)->sum('total_amount');
+        $sumValueSaleOrderInMonth = (clone $totalSaleOrderInMonth)->where('status', 'shipped')->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         $saleOrderChangeInSevenDay = SaleOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
             ->whereBetween('order_date', [$sevenDayAgo->startOfDay(), $current->endOfDay()])
