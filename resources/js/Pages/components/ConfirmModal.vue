@@ -6,9 +6,9 @@
         <!-- Modal -->
         <div
             v-if="isOpen"
-            class="fixed inset-0 z-50 flex items-start justify-center pt-20"
+            class="fixed inset-0 z-[99999] flex items-start justify-center pt-20"
             style="background-color: rgba(0, 0, 0, 0.6)"
-            @click.self="closeModal"
+            @click.self="closeModal"    
         >
             <div
                 class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 animate-slide-down"

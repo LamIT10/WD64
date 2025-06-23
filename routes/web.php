@@ -72,6 +72,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
         Route::patch('/{customer}', [CustomerController::class, 'update'])->name('update');
         Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+        Route::post('customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulk-delete');
+        Route::get('customers/import', [CustomerController::class, 'import'])->name('customers.import');
+        Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
     });
 
     Route::prefix('ranks')->as('ranks.')->group(function () {
@@ -108,6 +111,14 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     // });
 
     Route::prefix('role')->as('role.')->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::get('/create', [RoleController::class, 'create'])->name('create');
+        Route::post('', [RoleController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit');
+        Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}', [RoleController::class, 'show'])->name('show');
+        
         Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::ROLE_INDEX);
         Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('has_permission:' . PermissionConstant::ROLE_EDIT);
     });
@@ -120,6 +131,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('store', [SupplierController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierController::class, 'update'])->name('update');
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
+
+        Route::get('{id}/products', [SupplierController::class, 'getProducts'])->name('products');
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
