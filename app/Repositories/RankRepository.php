@@ -16,8 +16,22 @@ class RankRepository extends BaseRepository
     public function getAll($perPage = 10, array $filters = [])
     {
         $query = $this->handleModel::query();
+
+        // Xử lý tìm kiếm tổng quát
+        if (!empty($filters['search']['search'])) {
+            $search = $filters['search']['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('note', 'like', "%{$search}%");
+            });
+            // Loại bỏ 'search' để không áp dụng likeTextFilter trong filterData
+            unset($filters['search']['search']);
+        }
+
+        // Áp dụng các bộ lọc khác từ BaseRepository
         $query = $this->filterData($query, $filters);
         $query->orderBy('created_at', 'desc');
+
         Log::info('Câu truy vấn getAll:', ['query' => $query->toSql(), 'bindings' => $query->getBindings()]);
         return $query->paginate($perPage);
     }

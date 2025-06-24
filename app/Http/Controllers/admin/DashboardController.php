@@ -21,11 +21,4 @@ class DashboardController extends Controller
 
         return Inertia::render("Dashboard", ['data' => $data]);
     }
-    public function filterDataForSaleOrder()
-    {
-        $query = request()->all();
-        return response()->json([
-            'data' => $this->handleRepository->getDataForDashBoard($query),
-        ], 200);
-    }
 }

@@ -21,7 +21,7 @@ class RankController extends Controller
     {
         $perPage = request()->get('perPage', 10);
         $filters = [
-            'search' => request()->only(['name', 'note']),
+            'search' => ['search' => request()->input('search')],
             'absoluteFilter' => request()->only(['status']),
             'between' => [
                 'min_total_spent' => [

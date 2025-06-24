@@ -69,6 +69,27 @@ class ProductRepository extends BaseRepository
         ];
     }
 
+    public function getProductsBySupplier($supplierId, $perPage = 15)
+    {
+        return $this->handleModel::with([
+            'category',
+            'images',
+            'productVariants' => function ($query) {
+                $query->with([
+                    'attributes',
+                    'inventory',
+                    'inventoryLocations.zone',
+                    'supplierVariants'
+                ]);
+            },
+            'unitConversions.fromUnit',
+            'unitConversions.toUnit',
+        ])
+        ->whereHas('productVariants.supplierVariants', function ($query) use ($supplierId) {
+            $query->where('supplier_id', $supplierId);
+        })
+        ->paginate($perPage);
+    }
     public function store($data)
     {
         try {

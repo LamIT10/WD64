@@ -45,21 +45,21 @@ class CategorySeeder extends Seeder
         DB::table('categories')->insert([
             [
                 'name' => 'Thực phẩm khô',
-                'parent_id' => 1, // Thuộc danh mục Thực phẩm
+                'parent_id' => 1,
                 'description' => 'Các loại thực phẩm khô bảo quản lâu',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'name' => 'Thực phẩm đông lạnh',
-                'parent_id' => 1, // Thuộc danh mục Thực phẩm
+                'parent_id' => 1,
                 'description' => 'Các loại thực phẩm đông lạnh',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'name' => 'Nước ngọt',
-                'parent_id' => 2, // Thuộc danh mục Đồ uống
+                'parent_id' => 2,
                 'description' => 'Các loại nước giải khát có gas',
                 'created_at' => $now,
                 'updated_at' => $now,

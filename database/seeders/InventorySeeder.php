@@ -19,82 +19,121 @@ class InventorySeeder extends Seeder
         DB::table('inventory')->insert([
             [
                 'product_variant_id' => 1,
-                'quantity' => 25,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 1,
+                'warehouse_zone_id' => 1,
+                'quantity_on_hand' => 25,
+                'quantity_reserved' => 0,
+                'quantity_in_transit' => 0,
+                'unit_id' => 1,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 2,
-                'quantity' => 15,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 1, // Sửa từ 2 thành 1 để khớp với SupplierProductVariantSeeder
+                'warehouse_zone_id' => 2,
+                'quantity_on_hand' => 30,
+                'quantity_reserved' => 2,
+                'quantity_in_transit' => 1,
+                'unit_id' => 1,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 3,
-                'quantity' => 20,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 2, // Đổi thành 2 để khớp
+                'warehouse_zone_id' => 3,
+                'quantity_on_hand' => 20,
+                'quantity_reserved' => 5,
+                'quantity_in_transit' => 0,
+                'unit_id' => 2,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 4,
-                'quantity' => 12,
-                'unit_id' => 1, // Cái
-                'status' => 'available',
+                'supplier_id' => 2, // Đổi thành 2 để khớp
+                'warehouse_zone_id' => 1,
+                'quantity_on_hand' => 50,
+                'quantity_reserved' => 10,
+                'quantity_in_transit' => 3,
+                'unit_id' => 2,
+                'status' => 'reserved',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 5,
-                'quantity' => 8,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 3, // Sửa thành 3 để khớp
+                'warehouse_zone_id' => 2,
+                'quantity_on_hand' => 12,
+                'quantity_reserved' => 0,
+                'quantity_in_transit' => 1,
+                'unit_id' => 3,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 6,
-                'quantity' => 30,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 4, // Sửa thành 4 để khớp
+                'warehouse_zone_id' => 3,
+                'quantity_on_hand' => 35,
+                'quantity_reserved' => 5,
+                'quantity_in_transit' => 0,
+                'unit_id' => 3,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 7,
-                'quantity' => 25,
-                'unit_id' => 1, // Cái
-                'status' => 'available',
+                'supplier_id' => 4, // Sửa thành 4 để khớp
+                'warehouse_zone_id' => 2,
+                'quantity_on_hand' => 18,
+                'quantity_reserved' => 0,
+                'quantity_in_transit' => 0,
+                'unit_id' => 1,
+                'status' => 'damaged',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 8,
-                'quantity' => 18,
-                'unit_id' => 1, // Cái
-                'status' => 'available',
+                'supplier_id' => 3, // Sửa thành 3 để khớp
+                'warehouse_zone_id' => 1,
+                'quantity_on_hand' => 60,
+                'quantity_reserved' => 20,
+                'quantity_in_transit' => 10,
+                'unit_id' => 2,
+                'status' => 'reserved',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
             [
                 'product_variant_id' => 9,
-                'quantity' => 22,
-                'unit_id' => 1, // Cái
+                'supplier_id' => 3, // Sửa thành 3 để khớp
+                'warehouse_zone_id' => 3,
+                'quantity_on_hand' => 40,
+                'quantity_reserved' => 0,
+                'quantity_in_transit' => 0,
+                'unit_id' => 1,
                 'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-            // Một số sản phẩm bị hỏng
             [
-                'product_variant_id' => 1,
-                'quantity' => 2,
-                'unit_id' => 1, // Cái
-                'status' => 'damaged',
+                'product_variant_id' => 10,
+                'supplier_id' => 2, // Giữ nguyên
+                'warehouse_zone_id' => 2,
+                'quantity_on_hand' => 22,
+                'quantity_reserved' => 3,
+                'quantity_in_transit' => 1,
+                'unit_id' => 3,
+                'status' => 'available',
                 'created_at' => $now,
                 'updated_at' => $now,
             ],

@@ -3,7 +3,7 @@
         <div class="p-6">
             <div class="p-3 bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-indigo-700 font-semibold">
-                    Danh sách Nhà cung cấp
+                    Danh sách công nợ nhà cung cấp
                 </h5>
                 <div class="flex items-center space-x-3">
                     <div class="relative">
