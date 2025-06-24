@@ -74,7 +74,7 @@
                 <p class="text-2xl font-bold text-gray-800 mt-1">{{
                   data.statistical_sale_order.count_sale_order_in_month }}
                 </p>
-                <!-- <p class="text-xs text-gray-400 mt-1">Trong tháng</p> -->
+                <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
               </div>
               <div class="bg-blue-50 p-3 rounded-lg">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -213,7 +213,7 @@
                 <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_purchase.count_purchase_in_month
                 }}
                 </p>
-                <!-- <p class="text-xs text-gray-400 mt-1">Trong tháng</p> -->
+                <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
               </div>
               <div class="bg-blue-50 p-3 rounded-lg">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -306,7 +306,7 @@
       <div class="flex">
         <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_purchase.purchase_change_in_seven_day"
           :chartTitle="'Đơn nhập hàng trong 7 ngày'" />
-        <ChangePurchaseSevenDayAgo
+      <ChangePurchaseSevenDayAgo
           :purchaseChangeInSevenDay="data.statistical_sale_order.sale_order_change_in_seven_day"
           :chartTitle="'Đơn xuất hàng trong 7 ngày'" />
       </div>
@@ -374,7 +374,7 @@
       </div>
 
       <!-- Net Revenue Chart -->
-    <RevenueChart :data="data.net_revenue" />
+      <RevenueChart :data="data.net_revenue" />
 
       <!-- Top 10 Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-20">
@@ -396,7 +396,8 @@
               <div v-for="(item, index) in topProducts" :key="item.variant_id" class="mb-3">
                 <div class="flex items-center justify-between mb-1">
                   <span class="text-sm font-medium text-gray-700">{{ index + 1 }}. {{ item.full_variant_name }}</span>
-                  <span class="text-sm font-bold text-indigo-700">{{ formatNumber(item.total_quantity) }} sản phẩm</span>
+                  <span class="text-sm font-bold text-indigo-700">{{ formatNumber(item.total_quantity) }} {{
+                    item.base_unit_name }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                   <div class="bg-indigo-600 h-2.5 rounded-full"
@@ -432,7 +433,8 @@
                   <span class="text-sm font-bold text-green-700">{{ formatCurrency(item.total_spent) }}</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                  <div class="bg-green-600 h-2.5 rounded-full" :style="{ width: getBarWidthCustomer(item.total_spent) + '%' }">
+                  <div class="bg-green-600 h-2.5 rounded-full"
+                    :style="{ width: getBarWidthCustomer(item.total_spent) + '%' }">
                   </div>
                 </div>
               </div>
@@ -448,100 +450,56 @@
       <!-- Inventory Charts and Low Stock Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Inventory Chart -->
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">Inventory Overview by Paper Type</h3>
-            <select
-              class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
-              <option selected>Last 90 days</option>
-            </select>
-          </div>
-          <div class="h-80 bg-gray-50 rounded-lg flex items-center justify-center">
-            <p class="text-gray-400">Inventory chart visualization</p>
-          </div>
-        </div>
+        <InventoryByPaperChart :data="data.inventory_by_paper_type" />
+
 
         <!-- Low Stock Items -->
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">Low Stock Items</h3>
-            <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View All</button>
+            <h3 class="text-lg font-semibold text-gray-800">Sản phẩm tồn kho thấp</h3>
+            <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Xem tất cả</button>
           </div>
+
           <div class="space-y-4">
-            <div class="flex items-center p-3 bg-red-50 rounded-lg">
+            <div v-for="item in data.low_stock_items" :key="item.id" class="flex items-center p-3 rounded-lg" :class="item.quantity_on_hand <= 5
+              ? 'bg-red-50 text-red-600'
+              : item.quantity_on_hand <= 10
+                ? 'bg-orange-50 text-orange-600'
+                : 'bg-gray-100 text-gray-500'">
               <div class="bg-white p-2 rounded-lg mr-3">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div>
-                <p class="font-medium text-gray-800">A4 70gsm - White</p>
-                <p class="text-sm text-red-600">Only 5 remaining</p>
-              </div>
-            </div>
-
-            <div class="flex items-center p-3 bg-orange-50 rounded-lg">
-              <div class="bg-white p-2 rounded-lg mr-3">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">A3 80gsm - Yellow</p>
-                <p class="text-sm text-orange-600">Only 9 remaining</p>
-              </div>
-            </div>
-
-            <div class="flex items-center p-3 bg-red-50 rounded-lg">
-              <div class="bg-white p-2 rounded-lg mr-3">
-                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">A5 100gsm - Blue</p>
-                <p class="text-sm text-red-600">Only 3 remaining</p>
-              </div>
-            </div>
-
-            <div class="flex items-center p-3 bg-orange-50 rounded-lg">
-              <div class="bg-white p-2 rounded-lg mr-3">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="font-medium text-gray-800">A4 80gsm - Pink</p>
-                <p class="text-sm text-orange-600">Only 7 remaining</p>
+                <p class="font-medium text-gray-800">{{ item.product_name }} - {{ item.code }}</p>
+                <p class="text-sm">
+                 {{ `Chỉ còn ${item.quantity_on_hand} ${item.unit ?? ''}` }}
+                </p>
               </div>
             </div>
           </div>
         </div>
+
       </div>
 
       <!-- Recent Activity -->
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-semibold text-gray-800">Recent Employee Activity</h3>
-          <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View All</button>
+          <h3 class="text-lg font-semibold text-gray-800">Các hoạt động gần đây</h3>
+          <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Xem tất cả</button>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead>
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhân viên
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hoạt động</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -557,12 +515,12 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Warehouse Manager</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Processed 5 orders</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10 minutes ago</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Quản lý kho</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Đã xử lý 5 đơn hàng</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10 phút trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang hoạt động</span>
                 </td>
               </tr>
               <tr>
@@ -577,12 +535,12 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Accountant</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Updated inventory records</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 minutes ago</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kế toán</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cập nhật hồ sơ tồn kho</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 phút trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang hoạt động</span>
                 </td>
               </tr>
               <tr>
@@ -597,13 +555,12 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Delivery Staff</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Completed 2 deliveries</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 hour ago</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nhân viên giao hàng</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Đã hoàn thành 2 đơn hàng</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 giờ trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">On
-                    Delivery</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Đang giao hàng</span>
                 </td>
               </tr>
             </tbody>
@@ -622,6 +579,7 @@ import { ref, computed } from 'vue';
 import ChangePurchaseSevenDayAgo from './components/ChangePurchaseSevenDayAgo.vue';
 import RevenueChart from './components/RevenueChart.vue';
 import { reactive } from 'vue';
+import InventoryByPaperChart from './components/InventoryByPaperChart.vue';
 const { data } = defineProps({
   data: Object,
 });
@@ -729,5 +687,6 @@ const resetDateFilterPurchase = () => {
     dataFilterDatePurchase.sub_to_date = "",
     handleFilterPurchase();
 }
+
 
 </script>
