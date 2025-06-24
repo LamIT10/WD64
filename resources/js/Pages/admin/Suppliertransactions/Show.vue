@@ -235,8 +235,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr class="hover:bg-gray-50"
-                                v-for="(item, index) in supplierTransaction.list_item_order">
+                            <tr class="hover:bg-gray-50" v-for="(item, index) in supplierTransaction.list_item_order">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ index }}
                                 </td>
@@ -266,6 +265,72 @@
                     </table>
                 </div>
             </div>
+            <div class="bg-white rounded-lg shadow overflow-hidden mt-10">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-indigo-800">Lịch sử cập nhật công nợ</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    STT
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Giá trị cập nhật
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Loại
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Ghi chú
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Ngày thực hiện
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50"
+                                v-for="(item, index) in supplierTransaction.supplier_debt_histort">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ index + 1 }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span v-if="item.update_type == 'payment'">
+
+                                        {{ formatNumber(item.new_value) + " ₫" }}
+                                    </span>
+                                    <span v-else>
+                                        {{ formatDate(item.new_value) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span v-if="item.update_type == 'payment'">
+
+                                       Cập nhật thanh toán công nợ
+                                    </span>
+                                    <span v-else>
+                                        Cập nhật hạn công nợ
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
+                                    {{ item.note }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
+                                    {{ formatDate(item.created_at) }}
+                                </td>
+                              
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
         </div>
     </AppLayout>
@@ -277,7 +342,7 @@ import AppLayout from '../Layouts/AppLayout.vue';
 const { supplierTransaction } = defineProps({
     supplierTransaction: Object,
 })
-console.log(supplierTransaction);
+
 const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('vi-VN');
 };
