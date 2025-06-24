@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\SupplierDebtHistory;
 use App\Models\SupplierTransaction;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
@@ -12,9 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 class SupplierTransactionRepository extends BaseRepository
 {
-    public function __construct(SupplierTransaction $model)
+    private $supplierDebt;
+    public function __construct(SupplierTransaction $model, SupplierDebtHistory $supplier_debt)
     {
         $this->handleModel = $model;
+        $this->supplierDebt = $supplier_debt;
     }
     public function getData($data, $perPage)
     {
@@ -102,6 +105,13 @@ class SupplierTransactionRepository extends BaseRepository
             if (!$obj) {
                 throw new \Exception("Có lỗi cập nhật");
             }
+            $this->supplierDebt::create([
+                'supplier_transaction_id' => $id,
+                'new_value' => $newObj['credit_due_date'],
+                'update_type' => "due_date",
+                'note' => $data['note'] ?? "",
+            ]);
+
             DB::commit();
             return $obj;
         } catch (\Exception $e) {
@@ -126,6 +136,12 @@ class SupplierTransactionRepository extends BaseRepository
             if (!$obj) {
                 throw new \Exception("Có lỗi cập nhật");
             }
+            $this->supplierDebt::create([
+                'supplier_transaction_id' => $id,
+                'new_value' => $data['payment'],
+                'update_type' => "payment",
+                'note' => $data['note'] ?? "",
+            ]);
             DB::commit();
             return $obj;
         } catch (\Exception $e) {
@@ -160,14 +176,15 @@ class SupplierTransactionRepository extends BaseRepository
         // Eager load tất cả relationships cần thiết trong một truy vấn
         $obj = $this->handleModel->with([
             'purchaseOrder.supplier',
-            'purchaseOrder.items.productVariant.product.unitConversions.toUnit'
+            'purchaseOrder.items.productVariant.product.unitConversions.toUnit',
+            'supplierDebtHistories'
         ])->findOrFail($id);
-    
+
         // Lấy items và transform ngay trong query
         $listItem = $obj->purchaseOrder->items->map(function ($item) {
             $variant = $item->productVariant;
             $product = $variant->product;
-            
+
             // Tạo danh sách conversion
             $conversions = $product->unitConversions->map(function ($conversion) use ($item) {
                 return sprintf(
@@ -177,7 +194,7 @@ class SupplierTransactionRepository extends BaseRepository
                     $conversion->toUnit->name
                 );
             })->toArray();
-    
+
             return [
                 'product_name' => sprintf(
                     "%s - %s",
@@ -191,22 +208,35 @@ class SupplierTransactionRepository extends BaseRepository
                 'subtotal' => $this->formatNumberInt($item->subtotal) . " ₫",
             ];
         })->toArray();
-    
+        $supplierDebtHistory = $this->supplierDebt::where("supplier_transaction_id", $id)->orderBy("created_at", 'desc')->get();
+        // $supplierDebtHistory = $subSupplierDebtHistory->map(function ($history) {
+        //     $formated = $history->toArray();
+        //     if ($history->update_type === 'payment') {
+        //         $formatted['new_value'] = $this->formatNumberInt($history->new_value); 
+        //     } elseif ($history->update_type === 'due_date') {
+        //         $formatted['new_value'] = $this->formatDate($history->new_value); 
+        //     }
+        //     // $formated['created_date'] = $this->formatDate($history->created);
+        //     return $formated;
+        // });
+
+        // dd($supplierDebtHistory);
         return [
-                'name_supplier' => $obj->purchaseOrder->supplier->name,
-                'contact_person' => $obj->purchaseOrder->supplier->contact_person,
-                'phone' => $obj->purchaseOrder->supplier->phone,
-                'email' => $obj->purchaseOrder->supplier->email,
-                'address' => $obj->purchaseOrder->supplier->address,
-                'order_code' => 'MDH - ' . $obj->purchaseOrder->id,
-                'order_date' => $this->formatDate($obj->purchaseOrder->order_date),
-                'total_amount' => $obj->purchaseOrder->total_amount,
-                'paid_amount' => $obj->paid_amount,
-                'transaction_date' => $this->formatDate($obj->transaction_date),
-                'credit_due_date' => $this->formatDate($obj->credit_due_date),
-                'description' => $obj->description,
-                'status' => $this->getStatusBySupplierTransaction($obj->id),
-                'list_item_order' => $listItem,
+            'name_supplier' => $obj->purchaseOrder->supplier->name,
+            'contact_person' => $obj->purchaseOrder->supplier->contact_person,
+            'phone' => $obj->purchaseOrder->supplier->phone,
+            'email' => $obj->purchaseOrder->supplier->email,
+            'address' => $obj->purchaseOrder->supplier->address,
+            'order_code' => 'MDH - ' . $obj->purchaseOrder->id,
+            'order_date' => $this->formatDate($obj->purchaseOrder->order_date),
+            'total_amount' => $obj->purchaseOrder->total_amount,
+            'paid_amount' => $obj->paid_amount,
+            'transaction_date' => $this->formatDate($obj->transaction_date),
+            'credit_due_date' => $this->formatDate($obj->credit_due_date),
+            'description' => $obj->description,
+            'status' => $this->getStatusBySupplierTransaction($obj->id),
+            'list_item_order' => $listItem,
+            'supplier_debt_histort' => $supplierDebtHistory,
         ];
     }
     private function getStatusBySupplierTransaction($id)
