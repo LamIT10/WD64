@@ -57,10 +57,10 @@ class DashboardRepository extends BaseRepository
         $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
 
         // Đếm theo từng trạng thái
-        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('status', 'pending')->count();
-        $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('status', 'received')->count();
-        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('status', 'closed')->count();
-        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('status', 'received')->sum('total_amount');
+        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('order_status', 0)->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
         $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
