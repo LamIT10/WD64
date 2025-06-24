@@ -93,7 +93,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -115,9 +115,9 @@
                             </div>
                         </div>
                         <div class="col-span-3">
-                            <div class="grid grid-cols-4 grid-rows-1 gap-4">
+                            <div class="grid grid-cols-1 grid-rows-1 gap-4">
                                 <div class="col-span-2">
-                                    <div class="space-y-2">
+                                    <div class="space-y-1">
                                         <label for="production-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày sản xuất
                                         </label>
@@ -129,7 +129,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="col-span-2">
+                                <!-- <div class="col-span-2">
                                     <div class="space-y-2">
                                         <label for="expiration-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày hết hạn
@@ -141,7 +141,7 @@
                                             {{ form.errors.expiration_date }}
                                         </p>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -382,7 +382,9 @@
                             <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                                 <div>
                                     <input v-model="item.data.code" type="text" placeholder="Mã biến thể (SKU)"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.code`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.code`] }}
@@ -390,7 +392,9 @@
                                 </div>
                                 <div>
                                     <input v-model="item.data.barcode" type="text" placeholder="Mã vạch"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.barcode`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.barcode`] }}
@@ -398,7 +402,9 @@
                                 </div>
                                 <div>
                                     <input v-model.number="item.data.sale_price" type="number" placeholder="Giá bán"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.sale_price`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.sale_price`] }}
@@ -407,7 +413,9 @@
                                 <div>
                                     <input v-model.number="item.data.quantity_on_hand" type="number"
                                         placeholder="Tồn kho ban đầu"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.quantity_on_hand`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.quantity_on_hand`] }}
@@ -440,7 +448,10 @@
                                 <div>
                                     <input v-model="item.data.custom_location_name" type="text"
                                         placeholder="Tên vị trí lưu kho (nếu có)"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm focus:ring-indigo-300 focus:outline-none',
+                                            form.errors[`variants.0.combinationData.${item.key}.custom_location_name`] ? 'border-red-500' : 'border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.custom_location_name`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.custom_location_name`] }}
@@ -506,7 +517,7 @@ const form = useForm({
     custom_location_name: null,
 });
 
-// Image
+// Image Handling
 const maxImages = 4;
 const imagePreviews = ref([]);
 const handleImageUpload = (event) => {
@@ -546,7 +557,7 @@ const removeImage = (index) => {
     imagePreviews.value.splice(index, 1);
 };
 
-// Biến thể sản phẩm
+// Variant Handling
 const hasVariant = ref(false);
 watch(hasVariant, (newVal) => {
     if (newVal) {
@@ -563,6 +574,7 @@ watch(hasVariant, (newVal) => {
                 sale_price: 0,
                 unit_id: '',
                 attributes: [{ attribute_id: '', attribute_value_ids: [] }],
+                combinationData: {},
             }];
         }
     } else {
@@ -623,7 +635,6 @@ const generateCombinations = (attributes) => {
         .map((attr) => attr.attribute_value_ids)
         .filter((arr) => Array.isArray(arr) && arr.length > 0);
 
-    // Nếu không đủ thuộc tính hợp lệ, trả về rỗng
     if (values.length === 0 || values.length !== attributes.length) return [];
 
     return values.reduce((acc, curr) => {
@@ -634,18 +645,13 @@ const generateCombinations = (attributes) => {
             });
         });
         return result;
-    }, [[]]).filter(combo => combo.length === attributes.length); // Chỉ giữ tổ hợp đầy đủ
+    }, [[]]).filter(combo => combo.length === attributes.length);
 };
 
 const variantCombinations = computed(() => {
     if (!form.variants.length) return [];
     return form.variants.map((variant, index) => {
-        console.log(`▶️ Dữ liệu attributes cho variant ${index}:`, JSON.stringify(variant.attributes, null, 2));
-
         const attributeCombinations = generateCombinations(variant.attributes);
-        console.log('🧪 Kết quả generateCombinations:', JSON.stringify(attributeCombinations, null, 2));
-
-
         return attributeCombinations.map((combo) => {
             const key = combo.join('-');
             if (deletedCombinationKeys.value.includes(key)) return null;
@@ -687,55 +693,74 @@ const removeCombinationItem = (key) => {
     }
 };
 
+// Form Submission and Validation
 const transformFormBeforeSubmit = () => {
-    if (hasVariant.value) {
-        form.variants.forEach((variant) => {
-            const combinations = [];
+    form.transform((data) => {
+        const formData = JSON.parse(JSON.stringify(data));
 
-            const validKeys = generateCombinations(variant.attributes)
-                .map((ids) => ids.join('-'))
-                .filter((key) => !deletedCombinationKeys.value.includes(key));
+        if (hasVariant.value) {
+            formData.variants.forEach((variant) => {
+                const combinations = [];
+                const validKeys = generateCombinations(variant.attributes)
+                    .map((ids) => ids.join('-'))
+                    .filter((key) => !deletedCombinationKeys.value.includes(key));
 
-            validKeys.forEach((key) => {
-                const valueIds = key.split('-').map((id) => parseInt(id));
-                const comboData = variant.combinationData?.[key];
-                if (!comboData) return; // bỏ qua nếu combo đã bị xoá
+                validKeys.forEach((key) => {
+                    const valueIds = key.split('-').map((id) => parseInt(id));
+                    const comboData = variant.combinationData?.[key];
+                    if (!comboData) return;
 
-                combinations.push({
-                    attribute_value_ids: valueIds,
-                    code: comboData.code || '',
-                    barcode: comboData.barcode || '',
-                    sale_price: Number(comboData.sale_price) || 0,
-                    quantity_on_hand: Number(comboData.quantity_on_hand) || 0,
-                    supplier_ids: Array.isArray(comboData.supplier_ids) ? comboData.supplier_ids : [],
-                    warehouse_zone_id: comboData.warehouse_zone_id || null,
-                    custom_location_name: comboData.custom_location_name || null,
+                    combinations.push({
+                        attribute_value_ids: valueIds,
+                        code: comboData.code || '',
+                        barcode: comboData.barcode || '',
+                        sale_price: Number(comboData.sale_price) || 0,
+                        quantity_on_hand: Number(comboData.quantity_on_hand) || 0,
+                        supplier_ids: Array.isArray(comboData.supplier_ids) ? comboData.supplier_ids : [],
+                        warehouse_zone_id: comboData.warehouse_zone_id || null,
+                        custom_location_name: comboData.custom_location_name || null,
+                    });
                 });
+
+                variant.combinations = combinations;
             });
 
-            variant.combinations = combinations;
-            delete variant.combinationData;
-        });
+            formData.simple_sale_price = null;
+            formData.simple_quantity = null;
+            formData.simple_barcode = null;
+            formData.supplier_ids = [];
+            formData.warehouse_zone_id = null;
+            formData.custom_location_name = null;
+        } else {
+            formData.variants = [];
+            formData.unit_conversions = formData.unit_conversions.filter(
+                (uc) => uc.to_unit_id && uc.conversion_factor
+            );
+            formData.simple_sale_price = formData.simple_sale_price
+                ? Number(formData.simple_sale_price)
+                : null;
+            formData.simple_quantity = formData.simple_quantity
+                ? Number(formData.simple_quantity)
+                : null;
+            formData.supplier_ids = Array.isArray(formData.supplier_ids)
+                ? formData.supplier_ids
+                : [];
+            formData.simple_barcode = formData.simple_barcode || null;
+            formData.custom_location_name = formData.custom_location_name || null;
+        }
 
-        form.simple_sale_price = null;
-        form.simple_quantity = null;
-        form.simple_barcode = null;
-        form.supplier_ids = [];
-        form.warehouse_zone_id = null;
-        form.custom_location_name = null;
-    } else {
-        form.variants = [];
-        form.unit_conversions = form.unit_conversions.filter((uc) => uc.to_unit_id && uc.conversion_factor);
-        // Không gán mặc định 0, giữ nguyên giá trị từ input
-        form.simple_sale_price = form.simple_sale_price ? Number(form.simple_sale_price) : null;
-        form.simple_quantity = form.simple_quantity ? Number(form.simple_quantity) : null;
-        form.supplier_ids = Array.isArray(form.supplier_ids) ? form.supplier_ids : [];
-        form.simple_barcode = form.simple_barcode || null;
-        form.custom_location_name = form.custom_location_name || null;
-    }
+        return formData;
+    });
 };
 
 const handleSubmitForm = () => {
+    const originalVariants = JSON.parse(JSON.stringify(form.variants));
+    const newErrors = {};
+    Object.keys(form.errors).forEach((key) => {
+        if (key.includes('variants')) {
+            delete form.errors[key];
+        }
+    });
     transformFormBeforeSubmit();
     console.log('Dữ liệu gửi đi:', form.data());
 
@@ -747,29 +772,30 @@ const handleSubmitForm = () => {
             resetForm();
         },
         onError: (errors) => {
-            console.error('Lỗi validate:', errors);
-            const newErrors = {};
+            console.error('Lỗi validate từ server:', errors);
+            const serverErrors = {};
+            form.variants = originalVariants;
 
             if (hasVariant.value && form.variants.length > 0) {
                 form.variants.forEach((variant, variantIndex) => {
-                    const combinations = variant.combinations || [];
+                    const combinations = generateCombinations(variant.attributes);
                     combinations.forEach((combination, comboIndex) => {
-                        const key = combination.attribute_value_ids.join('-');
+                        const key = combination.join('-');
                         ['code', 'barcode', 'sale_price', 'quantity_on_hand', 'supplier_ids', 'warehouse_zone_id', 'custom_location_name'].forEach((field) => {
                             const path = `variants.${variantIndex}.combinations.${comboIndex}.${field}`;
                             if (errors[path]) {
-                                newErrors[`variants.${variantIndex}.combinationData.${key}.${field}`] = errors[path];
+                                serverErrors[`variants.${variantIndex}.combinationData.${key}.${field}`] = errors[path];
                             }
                         });
                         const attrPath = `variants.${variantIndex}.combinations.${comboIndex}.attribute_value_ids`;
                         if (errors[attrPath]) {
-                            newErrors[`variants.${variantIndex}.combinationData.${key}.attribute_value_ids`] = errors[attrPath];
+                            serverErrors[`variants.${variantIndex}.combinationData.${key}.attribute_value_ids`] = errors[attrPath];
                         }
                     });
                 });
             }
 
-            form.setError({ ...errors, ...newErrors });
+            form.setError({ ...errors, ...serverErrors });
         },
     });
 };
@@ -779,9 +805,10 @@ const resetForm = () => {
     hasVariant.value = false;
     form.variants = [];
     imagePreviews.value = [];
+    deletedCombinationKeys.value = [];
 };
 
-// Danh mục sản phẩm
+// Category Handling
 const searchQuery = ref('');
 const handleSearch = (query) => {
     searchQuery.value = query.toLowerCase();
@@ -823,7 +850,7 @@ const filteredCategories = computed(() => {
     );
 });
 
-// Đơn vị sản phẩm
+// Unit Conversion Handling
 const addConversion = () => {
     form.unit_conversions.push({
         to_unit_id: '',
@@ -835,7 +862,7 @@ const removeConversion = (index) => {
     form.unit_conversions.splice(index, 1);
 };
 
-// Thuộc tính
+// Attribute Handling
 const attributeValues = ref({});
 onMounted(() => {
     attributeValues.value = props.attributeValues || {};
