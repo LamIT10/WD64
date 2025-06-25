@@ -214,7 +214,7 @@
                                         'text-green-600 bg-green-100 px-2 py-1 rounded-xl':
                                             order.order_status == 1,
                                         'text-blue-600 bg-blue-100 px-2 py-1 rounded-xl':
-                                            order.order_status == 2, 
+                                            order.order_status == 2,
                                         'text-purple-600 bg-purple-100 px-2 py-1 rounded-xl':
                                             order.order_status == 3,
                                     }"
@@ -535,9 +535,12 @@
                                 Đóng
                             </button>
                             <Waiting
-                                v-if="selectedOrder.order_status == 1 || selectedOrder.order_status == 2"
+                                v-if="
+                                    selectedOrder.order_status == 1 ||
+                                    selectedOrder.order_status == 2
+                                "
                                 route-name="admin.receiving.create"
-                                :route-params="{id: selectedOrder.id}"
+                                :route-params="{ id: selectedOrder.id }"
                                 :color="'mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'"
                             >
                                 <i
