@@ -22,8 +22,8 @@
                         </div>
 
                         <!-- Nội dung modal -->
-                        <div class="p-6 space-y-4">
-                            <div>
+                        <div class="pt-6 ps-6 pe-6 space-y-4">
+                          
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền thanh toán
                                     (VND)</label>
                                 <div class="relative rounded-md shadow-sm">
@@ -34,20 +34,21 @@
                                         <span class="text-gray-500">₫</span>
                                     </div>
                                 </div>
-                                <div class="p-6 space-y-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                                    <textarea
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm date-picker"
-                                        type="text" v-model="form.note"></textarea>
-                                </div>
+
                                 <p class="mt-2 text-sm text-gray-500">
                                     Công nợ còn lại:
                                     <span class="font-semibold text-indigo-600">
                                         {{ transactionSupplierEdit.outstanding_amount }} ₫
                                     </span>
                                 </p>
+                          
                             </div>
-                        </div>
+                            <div class="p-6 space-y-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                                <textarea
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm date-picker"
+                                    type="text" v-model="form.note"></textarea>
+                            </div>
 
                         <!-- Footer modal -->
                         <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-between items-center">
@@ -100,7 +101,7 @@ const formatCurrency = (event) => {
 const initialPayment = transactionSupplierEdit.outstanding_amount.replace(".", "").replace(".", "");
 const form = useForm({
     payment: initialPayment,
-    note
+    note: ""
 });
 
 // Format giá trị ban đầu

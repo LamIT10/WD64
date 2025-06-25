@@ -189,7 +189,7 @@ const searchProducts = async () => {
         isSearching.value = false;
     }
 };
-
+console.log(products);
 const selectProduct = async (product) => {
     searchQuery.value = product.name;
     selectedProductId.value = product.id;
@@ -234,24 +234,16 @@ const addProductToSupplier = async () => {
 
 // ✅ Đã sửa để luôn gọi API lấy product_variants có attributes đầy đủ
 const showVariants = async (product) => {
-    try {
-        const response = await axios.get(route('admin.products.variants', {
-            productId: product.id,
-            supplierId: supplier.id,
-        }));
-
-        // console.log('Biến thể lấy được từ API:', response.data.variants);
+   
+    
 
         selectedProduct.value = {
             ...product,
-            product_variants: response.data.variants || [],
+            product_variants: product || {}
         };
 
-        console.log('selectedProduct:', selectedProduct.value);
         isModalOpen.value = true;
-    } catch (error) {
-        console.error("Không thể lấy biến thể:", error);
-    }
+   
 };
 
 const closeModal = () => {

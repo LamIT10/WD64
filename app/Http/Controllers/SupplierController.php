@@ -15,17 +15,16 @@ use Inertia\Inertia;
 class SupplierController extends Controller
 {
     protected $supplierRepository;
-    protected $productRepository;  
-    public function __construct
-    (
-     SupplierRepository $supplierRepository,
-     ProductRepository $productRepository
-    )
-    {
+    protected $productRepository;
+    public function __construct(
+        SupplierRepository $supplierRepository,
+        ProductRepository $productRepository
+    ) {
         $this->supplierRepository = $supplierRepository;
         $this->productRepository = $productRepository;
     }
-    public function getList(Request $request){
+    public function getList(Request $request)
+    {
         $suppliers = $this->supplierRepository->getList($request);
         return inertia('admin/Supplier/List', [
             'suppliers' => $suppliers
@@ -33,25 +32,29 @@ class SupplierController extends Controller
     }
     public function create()
     {
-       return inertia('admin/Supplier/Create');
+        return inertia('admin/Supplier/Create');
     }
-    public function store(SupplierRequest $request){
+    public function store(SupplierRequest $request)
+    {
         $data = $request->validated();
         $supplier = $this->supplierRepository->createData($data);
         return $this->returnInertia($supplier, 'Tạo mới nhà cung cấp thành công', 'admin.suppliers.index');
     }
-    public function edit($id){
+    public function edit($id)
+    {
         $supplier = $this->supplierRepository->findById($id);
         return inertia('admin/Supplier/Edit', [
             'supplier' => $supplier
         ]);
     }
-    public function update(SupplierRequest $request, $id){
+    public function update(SupplierRequest $request, $id)
+    {
         $data = $request->validated();
         $supplier = $this->supplierRepository->updateData($id, $data);
         return $this->returnInertia($supplier, 'Cập nhật nhà cung cấp thành công', 'admin.suppliers.edit', [$id]);
     }
-    public function destroy($id){
+    public function destroy($id)
+    {
         $success = $this->supplierRepository->deleteData($id);
         return $this->returnInertia($success, 'Xóa nhà cung cấp thông', 'admin.suppliers.index');
     }
@@ -67,13 +70,12 @@ class SupplierController extends Controller
         if (!$query) {
             return redirect()->route('admin.suppliers.index')->with('error', 'Không tìm thấy nhà cung cấp');
         }
-
+        // dd($query);
         // Nhóm biến thể theo product_id
         $groupedVariants = $query->variants->groupBy(function ($variant) {
             return $variant->product_id ?? 'Không rõ sản phẩm';
         });
 
-        dd($groupedVariants);
 
         // Chuẩn hóa dữ liệu cho frontend
         $products = $groupedVariants->map(function ($variants, $productId) {
@@ -83,22 +85,25 @@ class SupplierController extends Controller
                 'name' => $product->name,
                 'category' => $product->category ? ['name' => $product->category->name] : null,
                 'product_variants' => $variants->map(function ($variant) {
+                    $att = [
+                        'att_value' => "",
+                        "att" => "",
+                    ];
+
+                    foreach ($variant->attributes as $key => $item) {
+                        $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
+                        $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;
+                    }
                     return [
                         'id' => $variant->id,
                         'code' => $variant->code,
                         'barcode' => $variant->barcode,
                         'sale_price' => $variant->sale_price, // Lấy từ product_variants
-                        'attributes' => $variant->attributes->map(function ($attr) {
-                            return [
-                                'id' => $attr->id,
-                                'value' => $attr->value
-                            ];
-                        })
+                        'attributes' => $att
                     ];
                 })->toArray()
             ];
         })->values()->toArray();
-
         return Inertia::render('admin/Supplier/Products', [
             'supplier' => [
                 'id' => $query->id,
@@ -150,7 +155,7 @@ class SupplierController extends Controller
     public function getVariantsByProductId($supplierId, $productId)
     {
         $variants = $this->productRepository->getProductVariantsById($productId);
-        
+
 
         // Kiểm tra xem sản phẩm có được liên kết với nhà cung cấp không
         $variantIds = collect($variants)->pluck('variant_id')->unique()->toArray();
