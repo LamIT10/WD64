@@ -18,7 +18,8 @@ class ProductVariant extends Model
 
     public function attributes()
     {
-        return $this->belongsToMany(AttributeValue::class, 'product_variant_attributes', 'variant_id', 'attribute_value_id');
+        return $this->belongsToMany(AttributeValue::class, 'product_variant_attributes', 'variant_id', 'attribute_value_id')
+        ->with('attribute');;
     }
     public function supplierVariants()
     {

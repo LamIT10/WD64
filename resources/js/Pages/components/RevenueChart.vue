@@ -1,12 +1,12 @@
 <template>
   <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
     <div class="flex justify-between items-center mb-6">
-      <h3 class="text-lg font-semibold text-gray-800">Net Revenue</h3>
-      <select v-model="selectedRange" class="text-sm border rounded px-3 py-1">
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
-        <option value="quarterly">Quarterly</option>
+      <h3 class="text-lg font-semibold text-gray-800">Doanh thu thuần</h3>
+      <select v-model="selectedRange" class="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        <option value="daily">Hàng ngày</option>
+        <option value="weekly">Hàng tuần</option>
+        <option value="monthly">Hàng tháng</option>
+        <option value="quarterly">Hàng quý</option>
       </select>
     </div>
 
@@ -16,15 +16,15 @@
 
     <div class="mt-4 grid grid-cols-3 gap-4 text-center">
       <div class="bg-blue-50 p-3 rounded-lg">
-        <p class="text-sm text-blue-600">This {{ selectedRangeLabel }}</p>
+        <p class="text-sm text-blue-600"> {{ selectedRangeLabel }} Này</p>
         <p class="font-bold text-blue-800">{{ formatCurrency(currentRevenue) }}</p>
       </div>
       <div class="bg-green-50 p-3 rounded-lg">
-        <p class="text-sm text-green-600">Last {{ selectedRangeLabel }}</p>
+        <p class="text-sm text-green-600">{{ selectedRangeLabel }} Trước</p>
         <p class="font-bold text-green-800">{{ formatCurrency(lastRevenue) }}</p>
       </div>
       <div class="bg-purple-50 p-3 rounded-lg">
-        <p class="text-sm text-purple-600">Change</p>
+        <p class="text-sm text-purple-600">Thay đổi</p>
         <p class="font-bold text-purple-800">{{ percentChange }}</p>
       </div>
     </div>
@@ -44,9 +44,20 @@ const selectedRange = ref('weekly')
 const chartCanvas = ref(null)
 const chartInstance = ref(null)
 
-const selectedRangeLabel = computed(() =>
-  selectedRange.value.charAt(0).toUpperCase() + selectedRange.value.slice(1)
-)
+const selectedRangeLabel = computed(() => {
+  switch (selectedRange.value) {
+    case 'daily':
+      return 'Ngày';
+    case 'weekly':
+      return 'Tuần';
+    case 'monthly':
+      return 'Tháng';
+    case 'quarterly':
+      return 'Quý';
+    default:
+      return '';
+  }
+});
 
 const chartRaw = computed(() => props.data?.[selectedRange.value] || {
   labels: [],
@@ -81,7 +92,7 @@ const renderChart = () => {
     data: {
       labels: chartRaw.value.labels,
       datasets: [{
-        label: 'Revenue (₫)',
+        label: 'Doanh thu (₫)',
         data: chartRaw.value.values,
         backgroundColor: 'rgba(99, 102, 241, 0.3)',
         borderColor: '#6366f1',
