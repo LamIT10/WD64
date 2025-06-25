@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->foreignId('rank_id')->nullable()->constrained('ranks')->onDelete('set null');
+        Schema::table('users', function (Blueprint $table) {
+                $table->unique('phone');
+                $table->unique('identity_number');
+            
         });
     }
 
@@ -21,9 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->dropForeign(['rank_id']);
-            $table->dropColumn('rank_id');
+        Schema::table('users', function (Blueprint $table) {
+               $table->dropUnique(['phone']);
+               $table->dropUnique(['identity_number']);
+              
         });
     }
 };

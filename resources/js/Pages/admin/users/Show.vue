@@ -1,17 +1,17 @@
 <template>
     <AppLayout>
-        <div class="bg-gray-100 min-h-screen p-6">
+        <div class="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-8">
             <!-- Header Section -->
-            <div class="bg-white rounded-lg shadow p-4 mb-6 flex justify-between items-center">
+            <div class="bg-white rounded-lg shadow p-6 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 class="text-xl font-semibold text-indigo-700">Chi tiết nhân viên</h1>
                 <div class="flex space-x-3">
-                    <Waiting route-name="admin.users.edit" :route-params="{ id: user.id }" 
-                        class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded flex items-center space-x-1 transition-colors duration-200">
+                    <Waiting route-name="admin.users.edit" :route-params="{ id: user.id }"
+                        class="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded flex items-center space-x-2 transition-colors duration-200">
                         <i class="fas fa-edit"></i>
                         <span>Chỉnh sửa</span>
                     </Waiting>
-                    <Waiting route-name="admin.users.index" :route-params="{}" 
-                        class="bg-indigo-50 text-indigo-700 px-3 py-2 rounded flex items-center space-x-1 transition-colors duration-200">
+                    <Waiting route-name="admin.users.index"
+                        class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded flex items-center space-x-2 transition-colors duration-200">
                         <i class="fas fa-arrow-left"></i>
                         <span>Quay lại</span>
                     </Waiting>
@@ -19,195 +19,143 @@
             </div>
 
             <!-- Main Content -->
-            <div class="bg-white rounded-lg shadow overflow-hidden animate-fade-in">
-                <!-- Avatar -->
-                <div class="p-6 text-center">
-                    <img :src="user.avatar ? `/storage/${user.avatar}` : 'https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/05/anh-meme-meo-13.jpg'"
-                        alt="Avatar"
-                        class="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow mx-auto mb-4 transform hover:scale-105 transition-transform duration-300">
-                </div>
-
-                <!-- Content Sections -->
-                <div class="p-6">
-                    <!-- Personal Information -->
-                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin cá nhân</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-id-badge text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Mã nhân viên</label>
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Side - Avatar and Basic Info -->
+                <div class="lg:w-1/3 space-y-6">
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <img :src="user.avatar ? `/storage/${user.avatar}` : '/images/default-ava.png'" alt="Avatar"
+                            class="w-32 h-32 rounded-full object-cover border-4 border-indigo-200 shadow mx-auto mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">{{ user.name || 'Chưa cập nhật' }}</h2>
+                        <p class="text-indigo-600 font-medium">{{ user.position || 'Chưa cập nhật chức vụ' }}</p>
+                        
+                        <div class="mt-6 space-y-4 text-left">
+                            <div>
+                                <p class="text-sm text-gray-500">Email</p>
+                                <p class="font-medium break-all">{{ user.email || 'Chưa cập nhật' }}</p>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.employee_code || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-user text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Họ và tên</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.name || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-id-card text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">CMND/CCCD</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.identity_number || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-birthday-cake text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Ngày sinh</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.birthday ? formatDate(user.birthday) : 'Chưa cập nhật' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-venus-mars text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Giới tính</label>
-                            </div>
-                            <div class="mt-1 border-b border-indigo-200 pb-1">
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                                    :class="{
-                                        'bg-blue-100 text-blue-800': user.gender === 'male',
-                                        'bg-pink-100 text-pink-800': user.gender === 'female',
-                                        'bg-gray-100 text-gray-800': !user.gender
-                                    }">
-                                    {{ user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : 'Chưa cập nhật' }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Information -->
-                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin liên hệ</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-phone text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Số điện thoại</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.phone || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-envelope text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Email</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.email || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fab fa-facebook text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Facebook</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">
-                                <a v-if="user.facebook" :href="user.facebook" target="_blank"
-                                    class="text-indigo-600 hover:underline flex items-center space-x-1">
-                                    <i class="fab fa-facebook-f text-sm"></i>
-                                    <span class="break-all">{{ user.facebook }}</span>
-                                </a>
-                                <span v-else>Chưa cập nhật</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-map-marker-alt text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Địa chỉ</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.address || 'Chưa cập nhật' }}</div>
-                        </div>
-                    </div>
-
-                    <!-- Work Information -->
-                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin công việc</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-briefcase text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Chức vụ</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.position || 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-user-tag text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Vai trò</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">
-                                <span v-if="user.roles && user.roles.length" class="flex flex-wrap gap-2">
-                                    <span v-for="role in user.roles" :key="role.id"
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                        {{ role.name || role }}
-                                    </span>
-                                </span>
-                                <span v-else>Chưa cập nhật</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-calendar-day text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Ngày bắt đầu làm việc</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.start_date ? formatDate(user.start_date) : 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-info-circle text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Trạng thái</label>
-                            </div>
-                            <div class="mt-1 border-b border-indigo-200 pb-1">
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                            <div>
+                                <p class="text-sm text-gray-500 mb-2">Trạng thái</p>
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full "
                                     :class="{
                                         'bg-green-100 text-green-800': user.status === 'active',
-                                        'bg-red-100 text-red-800': user.status === 'inactive',
-                                        'bg-gray-100 text-gray-800': !user.status
+                                        'bg-red-100 text-red-800': user.status === 'inactive'
+                                    
                                     }">
-                                    {{ user.status === 'active' ? 'Đang làm việc' : user.status === 'inactive' ? 'Đã nghỉ làm' : 'Chưa cập nhật' }}
+                                    {{ user.status === 'active' ? 'Đang làm việc' : 'Đã nghỉ làm'}}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Additional Information (Notes) -->
-                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin bổ sung</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-sticky-note text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Ghi chú</label>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2">Thông tin đăng nhập</h3>
+                        <div class="space-y-4">
+                            <InfoItem icon="fa-sign-in-alt" label="Đăng nhập lần cuối"
+                                :value="user.last_login_at ? formatDate(user.last_login_at) : 'Chưa đăng nhập'" />
+                            <InfoItem icon="fa-calendar-plus" label="Ngày tạo"
+                                :value="user.created_at ? formatDate(user.created_at) : ''" />
+                            <InfoItem icon="fa-calendar-check" label="Ngày cập nhật"
+                                :value="user.updated_at ? formatDate(user.updated_at) : ''" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Detailed Info -->
+                <div class="lg:w-2/3 space-y-6">
+                    <!-- Personal Info -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2 flex items-center">
+                            <i class="fas fa-user-circle mr-2"></i>
+                            Thông tin cá nhân
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <InfoItem icon="fa-id-badge" label="Mã nhân viên" :value="user.employee_code || 'Chưa cập nhật'" />
+                            <InfoItem icon="fa-id-card" label="CMND/CCCD" :value="user.identity_number || 'Chưa cập nhật'" />
+                            <InfoItem icon="fa-birthday-cake" label="Ngày sinh"
+                                :value="user.birthday ? formatDate(user.birthday) : 'Chưa cập nhật'" />
+                            <div>
+                                <div class="flex items-center space-x-2 text-gray-600">
+                                    <i class="fas fa-venus-mars text-indigo-500"></i>
+                                    <label class="text-sm font-medium">Giới tính</label>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="px-2 py-1 text-sm rounded"
+                                        :class="{
+                                            'bg-blue-100 text-blue-800': user.gender === 'male',
+                                            'bg-pink-100 text-pink-800': user.gender === 'female',
+                                            'bg-gray-100 text-gray-800': !user.gender
+                                        }">
+                                        {{ user.gender === 'male' ? 'Nam' : user.gender === 'female' ? 'Nữ' : 'Chưa cập nhật' }}
+                                    </span>
+                                </div>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1 whitespace-pre-wrap">{{ user.note || 'Chưa cập nhật' }}</div>
                         </div>
                     </div>
 
-                    <!-- Timestamps -->
-                    <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin hệ thống</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-sign-in-alt text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Đăng nhập lần cuối</label>
+                    <!-- Contact Info -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2 flex items-center">
+                            <i class="fas fa-address-book mr-2"></i>
+                            Thông tin liên hệ
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <InfoItem icon="fa-phone" label="Số điện thoại" :value="user.phone || 'Chưa cập nhật'" />
+                            <InfoItem icon="fa-map-marker-alt" label="Địa chỉ" :value="user.address || 'Chưa cập nhật'" />
+                            <div class="sm:col-span-2">
+                                <div class="flex items-center space-x-2 text-gray-600">
+                                    <i class="fab fa-facebook text-indigo-500"></i>
+                                    <label class="text-sm font-medium">Facebook</label>
+                                </div>
+                                <div class="mt-1">
+                                    <a v-if="user.facebook" :href="user.facebook" target="_blank"
+                                        class="text-indigo-600 hover:underline inline-flex items-center space-x-1 break-all">
+                                        <i class="fab fa-facebook-f text-sm"></i>
+                                        <span class="truncate max-w-xs">{{ user.facebook }}</span>
+                                    </a>
+                                    <span v-else class="text-gray-500">Chưa cập nhật</span>
+                                </div>
                             </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.last_login_at ? formatDate(user.last_login_at) : 'Chưa đăng nhập' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-calendar-plus text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Ngày tạo</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.created_at ? formatDate(user.created_at) : 'Chưa cập nhật' }}</div>
-                        </div>
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-calendar-check text-indigo-500"></i>
-                                <label class="text-sm font-medium text-gray-700">Ngày cập nhật</label>
-                            </div>
-                            <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ user.updated_at ? formatDate(user.updated_at) : 'Chưa cập nhật' }}</div>
                         </div>
                     </div>
+
+                    <!-- Work Info -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2 flex items-center">
+                            <i class="fas fa-briefcase mr-2"></i>
+                            Thông tin công việc
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <InfoItem icon="fa-calendar-day" label="Ngày bắt đầu làm việc"
+                                :value="user.start_date ? formatDate(user.start_date) : 'Chưa cập nhật'" />
+                            <div>
+                                <div class="flex items-center space-x-2 text-gray-600">
+                                    <i class="fas fa-user-tag text-indigo-500"></i>
+                                    <label class="text-sm font-medium">Vai trò</label>
+                                </div>
+                                <div class="mt-2">
+                                    <div v-if="user.roles && user.roles.length" class="flex flex-wrap gap-2">
+                                        <span v-for="role in user.roles" :key="role.id"
+                                            class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 flex items-center">
+                                            <i class="fas fa-user-shield mr-1 text-xs"></i>
+                                            {{ role.name || role }}
+                                        </span>
+                                    </div>
+                                    <span v-else class="text-gray-500">Chưa cập nhật</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info - Full Width -->
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Thông tin bổ sung
+                </h3>
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap min-h-20">
+                    {{ user.note || 'Chưa cập nhật thông tin bổ sung' }}
                 </div>
             </div>
         </div>
@@ -217,6 +165,7 @@
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
+import InfoItem from '../../components/InfoItem.vue';
 
 const props = defineProps({
     user: Object

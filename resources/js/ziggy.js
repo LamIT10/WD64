@@ -1,9 +1,74 @@
 const Ziggy = {
-    url: "http://localhost",
+    url: "http:127.0.0.1:8000",
     port: null,
     defaults: {},
     routes: {
-        "admin.": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
+        "sanctum.csrf-cookie": {
+            uri: "sanctum/csrf-cookie",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.dashboard": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
+        "admin.inventory-audit.index": {
+            uri: "admin/inventory-audit",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.inventory-audit.create": {
+            uri: "admin/inventory-audit/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.inventory-audit.store": {
+            uri: "admin/inventory-audit",
+            methods: ["POST"],
+        },
+        "admin.inventory-audit.show": {
+            uri: "admin/inventory-audit/{inventory_audit}",
+            methods: ["GET", "HEAD"],
+            parameters: ["inventory_audit"],
+        },
+        "admin.inventory-audit.edit": {
+            uri: "admin/inventory-audit/{inventory_audit}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["inventory_audit"],
+        },
+        "admin.inventory-audit.update": {
+            uri: "admin/inventory-audit/{inventory_audit}",
+            methods: ["PUT", "PATCH"],
+            parameters: ["inventory_audit"],
+        },
+        "admin.inventory-audit.destroy": {
+            uri: "admin/inventory-audit/{inventory_audit}",
+            methods: ["DELETE"],
+            parameters: ["inventory_audit"],
+        },
+        "admin.inventory.index": {
+            uri: "admin/inventory",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.inventory.create": {
+            uri: "admin/inventory/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.inventory.store": { uri: "admin/inventory", methods: ["POST"] },
+        "admin.inventory.show": {
+            uri: "admin/inventory/{id}",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.inventory.edit": {
+            uri: "admin/inventory/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.inventory.update": {
+            uri: "admin/inventory/{id}",
+            methods: ["PUT"],
+            parameters: ["id"],
+        },
+        "admin.inventory.destroy": {
+            uri: "admin/inventory/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
         "admin.categories.index": {
             uri: "admin/categories",
             methods: ["GET", "HEAD"],
@@ -28,7 +93,7 @@ const Ziggy = {
         },
         "admin.categories.update": {
             uri: "admin/categories/{category}",
-            methods: ["PUT", "PATCH"],
+            methods: ["PUT"],
             parameters: ["category"],
         },
         "admin.categories.destroy": {
@@ -57,7 +122,7 @@ const Ziggy = {
         },
         "admin.products.update": {
             uri: "admin/products/{product}",
-            methods: ["PUT", "PATCH"],
+            methods: ["PUT"],
             parameters: ["product"],
         },
         "admin.products.destroy": {
@@ -97,6 +162,18 @@ const Ziggy = {
             methods: ["DELETE"],
             parameters: ["customer"],
             bindings: { customer: "id" },
+        },
+        "admin.customers.customers.bulk-delete": {
+            uri: "admin/customers/customers/bulk-delete",
+            methods: ["POST"],
+        },
+        "admin.customers.customers.import": {
+            uri: "admin/customers/customers/import",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customers.customers.export": {
+            uri: "admin/customers/customers/export",
+            methods: ["GET", "HEAD"],
         },
         "admin.ranks.index": { uri: "admin/ranks", methods: ["GET", "HEAD"] },
         "admin.ranks.create": {
@@ -195,12 +272,69 @@ const Ziggy = {
         },
         "admin.suppliers.edit": {
             uri: "admin/suppliers/{id}/edit",
-            methods: ["PATCH"],
+            methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
         "admin.suppliers.store": {
             uri: "admin/suppliers/store",
             methods: ["POST"],
+        },
+        "admin.suppliers.update": {
+            uri: "admin/suppliers/{id}/update",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.suppliers.destroy": {
+            uri: "admin/suppliers/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.suppliers.products": {
+            uri: "admin/suppliers/{id}/products",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.customer-transaction.index": {
+            uri: "admin/customer-transaction",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.customer-transaction.add": {
+            uri: "admin/customer-transaction/{order}/add",
+            methods: ["POST"],
+            parameters: ["order"],
+        },
+        "admin.customer-transaction.updateDueDate": {
+            uri: "admin/customer-transaction/{order}/update-due-date",
+            methods: ["POST"],
+            parameters: ["order"],
+        },
+        "admin.customer-transaction.show": {
+            uri: "admin/customer-transaction/{order}/show",
+            methods: ["GET", "HEAD"],
+            parameters: ["order"],
+        },
+        "admin.supplier-transaction.index": {
+            uri: "admin/supplier-transaction",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.supplier-transaction.show": {
+            uri: "admin/supplier-transaction/{id}/show",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.supplier-transaction.store": {
+            uri: "admin/supplier-transaction/store",
+            methods: ["POST"],
+        },
+        "admin.supplier-transaction.update": {
+            uri: "admin/supplier-transaction/{id}/update",
+            methods: ["PATCH"],
+            parameters: ["id"],
+        },
+        "admin.supplier-transaction.updatePayment": {
+            uri: "admin/supplier-transaction/{id}/update-payment",
+            methods: ["PATCH"],
+            parameters: ["id"],
         },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {
@@ -236,37 +370,6 @@ const Ziggy = {
             uri: "admin/users/bulk-delete",
             methods: ["POST"],
         },
-        "admin.sale-orders.index": {
-            uri: "admin/sale-orders",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.sale-orders.create": {
-            uri: "admin/sale-orders/create",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.sale-orders.sale-orders.products.search": {
-            uri: "admin/sale-orders/search/products",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.sale-orders.sale-orders.variants.all": {
-            uri: "admin/sale-orders/variants/{productId}",
-            methods: ["GET", "HEAD"],
-            parameters: ["productId"],
-        },
-        "admin.sale-orders.sale-orders.unit.all": {
-            uri: "admin/sale-orders/unit-conversions/{productId}",
-            methods: ["GET", "HEAD"],
-            parameters: ["productId"],
-        },
-        "admin.sale-orders.sale-orders.customer.search": {
-            uri: "admin/sale-orders/search/customers",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.sale-orders.store": {
-            uri: "admin/sale-orders/store",
-            methods: ["POST"],
-        },
-        dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
         logout: { uri: "logout", methods: ["POST"] },
         "password.request": {

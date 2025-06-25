@@ -1,0 +1,53 @@
+<template>
+    <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+            Hiển thị <span class="font-medium">{{ data.from }}</span> đến
+            <span class="font-medium">{{ data.to }}</span> của
+            <span class="font-medium">{{ data.total }}</span> kết quả
+        </div>
+        <div class="flex space-x-1">
+            <Link v-if="data.prev_page_url" :href="data.prev_page_url"
+                class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
+            <i class="fas fa-chevron-left"></i>
+            </Link>
+            <span v-else class="px-3 py-1 border border-gray-300 rounded-md text-gray-400 cursor-not-allowed">
+                <i class="fas fa-chevron-left"></i>
+            </span>
+
+            <!-- Page Numbers -->
+            <template v-for="page in data.links">
+                <Link v-if="page.url && !page.active && page.label !== '...'"
+                    :href="page.url +  '&perPage=' + newPerPage"
+                    class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
+                {{ page.label }}
+                </Link>
+                <span v-else-if="page.active" class="px-3 py-1 bg-indigo-600 text-white rounded-md">
+                    {{ page.label }}
+                </span>
+                <span v-else-if="page.label === '...'"
+                    class="px-3 py-1 border border-gray-300 rounded-md text-gray-600">
+                    {{ page.label }}
+                </span>
+            </template>
+
+            <Link v-if="data.next_page_url" :href="data.next_page_url +'&perPage=' + newPerPage "
+                class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
+            <i class="fas fa-chevron-right"></i>
+            </Link>
+            <span v-else class="px-3 py-1 border border-gray-300 rounded-md text-gray-400 cursor-not-allowed">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { Link } from '@inertiajs/vue3';
+const {data, perPage} = defineProps({
+    data: Object,
+    perPage:String
+})
+const newPerPage = perPage == null ? "20" : perPage.trim == "" ? "20" : perPage ;
+</script>
+
+<style lang="scss" scoped></style>

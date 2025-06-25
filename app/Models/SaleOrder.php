@@ -16,6 +16,7 @@ class SaleOrder extends Model
         'status',
         'total_amount',
         'address_delivery',
+        'credit_due_date',
     ];
 
     protected $casts = [
@@ -28,14 +29,26 @@ class SaleOrder extends Model
         return $this->belongsTo(Customer::class);
     }
 
-    public function items()
+    public function saleOrderDetails()
     {
         return $this->hasMany(SaleOrderItem::class);
     }
 
+    public function items()
+    {
+        return $this->hasMany(SaleOrderItem::class, 'sales_order_id');
+    }
     public function customerTransactions()
     {
         return $this->hasMany(CustomerTransaction::class);
+    }
+    public function transactions()
+    {
+        return $this->hasMany(CustomerTransaction::class, 'sales_order_id');
+    }
+    public function latestTransaction()
+    {
+        return $this->hasOne(CustomerTransaction::class, 'sales_order_id')->latestOfMany();
     }
 
     public function shipping()

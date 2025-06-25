@@ -18,6 +18,7 @@ class SupplierSeeder extends Seeder
 
         DB::table('suppliers')->insert([
             [
+                'id' => 1,
                 'name' => 'Công ty TNHH Thực Phẩm ABC',
                 'contact_person' => 'Nguyễn Văn A',
                 'phone' => '0909111222',
@@ -28,6 +29,7 @@ class SupplierSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
+                'id' => 2,
                 'name' => 'Công ty CP Đồ Uống XYZ',
                 'contact_person' => 'Trần Thị B',
                 'phone' => '0908222333',
@@ -38,6 +40,7 @@ class SupplierSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
+                'id' => 3,
                 'name' => 'Công ty Gia Vị DEF',
                 'contact_person' => 'Lê Văn C',
                 'phone' => '0907333444',
@@ -48,6 +51,7 @@ class SupplierSeeder extends Seeder
                 'updated_at' => $now,
             ],
             [
+                'id' => 4,
                 'name' => 'Công ty TNHH Thực Phẩm Đông Lạnh MNO',
                 'contact_person' => 'Phan Thị D',
                 'phone' => '0906444555',

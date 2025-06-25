@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\admin;
+
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ProductRepository;
 use Illuminate\Http\Request;
@@ -10,8 +13,9 @@ use Inertia\Inertia;
 class ProductController extends Controller
 {
     protected $productRepository;
-    private $categoryRepository;
-    public function __construct(ProductRepository $productRepository) {
+
+    public function __construct(ProductRepository $productRepository)
+    {
         $this->productRepository = $productRepository;
     }
     /**
@@ -31,17 +35,19 @@ class ProductController extends Controller
      */
     public function create()
     {
-        
-        return Inertia::render('admin/products/CreteProduct', [
-        ]);
+        $data = $this->productRepository->getCreateData();
+        return Inertia::render('admin/products/CreateProduct', $data);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        $data = $request->validated();
+        $product = $this->productRepository->store($data);
+
+        return $this->returnInertia($product, 'Thêm thành công', 'admin.products.index');
     }
 
     /**
@@ -49,7 +55,14 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = $this->productRepository->show($id);
+
+        if (isset($product['status']) && $product['status'] == false) {
+            return abort(404);
+        }
+        return Inertia::render('admin/products/ShowProduct', [
+            'product' => $product
+        ]);
     }
 
     /**
@@ -57,15 +70,24 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data = $this->productRepository->getEditData($id);
+
+        if (isset($data['status']) && $data['status'] == false) {
+            return abort(404);
+        }
+
+        return Inertia::render('admin/products/EditProduct', $data);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, string $id)
     {
-        //
+        $data = $request->validated();
+        $product = $this->productRepository->update($id, $data);
+
+        return $this->returnInertia($product, 'Cập nhật thành công', 'admin.products.index');
     }
 
     /**
@@ -73,6 +95,7 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $success = $this->productRepository->destroy($id);
+        return $this->returnInertia($success, 'Xóa nhà cung cấp thông', 'admin.products.index');
     }
 }

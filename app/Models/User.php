@@ -52,33 +52,36 @@ class User extends Authenticatable
 
     public function activityLogs()
     {
-        return $this->hasMany(ActivityLog::class, 'user_id')->onDelete('cascade');
+        return $this->hasMany(ActivityLog::class, 'user_id');
     }
 
     public function purchaseOrders()
     {
-        return $this->hasMany(PurchaseOrder::class,'user_id')->onDelete('cascade');
+        return $this->hasMany(PurchaseOrder::class,'user_id');
     }
 
     public function receiving()
     {
-        return $this->hasMany(Receiving::class,'user_id')->onDelete('cascade');
+        return $this->hasMany(Receiving::class,'user_id');
     }
 
     public function shipping()
     {
-        return $this->hasMany(Shipping::class,'user_id')->onDelete('cascade');
+        return $this->hasMany(Shipping::class,'user_id');
     }
 
     public function inventoryAudits()
     {
-        return $this->hasMany(InventoryAudit::class,'user_id')->onDelete('cascade');
+        return $this->hasMany(InventoryAudit::class,'user_id');
     }
 
     public function damagedExpiredProducts()
     {
-        return $this->hasMany(DamagedExpiredProduct::class, 'reported_by')->onDelete('cascade');
+        return $this->hasMany(DamagedExpiredProduct::class, 'reported_by');
     }
-
+      public function approvedAudits()
+    {
+        return $this->hasMany(InventoryAudit::class, 'approved_by');
+    }
 
 }
