@@ -17,6 +17,9 @@ class Customer extends Model
         'address',
         'current_debt',
         'rank_id',
+        'province',
+        'district',
+        'ward'
     ];
 
     protected $hidden = ['password'];

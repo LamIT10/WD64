@@ -52,7 +52,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::patch('/{rank}', [RankController::class, 'update'])->name('update');  // Cập nhật rank
         Route::delete('/{rank}', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
     });
-    
+
     Route::prefix('permission')->as('permission.')->group(function () {
         Route::get('/', [PermissionController::class, 'index'])->name('index');
         Route::get('/create', [PermissionController::class, 'create'])->name('create');
@@ -111,17 +111,19 @@ Route::prefix('admin')->as('admin.')->group(function () {
         Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
-
-});
-
-
-    Route::resource('users', UserController::class);
     Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
         Route::get('/', [SaleOrderController::class, 'index'])->name('index');
         Route::get('/create', [SaleOrderController::class, 'create'])->name('create');
-        Route::post('/', [SaleOrderController::class, 'create'])->name('create');
+        Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('sale-orders.products.search');
+        Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('sale-orders.variants.all');
+        Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('sale-orders.unit.all');
+        Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('sale-orders.customer.search');
+        Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
     });
 });
+
+
+
 // API địa chỉ
 Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
 Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);

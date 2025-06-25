@@ -39,7 +39,9 @@
                         {{ saleOrder.customer_id }}
                     </td>
                     <td class="w-[15%] text-center">{{ saleOrder.name }}</td>
-                    <td class="w-[15%] text-center">{{ saleOrder.address }}</td>
+                    <td class="w-[15%] text-center">
+                        {{ saleOrder.address_delivery }}
+                    </td>
                     <td class="w-[10%] text-center">
                         {{ saleOrder.total_amount }}
                     </td>

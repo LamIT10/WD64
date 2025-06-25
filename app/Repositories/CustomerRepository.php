@@ -24,15 +24,6 @@ class CustomerRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-<<<<<<< HEAD
-            $newCustomer = [];
-            $newCustomer['name'] = $data['name'] ?? '';
-            $newCustomer['contact_person'] = $data['contact_person'] ?? '';
-            $newCustomer['phone'] = $data['phone'] ?? '';
-            $newCustomer['email'] = $data['email'] ?? '';
-            $newCustomer['address'] = $data['address'] ?? '';
-            $newCustomer['current_debt'] = $data['current_debt'] ?? 0;
-=======
             $newCustomer = [
                 'name' => $data['name'] ?? '',
                 'phone' => $data['phone'] ?? '',
@@ -40,7 +31,6 @@ class CustomerRepository extends BaseRepository
                 'address' => $data['address'] ?? '',
                 'current_debt' => $data['current_debt'] ?? 0,
             ];
->>>>>>> e95a910bb0222c4e62850a8e97151062ae75a25f
 
             if (!empty($data['password'])) {
                 $newCustomer['password'] = Hash::make($data['password']);
@@ -76,10 +66,6 @@ class CustomerRepository extends BaseRepository
 
     public function updateCustomer(Customer $customer, array $data)
     {
-<<<<<<< HEAD
-
-=======
->>>>>>> e95a910bb0222c4e62850a8e97151062ae75a25f
         try {
             DB::beginTransaction();
             $newCustomer = [
@@ -111,24 +97,6 @@ class CustomerRepository extends BaseRepository
 
     public function deleteCustomer(Customer $customer)
     {
-<<<<<<< HEAD
-        $customer->delete();
-    }
-
-    public function storeRank(Customer $customer, array $data): void
-    {
-        $customer->ranks()->create($data);
-    }
-    public function getList()
-    {
-        try {
-            return  $this->handleModel->get();
-        } catch (\Throwable $th) {
-            return  Log::error('Lỗi lấy toàn bộ danh sách khách hàng: ' . $th->getMessage());
-        }
-    }
-}
-=======
         try {
             DB::beginTransaction();
             $customer = $this->handleModel->findOrFail($customer->id);
@@ -144,4 +112,3 @@ class CustomerRepository extends BaseRepository
         }
     }
 }
->>>>>>> e95a910bb0222c4e62850a8e97151062ae75a25f

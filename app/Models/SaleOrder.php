@@ -14,7 +14,8 @@ class SaleOrder extends Model
         'order_date',
         'expected_ship_date',
         'status',
-        'total_amount'
+        'total_amount',
+        'address_delivery',
     ];
 
     protected $casts = [
