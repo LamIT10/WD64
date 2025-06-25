@@ -69,7 +69,7 @@
                     'updated_at' => $now,
                 ],
                 [
-                    'supplier_id' => 4,
+                    'supplier_id' => 3,
                     'product_variant_id' => 7, // TB001-02
                     'cost_price' => 170000.00,
                     'min_order_quantity' => 5,
@@ -86,7 +86,7 @@
                     'updated_at' => $now,
                 ],
                 [
-                    'supplier_id' => 3,
+                    'supplier_id' => 4,
                     'product_variant_id' => 9, // BO001-02
                     'cost_price' => 4000.00,
                     'min_order_quantity' => 10,

@@ -3,6 +3,7 @@
 use App\Constant\PermissionConstant;
 use App\Http\Controllers\Admin\InventoryAuditController;
 use App\Http\Controllers\admin\ProductController;
+use App\Http\Controllers\Admin\SupplierProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -57,6 +58,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+
+        Route::get('/search', [SupplierController::class, 'searchProducts'])->name('search');
+        Route::get('/{productId}/variants/{supplierId}', [SupplierController::class, 'getProductVariants'])->name('variants');
     });
 
 
@@ -133,6 +137,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
 
         Route::get('{id}/products', [SupplierController::class, 'getProducts'])->name('products');
+        Route::post('/{supplierId}/products', [SupplierController::class, 'storeSupplierProducts'])->name('products.store');
+        Route::get('/{supplierId}/products/{productId}/variants', [SupplierController::class, 'getVariantsByProductId'])->name('variants');
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
