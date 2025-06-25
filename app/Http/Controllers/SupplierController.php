@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SupplierRequest;
+use App\Models\Supplier;
+use App\Models\SupplierProductVariant;
 use App\Repositories\ProductRepository;
 use App\Repositories\SupplierRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class SupplierController extends Controller
 {
@@ -53,17 +58,111 @@ class SupplierController extends Controller
 
     public function getProducts($id)
     {
-        $supplier = $this->supplierRepository->findById($id);
-        if (!$supplier) {
+        $query = Supplier::with([
+            'variants' => function ($query) {
+                $query->with(['product.category', 'attributes']);
+            }
+        ])->find($id);
+
+        if (!$query) {
             return redirect()->route('admin.suppliers.index')->with('error', 'Không tìm thấy nhà cung cấp');
         }
 
-        $products = $this->productRepository->getProductsBySupplier($id);
+        // Nhóm biến thể theo product_id
+        $groupedVariants = $query->variants->groupBy(function ($variant) {
+            return $variant->product_id ?? 'Không rõ sản phẩm';
+        });
 
-        return inertia('admin/Supplier/Products', [
-            'supplier' => $supplier,
+        dd($groupedVariants);
+
+        // Chuẩn hóa dữ liệu cho frontend
+        $products = $groupedVariants->map(function ($variants, $productId) {
+            $product = $variants->first()->product;
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category' => $product->category ? ['name' => $product->category->name] : null,
+                'product_variants' => $variants->map(function ($variant) {
+                    return [
+                        'id' => $variant->id,
+                        'code' => $variant->code,
+                        'barcode' => $variant->barcode,
+                        'sale_price' => $variant->sale_price, // Lấy từ product_variants
+                        'attributes' => $variant->attributes->map(function ($attr) {
+                            return [
+                                'id' => $attr->id,
+                                'value' => $attr->value
+                            ];
+                        })
+                    ];
+                })->toArray()
+            ];
+        })->values()->toArray();
+
+        return Inertia::render('admin/Supplier/Products', [
+            'supplier' => [
+                'id' => $query->id,
+                'name' => $query->name
+            ],
             'products' => $products
         ]);
     }
 
+    public function searchProducts(Request $request)
+    {
+        $search = $request->input('search');
+        $products = $this->productRepository->search($search);
+        return response()->json(['products' => $products]);
+    }
+
+    public function getProductVariants($productId, $supplierId)
+    {
+        $variants = $this->productRepository->getAvailableVariants($productId, $supplierId);
+        return response()->json(['variants' => $variants]);
+    }
+
+    public function storeSupplierProducts(Request $request, $supplierId)
+    {
+        $request->validate([
+            'variant_ids' => 'required|array',
+            'variant_ids.*' => 'exists:product_variants,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($request->variant_ids as $variantId) {
+                \App\Models\SupplierProductVariant::create([
+                    'supplier_id' => $supplierId,
+                    'product_variant_id' => $variantId
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('admin.suppliers.products', $supplierId)->with('success', 'Thêm sản phẩm thành công!');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi thêm sản phẩm cho nhà cung cấp: ' . $th->getMessage());
+            return back()->with('error', 'Lỗi khi thêm sản phẩm: ' . $th->getMessage());
+        }
+    }
+
+    public function getVariantsByProductId($supplierId, $productId)
+    {
+        $variants = $this->productRepository->getProductVariantsById($productId);
+        
+
+        // Kiểm tra xem sản phẩm có được liên kết với nhà cung cấp không
+        $variantIds = collect($variants)->pluck('variant_id')->unique()->toArray();
+        $isLinked = SupplierProductVariant::where('supplier_id', $supplierId)
+            ->whereIn('product_variant_id', $variantIds)
+            ->exists();
+
+
+        if (!$isLinked) {
+            return response()->json(['variants' => []], 200);
+        }
+
+        return response()->json(['variants' => $variants]);
+    }
 }
