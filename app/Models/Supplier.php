@@ -34,4 +34,8 @@ class Supplier extends Model
     {
         return $this->hasMany(Inventory::class);
     }
+    public function variants()
+    {
+        return $this->belongsToMany(ProductVariant::class,'supplier_product_variants','supplier_id', 'product_variant_id');
+    }
 }
