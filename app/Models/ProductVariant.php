@@ -62,6 +62,9 @@ class ProductVariant extends Model
     {
         return $this->hasMany(DamagedExpiredProduct::class);
     }
+    public function suppliers(){
+        return $this->belongsToMany(Supplier::class, 'supplier_product_variants', 'product_variant_id', 'supplier_id');
+    }
     public function unit()
     {
         return $this->belongsTo(Unit::class);

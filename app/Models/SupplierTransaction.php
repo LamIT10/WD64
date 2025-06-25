@@ -33,4 +33,7 @@ class SupplierTransaction extends Model
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
+    public function supplierDebtHistories(){
+        return $this->belongsTo(PurchaseOrder::class, "supplier_transaction_id");
+    }
 }

@@ -25,8 +25,8 @@
                                 <table class="w-full text-left text-sm text-gray-700">
                                     <thead class="text-xs text-gray-700 bg-gray-100">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3 z-10">Mã vạch
-                                            </th>
+                                            <th scope="col" class="px-6 py-3 z-10">Mã code</th>
+                                            <th scope="col" class="px-6 py-3 z-10">Mã vạch</th>
                                             <th scope="col" class="px-2 py-3">Nhà cung cấp</th>
                                             <th scope="col" class="px-2 py-3">Thuộc tính</th>
                                             <th scope="col" class="px-2 py-3 text-right">Giá nhập</th>
@@ -39,9 +39,14 @@
                                     <tbody class="divide-y divide-gray-200">
                                         <tr v-for="(variant, index) in variants" :key="index" class="hover:bg-gray-50">
 
+                                            <!-- code -->
+                                            <td class="px-3 py-4 z-10 font-mono">
+                                                {{ variant.code || '' }}
+                                            </td>
+
                                             <!-- Barcode -->
                                             <td class="px-3 py-4 z-10 font-mono">
-                                                {{ variant.barcode || 'N/A' }}
+                                                {{ variant.barcode || '' }}
                                             </td>
 
                                             <!-- Suppliers -->
@@ -160,7 +165,7 @@ const getVariantStock = (variant) => {
 const getStockBreakdown = (variant) => {
     return variant.inventory.map(inv => {
         const location = variant.inventory_locations.find(loc => loc.id === inv.warehouse_zone_id);
-        return `${location?.custom_location_name || 'N/A'}: ${inv.quantity_on_hand}`;
+        return `${location?.custom_location_name || ''}: ${inv.quantity_on_hand}`;
     }).join(', ');
 };
 

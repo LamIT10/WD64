@@ -114,8 +114,8 @@
                             </div>
                         </div>
                         <div class="col-span-3">
-                            <div class="grid grid-cols-4 grid-rows-1 gap-4">
-                                <div class="col-span-2">
+                            <div class="grid grid-cols-1 grid-rows-1 gap-4">
+                                <div class="col-span-1">
                                     <div class="space-y-2">
                                         <label for="production-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày sản xuất
@@ -129,7 +129,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-span-2">
+                                <!-- <div class="col-span-2">
                                     <div class="space-y-2">
                                         <label for="expiration-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày hết hạn
@@ -141,7 +141,7 @@
                                             {{ form.errors.expiration_date }}
                                         </p>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -503,15 +503,12 @@ const mergeVariants = (variants) => {
         // Thu thập thuộc tính
         if (variant.attributes) {
             variant.attributes.forEach((attr, attrIndex) => {
-                if (!attr.attribute_id) {
-                    console.warn(`Skipping invalid attribute at variant ${variantIndex}, attr ${attrIndex}:`, attr);
-                    return;
-                }
+                if (!attr.attribute_id) return;
                 const existingAttr = allAttributes.find(a => a.attribute_id === attr.attribute_id);
                 if (!existingAttr) {
                     allAttributes.push({
-                        attribute_id: attr.attribute_id,
-                        attribute_value_ids: Array.isArray(attr.attribute_value_ids) ? [...attr.attribute_value_ids] : [],
+                        ...attr,
+                        uniqueKey: `attr_${attrIndex}_${Date.now()}`, // Thêm uniqueKey
                     });
                 } else {
                     existingAttr.attribute_value_ids = [
@@ -635,6 +632,10 @@ onMounted(() => {
         }));
         imagePreviews.value = existingImages.value.map((img) => img.url);
     }
+    if (props.product.production_date) {
+        const date = new Date(props.product.production_date);
+        form.production_date = date.toISOString().split('T')[0];
+    }
 });
 
 const handleImageUpload = (event) => {
@@ -706,7 +707,7 @@ watch(hasVariant, (newVal) => {
         }];
     }
 });
-
+const variantBackup = ref(null);
 // Debug form.errors
 watch(() => form.errors, (newErrors) => {
     console.log('form.errors updated:', newErrors);
@@ -714,18 +715,11 @@ watch(() => form.errors, (newErrors) => {
 
 // Submit form
 const handleSubmitForm = () => {
-    // Validate supplier_ids cho biến thể
-    if (hasVariant.value && form.variants[0].combinationData) {
-        let hasError = false;
-        Object.keys(form.variants[0].combinationData).forEach((key, index) => {
-            if (!form.variants[0].combinationData[key].supplier_ids.length) {
-                form.errors[`variants.0.combinations.${index}.supplier_ids`] = 'Vui lòng chọn ít nhất một nhà cung cấp.';
-                hasError = true;
-            }
-        });
-        if (hasError) return;
-    }
 
+    if (hasVariant.value && form.variants[0]?.combinationData) {
+        const backup = JSON.parse(JSON.stringify(form.variants[0]));
+        variantBackup.value = backup;
+    }
     console.log('Dữ liệu form trước khi gửi:', form);
     transformFormBeforeSubmit();
     console.log('Dữ liệu form sau transform:', form);
@@ -741,8 +735,12 @@ const handleSubmitForm = () => {
         onSuccess: () => {
             console.log('Cập nhật sản phẩm thành công 🎉');
             resetForm();
+            variantBackup.value = null;
         },
         onError: (errors) => {
+            if (hasVariant.value && variantBackup.value) {
+                form.variants = mergeVariants([variantBackup.value]);
+            }
             console.error('Lỗi validate:', errors);
             console.log('Nội dung form.errors:', form.errors);
         },
@@ -971,8 +969,8 @@ const variantCombinations = computed(() => {
             data: variant.combinationData[key],
         });
     });
-
-    return combinations.sort((a, b) => a.label.localeCompare(b.label));
+    return combinations;
+    // return combinations.sort((a, b) => a.label.localeCompare(b.label));
 });
 const deletedCombinationKeys = ref([]);
 const removeCombinationItem = (key) => {
@@ -988,11 +986,18 @@ const transformFormBeforeSubmit = () => {
     if (hasVariant.value) {
         const variant = form.variants[0];
         if (!variant.combinationData) return;
+
         const combinations = [];
+        const keyToIndexMap = {}; // Ánh xạ key -> index
+
         for (const key in variant.combinationData) {
             if (deletedCombinationKeys.value.includes(key)) continue;
             const valueIds = key.split('-').map((id) => parseInt(id));
             const comboData = variant.combinationData[key];
+
+            const index = combinations.length;
+            keyToIndexMap[key] = index; // Lưu ánh xạ key -> index
+
             combinations.push({
                 attribute_value_ids: valueIds,
                 code: comboData.code ?? null,
@@ -1004,8 +1009,12 @@ const transformFormBeforeSubmit = () => {
                 custom_location_name: comboData.custom_location_name ?? null,
             });
         }
+
         variant.combinations = combinations;
         delete variant.combinationData;
+
+        // Lưu ánh xạ keyToIndexMap vào form để sử dụng khi hiển thị lỗi
+        form.keyToIndexMap = keyToIndexMap;
 
         form.variants = [variant];
         form.simple_sale_price = null;
