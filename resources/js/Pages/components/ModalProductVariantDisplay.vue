@@ -26,15 +26,12 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                    <template v-for="(variant, vIndex) in computedVariants" :key="vIndex">
-                      <tr
-                        v-for="(attribute, aIndex) in variant.attributes"
-                        :key="`variant-${vIndex}-attr-${aIndex}`"
-                      >
+                    <template v-for="(variant, vIndex) in props.variants.product_variants" :key="vIndex">
+                      <tr>
                         <td class="px-6 py-3">
-                          {{ attribute.name || `Thuộc tính ${aIndex + 1}` }}
+                          {{ variant.attributes.att || `Thuộc tính ${aIndex + 1}` }}
                         </td>
-                        <td class="px-6 py-3">{{ attribute.value }}</td>
+                        <td class="px-6 py-3">{{ variant.attributes.att_value }}</td>
                       </tr>
                     </template>
                   </tbody>
@@ -54,8 +51,8 @@ import { computed, watchEffect } from 'vue';
 const props = defineProps({
   isOpen: Boolean,
   variants: {
-    type: Array,
-    default: () => [],
+    type: Object,
+    default: () => {},
   },
   selectedProduct: {
     type: Object,
@@ -70,22 +67,22 @@ const closeModal = () => emit('close');
 const productName = computed(() => props.selectedProduct?.name || 'Không xác định');
 
 // Đảm bảo mỗi attribute là object có key name/value
-const computedVariants = computed(() => {
-  if (!Array.isArray(props.variants)) return [];
+// const computedVariants = computed(() => {
+//   if (!Array.isArray(props.variants)) return [];
 
-  return props.variants.map((variant) => {
-    let attrs = variant.attributes;
+//   return props.variants.map((variant) => {
+//     let attrs = variant.attributes;
 
-    if (!Array.isArray(attrs)) {
-      attrs = Object.entries(attrs || {}).map(([name, value]) => ({ name, value }));
-    }
+//     if (!Array.isArray(attrs)) {
+//       attrs = Object.entries(attrs || {}).map(([name, value]) => ({ name, value }));
+//     }
 
-    return {
-      ...variant,
-      attributes: attrs,
-    };
-  });
-});
+//     return {
+//       ...variant,
+//       attributes: attrs,
+//     };
+//   });
+// });
 
 // Debug
 watchEffect(() => {

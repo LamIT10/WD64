@@ -107,9 +107,8 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="relative inline-block text-left">
                     <div>
-                      <button @click.stop="toggleDropdown(debt.id)" type="button"
+                      <button v-if="debt.status !== 'Đã thanh toán'" @click.stop="toggleDropdown(debt.id)" type="button"
                         class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
-                        <!-- Thay icon bằng SVG dễ nhấn hơn -->
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                           <path
                             d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -118,7 +117,7 @@
                     </div>
 
                     <!-- Dropdown menu -->
-                    <transition enter-active-class="transition ease-out duration-100"
+                    <transition v-if="debt.status !== 'Đã thanh toán'" enter-active-class="transition ease-out duration-100"
                       enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
                       leave-active-class="transition ease-in duration-75"
                       leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
@@ -142,8 +141,8 @@
             </tbody>
           </table>
         </div>
-          <!-- Pagination -->
-          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
+        <!-- Pagination -->
+        <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
           <div class="text-sm text-gray-600 font-medium">
             Hiển thị
             <span class="font-semibold">{{ props.customerTransaction.from }}</span> đến
@@ -151,8 +150,7 @@
             <span class="font-semibold">{{ props.customerTransaction.total }}</span> kết quả
           </div>
           <div class="flex items-center space-x-2">
-            <Link v-if="props.customerTransaction.prev_page_url"
-              :href="props.customerTransaction.prev_page_url"
+            <Link v-if="props.customerTransaction.prev_page_url" :href="props.customerTransaction.prev_page_url"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
             <i class="fas fa-chevron-left"></i>
             </Link>
@@ -162,8 +160,7 @@
             <span class="text-sm text-gray-600">
               Trang {{ props.customerTransaction.current_page }} / {{ props.customerTransaction.last_page }}
             </span>
-            <Link v-if="props.customerTransaction.next_page_url"
-              :href="props.customerTransaction.next_page_url"
+            <Link v-if="props.customerTransaction.next_page_url" :href="props.customerTransaction.next_page_url"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
             <i class="fas fa-chevron-right"></i>
             </Link>
@@ -182,7 +179,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Link, router, useForm} from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '../../Layouts/AppLayout.vue';
 import PaymentEditModal from './PaymentEditModal.vue';
 import DueDateEditModal from './DueDateEditModal.vue'
@@ -215,7 +212,7 @@ const openPaymentModal = (debt) => {
 
 const openDueDateEditModal = (debt) => {
   selectedDebt.value = debt;
- showDueDateModal.value = true;
+  showDueDateModal.value = true;
   closeDropdown();
 };
 
@@ -237,13 +234,13 @@ const formatDate = (dateStr) => {
 };
 
 const handleClick = (debtId) => {
-    // Kiểm tra xem có văn bản nào đang được chọn không
-    if (window.getSelection().toString()) {
-        // Nếu có, ngừng hành động click (không chuyển hướng)
-        return;
-    }
-    // Nếu không có văn bản đang được chọn, chuyển hướng
-    router.visit(route('admin.customer-transaction.show', debtId));
+  // Kiểm tra xem có văn bản nào đang được chọn không
+  if (window.getSelection().toString()) {
+    // Nếu có, ngừng hành động click (không chuyển hướng)
+    return;
+  }
+  // Nếu không có văn bản đang được chọn, chuyển hướng
+  router.visit(route('admin.customer-transaction.show', debtId));
 };
 </script>
 
