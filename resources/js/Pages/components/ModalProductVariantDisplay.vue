@@ -59,7 +59,7 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-console.log(props.variants);
+
 const emit = defineEmits(['close']);
 
 const closeModal = () => emit('close');

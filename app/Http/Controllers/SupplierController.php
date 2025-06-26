@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SupplierRequest;
+use App\Models\ProductVariant;
 use App\Models\Supplier;
 use App\Models\SupplierProductVariant;
 use App\Repositories\ProductRepository;
 use App\Repositories\SupplierRepository;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +78,9 @@ class SupplierController extends Controller
             return $variant->product_id ?? 'Không rõ sản phẩm';
         });
 
-
+        $listVariantByProduct = Supplier::with(['supplierVariants'])->find(($id)); 
+        $listVariants = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
+        // dd($listVariants->toArray());
         // Chuẩn hóa dữ liệu cho frontend
         $products = $groupedVariants->map(function ($variants, $productId) {
             $product = $variants->first()->product;
@@ -109,7 +113,8 @@ class SupplierController extends Controller
                 'id' => $query->id,
                 'name' => $query->name
             ],
-            'products' => $products
+            'products' => $products,
+            'listVariants' => $listVariants,
         ]);
     }
 
@@ -128,21 +133,18 @@ class SupplierController extends Controller
 
     public function storeSupplierProducts(Request $request, $supplierId)
     {
-        $request->validate([
-            'variant_ids' => 'required|array',
-            'variant_ids.*' => 'exists:product_variants,id',
-        ]);
-
+      $data = $request->all();
         try {
             DB::beginTransaction();
-
-            foreach ($request->variant_ids as $variantId) {
-                \App\Models\SupplierProductVariant::create([
-                    'supplier_id' => $supplierId,
-                    'product_variant_id' => $variantId
-                ]);
+            $newObj = [];
+            $newObj['cost_price'] = $data['cost_price'];
+            $newObj['min_order_quantity'] = $data['min_order_quantity'];
+            $newObj['product_variant_id'] = $data['id'];
+            $newObj['supplier_id'] = $supplierId;
+            $newObj = SupplierProductVariant::create($newObj);
+            if(!$newObj){
+                throw new Exception("Có lỗi khi thêm biên thể cho nhà cung cấp");
             }
-
             DB::commit();
             return redirect()->route('admin.suppliers.products', $supplierId)->with('success', 'Thêm sản phẩm thành công!');
         } catch (\Throwable $th) {
@@ -151,7 +153,6 @@ class SupplierController extends Controller
             return back()->with('error', 'Lỗi khi thêm sản phẩm: ' . $th->getMessage());
         }
     }
-
     public function getVariantsByProductId($supplierId, $productId)
     {
         $variants = $this->productRepository->getProductVariantsById($productId);
