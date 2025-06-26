@@ -16,13 +16,13 @@ class GoodReceiptController extends Controller
     public function getList(Request $request)
     {
         $listGoodReceipts = $this->handleRepository->getList($request);
-        return Inertia::render('admin/GoodReceipts/List', [
+        return Inertia::render('admin/PurchaseOrders/ListGoodReceipt', [
             'listGoodReceipts' => $listGoodReceipts
         ]);
     }
     public function createFromPurchaseOrder($id)
     {
-        $purchaseOrder = $this->handleRepository->getList($id);
+        $purchaseOrder = $this->handleRepository->getByPurchaseOrder($id);
         if (!$purchaseOrder) {
             return redirect()->route('admin.purchases.index')->with('error', 'Đơn hàng không tồn tại');
         }
