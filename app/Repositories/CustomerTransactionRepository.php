@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class CustomerTransactionRepository extends BaseRepository
 {
-  
+
     public function getDebtSummaryByOrder($filter = [], $limit = 10)
     {
         $query = SaleOrder::with(['customer', 'latestTransaction'])
@@ -68,18 +68,18 @@ class CustomerTransactionRepository extends BaseRepository
         $paid = $order->transactions->sum('paid_amount');
         $remaining = $total - $paid;
 
-           $dueDate = $order->credit_due_date
-                ? Carbon::parse($order->credit_due_date)
-                : Carbon::parse($order->created_at)->addDays(30);
+        $dueDate = $order->credit_due_date
+            ? Carbon::parse($order->credit_due_date)
+            : Carbon::parse($order->created_at)->addDays(30);
 
-            $isOverdue = $dueDate->lt(now()) && $remaining > 0;
+        $isOverdue = $dueDate->lt(now()) && $remaining > 0;
 
-            //  Trạng thái công nợ
-            $status = match (true) {
-                $remaining <= 0 => 'Đã thanh toán',
-                $isOverdue => 'Đã quá hạn',
-                default => 'Chưa thanh toán',
-            };
+        //  Trạng thái công nợ
+        $status = match (true) {
+            $remaining <= 0 => 'Đã thanh toán',
+            $isOverdue => 'Đã quá hạn',
+            default => 'Chưa thanh toán',
+        };
 
         return [
             'id' => $order->id,
@@ -127,31 +127,53 @@ class CustomerTransactionRepository extends BaseRepository
 
     public function updateTransaction($orderId, array $data)
     {
-        $order = SaleOrder::findOrFail($orderId);
-        $newPaid = $data['paid_amount'];
-        $total = $order->total_amount;
 
-        //  Tính tổng đã thanh toán trước đó
-        $paidSoFar = $order->transactions()->sum('paid_amount');
+        try {
+            $order = SaleOrder::findOrFail($orderId);
+            $newPaid = $data['paid_amount'];
+            $total = $order->total_amount;
 
-        //  Kiểm tra tổng thanh toán không vượt quá giá trị đơn hàng
-        if (($paidSoFar + $newPaid) > $total) {
-            throw new \Exception('Tổng thanh toán vượt quá giá trị đơn hàng.');
+            //  Tính tổng đã thanh toán trước đó
+            $paidSoFar = $order->transactions()->sum('paid_amount');
+
+            //  Kiểm tra tổng thanh toán không vượt quá giá trị đơn hàng
+            if (($paidSoFar + $newPaid) > $total) {
+                throw new \Exception('Tổng thanh toán vượt quá giá trị đơn hàng.');
+            }
+
+            DB::commit();
+            return $order->transactions()->create([
+                'paid_amount' => $newPaid,
+                'transaction_date' => $data['transaction_date'],
+                'description' => $data['description'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return $this->returnError( $e->getMessage());;
         }
-
-        //  Tạo giao dịch thanh toán mới
-        return $order->transactions()->create([
-            'paid_amount' => $newPaid,
-            'transaction_date' => $data['transaction_date'],
-            'description' => $data['description'] ?? null,
-        ]);
     }
 
     public function updateDueDate($orderId, string $newDueDate)
     {
+       
+        try {
         $order = SaleOrder::findOrFail($orderId);
         $order->credit_due_date = $newDueDate;
         $order->save();
+            if(!$order) {
+                throw new \Exception('Không tìm thấy đơn hàng.');
+            }
+            if(!strtotime($newDueDate)) {
+                throw new \Exception('Ngày hết hạn không hợp lệ.');
+            }
+            if(Carbon::parse($newDueDate)->lt(Carbon::now())) {
+                throw new \Exception('Ngày hết hạn không thể là quá khứ.');
+            }
+        DB::commit();
         return $order;
+        } catch (\Throwable $e) {
+          DB::rollBack();
+            return $this->returnError( $e->getMessage());;
+        }
     }
 }
