@@ -1,14 +1,8 @@
 <template>
     <AppLayout>
         <div class="p-6">
-            <!-- Thông báo flash -->
-            <div v-if="$page.props.flash.success" class="p-4 mb-4 bg-green-100 text-green-700 rounded-md">
-                {{ $page.props.flash.success }}
-            </div>
-            <div v-if="$page.props.flash.error" class="p-4 mb-4 bg-red-100 text-red-700 rounded-md">
-                {{ $page.props.flash.error }}
-            </div>
-
+            <!-- Flash messages -->
+         
             <div class="p-3 bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Sản phẩm của nhà cung cấp: {{ supplier.name }}
@@ -16,157 +10,125 @@
                 <div class="flex items-center space-x-3">
                     <button @click="openAddProductModal"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
-                        Thêm sản phẩm
+                        Thêm biến thể
                     </button>
-                    <a :href="route('admin.suppliers.index')"
+                    <Link :href="route('admin.suppliers.index')"
                         class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300">
                         Quay lại
-                    </a>
+                    </Link>
                 </div>
             </div>
 
             <div class="bg-white overflow-hidden">
-                <div class="overflow-x-auto">
-                    <div class="relative overflow-x-auto shadow-md">
-                        <table class="w-full text-left shadow-sm rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300">
-                                <tr>
-                                    <th scope="col" class="px-4 py-2">Tên sản phẩm</th>
-                                    <th scope="col" class="px-4 py-2">Danh mục</th>
-                                    <th scope="col" class="px-4 py-2">Biến thể</th>
-                                    <th scope="col" class="px-4 py-2">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="product in products.data" :key="product.id"
-                                    class="bg-white border-b hover:bg-gray-50">
-                                    <th scope="row" class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
-                                        {{ product.name }}
-                                    </th>
-                                    <td class="px-4 py-2">
-                                        {{ product.category?.name || 'N/A' }}
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <div class="flex items-center space-x-2">
-                                            <span
-                                                class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-700">
-                                                {{ product.product_variants?.length || 0 }} biến thể
-                                            </span>
-                                            <button v-if="product.product_variants?.length > 0"
-                                                class="text-indigo-600 hover:text-indigo-800 text-xs"
-                                                @click="showVariants(product)">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <Waiting route-name="admin.products.edit" :route-params="{ id: product.id }"
-                                            :color="'text-blue-700'">
-                                            <i class="fas fa-edit"></i> Sửa
-                                        </Waiting>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="px-4 py-2 border-t border-gray-200 flex items-center justify-between">
-                    <div class="text-sm text-gray-500">
-                        Hiển thị <span class="font-medium">{{ products.from || 0 }}</span> đến
-                        <span class="font-medium">{{ products.to || 0 }}</span> của
-                        <span class="font-medium">{{ products.total || 0 }}</span> kết quả
-                    </div>
-                    <div class="flex justify-end space-x-1 mt-4">
-                        <button v-for="link in products.links" :key="link.label" v-html="link.label"
-                            :disabled="!link.url" @click="$inertia.visit(link.url)" :class="[
-                                'px-3 py-1 rounded-md text-sm',
-                                link.active
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
-                                !link.url && 'opacity-50 cursor-not-allowed',
-                            ]"></button>
-                    </div>
+                <div class="relative overflow-x-auto shadow-md">
+                    <table class="w-full text-left rtl:text-right text-gray-500">
+                        <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300">
+                            <tr>
+                                <th class="px-4 py-2">Tên sản phẩm</th>
+                                <th class="px-4 py-2">Danh mục</th>
+                                <th class="px-4 py-2">Biến thể</th>
+                                <!-- <th class="px-4 py-2">Hành động</th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="product in products" :key="product.id"
+                                class="bg-white border-b hover:bg-gray-50">
+                                <th class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+                                    {{ product.name }}
+                                </th>
+                                <td class="px-4 py-2">{{ product.category?.name || 'N/A' }}</td>
+                                <td class="px-4 py-2">
+                                    <div class="flex items-center space-x-2">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-700">
+                                            {{ product.product_variants?.length || 0 }} biến thể
+                                        </span>
+                                        <button v-if="product.product_variants?.length > 0"
+                                            class="text-indigo-600 hover:text-indigo-800 text-xs"
+                                            @click="showVariants(product)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <!-- <td class="px-4 py-2">
+                                    <a :href="route('admin.products.edit', product.id)"
+                                        class="text-blue-700 hover:text-blue-900">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </a>
+                                </td> -->
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Modal Biến thể Sản phẩm -->
-            <ModalProductVariant :isOpen="isModalOpen" :variants="selectedProduct.product_variants"
+            <!-- Modal xem biến thể -->
+            <ModalProductVariantDisplay :isOpen="isModalOpen" :variants="selectedProduct.product_variants"
                 :selectedProduct="selectedProduct" @close="closeModal" />
-
-            <!-- Modal Thêm Sản Phẩm -->
+            <!-- Modal thêm biến thể -->
             <div v-if="showAddProductModal"
-                class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg w-full max-w-xl relative">
-                    <h3 class="text-lg font-semibold mb-4">Thêm sản phẩm cho nhà cung cấp</h3>
-                    <form @submit.prevent="confirmAddProduct" class="space-y-6">
-                        <div class="mb-4 relative">
-                            <label class="block text-sm font-medium text-indigo-700">Chọn sản phẩm</label>
-                            <input type="text" v-model="searchQuery" list="productSuggestions"
-                                @input="debouncedSearchProducts"
-                                class="w-full mt-1 border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                                placeholder="Nhập tên sản phẩm...">
-                            <div v-if="isSearching" class="absolute right-3 top-10">
-                                <svg class="animate-spin h-5 w-5 text-indigo-600" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"></path>
-                                </svg>
+                class="fixed inset-0 backdrop-blur-sm  bg-opacity-20 flex items-center justify-center z-50 transition-opacity duration-300">
+                <div class="bg-white p-6 rounded-xl w-full max-w-xl relative shadow-lg border border-indigo-50">
+                    <h3 class="text-xl font-medium mb-6 text-indigo-900">Thêm biến thể cho nhà cung cấp</h3>
+                    <form @submit.prevent="confirmAddProduct" class="space-y-5">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Biến thể</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.id">{{ formAddVariant.errors.id }}</span>
+                                <select v-model="formAddVariant.id"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
+                                    <option v-for="item in listVariants" :value="item.id">{{ item.product.name + " / "
+                                        }}
+                                        <span v-for="(att, index) in item.attributes" :key="index">
+                                            <span v-if="index === 0"> {{ att.name + " - " }} </span>
+                                            <span v-else-if="index === item.attributes.length - 1">{{ att.name + " / "
+                                                }}</span>
+                                            <span v-else>{{ att.name + " - " }}</span>
+                                        </span>
+                                        <span v-for="(att, index) in item.attributes">
+                                            <span v-if="index === 0"> {{ att.attribute.name + " - " }} </span>
+                                            <span v-else-if="index === item.attributes.length - 1">{{ att.attribute.name
+                                                }}</span>
+                                            <span v-else>{{ att.attribute.name + " - " }}</span>
+                                        </span>
+                                    </option>
+                                </select>
                             </div>
-                            <datalist id="productSuggestions">
-                                <option v-for="product in searchResults" :key="product.id" :value="product.name"
-                                    :data-id="product.id">
-                                </option>
-                            </datalist>
-                        </div>
 
-                        <div v-if="selectedProductVariants.length" class="space-y-4">
-                            <label class="block text-sm font-medium text-indigo-700">Chọn và cấu hình biến thể</label>
-                            <div v-for="variant in selectedProductVariants" :key="variant.id"
-                                class="p-4 border border-gray-200 rounded-md">
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" :value="variant.id" v-model="selectedVariantIds"
-                                        class="mr-2">
-                                    <span>{{ variant.attributes.map(attr => attr.value).join(', ') }}</span>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Giá mua (VND)</label>
-                                        <input v-model.number="variantPrices[variant.id].cost_price" type="number"
-                                            step="0.01" placeholder="Nhập giá mua"
-                                            class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Giá bán (VND)</label>
-                                        <input v-model.number="variantPrices[variant.id].sale_price" type="number"
-                                            step="0.01" placeholder="Nhập giá bán"
-                                            class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700">Số lượng tối thiểu</label>
-                                        <input v-model.number="variantPrices[variant.id].min_order_quantity"
-                                            type="number" placeholder="Nhập số lượng"
-                                            class="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                                    </div>
-                                </div>
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Số lượng đặt tối thiểu</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.min_order_quantity">{{ formAddVariant.errors.min_order_quantity }}</span>
+                                <input type="number" v-model="formAddVariant.min_order_quantity"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Giá vốn</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.cost_price">{{ formAddVariant.errors.cost_price }}</span>
+                                <input type="number" v-model="formAddVariant.cost_price"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
                             </div>
                         </div>
 
-                        <div v-if="errorMessage" class="text-red-500 text-sm">
-                            {{ errorMessage }}
-                        </div>
-
-                        <div class="flex justify-end space-x-3">
+                        <div class="flex justify-end space-x-3 pt-2">
                             <button type="button" @click="closeAddProductModal"
-                                class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300">
+                                class="px-4 py-2 text-sm text-indigo-700 hover:text-indigo-900 rounded-lg hover:bg-indigo-50 transition-colors duration-200">
                                 Hủy
                             </button>
                             <button type="submit" :disabled="isAdding"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50">
-                                <span v-if="isAdding">Đang thêm...</span>
-                                <span v-else>Thêm</span>
+                                class="px-4 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center">
+                                <span v-if="isAdding" class="flex items-center">
+                                    <svg class="animate-spin mr-2 h-4 w-4 text-indigo-600"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    Đang xử lý...
+                                </span>
+                                <span v-else>Thêm biến thể</span>
                             </button>
                         </div>
                     </form>
@@ -177,42 +139,28 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import debounce from 'lodash/debounce'; // Giả định lodash đã được cài
+import { ref } from 'vue';
 import AppLayout from "../Layouts/AppLayout.vue";
-import Waiting from "../../components/Waiting.vue";
-import ModalProductVariant from '../../components/ModalProductVariant.vue';
+import ModalProductVariantDisplay from '../../Components/ModalProductVariantDisplay.vue';
+import axios from 'axios';
+import { Link, useForm } from '@inertiajs/vue3';
+import { route } from 'ziggy-js';
+import { formatNumber } from 'chart.js/helpers';
 
-// Props
-const { supplier, products } = defineProps({
-    supplier: Object,
-    products: Object,
-});
-
-// State
+const { supplier, products, listVariants } = defineProps({ supplier: Object, products: Array, listVariants: Object });
+console.log(listVariants);
 const showAddProductModal = ref(false);
 const searchQuery = ref('');
 const searchResults = ref([]);
 const selectedProductVariants = ref([]);
 const selectedVariantIds = ref([]);
-const variantPrices = ref({}); // Lưu giá và số lượng cho từng variant
 const isSearching = ref(false);
 const isAdding = ref(false);
 const errorMessage = ref('');
+const selectedProductId = ref(null);
+
 const isModalOpen = ref(false);
 const selectedProduct = ref({});
-
-// Methods
-const showVariants = (product) => {
-    selectedProduct.value = product;
-    isModalOpen.value = true;
-};
-
-const closeModal = () => {
-    isModalOpen.value = false;
-    selectedProduct.value = {};
-};
 
 const openAddProductModal = () => {
     showAddProductModal.value = true;
@@ -221,7 +169,7 @@ const openAddProductModal = () => {
 
 const closeAddProductModal = () => {
     showAddProductModal.value = false;
-    errorMessage.value = '';
+    resetForm();
 };
 
 const resetForm = () => {
@@ -229,119 +177,50 @@ const resetForm = () => {
     searchResults.value = [];
     selectedProductVariants.value = [];
     selectedVariantIds.value = [];
-    variantPrices.value = {};
+    selectedProductId.value = null;
     errorMessage.value = '';
 };
 
-const searchProducts = () => {
-    if (searchQuery.value.length > 2) {
-        isSearching.value = true;
-        $inertia.get(route('admin.products.search'), { search: searchQuery.value }, {
-            preserveState: true,
-            only: ['products'],
-            onSuccess: (page) => {
-                searchResults.value = page.props.products || [];
-                isSearching.value = false;
-            },
-            onError: (errors) => {
-                errorMessage.value = 'Lỗi khi tìm kiếm sản phẩm: ' + (errors.message || 'Không xác định');
-                isSearching.value = false;
-            },
-        });
-    } else {
-        searchResults.value = [];
-        selectedProductVariants.value = [];
-        selectedVariantIds.value = [];
-        variantPrices.value = {};
-        isSearching.value = false;
-    }
-};
-
-// Debounce search to reduce API calls
-const debouncedSearchProducts = debounce(searchProducts, 300);
-
-watch(searchQuery, (newValue) => {
-    const selectedOption = searchResults.value.find(product => product.name === newValue);
-    if (selectedOption) {
-        loadVariants(selectedOption.id);
-    } else {
-        selectedProductVariants.value = [];
-        selectedVariantIds.value = [];
-        variantPrices.value = {};
-    }
-});
-
-const loadVariants = (productId) => {
-    if (productId) {
-        isSearching.value = true;
-        $inertia.get(route('admin.products.variants', productId), {}, {
-            preserveState: true,
-            only: ['variants'],
-            onSuccess: (page) => {
-                selectedProductVariants.value = page.props.variants || [];
-                selectedVariantIds.value = [];
-                variantPrices.value = selectedProductVariants.value.reduce((acc, variant) => {
-                    acc[variant.id] = { cost_price: null, sale_price: null, min_order_quantity: null };
-                    return acc;
-                }, {});
-                isSearching.value = false;
-            },
-            onError: (errors) => {
-                errorMessage.value = 'Lỗi khi tải biến thể sản phẩm: ' + (errors.message || 'Không xác định');
-                isSearching.value = false;
-            },
-        });
-    }
-};
+const formAddVariant = useForm({
+    id: "",
+    cost_price: "",
+    min_order_quantity: ""
+})
 
 const confirmAddProduct = () => {
-    if (selectedVariantIds.value.length === 0) {
-        errorMessage.value = 'Vui lòng chọn ít nhất một biến thể';
-        return;
-    }
-
-    const invalidVariants = selectedVariantIds.value.filter(variantId => {
-        const prices = variantPrices.value[variantId];
-        return !prices.cost_price || !prices.sale_price || !prices.min_order_quantity || prices.min_order_quantity < 0;
+    formAddVariant.post(route('admin.suppliers.products.store', {
+        supplierId: supplier.id
+    }), {
+        onSuccess: () => {
+            showAddProductModal.value = false;
+            formAddVariant.reset();
+        }
     });
-
-    if (invalidVariants.length > 0) {
-        errorMessage.value = 'Vui lòng nhập đầy đủ và hợp lệ giá mua, giá bán, và số lượng tối thiểu cho các biến thể đã chọn.';
-        return;
-    }
-
-    if (confirm('Bạn có chắc chắn muốn thêm các sản phẩm này cho nhà cung cấp?')) {
-        addProductToSupplier();
-    }
 };
 
-const addProductToSupplier = () => {
-    isAdding.value = true;
-    const data = {
-        variant_ids: selectedVariantIds.value,
-        variant_details: selectedVariantIds.value.map(variantId => ({
-            id: variantId,
-            cost_price: variantPrices.value[variantId].cost_price,
-            sale_price: variantPrices.value[variantId].sale_price,
-            min_order_quantity: variantPrices.value[variantId].min_order_quantity,
-        })),
+
+
+// ✅ Đã sửa để luôn gọi API lấy product_variants có attributes đầy đủ
+const showVariants = (product) => {
+
+
+
+    selectedProduct.value = {
+        ...product,
+        product_variants: product || {}
     };
-    $inertia.post(route('admin.suppliers.addProduct', supplier.id), data, {
-        preserveState: true,
-        onSuccess: () => {
-            closeAddProductModal();
-            isAdding.value = false;
-            $page.props.flash.success = 'Thêm sản phẩm thành công!';
-        },
-        onError: (errors) => {
-            errorMessage.value = 'Lỗi khi thêm sản phẩm: ' + (errors.variant_ids?.[0] || errors.message || 'Không xác định');
-            isAdding.value = false;
-        },
-    });
+
+    isModalOpen.value = true;
+
+};
+
+const closeModal = () => {
+    isModalOpen.value = false;
+    selectedProduct.value = {};
 };
 </script>
 
-<style lang="css" scoped>
+<style scoped>
 ::-webkit-scrollbar {
     height: 6px;
     width: 6px;
