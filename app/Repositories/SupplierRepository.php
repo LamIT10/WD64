@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\ProductVariant;
 use App\Models\Supplier;
+use App\Models\SupplierProductVariant;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -92,5 +95,84 @@ class SupplierRepository extends BaseRepository
     {
         $data = $this->handleModel->select(['id', 'name'])->get()->toArray();
         return $data;
+    }
+    public function getProductBySupplierId($id)
+    {
+        try {
+            $data = [];
+            $query = Supplier::with([
+                'variants' => function ($query) {
+                    $query->with(['product.category', 'attributes']);
+                }
+            ])->findOrFail($id);
+            if (!$query) {
+                throw new Exception("Không tìm thấy nhà cung cấp");
+            }
+
+
+            $data['supplier'] = [
+                'id' => $query->id,
+                'name' => $query->name
+            ];
+            $groupedVariants = $query->variants->groupBy(function ($variant) {
+                return $variant->product_id ?? 'Không rõ sản phẩm';
+            });
+
+            $listVariantByProduct = Supplier::with(['supplierVariants'])->find(($id));
+            $data['listVariants'] = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
+
+
+            // Chuẩn hóa dữ liệu cho frontend
+            $data['products'] = $groupedVariants->map(function ($variants, $productId) {
+                $product = $variants->first()->product;
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category ? ['name' => $product->category->name] : null,
+                    'product_variants' => $variants->map(function ($variant) {
+                        $att = [
+                            'att_value' => "",
+                            "att" => "",
+                        ];
+
+                        foreach ($variant->attributes as $key => $item) {
+                            $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
+                            $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;
+                        }
+                        return [
+                            'id' => $variant->id,
+                            'code' => $variant->code,
+                            'barcode' => $variant->barcode,
+                            'sale_price' => $variant->sale_price, // Lấy từ product_variants
+                            'attributes' => $att
+                        ];
+                    })->toArray()
+                ];
+            })->values()->toArray();
+            return $data;
+        } catch (Exception $e) {
+            return $this->returnError($e->getMessage());
+        }
+    }
+    public function handleCreateSupplierProduct($data)
+    {
+        try {
+            DB::beginTransaction();
+            $newObj = [];
+            $newObj['cost_price'] = $data['cost_price'];
+            $newObj['min_order_quantity'] = $data['min_order_quantity'];
+            $newObj['product_variant_id'] = $data['id'];
+            $newObj['supplier_id'] = $data['supplier_id'];
+            $newObj = SupplierProductVariant::create($newObj);
+            if (!$newObj) {
+                throw new Exception("Có lỗi khi thêm biên thể cho nhà cung cấp");
+            }
+            DB::commit();
+            return $newObj;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi thêm sản phẩm cho nhà cung cấp: ' . $th->getMessage());
+            return $this->returnError($th->getMessage());
+        }
     }
 }

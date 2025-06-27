@@ -66,23 +66,6 @@ const closeModal = () => emit('close');
 
 const productName = computed(() => props.selectedProduct?.name || 'Không xác định');
 
-// Đảm bảo mỗi attribute là object có key name/value
-// const computedVariants = computed(() => {
-//   if (!Array.isArray(props.variants)) return [];
-
-//   return props.variants.map((variant) => {
-//     let attrs = variant.attributes;
-
-//     if (!Array.isArray(attrs)) {
-//       attrs = Object.entries(attrs || {}).map(([name, value]) => ({ name, value }));
-//     }
-
-//     return {
-//       ...variant,
-//       attributes: attrs,
-//     };
-//   });
-// });
 
 // Debug
 watchEffect(() => {
