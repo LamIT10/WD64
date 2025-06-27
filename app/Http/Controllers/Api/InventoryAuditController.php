@@ -87,7 +87,9 @@ class InventoryAuditController extends BaseApiController
                     'name_product' => $product->name,
                     'variant_attributes' => $attributes,
                     'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
-                    'code' => $variant->barcode ?? $product->code,
+                    'quantity_reserved' => optional($variant->inventory->first())->quantity_reserved,
+                    'quantity_in_transit' => optional($variant->inventory->first())->quantity_in_transit,
+                    'code' => $variant->code ?? $product->code,
                     'unit' => optional(optional($variant->inventory->first())->unit)->symbol,
                     'zone' => $zoneLocation->zone->name,
                 ];
