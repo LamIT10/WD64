@@ -2,13 +2,7 @@
     <AppLayout>
         <div class="p-6">
             <!-- Flash messages -->
-            <div v-if="$page.props.flash.success" class="p-4 mb-4 bg-green-100 text-green-700 rounded-md">
-                {{ $page.props.flash.success }}
-            </div>
-            <div v-if="$page.props.flash.error" class="p-4 mb-4 bg-red-100 text-red-700 rounded-md">
-                {{ $page.props.flash.error }}
-            </div>
-
+         
             <div class="p-3 bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Sản phẩm của nhà cung cấp: {{ supplier.name }}
@@ -18,10 +12,10 @@
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
                         Thêm biến thể
                     </button>
-                    <a :href="route('admin.suppliers.index')"
+                    <Link :href="route('admin.suppliers.index')"
                         class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300">
                         Quay lại
-                    </a>
+                    </Link>
                 </div>
             </div>
 
@@ -73,93 +67,68 @@
                 :selectedProduct="selectedProduct" @close="closeModal" />
             <!-- Modal thêm biến thể -->
             <div v-if="showAddProductModal"
-                class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-white p-6 rounded-lg w-full max-w-xl relative">
-                    <h3 class="text-lg font-semibold mb-4">Thêm biến thể cho nhà cung cấp</h3>
-                    <form @submit.prevent="confirmAddProduct" class="space-y-6">
-                        <div class="mb-4 relative">
-                            <!-- <label class="block text-sm font-medium text-indigo-700">Tìm sản phẩm</label>
-                            <input type="text" v-model="searchQuery" @input="searchProducts"
-                                class="w-full mt-1 border border-gray-300 rounded-md p-2"
-                                placeholder="Nhập tên sản phẩm..." />
-                            <ul v-if="searchResults.length && searchQuery"
-                                class="absolute z-10 bg-white border border-gray-300 mt-1 w-full max-h-48 overflow-y-auto rounded shadow">
-                                <li v-for="item in searchResults" :key="item.id"
-                                    @click="selectProduct(item)"
-                                    class="px-3 py-2 cursor-pointer hover:bg-indigo-100">
-                                    {{ item.name }}
-                                </li>
-                            </ul>
-                            <div v-if="isSearching" class="absolute right-3 top-10">
-                                <svg class="animate-spin h-5 w-5 text-indigo-600" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8 8 8 0 01-8-8z"></path>
-                                </svg>
-                            </div> -->
-
-                            <div class="mt-2">
-                                <label for="">Biến thể</label>
-                                <select v-model="formAddVariant.id" name=""
-                                    class="w-full p-2 border border-gray-400 rounded" id="">
+                class="fixed inset-0 backdrop-blur-sm  bg-opacity-20 flex items-center justify-center z-50 transition-opacity duration-300">
+                <div class="bg-white p-6 rounded-xl w-full max-w-xl relative shadow-lg border border-indigo-50">
+                    <h3 class="text-xl font-medium mb-6 text-indigo-900">Thêm biến thể cho nhà cung cấp</h3>
+                    <form @submit.prevent="confirmAddProduct" class="space-y-5">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Biến thể</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.id">{{ formAddVariant.errors.id }}</span>
+                                <select v-model="formAddVariant.id"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
                                     <option v-for="item in listVariants" :value="item.id">{{ item.product.name + " / "
                                         }}
                                         <span v-for="(att, index) in item.attributes" :key="index">
                                             <span v-if="index === 0"> {{ att.name + " - " }} </span>
                                             <span v-else-if="index === item.attributes.length - 1">{{ att.name + " / "
-                                                }}
-                                            </span>
+                                                }}</span>
                                             <span v-else>{{ att.name + " - " }}</span>
                                         </span>
-
                                         <span v-for="(att, index) in item.attributes">
                                             <span v-if="index === 0"> {{ att.attribute.name + " - " }} </span>
                                             <span v-else-if="index === item.attributes.length - 1">{{ att.attribute.name
-                                                }}
-                                            </span>
+                                                }}</span>
                                             <span v-else>{{ att.attribute.name + " - " }}</span>
                                         </span>
-
                                     </option>
                                 </select>
                             </div>
-                            <div class="mt-2">
-                                <label for="">Số lượng</label>
+
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Số lượng đặt tối thiểu</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.min_order_quantity">{{ formAddVariant.errors.min_order_quantity }}</span>
                                 <input type="number" v-model="formAddVariant.min_order_quantity"
-                                    class="w-full p-2 border border-gray-400 rounded">
-
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
                             </div>
-                            <div class="mt-2">
-                                <label for="">Giá</label>
 
+                            <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Giá vốn</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.cost_price">{{ formAddVariant.errors.cost_price }}</span>
                                 <input type="number" v-model="formAddVariant.cost_price"
-                                    class="w-full p-2 border border-gray-400 rounded">
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30">
                             </div>
                         </div>
-                        <!-- 
-                        <div v-if="selectedProductVariants.length" class="space-y-4">
-                            <label class="block text-sm font-medium text-indigo-700">Chọn biến thể</label>
-                            <div v-for="variant in selectedProductVariants" :key="variant.id"
-                                class="p-4 border border-gray-200 rounded-md">
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" :value="variant.id" v-model="selectedVariantIds" class="mr-2">
-                                    <span>{{ variant.attributes.map(attr => attr.value).join(', ') }}</span>
-                                </div>
-                            </div>
-                        </div> -->
 
-                        <!-- <div v-if="errorMessage" class="text-red-500 text-sm">
-                            {{ errorMessage }}
-                        </div> -->
-
-                        <div class="flex justify-end space-x-3">
+                        <div class="flex justify-end space-x-3 pt-2">
                             <button type="button" @click="closeAddProductModal"
-                                class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300">Hủy</button>
+                                class="px-4 py-2 text-sm text-indigo-700 hover:text-indigo-900 rounded-lg hover:bg-indigo-50 transition-colors duration-200">
+                                Hủy
+                            </button>
                             <button type="submit" :disabled="isAdding"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50">
-                                <span v-if="isAdding">Đang thêm...</span>
-                                <span v-else>Thêm</span>
+                                class="px-4 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center">
+                                <span v-if="isAdding" class="flex items-center">
+                                    <svg class="animate-spin mr-2 h-4 w-4 text-indigo-600"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    Đang xử lý...
+                                </span>
+                                <span v-else>Thêm biến thể</span>
                             </button>
                         </div>
                     </form>
@@ -174,8 +143,9 @@ import { ref } from 'vue';
 import AppLayout from "../Layouts/AppLayout.vue";
 import ModalProductVariantDisplay from '../../Components/ModalProductVariantDisplay.vue';
 import axios from 'axios';
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
+import { formatNumber } from 'chart.js/helpers';
 
 const { supplier, products, listVariants } = defineProps({ supplier: Object, products: Array, listVariants: Object });
 console.log(listVariants);
@@ -231,7 +201,7 @@ const confirmAddProduct = () => {
 
 
 // ✅ Đã sửa để luôn gọi API lấy product_variants có attributes đầy đủ
-const showVariants = async (product) => {
+const showVariants = (product) => {
 
 
 
