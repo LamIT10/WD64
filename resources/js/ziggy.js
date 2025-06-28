@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://127.0.0.1:8000",
+    url: "http:127.0.0.1:8000",
     port: null,
     defaults: {},
     routes: {
@@ -129,15 +129,6 @@ const Ziggy = {
             uri: "admin/products/{product}",
             methods: ["DELETE"],
             parameters: ["product"],
-        },
-        "admin.products.search": {
-            uri: "admin/products/search",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.products.variants": {
-            uri: "admin/products/{productId}/variants/{supplierId}",
-            methods: ["GET", "HEAD"],
-            parameters: ["productId", "supplierId"],
         },
         "admin.customers.index": {
             uri: "admin/customers",
@@ -303,16 +294,6 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
-        "admin.suppliers.products.store": {
-            uri: "admin/suppliers/{supplierId}/products",
-            methods: ["POST"],
-            parameters: ["supplierId"],
-        },
-        "admin.suppliers.variants": {
-            uri: "admin/suppliers/{supplierId}/products/{productId}/variants",
-            methods: ["GET", "HEAD"],
-            parameters: ["supplierId", "productId"],
-        },
         "admin.customer-transaction.index": {
             uri: "admin/customer-transaction",
             methods: ["GET", "HEAD"],
@@ -354,61 +335,6 @@ const Ziggy = {
             uri: "admin/supplier-transaction/{id}/update-payment",
             methods: ["PATCH"],
             parameters: ["id"],
-        },
-        "admin.purchases.index": {
-            uri: "admin/purchases",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.purchases.create": {
-            uri: "admin/purchases/create",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.purchases.approve": {
-            uri: "admin/purchases/{id}/approve",
-            methods: ["POST"],
-            parameters: ["id"],
-        },
-        "admin.purchases.getVariants": {
-            uri: "admin/purchases/{id}/get-variants",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.purchases.getSupplierAndUnit": {
-            uri: "admin/purchases/{id}/get-supplier-and-unit",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.purchases.store": {
-            uri: "admin/purchases/store",
-            methods: ["POST"],
-        },
-        "admin.receiving.index": {
-            uri: "admin/receiving",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.receiving.create": {
-            uri: "admin/receiving/{id}/create",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.receiving.approve": {
-            uri: "admin/receiving/{id}/approve",
-            methods: ["POST"],
-            parameters: ["id"],
-        },
-        "admin.receiving.getVariants": {
-            uri: "admin/receiving/{id}/get-variants",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.receiving.getSupplierAndUnit": {
-            uri: "admin/receiving/{id}/get-supplier-and-unit",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.receiving.store": {
-            uri: "admin/receiving/store",
-            methods: ["POST"],
         },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {

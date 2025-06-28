@@ -62,9 +62,17 @@
                                             <!-- Attributes -->
                                             <td class="px-3 py-4">
                                                 <div class="flex flex-wrap gap-1">
-                                                    <span v-for="attribute in variant.attributes" :key="attribute.id"
-                                                        class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                                                        {{ attribute.name }}
+                                                    <template
+                                                        v-if="variant.attributes && variant.attributes.length > 0">
+                                                        <span v-for="attribute in variant.attributes"
+                                                            :key="attribute.id"
+                                                            class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                                            {{ attribute.name }}
+                                                        </span>
+                                                    </template>
+                                                    <span v-else
+                                                        class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                                        Sản phẩm đơn giản
                                                     </span>
                                                 </div>
                                             </td>
