@@ -139,14 +139,14 @@
                     </div>
                     <span class="text-xs">Danh sách sản phẩm</span>
                     </Link>
-                    <a href="variants.html"
+                    <Link :href="route('admin.attributes.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-layer-group text-xs"></i>
                         </div>
-                        <span class="text-xs">Biến thể sản phẩm</span>
-                    </a>
+                        <span class="text-xs">Thuộc Tính sản phẩm</span>
+                    </Link>
                     <Link :href="route('admin.categories.index')"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
