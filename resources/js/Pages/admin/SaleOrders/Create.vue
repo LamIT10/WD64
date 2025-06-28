@@ -184,6 +184,7 @@
                                 <button
                                     class="p-1 hover:bg-gray-100 rounded"
                                     title="Thêm"
+                                    @click="selectProduct(product)"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -326,6 +327,7 @@
                                 <button
                                     @click="decreaseQuantity(product)"
                                     class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-50"
+                                    :disabled="product.quantity <= 1"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -346,6 +348,7 @@
                                     class="w-12 text-center border-b border-red-300 focus:outline-none focus:border-red-500"
                                     type="number"
                                     min="1"
+                                    @input="validateQuantity(product)"
                                 />
                                 <button
                                     @click="increaseQuantity(product)"
@@ -404,6 +407,13 @@
                                 </span>
                             </div>
                         </div>
+                        <!-- Lỗi số lượng vượt kho -->
+                        <p
+                            v-if="product.quantityError"
+                            class="text-red-500 text-sm mt-1"
+                        >
+                            {{ product.quantityError }}
+                        </p>
                     </div>
                 </div>
 
@@ -970,7 +980,7 @@
                 <button
                     class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
                     @click="handleComplete"
-                    :disabled="form.processing"
+                    :disabled="form.processing || hasQuantityError"
                 >
                     {{ form.processing ? "Đang xử lý..." : "COMPLETE" }}
                 </button>
@@ -1086,17 +1096,25 @@ if (savedCart) {
                 selectedUnitId: product.selectedUnitId || null,
                 hasOtherUnits: product.hasOtherUnits || false,
                 availableUnits: product.availableUnits || [],
-                conversionFactor: product.conversionFactor || 1,
+                conversionFactor: Number(product.conversionFactor) || 1,
                 defaultUnitId: product.defaultUnitId || null,
                 defaultUnitName: product.defaultUnitName || "cái",
+                quantityError: product.quantityError || "",
+                quantity_on_hand: product.quantity_on_hand || 0,
             }));
         }
     } catch (error) {
         console.error("Lỗi khi parse dữ liệu từ localStorage:", error);
+        localProducts.value = [];
     }
 } else {
     localProducts.value = props.products.map((product) => ({
-        ...product,
+        id: product.variant_id || null,
+        name: product.product_name || "Unknown",
+        price: Number(product.sale_price) || 0,
+        quantity: 1,
+        attribute_value_id: product.attribute_value_id || [],
+        product_id: product.product_id || null,
         useCustomUnit: false,
         selectedUnitId: null,
         hasOtherUnits: false,
@@ -1104,6 +1122,8 @@ if (savedCart) {
         conversionFactor: 1,
         defaultUnitId: product.default_unit_id || null,
         defaultUnitName: product.default_unit_name || "cái",
+        quantityError: "",
+        quantity_on_hand: 0,
     }));
 }
 
@@ -1159,6 +1179,10 @@ const totalAmount = computed(() =>
     )
 );
 
+const hasQuantityError = computed(() =>
+    localProducts.value.some((product) => product.quantityError)
+);
+
 // Format price utility
 const formatPrice = (price) => {
     if (price == null || isNaN(price)) {
@@ -1194,10 +1218,24 @@ const fetchData = async (url) => {
             ? result
             : result.data && Array.isArray(result.data)
             ? result.data
+            : result.quantity_on_hand !== undefined
+            ? result
             : [];
     } catch (error) {
         console.error(`Lỗi khi gọi API ${url}:`, error.message);
         throw error;
+    }
+};
+
+// Fetch inventory quantity
+const fetchInventoryQuantity = async (productVariantId) => {
+    try {
+        const url = `/admin/sale-orders/inventory/${productVariantId}`;
+        const result = await fetchData(url);
+        return Number(result.quantity_on_hand) || 0;
+    } catch (error) {
+        console.error("Lỗi khi lấy số lượng tồn kho:", error);
+        return 0;
     }
 };
 
@@ -1246,7 +1284,6 @@ const selectCustomer = async (customer) => {
     // Fill province, district, ward if available
     if (customer.province) {
         try {
-            // Fetch provinces to find matching province
             await fetchProvinces(customer.province);
             const matchedProvince = filteredProvinces.value.find(
                 (p) => p.name.toLowerCase() === customer.province.toLowerCase()
@@ -1255,7 +1292,6 @@ const selectCustomer = async (customer) => {
                 selectProvince(matchedProvince);
                 form.province = matchedProvince.name;
 
-                // Fetch districts if province is set and customer has district
                 if (customer.district) {
                     await fetchDistricts(customer.district);
                     const matchedDistrict = filteredDistricts.value.find(
@@ -1267,7 +1303,6 @@ const selectCustomer = async (customer) => {
                         selectDistrict(matchedDistrict);
                         form.district = matchedDistrict.name;
 
-                        // Fetch wards if district is set and customer has ward
                         if (customer.ward) {
                             await fetchWards(customer.ward);
                             const matchedWard = filteredWards.value.find(
@@ -1336,8 +1371,11 @@ const fetchUnitConversions = async (productId, defaultUnitId) => {
             .map((conv) => ({
                 unit_id: conv.to_unit_id,
                 unit_name: conv.to_unit_name,
-                conversion_factor: conv.conversion_factor,
+                conversion_factor: Number(conv.conversion_factor) || 1,
             }));
+        if (!hasOtherUnits) {
+            console.warn(`No unit conversions found for product ${productId}`);
+        }
         return { hasOtherUnits, availableUnits };
     } catch (error) {
         console.error("Lỗi khi lấy đơn vị chuyển đổi:", error);
@@ -1356,6 +1394,19 @@ const selectProduct = async (product) => {
         return;
     }
     selectedProduct.value = product;
+
+    // Kiểm tra số lượng tồn kho
+    const quantityOnHand = await fetchInventoryQuantity(product.variant_id);
+    const quantityRequested = 1;
+    if (quantityOnHand === 0) {
+        productError.value = `Sản phẩm ${product.product_name} không tồn tại trong kho.`;
+        return;
+    }
+    if (quantityRequested > quantityOnHand) {
+        productError.value = `Số lượng sản phẩm ${product.product_name} vượt quá số lượng trong kho (còn ${quantityOnHand}).`;
+        return;
+    }
+
     if (!localProducts.value.some((p) => p.id === product.variant_id)) {
         const { hasOtherUnits, availableUnits } = await fetchUnitConversions(
             product.product_id,
@@ -1365,7 +1416,7 @@ const selectProduct = async (product) => {
             id: product.variant_id,
             name: product.product_name,
             price: Number(product.sale_price) || 0,
-            quantity: 1,
+            quantity: quantityRequested,
             attribute_value_id: product.attribute_value_id || [],
             product_id: product.product_id,
             useCustomUnit: false,
@@ -1375,6 +1426,8 @@ const selectProduct = async (product) => {
             conversionFactor: 1,
             defaultUnitId: product.default_unit_id || null,
             defaultUnitName: product.default_unit_name || "cái",
+            quantityError: "",
+            quantity_on_hand: quantityOnHand,
         });
         const cardRef = `productCard-0`;
         setTimeout(() => {
@@ -1386,7 +1439,17 @@ const selectProduct = async (product) => {
         productMessage.value = `Đã thêm sản phẩm: ${product.product_name}`;
         setTimeout(() => (productMessage.value = ""), 2000);
     } else {
-        productMessage.value = `Sản phẩm ${product.product_name} đã có trong danh sách.`;
+        const existingProduct = localProducts.value.find(
+            (p) => p.id === product.variant_id
+        );
+        const quantityRequested = (existingProduct.quantity || 0) + 1;
+        if (quantityRequested > existingProduct.quantity_on_hand) {
+            productError.value = `Số lượng sản phẩm ${product.product_name} vượt quá số lượng trong kho (còn ${existingProduct.quantity_on_hand}).`;
+            return;
+        }
+        existingProduct.quantity = quantityRequested;
+        await validateQuantity(existingProduct);
+        productMessage.value = `Đã tăng số lượng sản phẩm: ${product.product_name}`;
         setTimeout(() => (productMessage.value = ""), 2000);
     }
     selectedProduct.value = null;
@@ -1414,13 +1477,26 @@ const fetchAllVariants = async (productId) => {
             productId,
             defaultUnitId
         );
-        variants.forEach((variant) => {
+        let addedCount = 0;
+        for (const variant of variants) {
+            const quantityOnHand = await fetchInventoryQuantity(
+                variant.variant_id
+            );
+            const quantityRequested = 1;
+            if (quantityOnHand === 0) {
+                productMessage.value = `Sản phẩm biến thể ${variant.product_name} không tồn tại trong kho.`;
+                continue;
+            }
+            if (quantityRequested > quantityOnHand) {
+                productMessage.value = `Số lượng sản phẩm biến thể ${variant.product_name} vượt quá số lượng trong kho (còn ${quantityOnHand}).`;
+                continue;
+            }
             if (!localProducts.value.some((p) => p.id === variant.variant_id)) {
                 localProducts.value.unshift({
                     id: variant.variant_id,
                     name: variant.product_name,
                     price: Number(variant.sale_price) || 0,
-                    quantity: 1,
+                    quantity: quantityRequested,
                     attribute_value_id: variant.attribute_value_id || [],
                     product_id: productId,
                     useCustomUnit: false,
@@ -1430,9 +1506,12 @@ const fetchAllVariants = async (productId) => {
                     conversionFactor: 1,
                     defaultUnitId,
                     defaultUnitName,
+                    quantityError: "",
+                    quantity_on_hand: quantityOnHand,
                 });
+                addedCount++;
             }
-        });
+        }
         const cardRef = `productCard-0`;
         setTimeout(() => {
             const element = document.querySelector(`[ref="${cardRef}"]`);
@@ -1440,7 +1519,7 @@ const fetchAllVariants = async (productId) => {
                 element.scrollIntoView({ behavior: "smooth", block: "start" });
             }
         }, 100);
-        productMessage.value = `Đã thêm ${variants.length} biến thể.`;
+        productMessage.value = `Đã thêm ${addedCount} biến thể.`;
         setTimeout(() => (productMessage.value = ""), 2000);
     } catch (error) {
         productMessage.value =
@@ -1615,14 +1694,33 @@ const selectWard = (ward) => {
     wardError.value = "";
 };
 
-// Increase/decrease quantity
-const increaseQuantity = (product) => {
-    product.quantity = (product.quantity || 1) + 1;
+// Validate quantity
+const validateQuantity = async (product) => {
+    product.quantityError = "";
+    const quantityRequested =
+        product.quantity *
+        (product.useCustomUnit ? product.conversionFactor : 1);
+    const quantityOnHand = await fetchInventoryQuantity(product.id);
+    if (quantityOnHand === 0) {
+        product.quantityError = `Sản phẩm ${product.name} không tồn tại trong kho.`;
+        return;
+    }
+    if (quantityRequested > quantityOnHand) {
+        product.quantityError = `Số lượng sản phẩm ${product.name} vượt quá số lượng trong kho (còn ${quantityOnHand}).`;
+    }
+    product.quantity_on_hand = quantityOnHand;
 };
 
-const decreaseQuantity = (product) => {
+// Increase/decrease quantity
+const increaseQuantity = async (product) => {
+    product.quantity = (product.quantity || 1) + 1;
+    await validateQuantity(product);
+};
+
+const decreaseQuantity = async (product) => {
     if (product.quantity > 1) {
         product.quantity -= 1;
+        await validateQuantity(product);
     }
 };
 
@@ -1637,6 +1735,44 @@ const removeProduct = (product) => {
     showProductMenu.value = null;
 };
 
+// Toggle product menu
+const toggleProductMenu = (productId) => {
+    showProductMenu.value =
+        showProductMenu.value === productId ? null : productId;
+};
+
+// Toggle unit converter
+const toggleUnitConverter = async (product) => {
+    product.useCustomUnit = !product.useCustomUnit;
+    if (product.useCustomUnit && product.availableUnits.length > 0) {
+        product.selectedUnitId = product.availableUnits[0].unit_id;
+        product.conversionFactor =
+            Number(product.availableUnits[0].conversion_factor) || 1;
+        console.log(
+            "Selected unit:",
+            product.selectedUnitId,
+            product.conversionFactor
+        );
+    } else {
+        product.useCustomUnit = false;
+        product.selectedUnitId = null;
+        product.conversionFactor = 1;
+    }
+    await validateQuantity(product);
+    showProductMenu.value = null;
+};
+
+// Update unit
+const updateUnit = async (product) => {
+    const selectedUnit = product.availableUnits.find(
+        (unit) => unit.unit_id === product.selectedUnitId
+    );
+    product.conversionFactor = selectedUnit
+        ? Number(selectedUnit.conversion_factor) || 1
+        : 1;
+    await validateQuantity(product);
+};
+
 // Handle complete
 const handleComplete = () => {
     // Reset all validation errors
@@ -1645,6 +1781,7 @@ const handleComplete = () => {
     provinceError.value = "";
     districtError.value = "";
     wardError.value = "";
+    localProducts.value.forEach((product) => (product.quantityError = ""));
 
     // Validate customer
     if (!form.customer_id) {
@@ -1666,37 +1803,39 @@ const handleComplete = () => {
         if (!form.ward) wardError.value = "Vui lòng chọn phường/xã!";
     }
 
-    // Check if there are any errors
-    if (
-        customerError.value ||
-        productError.value ||
-        provinceError.value ||
-        districtError.value ||
-        wardError.value
-    ) {
+    // Check quantity errors
+    if (hasQuantityError.value) {
+        productError.value =
+            "Một hoặc nhiều sản phẩm vượt quá số lượng trong kho.";
         return;
     }
 
+    // Prepare form items
     form.items = localProducts.value.map((product) => ({
         product_variant_id: product.id,
         quantity: product.quantity,
         price: product.price,
         useCustomUnit: product.useCustomUnit,
-        selectedUnitId: product.selectedUnitId,
+        selectedUnitId: product.useCustomUnit ? product.selectedUnitId : null,
         defaultUnitId: product.defaultUnitId,
-        conversionFactor: product.conversionFactor || 1,
+        conversionFactor: Number(product.conversionFactor) || 1,
     }));
     form.total_amount = totalAmount.value;
 
+    // Validate form items
     if (
         !form.items.every(
             (item) =>
                 item.product_variant_id &&
                 item.quantity >= 1 &&
-                item.defaultUnitId
+                item.defaultUnitId &&
+                (!item.useCustomUnit ||
+                    (item.useCustomUnit && item.selectedUnitId))
         )
     ) {
-        productError.value = "Dữ liệu sản phẩm không hợp lệ!";
+        productError.value = `Dữ liệu sản phẩm không hợp lệ! Items: ${JSON.stringify(
+            form.items
+        )}`;
         return;
     }
 
@@ -1723,50 +1862,27 @@ const handleComplete = () => {
         onError: (errors) => {
             console.error("Lỗi khi tạo đơn hàng:", errors);
             let errorMessage = "Có lỗi xảy ra khi tạo đơn hàng.";
-            if (errors.customer_id) errorMessage = "Khách hàng không hợp lệ.";
-            else if (errors.items)
-                errorMessage = "Dữ liệu sản phẩm không hợp lệ.";
-            else if (errors.total_amount)
+            if (errors.customer_id) {
+                errorMessage = "Khách hàng không hợp lệ.";
+            } else if (errors.items) {
+                errorMessage = `Dữ liệu sản phẩm không hợp lệ: ${JSON.stringify(
+                    errors.items
+                )}`;
+            } else if (errors.total_amount) {
                 errorMessage = "Tổng tiền không hợp lệ.";
-            else if (errors.error) errorMessage = errors.error;
-            productMessage.value = errorMessage;
-            setTimeout(() => (productMessage.value = ""), 3000);
+            } else if (errors.error) {
+                // Xử lý lỗi từ backend (như sản phẩm không tồn tại trong kho)
+                localProducts.value.forEach((product) => {
+                    if (errors.error.includes(product.name)) {
+                        product.quantityError = errors.error;
+                    }
+                });
+                errorMessage = errors.error;
+            }
+            productError.value = errorMessage;
+            setTimeout(() => (productError.value = ""), 3000);
         },
     });
-};
-
-// Toggle product menu
-const toggleProductMenu = (productId) => {
-    showProductMenu.value =
-        showProductMenu.value === productId ? null : productId;
-};
-
-// Toggle unit converter
-const toggleUnitConverter = (product) => {
-    product.useCustomUnit = !product.useCustomUnit;
-    if (product.useCustomUnit && product.availableUnits.length > 0) {
-        product.selectedUnitId = product.availableUnits[0].unit_id;
-        product.conversionFactor = product.availableUnits[0].conversion_factor;
-        console.log(
-            "Selected unit:",
-            product.selectedUnitId,
-            product.conversionFactor
-        );
-    } else if (!product.useCustomUnit) {
-        product.selectedUnitId = null;
-        product.conversionFactor = 1;
-    }
-    showProductMenu.value = null;
-};
-
-// Update unit
-const updateUnit = (product) => {
-    const selectedUnit = product.availableUnits.find(
-        (unit) => unit.unit_id === product.selectedUnitId
-    );
-    product.conversionFactor = selectedUnit
-        ? selectedUnit.conversion_factor
-        : 1;
 };
 
 // Handle click outside to close product menu
@@ -1808,7 +1924,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 .converter {
     display: flex;
     align-items: center;

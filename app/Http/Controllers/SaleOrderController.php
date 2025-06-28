@@ -4,15 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Exports\SaleOrderExport;
 use App\Http\Requests\StoreSaleOrderRequest;
-use App\Models\SaleOrder;
-use App\Models\SaleOrderItem;
 use App\Repositories\CustomerRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\SaleOrdersRepository;
 use App\Repositories\UnitRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -33,19 +29,17 @@ class SaleOrderController extends Controller
         $this->productRepository = $productRepository;
         $this->unitRepository = $unitRepository;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $saleOrders = $this->saleOrdersRepository->getList();
-        $units = $this->unitRepository->getList();
-        return inertia('admin/sale-orders/List', [
-            'saleOrders' => $saleOrders,
-            'units' => $units
+        $orders = $this->saleOrdersRepository->index($request);
+        return Inertia::render('admin/SaleOrders/List', [
+            'listOrders' => ['data' => $orders]
         ]);
     }
     public function create()
     {
 
-        return inertia('admin/sale-orders/Create');
+        return inertia('admin/SaleOrders/Create');
     }
     public function searchProductJson(Request $request)
     {
@@ -73,8 +67,31 @@ class SaleOrderController extends Controller
 
         return redirect()->route('admin.sale-orders.index')->with('success', 'Tạo đơn hàng thành công');
     }
+    public function getInventoryQuantity($productVariantId)
+    {
+        $quantity = $this->saleOrdersRepository->getInventoryQuantity($productVariantId);
+        return response()->json(['quantity_on_hand' => $quantity]);
+    }
+    public function rejectSaleOrder($id)
+    {
+        $result = $this->saleOrdersRepository->rejectOrder($id);
+        if (isset($result['error'])) {
+            return redirect()->back()->withErrors(['error' => $result['error']]);
+        }
+
+        return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
+    }
+    public function approve($id)
+    {
+        $result = $this->saleOrdersRepository->approveOrder($id);
+        if (isset($result['error'])) {
+            return redirect()->back()->withErrors(['error' => $result['error']]);
+        }
+
+        return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
+    }
     public function export()
     {
-        return Excel::download(new SaleOrderExport, 'DonHangXuat.xlsx');
+        return Excel::download(new SaleOrderExport(), 'Đơn_Xuất.xlsx');
     }
 }

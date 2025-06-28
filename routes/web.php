@@ -190,11 +190,15 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
         Route::get('/', [SaleOrderController::class, 'index'])->name('index');
         Route::get('/create', [SaleOrderController::class, 'create'])->name('create');
-        Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('sale-orders.products.search');
-        Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('sale-orders.variants.all');
-        Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('sale-orders.unit.all');
-        Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('sale-orders.customer.search');
+        Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
+        Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('variants.all');
+        Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('unit.all');
+        Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('customer.search');
+        Route::get('/inventory/{productVariantId}', [SaleOrderController::class, 'getInventoryQuantity'])->name('inventory');
+        Route::post('/{id}/reject', [SaleOrderController::class, 'rejectSaleOrder'])->name('reject');
+        Route::post('/{id}/approve', [SaleOrderController::class, 'approve'])->name('approve');
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
+        Route::get('export', [SaleOrderController::class, 'export'])->name('export');
     });
 });
 

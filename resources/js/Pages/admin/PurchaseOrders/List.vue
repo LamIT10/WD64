@@ -5,14 +5,14 @@
                 class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center"
             >
                 <h5 class="text-lg text-indigo-700 font-semibold">
-                    Danh sách đơn hàng nhập
+                    Danh sách đơn hàng xuất
                 </h5>
                 <Waiting
-                    route-name="admin.purchases.create"
+                    route-name="admin.sale-orders.create"
                     :route-params="{}"
                     class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
-                    <i class="fas fa-plus mr-1"></i> Tạo yêu cầu nhập kho
+                    <i class="fas fa-plus mr-1"></i> Tạo đơn hàng xuất
                 </Waiting>
             </div>
 
@@ -24,19 +24,21 @@
                     >
                         <!-- TẤT CẢ -->
                         <Waiting
-                            route-name="admin.purchases.index"
+                            route-name="admin.sale-orders.index"
                             :route-params="{}"
                             :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-600 shadow-sm hover:shadow-md hover:bg-indigo-100 hover:text-indigo-900 transition-all duration-200 ease-in-out animate-fade-in cursor-pointer'"
+                            @click="setActiveTab('all')"
                         >
                             <i class="fa-solid fa-border-all text-xl"></i>
-                            Tất cả đơn nhập
+                            Tất cả đơn xuất
                         </Waiting>
 
                         <!-- CHỜ DUYỆT -->
                         <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 0 }"
+                            route-name="admin.sale-orders.index"
+                            :route-params="{ status: 'pending' }"
                             :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 font-semibold border border-yellow-500 shadow-sm hover:shadow-md hover:bg-yellow-100 hover:text-yellow-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                            @click="setActiveTab('pending')"
                         >
                             <i class="fa-solid fa-hourglass-start text-xl"></i>
                             Chờ duyệt
@@ -44,34 +46,50 @@
 
                         <!-- ĐÃ DUYỆT -->
                         <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 1 }"
+                            route-name="admin.sale-orders.index"
+                            :route-params="{ status: 'approved' }"
                             :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 font-semibold border border-green-500 shadow-sm hover:shadow-md hover:bg-green-100 hover:text-green-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                            @click="setActiveTab('approved')"
                         >
                             <i
                                 class="fa-solid fa-file-circle-check text-xl"
                             ></i>
                             Đã duyệt
                         </Waiting>
+
+                        <!-- ĐÃ GIAO HÀNG -->
                         <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 2 }"
+                            route-name="admin.sale-orders.index"
+                            :route-params="{ status: 'shipped' }"
                             :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:bg-blue-100 hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                            @click="setActiveTab('shipped')"
                         >
-                            <i
-                                class="fa-solid fa-file-circle-check text-xl"
-                            ></i>
-                            Nhập một phần
+                            <i class="fa-solid fa-truck text-xl"></i>
+                            Đã giao hàng
                         </Waiting>
+
+                        <!-- HOÀN THÀNH -->
                         <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 3 }"
+                            route-name="admin.sale-orders.index"
+                            :route-params="{ status: 'completed' }"
                             :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:bg-purple-100 hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                            @click="setActiveTab('completed')"
                         >
                             <i
                                 class="fa-solid fa-file-circle-check text-xl"
                             ></i>
                             Hoàn thành
+                        </Waiting>
+
+                        <!-- TỪ CHỐI -->
+                        <Waiting
+                            route-name="admin.sale-orders.index"
+                            :route-params="{ status: 'rejected' }"
+                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                            @click="setActiveTab('rejected')"
+                        >
+                            <i class="fa-solid fa-ban text-xl"></i>
+                            Từ chối
                         </Waiting>
                     </nav>
                 </div>
@@ -80,36 +98,36 @@
             <!-- Filters -->
             <div class="mb-6 bg-white p-6 rounded-sm border border-gray-100">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <!-- Nhà cung cấp -->
+                    <!-- Khách hàng -->
                     <div>
                         <label
                             class="block text-sm font-semibold text-gray-700 mb-1"
                         >
-                            Nhà cung cấp
+                            Khách hàng
                         </label>
                         <div class="relative">
                             <input
                                 type="text"
-                                v-model="filters.supplier"
+                                v-model="filters.customer"
                                 class="peer w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm placeholder-gray-400 transition-all"
-                                placeholder="Nhập tên hoặc mã nhà cung cấp..."
+                                placeholder="Nhập tên hoặc mã khách hàng..."
                             />
                             <i
-                                class="fa-solid fa-building absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm peer-focus:text-indigo-500 transition"
+                                class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm peer-focus:text-indigo-500 transition"
                             ></i>
                         </div>
                     </div>
 
-                    <!-- Ngày tạo đơn -->
+                    <!-- Ngày đặt hàng -->
                     <div>
                         <label
                             class="block text-sm font-semibold text-gray-700 mb-1"
                         >
-                            Ngày tạo đơn
+                            Ngày đặt hàng
                         </label>
                         <input
                             type="date"
-                            v-model="filters.created_at"
+                            v-model="filters.order_date"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm transition-all"
                         />
                     </div>
@@ -126,9 +144,12 @@
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm bg-white transition-all"
                         >
                             <option value="">Tất cả</option>
-                            <option value="Pending">Chờ duyệt</option>
-                            <option value="Approved">Đã duyệt</option>
-                            <option value="Rejected">Từ chối</option>
+                            <option value="pending">Chờ duyệt</option>
+                            <option value="approved">Đã duyệt</option>
+                            <option value="shipped">Đã giao hàng</option>
+                            <option value="completed">Hoàn thành</option>
+                            인은
+                            <option value="rejected">Từ chối</option>
                         </select>
                     </div>
                 </div>
@@ -155,13 +176,13 @@
                                     >
                                 </div>
                             </th>
-                            <th scope="col" class="px-4 py-2">Mã đơn nhập</th>
-                            <th scope="col" class="px-4 py-2">Nhà cung cấp</th>
+                            <th scope="col" class="px-4 py-2">Mã đơn xuất</th>
+                            <th scope="col" class="px-4 py-2">Khách hàng</th>
                             <th scope="col" class="px-4 py-2">Ngày tạo đơn</th>
-                            <th scope="col" class="px-4 py-2">Người tạo đơn</th>
+                            <th scope="col" class="px-4 py-2">Số lượng</th>
                             <th scope="col" class="px-4 py-2">Trạng thái</th>
                             <th scope="col" class="px-4 py-2 text-center">
-                                Ngày giao dự kiến
+                                Địa chỉ giao hàng
                             </th>
                             <th scope="col" class="px-4 py-2 text-end">
                                 Thành tiền
@@ -200,34 +221,36 @@
                                 {{ order.id }}
                             </th>
                             <td class="px-4 py-2 text-indigo-700 font-semibold">
-                                {{ order.supplier.name }}
+                                {{ order.customer.name }}
                             </td>
                             <td class="px-4 py-2">
                                 {{ formatDate(order.created_at) }}
                             </td>
-                            <td class="px-4 py-2">{{ order.user.name }}</td>
+                            <td class="px-4 py-2">
+                                {{ order.total_quantity }}
+                            </td>
                             <td class="px-4 py-2">
                                 <span
                                     :class="{
                                         'text-yellow-600 bg-yellow-100 px-2 py-1 rounded-xl':
-                                            order.order_status == 0,
+                                            order.status === 'pending',
                                         'text-green-600 bg-green-100 px-2 py-1 rounded-xl':
-                                            order.order_status == 1,
+                                            order.status === 'approved',
                                         'text-blue-600 bg-blue-100 px-2 py-1 rounded-xl':
-                                            order.order_status == 2, 
+                                            order.status === 'shipped',
                                         'text-purple-600 bg-purple-100 px-2 py-1 rounded-xl':
-                                            order.order_status == 3,
+                                            order.status === 'completed',
+                                        'text-red-600 bg-red-100 px-2 py-1 rounded-xl':
+                                            order.status === 'rejected',
                                     }"
                                 >
-                                    {{
-                                        getStatusText(order.order_status)
-                                    }}</span
+                                    {{ getStatusText(order.status) }}</span
                                 >
                             </td>
                             <td
                                 class="px-4 py-2 text-orange-600 font-semibold text-center"
                             >
-                                {{ formatDate(order.order_date) }}
+                                {{ order.address_delivery || "Chưa xác định" }}
                             </td>
                             <td
                                 class="px-4 py-2 text-blue-800 font-semibold flex items-center justify-end"
@@ -250,7 +273,7 @@
                         aria-hidden="true"
                     >
                         <div
-                            class="absolute inset-0 hihi"
+                            class="absolute inset-0 bg-gray-500 opacity-50"
                             @click="closeModal"
                         ></div>
                     </div>
@@ -269,7 +292,7 @@
                                         <h3
                                             class="text-lg leading-6 font-medium text-gray-900"
                                         >
-                                            Đơn nhập {{ selectedOrder.id }}
+                                            Đơn xuất {{ selectedOrder.id }}
                                         </h3>
                                         <button
                                             @click="closeModal"
@@ -295,45 +318,62 @@
                                         class="w-full border border-gray-300 rounded-lg overflow-hidden text-sm"
                                     >
                                         <tbody>
-                                            <!-- Nhà cung cấp -->
+                                            <!-- Số điện thoại -->
                                             <tr
                                                 class="border-b border-gray-200"
                                             >
                                                 <td
                                                     class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
                                                 >
-                                                    🏢 Nhà cung cấp
+                                                    📞 Số điện thoại
                                                 </td>
                                                 <td
                                                     class="px-4 py-2 text-gray-900"
                                                 >
                                                     {{
-                                                        selectedOrder.supplier
-                                                            .name
+                                                        selectedOrder.customer
+                                                            .phone ||
+                                                        "Chưa xác định"
                                                     }}
                                                 </td>
                                             </tr>
+                                            <!-- Email khách hàng -->
                                             <tr
                                                 class="border-b border-gray-200"
                                             >
                                                 <td
                                                     class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
                                                 >
-                                                    Ngày giao dự kiến
+                                                    📧 Email
                                                 </td>
                                                 <td
                                                     class="px-4 py-2 text-gray-900"
                                                 >
                                                     {{
-                                                        selectedOrder.order_date
-                                                            ? formatDate(
-                                                                  selectedOrder.order_date
-                                                              )
-                                                            : "Chưa xác định"
+                                                        selectedOrder.customer
+                                                            .email ||
+                                                        "Chưa xác định"
                                                     }}
                                                 </td>
                                             </tr>
-
+                                            <!-- Địa chỉ giao hàng -->
+                                            <tr
+                                                class="border-b border-gray-200"
+                                            >
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
+                                                >
+                                                    📍 Địa chỉ giao hàng
+                                                </td>
+                                                <td
+                                                    class="px-4 py-2 text-gray-900"
+                                                >
+                                                    {{
+                                                        selectedOrder.address_delivery ||
+                                                        "Chưa xác định"
+                                                    }}
+                                                </td>
+                                            </tr>
                                             <!-- Trạng thái -->
                                             <tr>
                                                 <td
@@ -346,22 +386,25 @@
                                                         class="inline-block px-3 py-1 rounded-xl text-sm font-medium"
                                                         :class="{
                                                             'text-yellow-700 bg-yellow-100 border border-yellow-300':
-                                                                selectedOrder.order_status ==
-                                                                0,
+                                                                selectedOrder.status ===
+                                                                'pending',
                                                             'text-green-700 bg-green-100 border border-green-300':
-                                                                selectedOrder.order_status ==
-                                                                1,
-                                                            'text-gray-500 bg-gray-100 border border-gray-300':
-                                                                ![
-                                                                    0, 1,
-                                                                ].includes(
-                                                                    selectedOrder.order_status
-                                                                ),
+                                                                selectedOrder.status ===
+                                                                'approved',
+                                                            'text-blue-700 bg-blue-100 border border-blue-300':
+                                                                selectedOrder.status ===
+                                                                'shipped',
+                                                            'text-purple-700 bg-purple-100 border border-purple-300':
+                                                                selectedOrder.status ===
+                                                                'completed',
+                                                            'text-red-700 bg-red-100 border border-red-300':
+                                                                selectedOrder.status ===
+                                                                'rejected',
                                                         }"
                                                     >
                                                         {{
                                                             getStatusText(
-                                                                selectedOrder.order_status
+                                                                selectedOrder.status
                                                             )
                                                         }}
                                                     </span>
@@ -424,21 +467,26 @@
                                                                     .product
                                                                     .name
                                                             }}
-                                                            -
                                                             <span
-                                                                v-for="(
-                                                                    attribute,
-                                                                    index
-                                                                ) in item
-                                                                    .product_variant
-                                                                    .attributes"
-                                                                :key="index"
+                                                                v-if="
+                                                                    item
+                                                                        .product_variant
+                                                                        .attributes
+                                                                        .length
+                                                                "
                                                             >
+                                                                -
                                                                 {{
-                                                                    attribute.name
-                                                                }}
-                                                                {{
-                                                                    attribute.value
+                                                                    item.product_variant.attributes
+                                                                        .map(
+                                                                            (
+                                                                                attr
+                                                                            ) =>
+                                                                                attr.name
+                                                                        )
+                                                                        .join(
+                                                                            " - "
+                                                                        )
                                                                 }}
                                                             </span>
                                                         </td>
@@ -457,7 +505,11 @@
                                                         <td
                                                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                                                         >
-                                                            {{ item.subtotal }}
+                                                            {{
+                                                                formatCurrencyVND(
+                                                                    item.subtotal
+                                                                )
+                                                            }}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -476,7 +528,9 @@
                                                     >Tổng tiền đơn:</span
                                                 >
                                                 <span class="font-medium">{{
-                                                    selectedOrder.total_amount
+                                                    formatCurrencyVND(
+                                                        selectedOrder.total_amount
+                                                    )
                                                 }}</span>
                                             </div>
                                             <div
@@ -485,9 +539,9 @@
                                                 <span class="text-gray-600"
                                                     >Đã thanh toán:</span
                                                 >
-                                                <span class="font-medium"
-                                                    >0</span
-                                                >
+                                                <span class="font-medium">{{
+                                                    formatCurrencyVND(0)
+                                                }}</span>
                                             </div>
                                             <div
                                                 class="flex justify-between border-t border-gray-200 pt-2 mt-2"
@@ -499,7 +553,9 @@
                                                 <span
                                                     class="text-gray-900 font-medium"
                                                     >{{
-                                                        selectedOrder.total_amount
+                                                        formatCurrencyVND(
+                                                            selectedOrder.total_amount
+                                                        )
                                                     }}</span
                                                 >
                                             </div>
@@ -512,7 +568,7 @@
                             class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                         >
                             <button
-                                v-if="selectedOrder.order_status == 0"
+                                v-if="selectedOrder.status === 'pending'"
                                 @click="approveOrder(selectedOrder.id)"
                                 class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
@@ -520,8 +576,8 @@
                                 Duyệt đơn
                             </button>
                             <button
-                                v-if="selectedOrder.order_status == 0"
-                                type="button"
+                                v-if="selectedOrder.status === 'pending'"
+                                @click="rejectOrder(selectedOrder.id)"
                                 class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-solid fa-ban"></i>
@@ -535,15 +591,17 @@
                                 Đóng
                             </button>
                             <Waiting
-                                v-if="selectedOrder.order_status == 1 || selectedOrder.order_status == 2"
-                                route-name="admin.receiving.create"
-                                :route-params="{id: selectedOrder.id}"
+                                v-if="
+                                    ['approved', 'shipped'].includes(
+                                        selectedOrder.status
+                                    )
+                                "
+                                route-name="admin.shipping.create"
+                                :route-params="{ id: selectedOrder.id }"
                                 :color="'mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'"
                             >
-                                <i
-                                    class="fa-solid fa-file-lines text-xl mr-1"
-                                ></i>
-                                Tạo phiếu nhập
+                                <i class="fa-solid fa-truck text-xl mr-1"></i>
+                                Tạo phiếu giao hàng
                             </Waiting>
                         </div>
                     </div>
@@ -575,13 +633,17 @@ function formatCurrencyVND(value) {
 }
 
 const isModalOpen = ref(false);
-const selectedOrder = ref({ items: [] });
+const selectedOrder = ref({ items: [], customer: { phone: "", email: "" } });
 const activeTab = ref("all");
 const filters = ref({
-    supplier: "",
-    created_at: "",
+    customer: "",
+    order_date: "",
     status: "",
 });
+
+function setActiveTab(tab) {
+    activeTab.value = tab;
+}
 
 function openModal(order) {
     selectedOrder.value = order;
@@ -600,7 +662,6 @@ function closeModal() {
     isModalOpen.value = false;
 }
 
-// Computed property for filtered orders
 const filteredOrders = computed(() => {
     let orders = listOrders.data || [];
 
@@ -612,18 +673,18 @@ const filteredOrders = computed(() => {
     }
 
     // Apply filters
-    if (filters.value.supplier) {
+    if (filters.value.customer) {
         orders = orders.filter((order) =>
-            order.supplier.name
+            order.customer.name
                 .toLowerCase()
-                .includes(filters.value.supplier.toLowerCase())
+                .includes(filters.value.customer.toLowerCase())
         );
     }
-    if (filters.value.created_at) {
+    if (filters.value.order_date) {
         orders = orders.filter(
             (order) =>
-                new Date(order.created_at).toDateString() ===
-                new Date(filters.value.created_at).toDateString()
+                new Date(order.order_date).toDateString() ===
+                new Date(filters.value.order_date).toDateString()
         );
     }
     if (filters.value.status) {
@@ -634,24 +695,47 @@ const filteredOrders = computed(() => {
 
     return orders;
 });
+
 const approve = useForm({});
 const approveOrder = (id) => {
-    approve.post(route("admin.purchases.approve", id), {
+    approve.post(route("admin.sale-orders.approve", id), {
         onSuccess: () => {
             closeModal();
         },
+        onError: (errors) => {
+            console.error("Lỗi khi phê duyệt đơn hàng:", errors);
+        },
     });
 };
+
+const reject = useForm({});
+const rejectOrder = (id) => {
+    reject.post(route("admin.sale-orders.reject", id), {
+        onSuccess: () => {
+            closeModal();
+            // Xóa đơn hàng khỏi danh sách hiển thị
+            listOrders.data = listOrders.data.filter(
+                (order) => order.id !== id
+            );
+        },
+        onError: (errors) => {
+            console.error("Lỗi khi từ chối đơn hàng:", errors);
+        },
+    });
+};
+
 const getStatusText = (status) => {
     switch (status) {
-        case 0:
+        case "pending":
             return "Chờ duyệt";
-        case 1:
-            return "Chờ vận chuyển";
-        case 2:
-            return "Nhập một phần";
-        case 3:
-            return "Đã hoàn thành";
+        case "approved":
+            return "Đã duyệt";
+        case "shipped":
+            return "Đã giao hàng";
+        case "completed":
+            return "Hoàn thành";
+        case "rejected":
+            return "Từ chối";
         default:
             return "Không xác định";
     }
@@ -659,31 +743,23 @@ const getStatusText = (status) => {
 </script>
 
 <style scoped>
-.hihi {
+.bg-gray-500.opacity-50 {
     background-color: rgba(0, 0, 0, 0.5);
 }
-/* Ensure table headers and cells align properly */
 th,
 td {
     vertical-align: middle;
 }
-
-/* Hover effect for table rows */
 tr:hover {
     transition: background-color 0.2s ease;
 }
-
-/* Style for input and select elements */
 input,
 select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* Modal animation */
 .fixed.inset-0 {
     animation: fadeIn 0.3s ease-in-out;
 }
-
 @keyframes fadeIn {
     from {
         top: -100px;

@@ -3,7 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\Customer;
+use App\Models\Inventory;
 use App\Models\Product;
+use App\Models\ProductUnitConversion;
+use App\Models\ProductVariant;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\Unit;
@@ -22,28 +25,69 @@ class SaleOrdersRepository extends BaseRepository
         $this->saleOrderItem = $saleOrderItem;
         $this->product = $product;
     }
-    public function getList()
+    public function index(Request $request)
     {
         try {
-            return  $this->handleModel->select(
-                'sale_orders.id',
-                'customers.id as customer_id',
-                'customers.name',
-                'customers.address',
-                'sale_orders.status',
-                'sale_orders.total_amount',
-                'sale_orders.address_delivery'
-            )->leftJoin('customers', 'sale_orders.customer_id', '=', 'customers.id')
-                ->get();
+            $query = $this->handleModel
+                ->with([
+                    'customer' => function ($query) {
+                        $query->select('id', 'name', 'phone', 'email');
+                    },
+                    'items' => function ($query) {
+                        $query->select(
+                            'id',
+                            'sales_order_id',
+                            'product_variant_id',
+                            'quantity_ordered',
+                            'unit_id',
+                            'unit_price',
+                            'subtotal'
+                        )
+                            ->with([
+                                'productVariant' => function ($query) {
+                                    $query->select('id', 'product_id')
+                                        ->with([
+                                            'product' => function ($query) {
+                                                $query->select('id', 'name');
+                                            },
+                                            'attributes' => function ($query) {
+                                                $query->select('attribute_values.id', 'attribute_values.name');
+                                            }
+                                        ]);
+                                },
+                                'unit' => function ($query) {
+                                    $query->select('id', 'name');
+                                }
+                            ]);
+                    }
+                ])
+                ->select(
+                    'id',
+                    'customer_id',
+                    'order_date',
+                    'status',
+                    'total_amount',
+                    'address_delivery',
+                    'created_at'
+                );
+
+            if ($request->has('status') && !empty($request->status)) {
+                $query->where('status', $request->status);
+            }
+            $orders = $query->get()->map(function ($order) {
+                $order->total_quantity = $order->items->sum('quantity_ordered');
+                return $order;
+            });
+
+            return $orders;
         } catch (\Throwable $th) {
-            return  Log::error('Lỗi lấy toàn bộ danh sách đơn xuất: ' . $th->getMessage());
+            Log::error('Lỗi khi lấy danh sách đơn xuất: ' . $th->getMessage());
+            return ['error' => 'Lỗi khi lấy danh sách đơn xuất: ' . $th->getMessage()];
         }
     }
     public function searchProduct(Request $request)
     {
         $searchTerm = $request->input('searchProduct', '');
-
-        // Truy vấn sản phẩm theo tên
         $products = Product::query()
             ->where('name', 'LIKE', "%{$searchTerm}%")
             ->with([
@@ -66,18 +110,13 @@ class SaleOrdersRepository extends BaseRepository
             ])
             ->select('id', 'name', 'default_unit_id')
             ->get();
-
-        // Biến đổi dữ liệu trả về
         $result = [];
 
         foreach ($products as $product) {
             $defaultUnit = Unit::find($product->default_unit_id);
             foreach ($product->productVariants as $variant) {
-                // Lấy danh sách tên giá trị thuộc tính
                 $attributeNames = $variant->attributes->pluck('name')->implode('-');
                 $attributeValueIds = $variant->attributes->pluck('id')->toArray();
-
-                // Tạo tên hiển thị: product_name + attribute_names
                 $productName = $product->name;
                 if ($attributeNames) {
                     $productName .= '-' . $attributeNames;
@@ -185,8 +224,6 @@ class SaleOrdersRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-
-            // Ghép địa chỉ giao hàng
             $addressComponents = [
                 $data['address_detail'] ?? '',
                 $data['ward'] ?? '',
@@ -196,8 +233,6 @@ class SaleOrdersRepository extends BaseRepository
             $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
             Log::info('Address components:', $addressComponents);
             Log::info('Address delivery:', ['value' => $addressDelivery]);
-
-            // Tạo sale_order
             $newSaleOrder = [
                 'customer_id' => $data['customer_id'],
                 'order_date' => now(),
@@ -211,9 +246,30 @@ class SaleOrdersRepository extends BaseRepository
                 throw new \Exception('Không thể tạo đơn hàng');
             }
             Log::info('Sale Order created with ID: ' . $saleOrder->id);
-
-            // Tạo sale_order_items
             foreach ($data['items'] as $item) {
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
+                    ->first();
+
+                if (!$inventory) {
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
+                        ->with(['product', 'attributes'])
+                        ->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    throw new \Exception("Sản phẩm {$fullName} không tồn tại trong kho.");
+                }
+
+                $quantityRequested = $item['quantity'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1);
+                if ($quantityRequested > $inventory->quantity_on_hand) {
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
+                        ->with(['product', 'attributes'])
+                        ->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    throw new \Exception("Số lượng yêu cầu cho sản phẩm {$fullName} vượt quá số lượng trong kho (còn {$inventory->quantity_on_hand}).");
+                }
                 $this->saleOrderItem->create([
                     'sales_order_id' => $saleOrder->id,
                     'product_variant_id' => $item['product_variant_id'],
@@ -223,9 +279,10 @@ class SaleOrdersRepository extends BaseRepository
                     'subtotal' => $item['quantity'] * ($item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1)),
                     'quantity_shipped' => $item['quantity'],
                 ]);
+                $inventory->update([
+                    'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
+                ]);
             }
-
-            // Cập nhật thông tin địa chỉ cho khách hàng nếu có thay đổi hoặc trường hiện tại là null
             $customer = Customer::find($data['customer_id']);
             if ($customer) {
                 $updateData = [];
@@ -251,7 +308,96 @@ class SaleOrdersRepository extends BaseRepository
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error('Lỗi tạo đơn hàng: ' . $th->getMessage());
-            return ['error' => 'Lỗi tạo đơn hàng: ' . $th->getMessage()];
+            return ['error' => $th->getMessage()];
+        }
+    }
+
+    public function getInventoryQuantity($productVariantId)
+    {
+        $inventory = Inventory::where('product_variant_id', $productVariantId)
+            ->first();
+        return $inventory ? $inventory->quantity_on_hand : 0;
+    }
+    public function rejectOrder($orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Tìm sale_order
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            // Lấy danh sách sale_order_items
+            $items = $this->saleOrderItem->where('sales_order_id', $orderId)->get();
+
+            // Khôi phục inventory
+            foreach ($items as $item) {
+                $inventory = Inventory::where('product_variant_id', $item->product_variant_id)
+                    ->first();
+
+                if ($inventory) {
+                    // Tính số lượng khôi phục dựa trên quantity_ordered và conversion_factor
+                    $productVariant = ProductVariant::where('id', $item->product_variant_id)
+                        ->with(['product', 'attributes'])
+                        ->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    $conversionFactor = 1;
+                    $unitConversion = ProductUnitConversion::where('product_id', $productVariant->product_id)
+                        ->where('to_unit_id', $item->unit_id)
+                        ->first();
+                    if ($unitConversion) {
+                        $conversionFactor = $unitConversion->conversion_factor;
+                    }
+
+                    $quantityToRestore = $item->quantity_ordered * $conversionFactor;
+
+                    $inventory->update([
+                        'quantity_on_hand' => $inventory->quantity_on_hand + $quantityToRestore
+                    ]);
+                    Log::info("Khôi phục tồn kho cho sản phẩm {$fullName}: +{$quantityToRestore}");
+                } else {
+                    Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
+                }
+            }
+            $this->saleOrderItem->where('sales_order_id', $orderId)->delete();
+            Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
+            $saleOrder->delete();
+            Log::info("Đã xóa đơn hàng xuất {$orderId}");
+            DB::commit();
+            return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi từ chối đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi từ chối đơn hàng: {$th->getMessage()}"];
+        }
+    }
+    public function approveOrder($orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            if ($saleOrder->status !== 'pending') {
+                throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
+            }
+
+            $saleOrder->update(['status' => 'shipped']);
+            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped.");
+
+            DB::commit();
+            return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
         }
     }
 }

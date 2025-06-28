@@ -27,7 +27,7 @@ class StoreSaleOrderRequest extends FormRequest
             'items.*.useCustomUnit' => 'required|boolean',
             'items.*.selectedUnitId' => 'nullable|exists:units,id',
             'items.*.defaultUnitId' => 'required|exists:units,id',
-            'items.*.conversionFactor' => 'required|numeric|min:1',
+            'items.*.conversionFactor' => 'required|numeric',
         ];
     }
 
