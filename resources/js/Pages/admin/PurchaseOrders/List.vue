@@ -526,13 +526,9 @@
                                                     >Tổng tiền đơn:</span
                                                 >
                                                 <span class="font-medium">{{
-<<<<<<< HEAD
                                                     formatCurrencyVND(
                                                         selectedOrder.total_amount
                                                     )
-=======
-                                                    formatCurrencyVND(selectedOrder.total_amount)
->>>>>>> 3fdeaeb4b121d6559d2cdb48e509d2c4e7fff514
                                                 }}</span>
                                             </div>
                                             <div

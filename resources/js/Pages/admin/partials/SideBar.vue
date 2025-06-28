@@ -185,18 +185,14 @@
                     ></i>
                 </button>
 
-                <div id="product-menu"
-                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                  <Link :href="route('admin.products.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
-                    <div
-                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                        <i class="fas fa-th text-xs"></i>
-                    </div>
-                    <span class="text-xs">Danh sách sản phẩm</span>
-                    </Link>
-                    <Link :href="route('admin.attributes.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                <div
+                    id="product-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
+                >
+                    <Link
+                        :href="route('admin.products.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
                         >
@@ -213,20 +209,70 @@
                         >
                             <i class="fas fa-layer-group text-xs"></i>
                         </div>
-                        <span class="text-xs">Thuộc Tính sản phẩm</span>
-                    </Link>
-                    <Link :href="route('admin.categories.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
-                    <div
-                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
-                        <i class="fas fa-tags text-xs"></i>
-                    </div>
-                    <span class="text-xs">Danh mục</span>
+                        <span class="text-xs">Biến thể sản phẩm</span>
+                    </a>
+                    <Link
+                        :href="route('admin.categories.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                        >
+                            <i class="fas fa-tags text-xs"></i>
+                        </div>
+                        <span class="text-xs">Danh mục</span>
                     </Link>
                 </div>
             </div>
 
-           
+            <!-- Orders -->
+            <div class="mb-1">
+                <button
+                    class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
+                    onclick="toggleDropdown('order-menu')"
+                >
+                    <div
+                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors"
+                    >
+                        <i class="fas fa-shopping-bag text-sm"></i>
+                    </div>
+                    <span class="text-sm font-medium flex-1 text-left"
+                        >Đơn hàng</span
+                    >
+                    <i
+                        class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
+                        id="order-icon"
+                    ></i>
+                </button>
+
+                <div
+                    id="order-menu"
+                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
+                >
+                    <a
+                        href="purchase-orders.html"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
+                        >
+                            <i class="fas fa-shopping-cart text-xs"></i>
+                        </div>
+                        <span class="text-xs">Đơn hàng nhập</span>
+                    </a>
+                    <Link
+                        :href="route('admin.sale-orders.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                        >
+                            <i class="fas fa-tags text-xs"></i>
+                        </div>
+                        <span class="text-xs">Đơn hàng xuất</span>
+                    </Link>
+                </div>
+            </div>
 
             <!-- Suppliers -->
             <div class="mb-2">
