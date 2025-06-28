@@ -165,13 +165,19 @@
                             <label for="base-unit" class="block text-sm font-medium text-indigo-700">
                                 Đơn vị cơ bản <span class="text-red-500">*</span>
                             </label>
-                            <select v-model="form.base_unit_id" id="base-unit"
-                                class="mt-1 w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200">
-                                <option value="">Chọn đơn vị cơ bản</option>
-                                <option v-for="unit in units" :key="unit.id" :value="unit.id">
-                                    {{ unit.name }} ({{ unit.symbol }})
-                                </option>
-                            </select>
+                            <div class="flex gap-3">
+                                <select v-model="form.base_unit_id" id="base-unit"
+                                    class="mt-1 w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200">
+                                    <option value="">Chọn đơn vị cơ bản</option>
+                                    <option v-for="unit in units" :key="unit.id" :value="unit.id">
+                                        {{ unit.name }} ({{ unit.symbol }})
+                                    </option>
+                                </select>
+                                <button type="button" @click="openUnitModal"
+                                    class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                             <p v-if="form.errors.base_unit_id" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.base_unit_id }}
                             </p>
@@ -329,25 +335,34 @@
                                 <div v-for="(attribute, attrIndex) in variant.attributes" :key="attrIndex"
                                     class="mb-4 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-1">
-                                        <Multiselect v-model="attribute.attribute_id"
-                                            :options="getAvailableAttributes(variant, attribute.attribute_id)"
-                                            label="name" value-prop="id" placeholder="Chọn thuộc tính"
-                                            :searchable="true" :can-clear="true" :create-option="true"
-                                            @create-option="handleCreateAttribute" />
-                                        <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]"
-                                            class="text-red-500 text-sm mt-1">
-                                            {{ form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`] }}
-                                        </p>
+                                        <div class="flex gap-3 items-start">
+                                            <button type="button" @click="openAttributeModal(index, attrIndex)"
+                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <Multiselect v-model="attribute.attribute_id"
+                                                :options="getAvailableAttributes(variant, attribute.attribute_id)"
+                                                label="name" value-prop="id" placeholder="Chọn thuộc tính"
+                                                :searchable="true" :can-clear="true" />
+                                            <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]"
+                                                class="text-red-500 text-sm mt-1">
+                                                {{ form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]
+                                                }}
+                                            </p>
+                                        </div>
                                     </div>
                                     <div class="space-y-1">
                                         <div class="flex gap-3 items-start">
+                                            <button type="button" @click="openAttributeValueModal(index, attrIndex)"
+                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100"
+                                                :disabled="!attribute.attribute_id">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
                                             <div class="w-full">
                                                 <Multiselect v-model="attribute.attribute_value_ids"
                                                     :options="attributeValues[attribute.attribute_id] || []"
                                                     label="name" value-prop="id" placeholder="Chọn nhiều giá trị"
-                                                    mode="tags" :searchable="true" :can-clear="true"
-                                                    :create-option="true"
-                                                    @create-option="(val) => handleCreateAttributeValue(attribute.attribute_id, val)" />
+                                                    mode="tags" :searchable="true" :can-clear="true" />
                                                 <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_value_ids`]"
                                                     class="text-red-500 text-sm mt-1">
                                                     {{
@@ -381,20 +396,18 @@
                             <div class="text-sm font-medium text-indigo-700">{{ item.label }}</div>
                             <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                                 <div>
-                                    <input v-model="item.data.code" type="text" placeholder="Mã biến thể (SKU)"
-                                        :class="[
-                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
-                                        ]" />
+                                    <input v-model="item.data.code" type="text" placeholder="Mã biến thể (SKU)" :class="[
+                                        'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                    ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.code`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.code`] }}
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch"
-                                        :class="[
-                                            'w-full px-2 py-1 border rounded text-sm border-gray-300'
-                                        ]" />
+                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch" :class="[
+                                        'w-full px-2 py-1 border rounded text-sm border-gray-300'
+                                    ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.barcode`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.barcode`] }}
@@ -412,8 +425,7 @@
                                 </div>
                                 <div>
                                     <input v-model.number="item.data.quantity_on_hand" type="number"
-                                        placeholder="Tồn kho ban đầu"
-                                        :class="[
+                                        placeholder="Tồn kho ban đầu" :class="[
                                             'w-full px-2 py-1 border rounded text-sm border-gray-300'
                                         ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.quantity_on_hand`]"
@@ -447,8 +459,7 @@
                                 </div>
                                 <div>
                                     <input v-model="item.data.custom_location_name" type="text"
-                                        placeholder="Tên vị trí lưu kho (nếu có)"
-                                        :class="[
+                                        placeholder="Tên vị trí lưu kho (nếu có)" :class="[
                                             'w-full px-2 py-1 border rounded text-sm focus:ring-indigo-300 focus:outline-none',
                                             form.errors[`variants.0.combinationData.${item.key}.custom_location_name`] ? 'border-red-500' : 'border-gray-300'
                                         ]" />
@@ -477,6 +488,11 @@
                 </form>
             </div>
         </div>
+        <AttributeCreateModal :show="showAttributeModal" @close="closeAttributeModal"
+            @created="handleAttributeCreated" />
+        <AttributeValueCreateModal :show="showAttributeValueModal" :attributeId="modalAttributeId"
+            @close="closeAttributeValueModal" @created="handleAttributeValueCreated" />
+        <UnitCreateModal :show="showUnitModal" @close="closeUnitModal" @created="handleUnitCreated" />
     </AppLayout>
 </template>
 
@@ -487,6 +503,10 @@ import Waiting from '../../components/Waiting.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, onMounted, computed, watch } from 'vue';
 import Multiselect from '@vueform/multiselect';
+import AttributeCreateModal from '../../components/AttributeCreateModal.vue';
+import AttributeValueCreateModal from '../../components/AttributeValueCreateModal.vue';
+import UnitCreateModal from '../../components/UnitCreateModal.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
 
 const props = defineProps({
     categories: Array,
@@ -587,30 +607,6 @@ watch(hasVariant, (newVal) => {
         form.custom_location_name = null;
     }
 });
-
-const handleCreateAttribute = async (name) => {
-    try {
-        const response = await axios.post(route('admin.attributes.store'), { name });
-        props.attributes.push(response.data);
-    } catch (error) {
-        console.error('Lỗi tạo thuộc tính:', error);
-    }
-};
-
-const handleCreateAttributeValue = async (attributeId, value) => {
-    try {
-        const response = await axios.post(route('admin.attribute-values.store'), {
-            attribute_id: attributeId,
-            name: value,
-        });
-        if (!attributeValues.value[attributeId]) {
-            attributeValues.value[attributeId] = [];
-        }
-        attributeValues.value[attributeId].push(response.data);
-    } catch (error) {
-        console.error('Lỗi tạo giá trị thuộc tính:', error);
-    }
-};
 
 const getAvailableAttributes = (variant, currentAttrId = null) => {
     const selectedIds = variant.attributes
@@ -867,6 +863,93 @@ const attributeValues = ref({});
 onMounted(() => {
     attributeValues.value = props.attributeValues || {};
 });
+const showAttributeModal = ref(false);
+const showAttributeValueModal = ref(false);
+const modalAttributeId = ref(null);
+const currentVariantIndex = ref(null);
+const currentAttrIndex = ref(null);
+
+const openAttributeModal = (variantIndex, attrIndex) => {
+    currentVariantIndex.value = variantIndex;
+    currentAttrIndex.value = attrIndex;
+    showAttributeModal.value = true;
+};
+
+const closeAttributeModal = () => {
+    showAttributeModal.value = false;
+    currentVariantIndex.value = null;
+    currentAttrIndex.value = null;
+};
+
+const handleAttributeCreated = (data) => {
+    props.attributes.push(data);
+    attributeValues.value[data.id] = [];
+    form.variants[currentVariantIndex.value].attributes[currentAttrIndex.value].attribute_id = data.id;
+    closeAttributeModal();
+};
+
+const openAttributeValueModal = (variantIndex, attrIndex) => {
+    const attributeId = form.variants[variantIndex].attributes[attrIndex].attribute_id;
+    if (!attributeId) return;
+    currentVariantIndex.value = variantIndex;
+    currentAttrIndex.value = attrIndex;
+    modalAttributeId.value = attributeId;
+    showAttributeValueModal.value = true;
+};
+
+const closeAttributeValueModal = () => {
+    showAttributeValueModal.value = false;
+    modalAttributeId.value = null;
+    currentVariantIndex.value = null;
+    currentAttrIndex.value = null;
+};
+
+const handleAttributeValueCreated = (data) => {
+    if (!attributeValues.value[modalAttributeId.value]) {
+        attributeValues.value[modalAttributeId.value] = [];
+    }
+    attributeValues.value[modalAttributeId.value].push(data);
+    const attr = form.variants[currentVariantIndex.value].attributes[currentAttrIndex.value];
+    if (!Array.isArray(attr.attribute_value_ids)) {
+        attr.attribute_value_ids = [];
+    }
+    attr.attribute_value_ids.push(data.id);
+    closeAttributeValueModal();
+};
+
+
+// Đơn Vị Sản Phẩm
+const showUnitModal = ref(false);
+
+const openUnitModal = () => {
+    showUnitModal.value = true;
+};
+
+const closeUnitModal = () => {
+    showUnitModal.value = false;
+};
+
+const handleUnitCreated = (unit) => {
+    //   props.units.push(unit);
+    form.base_unit_id = unit.id;
+    closeUnitModal();
+};
 </script>
 
-<style></style>
+<style scoped>
+/* Đảm bảo nút + căn chỉnh đẹp */
+button i.fas.fa-plus {
+    font-size: 0.875rem;
+}
+
+/* Modal backdrop */
+.fixed.inset-0 {
+    z-index: 50;
+}
+
+/* Modal container */
+.bg-white.rounded-lg {
+    max-width: 32rem;
+    width: 100%;
+}
+</style>
