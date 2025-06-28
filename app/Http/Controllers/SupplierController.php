@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSupplierProductRequest;
 use App\Http\Requests\SupplierRequest;
 use App\Models\ProductVariant;
 use App\Models\Supplier;
@@ -63,58 +64,16 @@ class SupplierController extends Controller
 
     public function getProducts($id)
     {
-        $query = Supplier::with([
-            'variants' => function ($query) {
-                $query->with(['product.category', 'attributes']);
-            }
-        ])->find($id);
 
-        if (!$query) {
-            return redirect()->route('admin.suppliers.index')->with('error', 'Không tìm thấy nhà cung cấp');
+        $data = $this->supplierRepository->getProductBySupplierId($id);
+        if(isset($data['status']) && $data['status'] == false){
+            
+            return $this->returnInertia($data, '', '');
         }
-        // dd($query);
-        // Nhóm biến thể theo product_id
-        $groupedVariants = $query->variants->groupBy(function ($variant) {
-            return $variant->product_id ?? 'Không rõ sản phẩm';
-        });
-
-        $listVariantByProduct = Supplier::with(['supplierVariants'])->find(($id)); 
-        $listVariants = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
-        // dd($listVariants->toArray());
-        // Chuẩn hóa dữ liệu cho frontend
-        $products = $groupedVariants->map(function ($variants, $productId) {
-            $product = $variants->first()->product;
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'category' => $product->category ? ['name' => $product->category->name] : null,
-                'product_variants' => $variants->map(function ($variant) {
-                    $att = [
-                        'att_value' => "",
-                        "att" => "",
-                    ];
-
-                    foreach ($variant->attributes as $key => $item) {
-                        $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
-                        $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;
-                    }
-                    return [
-                        'id' => $variant->id,
-                        'code' => $variant->code,
-                        'barcode' => $variant->barcode,
-                        'sale_price' => $variant->sale_price, // Lấy từ product_variants
-                        'attributes' => $att
-                    ];
-                })->toArray()
-            ];
-        })->values()->toArray();
         return Inertia::render('admin/Supplier/Products', [
-            'supplier' => [
-                'id' => $query->id,
-                'name' => $query->name
-            ],
-            'products' => $products,
-            'listVariants' => $listVariants,
+            'supplier' =>$data['supplier'],
+            'products' => $data['products'],
+            'listVariants' => $data['listVariants'],
         ]);
     }
 
@@ -131,27 +90,12 @@ class SupplierController extends Controller
         return response()->json(['variants' => $variants]);
     }
 
-    public function storeSupplierProducts(Request $request, $supplierId)
+    public function storeSupplierProducts(StoreSupplierProductRequest $request, $supplierId)
     {
-      $data = $request->all();
-        try {
-            DB::beginTransaction();
-            $newObj = [];
-            $newObj['cost_price'] = $data['cost_price'];
-            $newObj['min_order_quantity'] = $data['min_order_quantity'];
-            $newObj['product_variant_id'] = $data['id'];
-            $newObj['supplier_id'] = $supplierId;
-            $newObj = SupplierProductVariant::create($newObj);
-            if(!$newObj){
-                throw new Exception("Có lỗi khi thêm biên thể cho nhà cung cấp");
-            }
-            DB::commit();
-            return redirect()->route('admin.suppliers.products', $supplierId)->with('success', 'Thêm sản phẩm thành công!');
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error('Lỗi khi thêm sản phẩm cho nhà cung cấp: ' . $th->getMessage());
-            return back()->with('error', 'Lỗi khi thêm sản phẩm: ' . $th->getMessage());
-        }
+      $data = $request->validated();
+      $data['supplier_id'] = $supplierId;
+      $supplierProduct = $this->supplierRepository->handleCreateSupplierProduct($data);
+      return $this->returnInertia($supplierProduct, "Thêm biến thể cho nhà cung cấp thành công", 'admin.suppliers.products', ['id' => $supplierId]);
     }
     public function getVariantsByProductId($supplierId, $productId)
     {

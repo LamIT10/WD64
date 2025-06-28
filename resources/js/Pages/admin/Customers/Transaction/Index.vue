@@ -23,32 +23,28 @@
       <!-- Table -->
       <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-fade-in">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300  dark:text-gray-400">
+
               <tr>
                 <!-- Checkbox column for selecting all -->
-                <th class="w-12 px-4 py-3 text-left">
-                  <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"
-                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                </th>
+                
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Mã đơn hàng
                 </th>
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  Họ tên
+                  Khách hàng
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Trạng thái
                 </th>
                 <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Tông tiền nợ
                 </th>
-
-
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Hạn công nợ
@@ -61,25 +57,17 @@
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Điều chỉnh
                 </th>
-
-
-
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="(debt, index) in props.customerTransaction.data" :key="debt.id" @click="handleClick(debt.id)"
                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
                 <!-- Checkbox for individual row -->
-                <td class="px-4 py-4 whitespace-nowrap">
-                  <input type="checkbox" :value="debt.id" v-model="selectedcustomerTransaction"
-                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-left text-sm text-gray-500 font-medium">
                   {{ 'DH' + debt.id.toString().padStart(4, '0') }}
-
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
+                  <div class="text-sm font-medium text-gray-900">
                     {{ debt.customer?.name || '-' }}
                   </div>
                 </td>
@@ -91,18 +79,16 @@
                   }" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold">
                     {{ debt.status }}
                   </span>
+                </td> 
+                <td class="px-6 py-4 whitespace-nowrap text-center font-medium text-red-600 text-base">
+                  {{ formatCurrency(debt.remaining_amount)}}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center font-medium text-gray-800">
-                  {{ formatCurrency(debt.remaining_amount) }}
-                </td>
-
                 <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                   {{
                     debt.credit_due_date ? formatDate(debt.credit_due_date) : '-' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ debt.transaction_date ? formatDate(debt.transaction_date) : 'Chưa giao dịch' }}
-
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="relative inline-block text-left">
@@ -115,7 +101,6 @@
                         </svg>
                       </button>
                     </div>
-
                     <!-- Dropdown menu -->
                     <transition v-if="debt.status !== 'Đã thanh toán'" enter-active-class="transition ease-out duration-100"
                       enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
@@ -172,25 +157,20 @@
       </div>
       <PaymentEditModal :visible="showPaymentModal" :debt="selectedDebt" @closeModal="showPaymentModal = false" />
       <DueDateEditModal :visible="showDueDateModal" :debt="selectedDebt" @closeModal="showDueDateModal = false" />
-
     </div>
   </AppLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../../Layouts/AppLayout.vue';
 import PaymentEditModal from './PaymentEditModal.vue';
 import DueDateEditModal from './DueDateEditModal.vue'
 import { route } from 'ziggy-js';
-
 const props = defineProps({
   customerTransaction: Array,
 });
-
-
-
 const activeDropdown = ref(null);
 const showPaymentModal = ref(false);
 const showDueDateModal = ref(false);
