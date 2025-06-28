@@ -35,4 +35,6 @@ class InventoryController extends Controller
     {
         //
     }
+
+    
 }

@@ -7,6 +7,7 @@ use App\Models\InventoryLocation;
 use App\Models\Product;
 use App\Repositories\InventoryAuditRepository;
 use Illuminate\Http\Request;
+use Symfony\Component\CssSelector\XPath\Extension\FunctionExtension;
 
 class InventoryAuditController extends BaseApiController
 {
@@ -104,4 +105,35 @@ class InventoryAuditController extends BaseApiController
         ], 200);
     }
 
+    public function update(Request $request)
+    {
+        $auditId = $request->input('audit_id');
+        $isReject = $request->input('reject', false);
+
+        if (!$auditId) {
+            return response()->json([
+                'message' => 'Thiếu audit_id!'
+            ], 400);
+        }
+
+        $audit = InventoryAudit::find($auditId);
+        if (!$audit) {
+            return response()->json(['message' => 'Không tìm thấy phiếu kiểm kho!'], 404);
+        }
+
+        if ($isReject) {
+            $audit->is_adjusted = 2; // hoặc $audit->status = 'rejected';
+            $audit->save();
+
+            return response()->json([
+                'message' => 'Đã từ chối phiếu kiểm kho!',
+                'success' => true
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Không có hành động nào được thực hiện!',
+            'success' => false
+        ], 400);
+    }
 }
