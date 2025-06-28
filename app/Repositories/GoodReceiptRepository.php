@@ -4,11 +4,13 @@ namespace App\Repositories;
 
 use App\Models\GoodReceipt;
 use App\Models\GoodReceiptItem;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Receiving;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,39 @@ class GoodReceiptRepository extends BaseRepository
     {
         $this->handleModel = $model;
     }
-    public function getList($id)
+    public function getList($request)
+    {
+        $query = $this->handleModel->with([
+            'purchaseOrder' => function ($query) {
+                $query->select(['id', 'supplier_id', 'user_id', 'order_status']);
+            },
+            'purchaseOrder.supplier' => function ($query) {
+                $query->select(['id', 'name']);
+            },
+            'createBy' => function ($query) {
+                $query->select(['id', 'name']);
+            },
+            'items' => function ($query) {
+                $query->select(['id', 'good_receipt_id', 'product_variant_id', 'quantity_received', 'unit_price', 'unit_id', 'subtotal']);
+            },
+            'items.productVariant' => function ($query) {
+                $query->select(['id', 'product_id']);
+            },
+            'items.productVariant.product' => function ($query) {
+                $query->select(['id', 'name', 'default_unit_id']);
+            },
+            'items.productVariant.attributes' => function ($query) {
+                $query->select(['*']);
+            },
+            'items.unit' => function ($query) {
+                $query->select(['id', 'name']);
+            },
+        ]);
+        $query->orderBy('created_at', 'desc');
+        $list = $query->get();
+        return $list;
+    }
+    public function getByPurchaseOrder($id)
     {
         $query = PurchaseOrder::with([
             'supplier' => function ($query) {
@@ -31,7 +65,7 @@ class GoodReceiptRepository extends BaseRepository
                 $query->select(['id', 'name']);
             },
             'items' => function ($query) {
-                $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered','quantity_received','unit_price', 'unit_id', 'subtotal']);
+                $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered', 'quantity_received', 'unit_price', 'unit_id', 'subtotal']);
             },
             'items.productVariant' => function ($query) {
                 $query->select(['id', 'product_id']);
@@ -60,7 +94,7 @@ class GoodReceiptRepository extends BaseRepository
             $newGoodReceipt['code'] = $this->autoAddDealCode();
             $newGoodReceipt['receipt_date'] = Carbon::now();
             $newGoodReceipt['created_by'] = Auth::id();
-            $newGoodReceipt['subtotal'] = $data['total_amount'] ?? 0;
+            $newGoodReceipt['total_amount'] = $data['total_amount'] ?? 0;
             $goodReceipt = $this->handleModel->create($newGoodReceipt);
 
             $purchaseOrder = PurchaseOrder::find($data['purchase_order_id']);
@@ -84,7 +118,12 @@ class GoodReceiptRepository extends BaseRepository
                     return $this->returnError('Mục phiếu nhập kho không tồn tại trong đơn hàng, vui lòng kiểm tra lại');
                 }
                 $purchaseItem->update([
-                    'quantity_received' => $item['quantity_received'],
+                    'quantity_received' => $purchaseItem['quantity_received'] + $item['quantity_received'],
+                ]);
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
+                $inventory->update([
+                    'quantity_in_transit' => $inventory->quantity_in_transit - $item['quantity_received'],
+                    'quantity_on_hand' => $inventory->quantity_on_hand + $item['quantity_received'],
                 ]);
 
                 $newItem = [];

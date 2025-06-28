@@ -6,6 +6,7 @@ use App\Models\Attribute;
 use App\Models\Inventory;
 use App\Models\InventoryLocation;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Supplier;
 use App\Models\SupplierProductVariant;
 use App\Models\Unit;
@@ -796,5 +797,58 @@ class ProductRepository extends BaseRepository
             ]);
             return $this->returnError('Lỗi khi xóa sản phẩm: ' . $th->getMessage());
         }
+    }
+
+    public function search($search)
+    {
+        return $this->handleModel::select(['id', 'name'])
+            ->where('name', 'like', '%' . $search . '%')
+            ->orWhere('code', 'like', '%' . $search . '%')
+            ->take(10)
+            ->get()
+            ->toArray();
+    }
+
+    public function getAvailableVariants($productId, $supplierId)
+    {
+        $linkedVariantIds = SupplierProductVariant::where('supplier_id', $supplierId)
+            ->pluck('product_variant_id')
+            ->toArray();
+
+        return ProductVariant::where('product_id', $productId)
+            ->whereNotIn('id', $linkedVariantIds)
+            ->with(['attributes'])
+            ->get()
+            ->map(function ($variant) {
+                return [
+                    'id' => $variant->id,
+                    'code' => $variant->code,
+                    'barcode' => $variant->barcode,
+                    'sale_price' => $variant->sale_price,
+                    'attributes' => $variant->attributes->map(function ($attr) {
+                        return [
+                            'id' => $attr->id,
+                            'value' => $attr->value
+                        ];
+                    })
+                ];
+            })->toArray();
+    }
+
+    public function getProductVariantsById($productId)
+    {
+        return DB::table('products as p')
+            ->join('product_variants as pv', 'pv.product_id', '=', 'p.id')
+            ->join('product_variant_attributes as pva', 'pva.variant_id', '=', 'pv.id')
+            ->join('attribute_values as av', 'av.id', '=', 'pva.attribute_value_id')
+            ->join('attributes as a', 'a.id', '=', 'av.attribute_id')
+            ->where('p.id', $productId)
+            ->select([
+                'p.name as product_name',
+                'pv.id as variant_id',
+                'a.name as attribute_name',
+                'av.name as attribute_value',
+            ])
+            ->get();
     }
 }

@@ -19,12 +19,12 @@
                     <Waiting route-name="admin.users.create" :route-params="{}">
                         <i class="fas fa-plus"></i> Nhân viên
                     </Waiting>
-                    <Waiting route-name="admin.users.create" :route-params="{}">
+                    <!-- <Waiting route-name="#" :route-params="{}">
                         <i class="fa fa-sign-in icon-btn"></i> Nhập file
                     </Waiting>
-                    <Waiting route-name="admin-users.create" :route-params="{}">
+                    <Waiting route-name="#" :route-params="{}">
                         <i class="fa fa-file-export icon-btn"></i> Xuất file
-                    </Waiting>
+                    </Waiting> -->
                     <div ref="dropdownRef" class="relative">
                         <button @click="toggleDropdown"
                             class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
@@ -104,7 +104,7 @@
             <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-fade-in">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                        <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:text-gray-400">
                             <tr>
                                 <!-- Checkbox column for selecting all -->
                                 <th class="w-12 px-4 py-3 text-left">
@@ -172,9 +172,9 @@
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </td>
                                 <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
+                                    <div class="flex items-center ">
                                         <img :src="user.avatar ? `/storage/${user.avatar}` : '/images/default-ava.png'"
-                                            alt="Avatar" class="h-10 w-10 object-cover shadow-sm">
+                                            alt="Avatar" class="h-10 w-10 object-cover shadow-sm rounded-md">
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">
                                                 {{ user.name }}
@@ -207,9 +207,8 @@
                                 </td>
                                 <td v-if="visibleColumns.includes('position')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <p class="rounded-2xl bg-blue-500 p-1 text-center m-0.5 text-white"
-                                        v-for="role in user.roles">
-                                        {{ role.name }}
+                                    <p class="rounded-2xl font-medium p-1 bg-gray-100 text-center  m-0.5">
+                                        {{ user.position || '-' }}
                                     </p>
                                 </td>
                                 <td v-if="visibleColumns.includes('facebook')"

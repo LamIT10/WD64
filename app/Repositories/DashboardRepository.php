@@ -57,10 +57,10 @@ class DashboardRepository extends BaseRepository
         $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
 
         // Đếm theo từng trạng thái
-        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('status', 'pending')->count();
-        $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('status', 'received')->count();
-        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('status', 'closed')->count();
-        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('status', 'received')->sum('total_amount');
+        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
+        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('order_status', 0)->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
         $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
@@ -139,6 +139,13 @@ class DashboardRepository extends BaseRepository
                 'quarterly' => $this->getNetRevenueStats('quarterly'),
             ],
 
+            'inventory_by_paper_type' => [
+                '7days' => $this->getInventoryByPaperType('7days'),
+                '30days' => $this->getInventoryByPaperType('30days'),
+                '90days' => $this->getInventoryByPaperType('90days'),
+            ],
+            'low_stock_items' => $this->getLowStockItems(10),
+
         ];
 
 
@@ -159,19 +166,39 @@ class DashboardRepository extends BaseRepository
             ->join('sale_orders', 'sale_order_items.sales_order_id', '=', 'sale_orders.id')
             ->join('product_variants', 'sale_order_items.product_variant_id', '=', 'product_variants.id')
             ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->join('units as base_unit', 'products.default_unit_id', '=', 'base_unit.id')
+            ->leftJoin('product_unit_conversions as puc', function ($join) {
+                $join->on('products.id', '=', 'puc.product_id')
+                    ->on('sale_order_items.unit_id', '=', 'puc.from_unit_id')
+                    ->on('products.default_unit_id', '=', 'puc.to_unit_id');
+            })
             ->where('sale_orders.order_date', '>=', $startDate)
             ->select(
                 'product_variants.id as variant_id',
                 'product_variants.code as variant_code',
                 DB::raw("CONCAT(products.name, ' - ', product_variants.code) AS full_variant_name"),
-                DB::raw('SUM(sale_order_items.quantity_ordered) as total_quantity'),
+                'base_unit.name as base_unit_name',
+                DB::raw("
+                SUM(
+                    CASE 
+                        WHEN puc.conversion_factor IS NOT NULL THEN sale_order_items.quantity_ordered * puc.conversion_factor
+                        ELSE sale_order_items.quantity_ordered
+                    END
+                ) as total_quantity
+            "),
                 DB::raw('SUM(sale_order_items.subtotal) as total_revenue')
             )
-            ->groupBy('product_variants.id', 'product_variants.code', 'products.name')
+            ->groupBy(
+                'product_variants.id',
+                'product_variants.code',
+                'products.name',
+                'base_unit.name'
+            )
             ->orderByDesc('total_quantity')
             ->limit(10)
             ->get();
     }
+
 
     private function getTop10Customers($type = 'month')
     {
@@ -185,6 +212,7 @@ class DashboardRepository extends BaseRepository
         return DB::table('sale_orders')
             ->join('customers', 'sale_orders.customer_id', '=', 'customers.id')
             ->where('sale_orders.order_date', '>=', $startDate)
+            ->where('sale_orders.status', '=', 'closed')
             ->select(
                 'customers.id as customer_id',
                 'customers.name as customer_name',
@@ -196,6 +224,7 @@ class DashboardRepository extends BaseRepository
             ->limit(10)
             ->get();
     }
+
 
     public function getNetRevenueStats($range = 'weekly')
     {
@@ -271,4 +300,62 @@ class DashboardRepository extends BaseRepository
             'percent_change' => is_numeric($change) ? $change : 0,
         ];
     }
+    // Lấy thống kê tồn kho theo loại giấy
+    public function getInventoryByPaperType($range = '90days')
+    {
+        $startDate = match ($range) {
+            '7days' => now()->subDays(7),
+            '30days' => now()->subDays(30),
+            '90days' => now()->subDays(90),
+            default => now()->subDays(90),
+        };
+
+        return DB::table('inventory')
+            ->join('product_variants', 'inventory.product_variant_id', '=', 'product_variants.id')
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->leftJoin('product_unit_conversions as puc', function ($join) {
+                $join->on('products.id', '=', 'puc.product_id')
+                    ->on('inventory.unit_id', '=', 'puc.from_unit_id')
+                    ->on('products.default_unit_id', '=', 'puc.to_unit_id');
+            })
+            ->leftJoin('units as default_units', 'products.default_unit_id', '=', 'default_units.id')
+            ->where('inventory.updated_at', '>=', $startDate)
+            ->select(
+                'products.name as paper_type',
+                DB::raw("
+                SUM(
+                    CASE 
+                        WHEN puc.conversion_factor IS NOT NULL 
+                            THEN inventory.quantity_on_hand * puc.conversion_factor
+                        ELSE inventory.quantity_on_hand
+                    END
+                ) as total_quantity
+            "),
+                DB::raw('MAX(default_units.symbol) as unit')
+            )
+            ->groupBy('products.name')
+            ->orderByDesc('total_quantity')
+            ->get();
+    }
+
+    // Lấy danh sách sản phẩm có số lượng tồn kho thấp hơn ngưỡng nhất định
+public function getLowStockItems($threshold = 10, $limit = 5)
+{
+    return DB::table('inventory')
+        ->join('product_variants', 'inventory.product_variant_id', '=', 'product_variants.id')
+        ->join('products', 'product_variants.product_id', '=', 'products.id')
+        ->leftJoin('units', 'inventory.unit_id', '=', 'units.id')
+        ->where('inventory.quantity_on_hand', '<=', $threshold)
+        ->select(
+            'product_variants.id',
+            'product_variants.code',
+            'products.name as product_name',
+            'inventory.quantity_on_hand',
+            'units.symbol as unit'
+        )
+        ->orderBy('inventory.quantity_on_hand', 'asc')
+        ->limit($limit)
+        ->get();
+}
+
 }

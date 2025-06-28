@@ -3,10 +3,12 @@ import Header from "../partials/Header.vue";
 import Sidebar from "../partials/SideBar.vue";
 import Toast from "../../components/Toast.vue";
 import { usePage } from "@inertiajs/vue3";
+import ToastClient from "../../components/ToastClient.vue";
 const page = usePage()
 </script>
 <template>
     <Toast :initial-flash="page.props.flash" />
+    <ToastClient ref="toastRef" />
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <Sidebar />
     <div
