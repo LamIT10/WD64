@@ -1,87 +1,95 @@
 <template>
   <AppLayout>
     <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-6 md:p-8">
-      <!-- Header Card -->
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-        <h5 class="text-xl font-bold text-indigo-800 tracking-tight">Danh sách sản phẩm trong kho</h5>
-      </div>
-      <!-- Form Phiếu Kiểm Kê -->
-      <form @submit.prevent="submitForm">
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div class="grid grid-cols-1 gap-6">
-            <div class="flex justify-center">
-              <div class="my-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Chọn khu vực kiểm kho</label>
-                <div class="flex flex-wrap gap-4 justify-center">
-                  <button v-for="zone in zones" :key="zone" type="button"
-                    :class="['px-4 py-2 rounded-lg border', selectedZones.includes(zone) ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-indigo-50 text-indigo-700 border-indigo-200']"
-                    @click="toggleZone(zone)">
-                    {{ zone }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Danh sách Sản phẩm cần kiểm kê -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div class="flex justify-between mb-4">
+      <!-- Stats Cards -->
+      <InventoryStatsCards/>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="grid grid-cols-1 gap-6">
+          <div class="flex justify-center">
             <div>
-              <h6 class="text-lg font-semibold text-indigo-800 mb-4">Danh sách Sản phẩm</h6>
-            </div>
-            <div class="flex items-center space-x-4">
-              <div>
-                <div @click="exportSampleExcel"
-                  class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"
-                  type="button">
-                  <i class="fa fa-download icon-btn"></i> Tải file
-                </div>
+              <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Chọn khu vực xem sản
+                phẩm</label>
+              <div class="flex flex-wrap gap-4 justify-center">
+                <button v-for="zone in zones" :key="zone" type="button"
+                  :class="['px-4 py-2 rounded-lg border', selectedZones.includes(zone) ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-indigo-50 text-indigo-700 border-indigo-200']"
+                  @click="toggleZone(zone)">
+                  {{ zone }}
+                </button>
               </div>
             </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-indigo-50">
-                <tr>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">#
-                  </th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Khu
-                    vực
-                  </th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Mã
-                    hàng</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tên
-                    hàng</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Đơn
-                    vị</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tồn
-                    kho</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-100">
-                <tr v-for="(product, index) in filteredProducts" :key="product.id"
-                  class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ index + 1 }}</td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.zone }}</td>
-                  <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ product.code }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-900">
-                    {{ product.name_product }}
-                    <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
-                      <div class="text-xs text-gray-500 mt-1">
-                        <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
-                          <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
-                        </span>
-                      </div>
-                    </template>
-                  </td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
-                </tr>
-              </tbody>
-            </table>
+        </div>
+      </div>
+      <!-- Danh sách Sản phẩm cần kiểm kê -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <div class="flex justify-between mb-4">
+          <div class="flex gap-x-10 items-start space-y-1">
+            <h5 class="text-xl  font-bold text-indigo-800 tracking-tight">Danh sách sản phẩm trong kho</h5>
+
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="relative w-76">
+              <input v-model="searchQuery" type="text" placeholder="Nhập mã hoặc tên sản phẩm..."
+                class="border border-indigo-200 rounded-lg py-2 px-4 bg-indigo-50 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-300 transition" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-400">
+                <i class="fa fa-search"></i>
+              </span>
+            </div>
+            <div @click="exportSampleExcel"
+              class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"
+              type="button">
+              <i class="fa fa-download icon-btn"></i> Tải file
+            </div>
           </div>
         </div>
-      </form>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-indigo-50">
+              <tr>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">#
+                </th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Khu
+                  vực
+                </th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Mã
+                  hàng</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tên
+                  hàng</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Đơn
+                  vị</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tồn
+                  kho</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Đã
+                  đặt trước</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Đang
+                  vận chuyển</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="(product, index) in filteredProducts" :key="product.id"
+                class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ index + 1 }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.zone }}</td>
+                <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ product.code }}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ product.name_product }}
+                  <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
+                    <div class="text-xs text-gray-500 mt-1">
+                      <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
+                        <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
+                      </span>
+                    </div>
+                  </template>
+                </td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_reserved }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_in_transit }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
@@ -90,9 +98,14 @@ import { reactive, ref, watch, computed } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { usePage, router } from '@inertiajs/vue3';
 import * as XLSX from 'xlsx';
+import InventoryStatsCards from '../../components/InventoryStatsCards.vue';
+
+const filterZone = ref("");
+const searchQuery = ref("");
 
 const page = usePage();
 const zones = page.props.zones || [];
+const cardData = page.props.cardData || [];
 const products = reactive([]);
 const selectedZones = ref([]);
 const today = new Date().toISOString().split('T')[0];
@@ -146,92 +159,17 @@ const fetchProductsByZones = async () => {
 };
 const importInput = ref(null);
 
-const handleImportExcel = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-    // Xác định header
-    const headers = jsonData[0].map(h => h ? h.toString().trim() : '');
-    const rows = jsonData.slice(1).filter(row => row.length && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
-
-    // Lấy danh sách khu vực từ file
-    const importedZones = Array.from(new Set(rows.map(row => row[headers.indexOf('Khu vực')] || '').filter(Boolean)));
-    // Cập nhật selectedZones và chờ API load xong products rồi mới xử lý tiếp
-    selectedZones.value = importedZones;
-    await fetchProductsByZones();
-
-    // Map dữ liệu từ file Excel vào auditData.value.items
-    rows.forEach(row => {
-      const code = row[headers.indexOf('Mã hàng')] || '';
-      const zone = row[headers.indexOf('Khu vực')] || '';
-      // Tìm đúng item trong auditData.value.items để cập nhật
-      const idx = products.findIndex(
-        p => p.code === code && p.zone === zone
-      );
-      if (idx !== -1 && auditData.value.items[idx]) {
-        auditData.value.items[idx].actual_quantity = actual_quantity;
-        auditData.value.items[idx].discrepancy_reason = discrepancy_reason;
-      }
-    });
-  };
-  reader.readAsArrayBuffer(file);
-};
-
-const submitForm = () => {
-  // Kiểm tra trạng thái hoàn thành hay có chênh lệch
-  const allMatched = auditData.value.items.every(item =>
-    Number(item.expected_quantity) === Number(item.actual_quantity)
-  );
-  const status = allMatched ? 'completed' : 'issues';
-
-  router.post(route('admin.inventory-audit.store'), {
-    notes: auditData.value.notes,
-    audit_date: auditData.value.audit_date,
-    status: status,
-    items: auditData.value.items.map(item => ({
-      product_variant_id: item.product_variant_id,
-      expected_quantity: item.expected_quantity,
-      actual_quantity: item.actual_quantity,
-      discrepancy_reason: item.discrepancy_reason
-    }))
-  }, {
-    forceFormData: true,
-    preserveState: true,
-    onSuccess: () => {
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lưu phiếu kiểm kho thành công!', 'success');
-      }
-      // resetForm(); // Nếu bạn có hàm reset form thì gọi ở đây
-    },
-    onError: (errors) => {
-      console.error('Lỗi từ backend:', errors);
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lỗi khi lưu phiếu kiểm kho: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
-      }
-    },
-  });
-};
-
-const filteredProducts = computed(() => products);
-
 const exportSampleExcel = () => {
   const sampleData = [
-    ['Khu vực', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho'],
+    ['Khu vực', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', "Đã đặt trước", "Đang vận chuyển"],
     ...filteredProducts.value.map((product, idx) => [
       product.zone,
       product.code,
       product.name_product,
       product.unit,
       product.quantity_on_hand,
+      product.quantity_reserved,
+      product.quantity_in_transit,
     ])
   ];
   const ws = XLSX.utils.aoa_to_sheet(sampleData);
@@ -247,4 +185,19 @@ const exportSampleExcel = () => {
     saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `mau-kiem-kho-${dateStr}.xlsx`);
   });
 };
+
+const filteredProducts = computed(() => {
+  let result = products;
+  if (filterZone.value) {
+    result = result.filter(p => p.zone === filterZone.value);
+  }
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase();
+    result = result.filter(p =>
+      (p.code && p.code.toLowerCase().includes(q)) ||
+      (p.name_product && p.name_product.toLowerCase().includes(q))
+    );
+  }
+  return result;
+});
 </script>
