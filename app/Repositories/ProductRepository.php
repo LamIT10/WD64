@@ -6,6 +6,7 @@ use App\Models\Attribute;
 use App\Models\Inventory;
 use App\Models\InventoryLocation;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Supplier;
 use App\Models\SupplierProductVariant;
 use App\Models\Unit;
@@ -13,6 +14,7 @@ use App\Models\WarehouseZone;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -85,10 +87,10 @@ class ProductRepository extends BaseRepository
             'unitConversions.fromUnit',
             'unitConversions.toUnit',
         ])
-        ->whereHas('productVariants.supplierVariants', function ($query) use ($supplierId) {
-            $query->where('supplier_id', $supplierId);
-        })
-        ->paginate($perPage);
+            ->whereHas('productVariants.supplierVariants', function ($query) use ($supplierId) {
+                $query->where('supplier_id', $supplierId);
+            })
+            ->paginate($perPage);
     }
     public function store($data)
     {
@@ -242,23 +244,96 @@ class ProductRepository extends BaseRepository
     }
     public function show($id)
     {
-        try {
-            $product = $this->handleModel::with([
-                'category',
-                'images',
-                'defaultUnit',
-                'unitConversions',
-                'productVariants.inventory',
-                'productVariants.attributes',
-                'productVariants.inventoryLocations',
-                'productVariants.supplierVariants',
-            ])->find($id);
-
-            return $product;
-        } catch (Exception $e) {
-            Log::error("Lỗi khi lấy chi tiết sản phẩm: " . $e->getMessage());
-            return $this->returnError("Không tìm thấy sản phẩm");
+        if (!is_numeric($id) || $id <= 0) {
+            return response()->json([
+                'error' => true,
+                'message' => 'ID sản phẩm không hợp lệ',
+            ], 400);
         }
+
+        $product = $this->handleModel::with([
+            'category',
+            'images',
+            'defaultUnit',
+            'unitConversions.toUnit',
+            'productVariants.inventory',
+            'productVariants.attributes',
+            'productVariants.inventoryLocations.zone',
+            'productVariants.supplierVariants.supplier',
+        ])->findOrFail($id);
+
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'code' => $product->code,
+            'description' => $product->description ?? '',
+            'min_stock' => $product->min_stock ?? 0,
+            'category' => $product->category ? [
+                'id' => $product->category->id,
+                'name' => $product->category->name,
+            ] : null,
+            'production_date' => $product->production_date,
+            'expiration_date' => $product->expiration_date,
+            'default_unit' => $product->defaultUnit ? [
+                'id' => $product->defaultUnit->id,
+                'name' => $product->defaultUnit->name,
+                'symbol' => $product->defaultUnit->symbol,
+            ] : null,
+            'images' => $product->images->map(fn($img) => [
+                'id' => $img->id,
+                'path' => $img->url, // Ensure this matches frontend expectations (e.g., /storage/...)
+            ])->values()->toArray(),
+            'unit_conversions' => $product->unitConversions->map(fn($conv) => [
+                'to_unit_id' => $conv->to_unit_id,
+                'to_unit' => $conv->toUnit ? [
+                    'id' => $conv->toUnit->id,
+                    'name' => $conv->toUnit->name,
+                    'symbol' => $conv->toUnit->symbol,
+                ] : null,
+                'conversion_factor' => $conv->conversion_factor,
+            ])->values()->toArray(),
+            'product_variants' => $product->productVariants->map(fn($variant) => [
+                'id' => $variant->id,
+                'code' => $variant->code,
+                'barcode' => $variant->barcode ?? null,
+                'sale_price' => $variant->sale_price ?? 0,
+                'inventory' => $variant->inventory->first() ? [
+                    'quantity_on_hand' => $variant->inventory->first()->quantity_on_hand ?? 0,
+                ] : [],
+                'attributes' => $variant->attributes->map(fn($attr) => [
+                    'id' => $attr->id,
+                    'name' => $attr->name,
+                ])->values()->toArray(),
+                'inventory_locations' => $variant->inventoryLocations->map(fn($loc) => [
+                    'zone' => $loc->zone ? [
+                        'id' => $loc->zone->id,
+                        'name' => $loc->zone->name,
+                    ] : null,
+                    'custom_location_name' => $loc->custom_location_name ?? '',
+                ])->values()->toArray(),
+                'supplier_variants' => $variant->supplierVariants->map(fn($sv) => [
+                    'supplier' => $sv->supplier ? [
+                        'id' => $sv->supplier->id,
+                        'name' => $sv->supplier->name,
+                        'phone' => $sv->supplier->phone ?? '',
+                    ] : null,
+                ])->values()->toArray(),
+            ])->values()->toArray(),
+            'supplier_variants' => $product->productVariants->flatMap->supplierVariants->map(fn($sv) => [
+                'supplier' => $sv->supplier ? [
+                    'id' => $sv->supplier->id,
+                    'name' => $sv->supplier->name,
+                    'phone' => $sv->supplier->phone ?? '',
+                ] : null,
+            ])->unique('supplier.id')->values()->toArray(),
+            'inventory_locations' => $product->productVariants->flatMap->inventoryLocations->map(fn($loc) => [
+                'zone' => $loc->zone ? [
+                    'id' => $loc->zone->id,
+                    'name' => $loc->zone->name,
+                ] : null,
+                'custom_location_name' => $loc->custom_location_name ?? '',
+            ])->unique(fn($loc) => $loc['zone']['id'] . '-' . $loc['custom_location_name'])->values()->toArray(),
+        ];
     }
 
     public function getEditData($id)
@@ -722,5 +797,58 @@ class ProductRepository extends BaseRepository
             ]);
             return $this->returnError('Lỗi khi xóa sản phẩm: ' . $th->getMessage());
         }
+    }
+
+    public function search($search)
+    {
+        return $this->handleModel::select(['id', 'name'])
+            ->where('name', 'like', '%' . $search . '%')
+            ->orWhere('code', 'like', '%' . $search . '%')
+            ->take(10)
+            ->get()
+            ->toArray();
+    }
+
+    public function getAvailableVariants($productId, $supplierId)
+    {
+        $linkedVariantIds = SupplierProductVariant::where('supplier_id', $supplierId)
+            ->pluck('product_variant_id')
+            ->toArray();
+
+        return ProductVariant::where('product_id', $productId)
+            ->whereNotIn('id', $linkedVariantIds)
+            ->with(['attributes'])
+            ->get()
+            ->map(function ($variant) {
+                return [
+                    'id' => $variant->id,
+                    'code' => $variant->code,
+                    'barcode' => $variant->barcode,
+                    'sale_price' => $variant->sale_price,
+                    'attributes' => $variant->attributes->map(function ($attr) {
+                        return [
+                            'id' => $attr->id,
+                            'value' => $attr->value
+                        ];
+                    })
+                ];
+            })->toArray();
+    }
+
+    public function getProductVariantsById($productId)
+    {
+        return DB::table('products as p')
+            ->join('product_variants as pv', 'pv.product_id', '=', 'p.id')
+            ->join('product_variant_attributes as pva', 'pva.variant_id', '=', 'pv.id')
+            ->join('attribute_values as av', 'av.id', '=', 'pva.attribute_value_id')
+            ->join('attributes as a', 'a.id', '=', 'av.attribute_id')
+            ->where('p.id', $productId)
+            ->select([
+                'p.name as product_name',
+                'pv.id as variant_id',
+                'a.name as attribute_name',
+                'av.name as attribute_value',
+            ])
+            ->get();
     }
 }

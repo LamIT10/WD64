@@ -20,4 +20,15 @@ class GoodReceipt extends Model
         'approved_at',
         'total_amount',
     ];
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');
+    }
+    public function items()
+    {
+        return $this->hasMany(GoodReceiptItem::class, 'good_receipt_id');
+    }
+    public function createBy(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

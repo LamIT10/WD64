@@ -1,136 +1,101 @@
 <template>
   <AppLayout>
-    <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-6 md:p-8">
+    <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-4 md:p-8">
       <!-- Header Card -->
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
-        <h5 class="text-xl font-bold text-indigo-800 tracking-tight">Tạo Phiếu Kiểm Kho</h5>
+      <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100 flex items-center justify-between">
+        <h5 class="text-lg font-bold text-indigo-800">Tạo Phiếu Kiểm Kho</h5>
+        <span class="text-xs text-gray-400">{{ today }}</span>
       </div>
-      <!-- Thời gian tạo phiếu -->
-      <div class="bg-white rounded-xl shadow-lg p-4 mb-6 border border-gray-100 text-center">
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Ngày kiểm kho</label>
-          <input type="date" v-model="auditData.audit_date" :max="today"
-            class="border border-gray-200 rounded-lg py-2 px-3 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-            required />
+      <!-- Thông tin nhanh -->
+      <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100 flex flex-wrap gap-4 items-center">
+        <label class="text-sm font-medium text-gray-700">Ngày kiểm kho</label>
+        <input type="date" v-model="auditData.audit_date" :max="today"
+          class="border border-gray-200 rounded px-3 py-1 bg-gray-50 text-sm" required />
+        <label class="text-sm font-medium text-gray-700 ml-4">Ghi chú</label>
+        <input v-model="auditData.notes" type="text" placeholder="Nhập ghi chú nếu có"
+          class="border border-gray-200 rounded px-3 py-1 bg-gray-50 text-sm flex-1 min-w-[200px]" />
+      </div>
+      <!-- Chọn khu vực -->
+      <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100 flex flex-wrap gap-2 items-center">
+        <span class="text-sm font-medium text-gray-700 mr-2">Khu vực:</span>
+        <button v-for="zone in zones" :key="zone" type="button"
+          :class="['px-3 py-1 rounded border text-sm', selectedZones.includes(zone) ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-indigo-50 text-indigo-700 border-indigo-200']"
+          @click="toggleZone(zone)">
+          {{ zone }}
+        </button>
+      </div>
+      <!-- Danh sách Sản phẩm cần kiểm kê -->
+      <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100">
+        <div class="flex justify-between items-center mb-2">
+          <h6 class="text-base font-semibold text-indigo-800">Danh sách Sản phẩm</h6>
+          <div class="flex gap-2">
+            <button @click="exportSampleExcel"
+              class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
+              <i class="fa fa-download"></i> Tải mẫu
+            </button>
+            <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none" @change="handleImportExcel" />
+            <button @click="$refs.importInput.click()"
+              class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
+              <i class="fa fa-sign-in"></i> Nhập file
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-indigo-50">
+              <tr>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">#</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">Khu vực</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">Mã hàng</th>
+                <th class="px-3 py-2 text-left font-semibold text-indigo-700">Tên hàng</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">Đơn vị</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">Tồn kho</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">Thực tế</th>
+                <th class="px-3 py-2 text-center font-semibold text-indigo-700">SL chênh</th>
+                <th class="px-3 py-2 text-left font-semibold text-indigo-700">Ghi chú chênh</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-100">
+              <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
+                <td class="px-3 py-2 text-center">{{ index + 1 }}</td>
+                <td class="px-3 py-2 text-center">{{ product.zone }}</td>
+                <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
+                <td class="px-3 py-2">
+                  {{ product.name_product }}
+                  <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
+                    <div class="text-xs text-gray-500 mt-1">
+                      <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
+                        <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
+                      </span>
+                    </div>
+                  </template>
+                </td>
+                <td class="px-3 py-2 text-center">{{ product.unit }}</td>
+                <td class="px-3 py-2 text-center">{{ product.quantity_on_hand }}</td>
+                <td class="px-3 py-2 text-center">
+                  <input type="number" v-model="auditData.items[index].actual_quantity"
+                    class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center" min="0" required />
+                </td>
+                <td class="px-3 py-2 text-center">
+                  {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
+                </td>
+                <td class="px-3 py-2">
+                  <input type="text" v-model="auditData.items[index].discrepancy_reason"
+                    class="w-full border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm" placeholder="Lý do chênh lệch" />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <!-- Form Phiếu Kiểm Kê -->
-      <form @submit.prevent="submitForm">
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div class="grid grid-cols-1 gap-6">
-            <div class="flex justify-center">
-              <div class="my-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Chọn khu vực kiểm kho</label>
-                <div class="flex flex-wrap gap-4 justify-center">
-                  <button v-for="zone in zones" :key="zone" type="button"
-                    :class="['px-4 py-2 rounded-lg border', selectedZones.includes(zone) ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-indigo-50 text-indigo-700 border-indigo-200']"
-                    @click="toggleZone(zone)">
-                    {{ zone }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-            <textarea v-model="auditData.notes" rows="4"
-              class="block w-full border border-gray-200 rounded-lg py-2 px-3 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm resize-y transition-all duration-200"
-              placeholder="Nhập ghi chú nếu có"></textarea>
-          </div>
-        </div>
-        <!-- Danh sách Sản phẩm cần kiểm kê -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div class="flex justify-between mb-4">
-            <div>
-              <h6 class="text-lg font-semibold text-indigo-800 mb-4">Danh sách Sản phẩm</h6>
-            </div>
-            <div class="flex items-center space-x-4">
-              <div>
-                <div @click="exportSampleExcel"
-                  class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"
-                  type="button">
-                  <i class="fa fa-download icon-btn"></i> Tải file mẫu
-                </div>
-              </div>
-              <div>
-                <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
-                  @change="handleImportExcel" />
-                <div @click="$refs.importInput.click()"
-                  class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2"> <i class="fa fa-sign-in icon-btn"></i> Nhập
-                  file</div>
-              </div>
-            </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-indigo-50">
-                <tr>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">#
-                  </th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Khu
-                    vực
-                  </th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Mã
-                    hàng</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tên
-                    hàng</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Đơn
-                    vị</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Tồn
-                    kho</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">Thực
-                    tế</th>
-                  <th class="px-6 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">SL
-                    chênh</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">Ghi chú
-                    chênh</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-100">
-                <tr v-for="(product, index) in filteredProducts" :key="product.id"
-                  class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ index + 1 }}</td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.zone }}</td>
-                  <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ product.code }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-900">
-                    {{ product.name_product }}
-                    <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
-                      <div class="text-xs text-gray-500 mt-1">
-                        <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
-                          <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
-                        </span>
-                      </div>
-                    </template>
-                  </td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
-                  <td class="px-6 py-4 text-center">
-                    <input type="number" v-model="auditData.items[index].actual_quantity"
-                      class="w-24 border border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-                      min="0" required />
-                  </td>
-                  <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
-                  </td>
-                  <td class="px-6 py-4">
-                    <input type="text" v-model="auditData.items[index].discrepancy_reason"
-                      class="w-full border border-gray-200 rounded-lg py-1.5 px-2 bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm"
-                      placeholder="Lý do chênh lệch" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <!-- Submit Button -->
-        <div class="flex justify-end">
-          <button type="submit"
-            class="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 hover:-translate-y-[1px] focus:ring-4 focus:ring-indigo-200 transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            :disabled="!canSubmit">
-            Lưu Phiếu Kiểm Kho
-          </button>
-        </div>
-      </form>
+      <!-- Submit Button -->
+      <div class="flex justify-end mt-4">
+        <button type="submit"
+          class="px-6 py-2 bg-indigo-600 text-white font-medium rounded hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-200 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
+          :disabled="!canSubmit">
+          Lưu Phiếu Kiểm Kho
+        </button>
+      </div>
     </div>
   </AppLayout>
 </template>

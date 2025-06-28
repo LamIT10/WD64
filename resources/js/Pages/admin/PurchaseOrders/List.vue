@@ -144,12 +144,10 @@
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm bg-white transition-all"
                         >
                             <option value="">Tất cả</option>
-                            <option value="pending">Chờ duyệt</option>
-                            <option value="approved">Đã duyệt</option>
-                            <option value="shipped">Đã giao hàng</option>
-                            <option value="completed">Hoàn thành</option>
-                            인은
-                            <option value="rejected">Từ chối</option>
+                            <option value="0">Chờ duyệt</option>
+                            <option value="1">Đã duyệt</option>
+                            <option value="2">Nhập một phần</option>
+                            <option value="3">Đã hoàn thành</option>
                         </select>
                     </div>
                 </div>
@@ -237,7 +235,7 @@
                                         'text-green-600 bg-green-100 px-2 py-1 rounded-xl':
                                             order.status === 'approved',
                                         'text-blue-600 bg-blue-100 px-2 py-1 rounded-xl':
-                                            order.status === 'shipped',
+                                            order.order_status == 2,
                                         'text-purple-600 bg-purple-100 px-2 py-1 rounded-xl':
                                             order.status === 'completed',
                                         'text-red-600 bg-red-100 px-2 py-1 rounded-xl':
@@ -279,7 +277,7 @@
                     </div>
 
                     <div
-                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[80%] sm:w-full"
                     >
                         <div class="bg-white px-4 p-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
@@ -503,7 +501,7 @@
                                                             {{ item.unit.name }}
                                                         </td>
                                                         <td
-                                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                            class="px-6 py-4 font-semibold whitespace-nowrap text-sm text-indigo-800"
                                                         >
                                                             {{
                                                                 formatCurrencyVND(
@@ -528,9 +526,13 @@
                                                     >Tổng tiền đơn:</span
                                                 >
                                                 <span class="font-medium">{{
+<<<<<<< HEAD
                                                     formatCurrencyVND(
                                                         selectedOrder.total_amount
                                                     )
+=======
+                                                    formatCurrencyVND(selectedOrder.total_amount)
+>>>>>>> 3fdeaeb4b121d6559d2cdb48e509d2c4e7fff514
                                                 }}</span>
                                             </div>
                                             <div
@@ -592,11 +594,10 @@
                             </button>
                             <Waiting
                                 v-if="
-                                    ['approved', 'shipped'].includes(
-                                        selectedOrder.status
-                                    )
+                                    selectedOrder.order_status == 1 ||
+                                    selectedOrder.order_status == 2
                                 "
-                                route-name="admin.shipping.create"
+                                route-name="admin.receiving.create"
                                 :route-params="{ id: selectedOrder.id }"
                                 :color="'mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'"
                             >
@@ -665,15 +666,13 @@ function closeModal() {
 const filteredOrders = computed(() => {
     let orders = listOrders.data || [];
 
-    // Filter by tab
     if (activeTab.value !== "all") {
         orders = orders.filter(
             (order) => order.status.toLowerCase() === activeTab.value
         );
     }
 
-    // Apply filters
-    if (filters.value.customer) {
+    if (filters.value.supplier) {
         orders = orders.filter((order) =>
             order.customer.name
                 .toLowerCase()
@@ -728,14 +727,12 @@ const getStatusText = (status) => {
     switch (status) {
         case "pending":
             return "Chờ duyệt";
-        case "approved":
+        case 1:
             return "Đã duyệt";
-        case "shipped":
-            return "Đã giao hàng";
-        case "completed":
-            return "Hoàn thành";
-        case "rejected":
-            return "Từ chối";
+        case 2:
+            return "Nhập một phần";
+        case 3:
+            return "Đã hoàn thành";
         default:
             return "Không xác định";
     }
@@ -750,9 +747,11 @@ th,
 td {
     vertical-align: middle;
 }
+
 tr:hover {
     transition: background-color 0.2s ease;
 }
+
 input,
 select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;

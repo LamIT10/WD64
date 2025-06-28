@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
@@ -61,8 +62,9 @@ class PurchaseOrderRepository extends BaseRepository
                     break;
             }
         }
+        $query->orderByDesc('id');
 
-        $purchaseList = $query->paginate(10);
+        $purchaseList = $query->paginate(100);
         return $purchaseList;
     }
     public function getDataForcreate()
@@ -184,6 +186,16 @@ class PurchaseOrderRepository extends BaseRepository
             $orderApproved['order_status'] = 1;
             $orderApproved['approved_at'] = Carbon::now();
             $purchaseOrder->update($orderApproved);
+            // đổi thành mảng key value dạng số lượng => id variant để foreach rồi cập nhật số lượng transit
+            $listItemVariant = PurchaseOrderItem::where('purchase_order_id', $id)->pluck('product_variant_id', 'quantity_ordered')->toArray();
+            foreach ($listItemVariant as $quantity => $id) {
+                $item = Inventory::where('product_variant_id', $id)->first();
+                if (!$item) {
+                    DB::rollBack();
+                    return $this->returnError('Lỗi khi phê duyệt đơn hàng, tồn kho không hợp lệ');
+                }
+                $item->update(['quantity_in_transit' => $item->quantity_in_transit ?? 0 + $quantity]);
+            }
             DB::commit();
             return $purchaseOrder;
         } catch (\Throwable $th) {

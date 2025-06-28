@@ -9,10 +9,13 @@
                         <h2 class="text-lg font-semibold ml-2 text-gray-800">
                             Danh sách hàng hoá
                         </h2>
-                        <span
-                            class="text-sm px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full"
-                            >PIN000052</span
+                        <Waiting
+                            route-name="admin.purchases.index"
+                            :route-params="{}"
+                            :color="'bg-indigo-50 text-indigo-700'"
                         >
+                            <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                        </Waiting>
                     </div>
 
                     <div class="relative mb-5">
@@ -188,12 +191,12 @@
                                             />
                                         </td>
                                         <td class="text-center">
-                                            {{ item.unit_price }}
+                                            {{ formatCurrencyVND(item.unit_price) }}
                                         </td>
                                         <td
                                             class="text-center font-semibold text-red-700"
                                         >
-                                            {{ item.subtotal }}
+                                            {{ formatCurrencyVND(item.subtotal) }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -392,6 +395,7 @@ import AppLayout from "../Layouts/AppLayout.vue";
 import { ref } from "vue";
 import { onMounted } from "vue";
 import { useForm } from "@inertiajs/vue3";
+import Waiting from "../../components/Waiting.vue";
 
 const today = new Date().toLocaleDateString("vi-VN");
 const { purchaseOrder } = defineProps({
@@ -437,14 +441,16 @@ watch(realQuantity, () => {
 
 onMounted(() => {
     purchaseOrder.items.forEach((item) => {
-        receiptForm.value[item.id] = item.quantity_received || 0;
+        receiptForm.value[item.id] = 0;
     });
     calculateTotals();
 });
 const showReceiveTypeSelector = ref(false);
 const checkReceiveType = () => {
     const hasPartial = purchaseOrder.items.some(
-        (item) => Number(receiptForm.value[item.id] || 0) < Number(item.quantity_ordered)
+        (item) =>
+            Number(receiptForm.value[item.id] || 0) <
+            Number(item.quantity_ordered - item.quantity_received)
     );
     showReceiveTypeSelector.value = hasPartial;
 };
@@ -476,6 +482,14 @@ const submitGoodReceipt = () => {
         },
     });
 };
+function formatCurrencyVND(value) {
+    if (value == null || isNaN(value)) return "0 ₫";
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        minimumFractionDigits: 0,
+    }).format(value);
+}
 </script>
 
 <style scoped>

@@ -1,8 +1,10 @@
 <?php
 
 use App\Constant\PermissionConstant;
+use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
 use App\Http\Controllers\admin\ProductController;
+use App\Http\Controllers\Admin\SupplierProductController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\ProxyController;
 use App\Http\Controllers\RankController;
 use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
+use App\Http\Controllers\Admin\UnitController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -61,9 +64,25 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+
+        Route::get('/search', [SupplierController::class, 'searchProducts'])->name('search');
+        Route::get('/{productId}/variants/{supplierId}', [SupplierController::class, 'getProductVariants'])->name('variants');
     });
 
-
+    Route::prefix('attributes')->as('attributes.')->group(function () {
+        Route::get('/', [AttributeController::class, 'index'])->name('index');
+        Route::post('/', [AttributeController::class, 'store'])->name('store');
+        Route::delete('/{id}', [AttributeController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix('attribute-values')->as('attribute-values.')->group(function () {
+        Route::post('/', [AttributeController::class, 'storeValue'])->name('store');
+        Route::delete('/{id}', [AttributeController::class, 'destroyValue'])->name('destroy');
+    });
+    Route::prefix('units')->as('units.')->group(function () {
+        Route::get('/', [UnitController::class, 'index'])->name('index');
+        Route::post('/', [UnitController::class, 'store'])->name('store');
+        Route::delete('/{id}', [UnitController::class, 'destroy'])->name('destroy');
+    });
 
     Route::group([
         'prefix' => 'customers',
@@ -138,6 +157,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::delete('{id}', [SupplierController::class, 'destroy'])->name('destroy');
 
         Route::get('{id}/products', [SupplierController::class, 'getProducts'])->name('products');
+        Route::post('/{supplierId}/products', [SupplierController::class, 'storeSupplierProducts'])->name('products.store');
+        Route::get('/{supplierId}/products/{productId}/variants', [SupplierController::class, 'getVariantsByProductId'])->name('variants');
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {

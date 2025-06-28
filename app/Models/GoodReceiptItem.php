@@ -27,4 +27,8 @@ class GoodReceiptItem extends Model
     {
         return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
+        public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
 }
