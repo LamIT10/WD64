@@ -10,14 +10,16 @@ class Customer extends Model
     use HasFactory;
 
     protected $fillable = [
-    'name', 'phone', 'email', 'password', 'address', 'current_debt', 'rank_id',
-    'avatar', 'total_spent', 'max_debt_limit', 'status'
-    ];
-
-    protected $casts = [
-    'current_debt' => 'decimal:2',
-    'total_spent' => 'decimal:2',
-    'max_debt_limit' => 'decimal:2',
+        'name',
+        'phone',
+        'email',
+        'password',
+        'address',
+        'current_debt',
+        'rank_id',
+        'province',
+        'district',
+        'ward'
     ];
 
     protected $hidden = ['password'];
