@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://127.0.0.1:8000/",
+    url: "http://127.0.0.1:8000",
     port: null,
     defaults: {},
     routes: {
@@ -138,6 +138,35 @@ const Ziggy = {
             uri: "admin/products/{productId}/variants/{supplierId}",
             methods: ["GET", "HEAD"],
             parameters: ["productId", "supplierId"],
+        },
+        "admin.attributes.index": {
+            uri: "admin/attributes",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.attributes.store": {
+            uri: "admin/attributes",
+            methods: ["POST"],
+        },
+        "admin.attributes.destroy": {
+            uri: "admin/attributes/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.attribute-values.store": {
+            uri: "admin/attribute-values",
+            methods: ["POST"],
+        },
+        "admin.attribute-values.destroy": {
+            uri: "admin/attribute-values/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.units.index": { uri: "admin/units", methods: ["GET", "HEAD"] },
+        "admin.units.store": { uri: "admin/units", methods: ["POST"] },
+        "admin.units.destroy": {
+            uri: "admin/units/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
         },
         "admin.customers.index": {
             uri: "admin/customers",

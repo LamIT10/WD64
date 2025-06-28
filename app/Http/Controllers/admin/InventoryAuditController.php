@@ -149,4 +149,6 @@ class InventoryAuditController extends Controller
         return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
     }
 
+    
+
 }

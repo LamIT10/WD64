@@ -15,4 +15,16 @@ class Unit extends Model
     {
         return $this->hasMany(ProductUnitConversion::class);
     }
+    public function conversionsFrom()
+    {
+        return $this->hasMany(ProductUnitConversion::class, 'from_unit_id');
+    }
+    public function conversionsTo()
+    {
+        return $this->hasMany(ProductUnitConversion::class, 'to_unit_id');
+    }
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'default_unit_id');
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Constant\PermissionConstant;
+use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\Admin\SupplierProductController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\RankController;
 use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
+use App\Http\Controllers\Admin\UnitController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -65,7 +67,20 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{productId}/variants/{supplierId}', [SupplierController::class, 'getProductVariants'])->name('variants');
     });
 
-
+    Route::prefix('attributes')->as('attributes.')->group(function () {
+        Route::get('/', [AttributeController::class, 'index'])->name('index');
+        Route::post('/', [AttributeController::class, 'store'])->name('store');
+        Route::delete('/{id}', [AttributeController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix('attribute-values')->as('attribute-values.')->group(function () {
+        Route::post('/', [AttributeController::class, 'storeValue'])->name('store');
+        Route::delete('/{id}', [AttributeController::class, 'destroyValue'])->name('destroy');
+    });
+    Route::prefix('units')->as('units.')->group(function () {
+        Route::get('/', [UnitController::class, 'index'])->name('index');
+        Route::post('/', [UnitController::class, 'store'])->name('store');
+        Route::delete('/{id}', [UnitController::class, 'destroy'])->name('destroy');
+    });
 
     Route::group([
         'prefix' => 'customers',
@@ -124,7 +139,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::patch('/{id}', [RoleController::class, 'update'])->name('update');
         Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
         Route::get('/{id}', [RoleController::class, 'show'])->name('show');
-        
+
         Route::get('/', [RoleController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::ROLE_INDEX);
         Route::get('/{id}/edit', [RoleController::class, 'edit'])->name('edit')->middleware('has_permission:' . PermissionConstant::ROLE_EDIT);
     });
