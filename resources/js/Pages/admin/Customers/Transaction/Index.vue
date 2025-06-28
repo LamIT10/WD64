@@ -42,7 +42,7 @@
                   Trạng thái
                 </th>
                 <th
-                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Tông tiền nợ
                 </th>
                 <th
@@ -80,7 +80,7 @@
                     {{ debt.status }}
                   </span>
                 </td> 
-                <td class="px-6 py-4 whitespace-nowrap text-center font-medium text-red-600 text-base">
+                <td class="px-6 py-4 whitespace-nowrap text-right font-medium text-red-600 text-base">
                   {{ formatCurrency(debt.remaining_amount)}}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
