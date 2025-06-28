@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\GoodReceipt;
 use App\Models\GoodReceiptItem;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
@@ -117,7 +118,12 @@ class GoodReceiptRepository extends BaseRepository
                     return $this->returnError('Mục phiếu nhập kho không tồn tại trong đơn hàng, vui lòng kiểm tra lại');
                 }
                 $purchaseItem->update([
-                    'quantity_received' => $item['quantity_received'],
+                    'quantity_received' => $purchaseItem['quantity_received'] + $item['quantity_received'],
+                ]);
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
+                $inventory->update([
+                    'quantity_in_transit' => $inventory->quantity_in_transit - $item['quantity_received'],
+                    'quantity_on_hand' => $inventory->quantity_on_hand + $item['quantity_received'],
                 ]);
 
                 $newItem = [];
