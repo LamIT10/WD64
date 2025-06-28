@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\ProxyController;
 
 use App\Http\Controllers\RankController;
 use App\Models\InventoryAudit;
@@ -28,6 +29,7 @@ use App\Http\Controllers\Admin\UnitController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
+use App\Http\Controllers\SaleOrderController;
 
 
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
@@ -98,6 +100,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
     });
 
+
     Route::prefix('ranks')->as('ranks.')->group(function () {
         Route::get('/', [RankController::class, 'index'])->name('index');        // Danh sách rank của customer
         Route::get('/create', [RankController::class, 'create'])->name('create'); // Form tạo mới
@@ -163,15 +166,13 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
         Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
-
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
-        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_INDEX);
-        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
+        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_INDEX);
+        Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
         Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
-        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
-        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:'. PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
-      
+        Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
+        Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
     });
     Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
         Route::get('/', [PurchaseOrderController::class, 'getList'])->name('index');
@@ -207,8 +208,34 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
+    Route::prefix('sale-orders')->as('sale-orders.')->group(function () {
+        Route::get('/', [SaleOrderController::class, 'index'])->name('index');
+        Route::get('/create', [SaleOrderController::class, 'create'])->name('create');
+        Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
+        Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('variants.all');
+        Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('unit.all');
+        Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('customer.search');
+        Route::get('/inventory/{productVariantId}', [SaleOrderController::class, 'getInventoryQuantity'])->name('inventory');
+        Route::post('/{id}/reject', [SaleOrderController::class, 'rejectSaleOrder'])->name('reject');
+        Route::post('/{id}/approve', [SaleOrderController::class, 'approve'])->name('approve');
+        Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
+        Route::get('export', [SaleOrderController::class, 'export'])->name('export');
+    });
 });
 
+
+
+// API địa chỉ
+Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
+Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);
+Route::get('/proxy/wards/{districtId}', [ProxyController::class, 'getWards']);
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+Route::get('/', function () {
+    return Inertia::render('Dashboard');
+});
 // Authentication routes
 Route::middleware('check_logined')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

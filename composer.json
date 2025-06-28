@@ -17,7 +17,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "*",
         "laravel/tinker": "^2.10.1",
-        "spatie/image": "^3.8",
+        "maatwebsite/excel": "^3.1",
         "spatie/laravel-permission": "*",
         "tightenco/ziggy": "^2.5"
     },

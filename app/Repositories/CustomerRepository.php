@@ -26,8 +26,8 @@ class CustomerRepository extends BaseRepository
             $search = $filters['search']['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
             // Loại bỏ 'search' để không áp dụng likeTextFilter trong filterData
             unset($filters['search']['search']);
