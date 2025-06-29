@@ -2,35 +2,32 @@
   <AppLayout>
     <div class="bg-gradient-to-b from-gray-100 to-gray-50 p-6 min-h-screen">
       <!-- Header -->
-      <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-start border border-gray-200">
-        <div>
-          <h5 class="text-lg text-indigo-700 font-semibold mb-2">Lịch sử Kiểm kho</h5>
-        </div>
-        <div class="flex items-center space-x-3">
-          <!-- Search bar -->
+      <div
+        class="p-4 shadow-sm rounded-lg bg-white mb-4 flex flex-col md:flex-row md:items-center md:justify-between border border-gray-200 gap-2">
+        <h5 class="text-lg text-indigo-700 font-semibold mb-2 md:mb-0">Lịch sử Kiểm kho</h5>
+        <div class="flex flex-wrap items-center gap-2">
           <div class="relative">
-            <input type="text" placeholder="Tìm theo mã, tên sản phẩm..."
-              class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
-            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            <input type="text" placeholder="Tìm mã, tên sản phẩm..."
+              class="w-48 pl-8 pr-3 py-1.5 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm" />
+            <i class="fas fa-search absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"></i>
           </div>
           <Waiting route-name="admin.inventory-audit.create" :route-params="{}">
-            <i class="fas fa-plus"></i> Tạo phiếu kiểm kê
+            <i class="fas fa-plus"></i> Tạo phiếu
           </Waiting>
           <button @click="exportToExcel"
-            class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
-            <i class="fa fa-file-export icon-btn"></i> Xuất file
+            class="px-3 py-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
+            <i class="fa fa-file-export"></i> Xuất file
           </button>
           <div ref="dropdownRef" class="relative">
             <button @click="toggleDropdown"
-              class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
-              <i class="fas fa-columns"></i>
-              Cột hiển thị
+              class="px-3 py-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
+              <i class="fas fa-columns"></i> Cột hiển thị
             </button>
             <div v-if="showColumnDropdown"
-              class="absolute right-0 z-20 mt-2 w-80 bg-white border border-indigo-100 rounded-xl shadow-lg p-4">
-              <div class="grid grid-cols-2 gap-x-6 gap-y-3">
+              class="absolute right-0 z-20 mt-2 w-72 bg-white border border-indigo-100 rounded-xl shadow-lg p-3">
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2">
                 <label v-for="field in columnOptions" :key="field"
-                  class="flex items-center space-x-2 text-sm text-gray-800">
+                  class="flex items-center space-x-2 text-xs text-gray-800">
                   <input type="checkbox" :value="field" v-model="visibleColumns"
                     class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
                   <span class="truncate">{{ columnLabels[field] }}</span>
@@ -40,7 +37,6 @@
           </div>
         </div>
       </div>
-
       <!-- Tab Navigation -->
       <div class="mb-4 border-b border-gray-200">
         <div class="flex items-center">
@@ -111,7 +107,7 @@
                 </th> -->
                 <th v-if="visibleColumns.includes('id')"
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  #ID
+                  Mã phiếu
                 </th>
                 <th v-if="visibleColumns.includes('location')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -133,10 +129,10 @@
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Trạng thái
                 </th>
-                <!-- <th v-if="visibleColumns.includes('adjusted')"
+                <th v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Đồng bộ
-                </th> -->
+                </th>
                 <th v-if="visibleColumns.includes('action')"
                   class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                   Hành động
@@ -173,14 +169,16 @@
                   {{ item.audit_date ? new Date(new Date(item.audit_date).getTime() + 7 * 60 * 60 *
                     1000).toLocaleString('vi-VN', {
                       day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
-                  minute: '2-digit' }) : '-' }}
+                      minute: '2-digit'
+                    }) : '-' }}
                 </td>
                 <td v-if="visibleColumns.includes('created_at')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                   {{ item.created_at ? new Date(new Date(item.created_at).getTime() + 7 * 60 * 60 *
                     1000).toLocaleString('vi-VN', {
                       day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
-                  minute: '2-digit' }) : '-' }}
+                      minute: '2-digit'
+                    }) : '-' }}
                 </td>
                 <td v-if="visibleColumns.includes('user_name')"
                   class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -195,16 +193,16 @@
                     {{ item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch' }}
                   </span>
                 </td>
-                <!-- <td v-if="visibleColumns.includes('adjusted')"
+                <td v-if="visibleColumns.includes('adjusted')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                   <span v-if="item.status === 'completed'">--</span>
                   <span v-else>{{ item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ' }}</span>
-                </td> -->
+                </td>
                 <td v-if="visibleColumns.includes('action')"
                   class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                    <Link :href="route('admin.inventory-audit.show', item.id)" @click.stop title="Xem chi tiết">
-                    <i class="fas fa-eye"></i>
-                    </Link>
+                  <Link :href="route('admin.inventory-audit.show', item.id)" @click.stop title="Xem chi tiết">
+                  <i class="fas fa-eye"></i>
+                  </Link>
                 </td>
               </tr>
             </tbody>
@@ -240,7 +238,7 @@
             </span>
             <Link v-if="props.audits.next_page_url" :href="addStatusToUrl(props.audits.next_page_url)"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
-              <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-chevron-right"></i>
             </Link>
             <span v-else class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
               <i class="fas fa-chevron-right"></i>
@@ -278,18 +276,18 @@ const columnOptions = [
   'created_at',
   'user_name',
   'status',
-  // 'adjusted',
+  'adjusted',
   'action',
 ];
 
 const columnLabels = {
-  id: '#ID',
+  id: 'Mã phi',
   location: 'Khu vực',
   audit_date: 'Ngày kiểm',
   created_at: 'Ngày lưu',
   user_name: 'Người tạo',
   status: 'Trạng thái',
-  // adjusted: 'Đồng bộ',
+  adjusted: 'Đồng bộ',
   action: 'Hành động',
 };
 
@@ -303,7 +301,7 @@ const visibleColumns = ref(
   localStorage.getItem('auditsVisibleColumns')
     ? JSON.parse(localStorage.getItem('auditsVisibleColumns'))
     // , 'adjusted'
-    : ['id', 'location', 'audit_date', 'created_at', 'user_name', 'status', 'action']
+    : ['id', 'location', 'audit_date', 'created_at', 'user_name', 'status', 'action', 'adjusted']
 );
 
 // Save visibleColumns to localStorage
@@ -396,7 +394,7 @@ const exportToExcel = () => {
     'Ngày lưu': item.created_at,
     'Người tạo': item.user?.name,
     'Trạng thái': item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch',
-    // 'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
+    'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
   }));
 
   const ws = XLSX.utils.json_to_sheet(data);
@@ -443,6 +441,7 @@ const exportToExcel = () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

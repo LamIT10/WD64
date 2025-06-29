@@ -71,7 +71,7 @@
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
                         >
-                            <i class="fa-solid fa-dolly"></i>
+                            <i class="fas fa-arrow-down text-xs"></i>
                         </div>
                         <Link
                             :href="route('admin.purchases.index')"
@@ -85,7 +85,7 @@
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
                         >
-                            <i class="fa-solid fa-file-lines"></i>
+                            <i class="fa-solid fa-file-lines text-xl mr-1"></i>
                         </div>
                         <Link
                             :href="route('admin.receiving.index')"

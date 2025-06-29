@@ -21,12 +21,16 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = $this->productRepository->getAll();
+        $filters = $request->only(['name', 'code', 'stock_status']);
+
+        $products = $this->productRepository->getAll($filters, 20);
+
 
         return Inertia::render('admin/products/ListProduct', [
-            'products' => $products
+            'products' => $products,
+            'filters' => $filters,
         ]);
     }
 
