@@ -29,9 +29,9 @@ class ProductRepository extends BaseRepository
         $this->repositoryCategory = $category;
     }
 
-    public function getAll($perPage = 15)
+    public function getAll(array $filters = [], $perPage = 15)
     {
-        return $this->handleModel::with([
+        $query = $this->handleModel::with([
             'category',
             'images',
             'productVariants' => function ($query) {
@@ -44,7 +44,50 @@ class ProductRepository extends BaseRepository
             },
             'unitConversions.fromUnit',
             'unitConversions.toUnit',
-        ])->paginate($perPage);
+            'defaultUnit',
+        ]);
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['code'])) {
+            $query->where('code', 'like', '%' . $filters['code'] . '%');
+        }
+
+        if (!empty($filters['stock_status'])) {
+            $query->whereHas('productVariants', function ($variantQuery) use ($filters) {
+                $variantQuery->with('inventory');
+
+                if ($filters['stock_status'] === 'out_of_stock') {
+                    $variantQuery->whereDoesntHave('inventory')
+                        ->orWhereHas('inventory', function ($q) {
+                            $q->where('quantity_on_hand', '<=', 0);
+                        });
+                }
+
+                if ($filters['stock_status'] === 'low_stock') {
+                    $variantQuery->where(function ($q) {
+                        $q->whereHas('inventory', function ($inv) {
+                            $inv->select('product_variant_id')
+                                ->groupBy('product_variant_id')
+                                ->havingRaw('SUM(quantity_on_hand) <= MIN(min_stock)')
+                                ->havingRaw('SUM(quantity_on_hand) !=    0');
+                        });
+                    });
+                }
+
+                if ($filters['stock_status'] === 'normal') {
+                    $variantQuery->whereHas('inventory', function ($inv) {
+                        $inv->select('product_variant_id')
+                            ->groupBy('product_variant_id')
+                            ->havingRaw('SUM(quantity_on_hand) > MIN(min_stock)');
+                    });
+                }
+            });
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     public function findById($id)
