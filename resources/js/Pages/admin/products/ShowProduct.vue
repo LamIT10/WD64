@@ -42,7 +42,7 @@
                                     {{ product.default_unit?.name }} ({{ product.default_unit?.symbol }})
                                 </p>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <p class="text-gray-500 font-medium">Ngày sản xuất</p>
                                 <p class="font-semibold mt-1">
                                     {{ product.production_date ? formatDate(product.production_date) : '—' }}
@@ -53,7 +53,7 @@
                                 <p class="font-semibold mt-1">
                                     {{ product.expiration_date ? formatDate(product.expiration_date) : '—' }}
                                 </p>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="mt-4">
                             <p class="text-gray-500 font-medium">Mô tả</p>
@@ -211,10 +211,10 @@ const totalQuantity = computed(() =>
     props.product?.product_variants?.reduce((sum, pv) => sum + (pv.inventory?.quantity_on_hand || 0), 0)
 );
 
-const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('vi-VN');
-};
+// const formatDate = (dateStr) => {
+//     const d = new Date(dateStr);
+//     return d.toLocaleDateString('vi-VN');
+// };
 </script>
 
 <style scoped></style>
