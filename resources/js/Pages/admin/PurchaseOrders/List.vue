@@ -239,6 +239,31 @@
                         </tr>
                     </tbody>
                 </table>
+                <div
+                    class="px-4 py-2 border-t border-gray-200 flex items-center justify-between"
+                >
+                    <div class="text-sm text-gray-500">
+                        Hiển thị <span class="font-medium">1</span> đến
+                        <span class="font-medium">2</span> của
+                        <span class="font-medium">10</span> kết quả
+                    </div>
+                    <div class="flex justify-end space-x-1 mt-4">
+                        <button
+                            v-for="link in listOrders.links"
+                            :key="link.label"
+                            v-html="link.label"
+                            :disabled="!link.url"
+                            @click="$inertia.visit(link.url)"
+                            :class="[
+                                'px-3 py-1 rounded-md text-sm',
+                                link.active
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100',
+                                !link.url && 'opacity-50 cursor-not-allowed',
+                            ]"
+                        ></button>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal -->
@@ -384,7 +409,7 @@
                                                 class="min-w-full divide-y divide-gray-200"
                                             >
                                                 <thead
-                                                    class="bg-indigo-400 text-white"
+                                                    class="bg-indigo-500 text-white"
                                                 >
                                                     <tr>
                                                         <th
@@ -417,7 +442,7 @@
                                                         :key="item.id"
                                                     >
                                                         <td
-                                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                            class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600"
                                                         >
                                                             {{
                                                                 item
@@ -458,7 +483,11 @@
                                                         <td
                                                             class="px-6 py-4 font-semibold whitespace-nowrap text-sm text-indigo-800"
                                                         >
-                                                            {{ formatCurrencyVND(item.subtotal) }}
+                                                            {{
+                                                                formatCurrencyVND(
+                                                                    item.subtotal
+                                                                )
+                                                            }}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -477,7 +506,9 @@
                                                     >Tổng tiền đơn:</span
                                                 >
                                                 <span class="font-medium">{{
-                                                    formatCurrencyVND(selectedOrder.total_amount)
+                                                    formatCurrencyVND(
+                                                        selectedOrder.total_amount
+                                                    )
                                                 }}</span>
                                             </div>
                                             <div
@@ -500,7 +531,9 @@
                                                 <span
                                                     class="text-gray-900 font-medium"
                                                     >{{
-                                                        formatCurrencyVND(selectedOrder.total_amount)
+                                                        formatCurrencyVND(
+                                                            selectedOrder.total_amount
+                                                        )
                                                     }}</span
                                                 >
                                             </div>

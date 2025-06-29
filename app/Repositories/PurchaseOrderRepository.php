@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Inventory;
 use App\Models\Product;
+use App\Models\ProductUnitConversion;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -64,7 +65,7 @@ class PurchaseOrderRepository extends BaseRepository
         }
         $query->orderByDesc('id');
 
-        $purchaseList = $query->paginate(100);
+        $purchaseList = $query->paginate(10);
         return $purchaseList;
     }
     public function getDataForcreate()
@@ -187,15 +188,40 @@ class PurchaseOrderRepository extends BaseRepository
             $orderApproved['approved_at'] = Carbon::now();
             $purchaseOrder->update($orderApproved);
             // đổi thành mảng key value dạng số lượng => id variant để foreach rồi cập nhật số lượng transit
-            $listItemVariant = PurchaseOrderItem::where('purchase_order_id', $id)->pluck('product_variant_id', 'quantity_ordered')->toArray();
-            foreach ($listItemVariant as $quantity => $id) {
-                $item = Inventory::where('product_variant_id', $id)->first();
-                if (!$item) {
+            $listItemVariant = PurchaseOrderItem::where('purchase_order_id', $id)->get(['product_variant_id', 'quantity_ordered', 'unit_id']);
+            foreach ($listItemVariant as $itemVariant) {
+                $productVariantId = $itemVariant->product_variant_id;
+                $quantity = $itemVariant->quantity_ordered;
+                $orderUnitId = $itemVariant->unit_id;
+
+                $inventory = Inventory::where('product_variant_id', $productVariantId)->first();
+                if (!$inventory) {
                     DB::rollBack();
                     return $this->returnError('Lỗi khi phê duyệt đơn hàng, tồn kho không hợp lệ');
                 }
-                $item->update(['quantity_in_transit' => $item->quantity_in_transit ?? 0 + $quantity]);
+
+                $productID = ProductVariant::find($productVariantId)->product_id;
+                $unitDefault = Product::find($productID)->default_unit_id;
+
+                if ($unitDefault == $orderUnitId) {
+                    $quantityLast = $quantity;
+                } else {
+                    $convert = ProductUnitConversion::where('product_id', $productID)
+                        ->where('from_unit_id', $unitDefault)
+                        ->where('to_unit_id', $orderUnitId)
+                        ->first();
+                    if (!$convert) {
+                        DB::rollBack();
+                        return $this->returnError('Không tìm thấy tỉ lệ quy đổi đơn vị');
+                    }
+                    $quantityLast = intval($quantity * $convert->conversion_factor);
+                }
+
+                $inventory->update([
+                    'quantity_in_transit' => $inventory->quantity_in_transit + $quantityLast,
+                ]);
             }
+
             DB::commit();
             return $purchaseOrder;
         } catch (\Throwable $th) {

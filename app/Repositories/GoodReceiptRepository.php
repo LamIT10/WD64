@@ -5,12 +5,12 @@ namespace App\Repositories;
 use App\Models\GoodReceipt;
 use App\Models\GoodReceiptItem;
 use App\Models\Inventory;
-use App\Models\Product;
-use App\Models\ProductVariant;
+use App\Models\ProductUnitConversion;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
-use App\Models\Receiving;
 use App\Models\Supplier;
+use App\Models\SupplierDebtHistory;
+use App\Models\SupplierTransaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,8 +86,11 @@ class GoodReceiptRepository extends BaseRepository
     }
     public function store($data)
     {
+        // phương thức để tạo phiếu nhập, cập nhật tồn kho, cập nhật công nợ nhà cung cấp, cập nhật giao dịch nhà cung cấp
         try {
             DB::beginTransaction();
+
+            // tạo phiếu nhập kho mới
             $newGoodReceipt = [];
             $newGoodReceipt['purchase_order_id'] = $data['purchase_order_id'];
             $newGoodReceipt['note'] = $data['note'] ?? '';
@@ -97,6 +100,7 @@ class GoodReceiptRepository extends BaseRepository
             $newGoodReceipt['total_amount'] = $data['total_amount'] ?? 0;
             $goodReceipt = $this->handleModel->create($newGoodReceipt);
 
+            // cập nhật trạng thái đơn hàng
             $purchaseOrder = PurchaseOrder::find($data['purchase_order_id']);
             if ($purchaseOrder) {
                 $orderUpdate = [];
@@ -108,6 +112,8 @@ class GoodReceiptRepository extends BaseRepository
                 DB::rollBack();
                 return $this->returnError('Không thể tạo phiếu nhập kho, vui lòng thử lại sau');
             }
+
+            // cập nhật số lượng đã nhận của đơn hàng chi tiết
             $idGoodReceipt = $goodReceipt->id;
             foreach ($data['items'] as $item) {
                 $purchaseItem = PurchaseOrderItem::where('purchase_order_id', $data['purchase_order_id'])
@@ -120,12 +126,23 @@ class GoodReceiptRepository extends BaseRepository
                 $purchaseItem->update([
                     'quantity_received' => $purchaseItem['quantity_received'] + $item['quantity_received'],
                 ]);
+
+                // cập nhật tồn kho
                 $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
+                $quantityLast = null;
+                if ($item['unit_default'] == $item['unit_id']) {
+                    $quantityLast = $item['quantity_received'];
+                } else {
+                    $factor = ProductUnitConversion::where('product_id', $item['product_id'])->where('from_unit_id', $item['unit_default'])->where('to_unit_id', $item['unit_id'])->first();
+                    $quantityLast = $factor->conversion_factor * $item['quantity_received'];
+                }
+                $factor = ProductUnitConversion::where('product_id', $item['product_id'])->where('from_unit_id', $item['unit_default'])->where('to_unit_id', $item['unit_id'])->first();
                 $inventory->update([
-                    'quantity_in_transit' => $inventory->quantity_in_transit - $item['quantity_received'],
-                    'quantity_on_hand' => $inventory->quantity_on_hand + $item['quantity_received'],
+                    'quantity_in_transit' => $inventory->quantity_in_transit - $quantityLast,
+                    'quantity_on_hand' => $inventory->quantity_on_hand + $quantityLast,
                 ]);
 
+                // tạo mới chi tiết phiếu nhập kho
                 $newItem = [];
                 $newItem['good_receipt_id'] = $idGoodReceipt;
                 $newItem['product_variant_id'] = $item['product_variant_id'];
@@ -139,6 +156,32 @@ class GoodReceiptRepository extends BaseRepository
                     DB::rollBack();
                     return $this->returnError('Không thể tạo mục phiếu nhập kho, vui lòng thử lại sau');
                 }
+            }
+
+            // tạo mới giao dịch
+            $newTransaction = [];
+            $newTransaction['goods_receipt_id'] = $idGoodReceipt;
+            $newTransaction['paid_amount'] = $data['payment'] ?? 0;
+            $newTransaction['transaction_date'] = Carbon::now();
+            $newTransaction['credit_due_date'] = Carbon::now()->addDays(10);
+            $newTransaction['description'] = 'Nhập kho';
+            $goodReceiptTransaction = SupplierTransaction::create($newTransaction);
+            if (!$goodReceiptTransaction) {
+                DB::rollBack();
+                return $this->returnError('Không thể tạo giao dịch, vui lòng thử lại sau');
+            }
+
+            // tạo mới lịch sử công nợ
+            $idTransaction = $goodReceiptTransaction->id;
+            $newDebt = [];
+            $newDebt['supplier_transaction_id'] = $idTransaction;
+            $newDebt['new_value'] = $data['payment'] ?? 0;
+            $newDebt['note'] = 'Thanh toán lần đầu';
+            $newDebt['update_type'] = 'payment';
+            $goodReceiptDebt = SupplierDebtHistory::create($newDebt);
+            if (!$goodReceiptDebt) {
+                DB::rollBack();
+                return $this->returnError('Có lỗi khi lưu lịch sử thanh toán');
             }
 
             DB::commit();
