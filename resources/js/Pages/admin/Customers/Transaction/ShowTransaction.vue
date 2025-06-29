@@ -65,49 +65,61 @@
                     </p>
                 </div>
             </div>
-            <div class="bg-white rounded-lg shadow overflow-hidden mb-7">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-indigo-800">Lịch sử thanh toán</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-indigo-50">
-                            <tr>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Ngày thanh toán
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Số tiền
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Ghi chú
-                                </th>
+          <div class="bg-white rounded-lg shadow overflow-hidden mb-7">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-indigo-800">Lịch sử điều chỉnh & thanh toán</h2>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-indigo-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Loại giao dịch
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Ngày thực hiện
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Giá trị
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                        Ghi chú
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr
+                    v-for="item in [...debt.payment_history, ...debt.adjustment_history]"
+                    :key="item.id"
+                    class="hover:bg-gray-50"
+                >
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                        {{ item.type === 'adjustment' ? 'Điều chỉnh hạn' : 'Thanh toán' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ formatDate(item.transaction_date) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                        <span v-if="item.type === 'adjustment'">
+                            {{ formatDate(item.credit_due_date) }}
+                        </span>
+                        <span v-else>
+                            {{ formatNumber(item.paid_amount) + ' VNĐ' }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                        {{ item.note || 'Không có ghi chú' }}
+                    </td>
+                </tr>
 
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="item in debt.payment_history" :key="item.id" class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ formatDate(item.transaction_date) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
-                                    {{ formatNumber(item.paid_amount) + " VNĐ" }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 ">
-                                    {{ item.note || 'Không có ghi chú' }}
-                                </td>
+                <tr v-if="!debt.payment_history.length && !debt.adjustment_history.length">
+                    <td colspan="4" class="text-center py-4 text-gray-500">Không có lịch sử thanh toán hoặc điều chỉnh</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                            </tr>
-                            <tr v-if="!debt.payment_history.length">
-                                <td colspan="3" class="text-center py-4 text-gray-500">Không có thanh toán nào</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             <!-- Chi tiết đơn hàng -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">

@@ -15,6 +15,7 @@ class SaleOrder extends Model
         'expected_ship_date',
         'status',
         'total_amount',
+        'address_delivery',
         'credit_due_date',
     ];
 
