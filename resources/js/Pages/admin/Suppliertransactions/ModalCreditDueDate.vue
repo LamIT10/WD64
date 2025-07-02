@@ -73,7 +73,7 @@ const formatDateForSubmit = (dateString) => {
 
 // Khởi tạo form với giá trị ngày định dạng d/m/Y
 const form = useForm({
-    sub_credit_due_date: formatDateForDisplay(transactionSupplierEdit.credit_due_date),
+    sub_credit_due_date: formatDateForDisplay(transactionSupplierEdit.value.supplier_transaction.credit_due_date),
     credit_due_date: "",
     note: ""
 });
@@ -81,7 +81,7 @@ const form = useForm({
 const handleSubmit = () => {
    form.credit_due_date = formatDateForSubmit(form.sub_credit_due_date)
     form.patch(route('admin.supplier-transaction.update', {
-        id: transactionSupplierEdit.id,
+        id: transactionSupplierEdit.value.supplier_transaction.id,
     }),{
         onSuccess: () => {
             emit('closeModal');

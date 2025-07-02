@@ -20,42 +20,35 @@
             </div>
 
             <div class="bg-white overflow-hidden">
-                <div class="relative overflow-x-auto shadow-md">
-                    <table class="w-full text-left rtl:text-right text-gray-500">
-                        <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300">
+                <div class="relative overflow-x-auto rounded-lg shadow-sm">
+                    <table class="w-full text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 bg-blue-50 border-b border-blue-200">
                             <tr>
-                                <th class="px-4 py-2">Tên sản phẩm</th>
-                                <th class="px-4 py-2">Danh mục</th>
-                                <th class="px-4 py-2">Biến thể</th>
-                                <!-- <th class="px-4 py-2">Hành động</th> -->
+                                <th class="px-6 py-3 font-semibold">Tên sản phẩm</th>
+                                <th class="px-6 py-3 font-semibold">Danh mục</th>
+                                <th class="px-6 py-3 font-semibold">Biến thể</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="product in products" :key="product.id"
-                                class="bg-white border-b hover:bg-gray-50">
-                                <th class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+                                class="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+                                <th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                     {{ product.name }}
                                 </th>
-                                <td class="px-4 py-2">{{ product.category?.name || 'N/A' }}</td>
-                                <td class="px-4 py-2">
-                                    <div class="flex items-center space-x-2">
+                                <td class="px-6 py-4">{{ product.category?.name || 'N/A' }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
                                         <span
-                                            class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-700">
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             {{ product.product_variants?.length || 0 }} biến thể
                                         </span>
                                         <button v-if="product.product_variants?.length > 0"
-                                            class="text-indigo-600 hover:text-indigo-800 text-xs"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors duration-150"
                                             @click="showVariants(product)">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
                                 </td>
-                                <!-- <td class="px-4 py-2">
-                                    <a :href="route('admin.products.edit', product.id)"
-                                        class="text-blue-700 hover:text-blue-900">
-                                        <i class="fas fa-edit"></i> Sửa
-                                    </a>
-                                </td> -->
                             </tr>
                         </tbody>
                     </table>

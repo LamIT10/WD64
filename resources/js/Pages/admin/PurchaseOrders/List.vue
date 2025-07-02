@@ -126,9 +126,10 @@
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm bg-white transition-all"
                         >
                             <option value="">Tất cả</option>
-                            <option value="Pending">Chờ duyệt</option>
-                            <option value="Approved">Đã duyệt</option>
-                            <option value="Rejected">Từ chối</option>
+                            <option value="0">Chờ duyệt</option>
+                            <option value="1">Đã duyệt</option>
+                            <option value="2">Nhập một phần</option>
+                            <option value="3">Đã hoàn thành</option>
                         </select>
                     </div>
                 </div>
@@ -256,7 +257,7 @@
                     </div>
 
                     <div
-                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-[80%] sm:w-full"
                     >
                         <div class="bg-white px-4 p-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
@@ -455,9 +456,9 @@
                                                             {{ item.unit.name }}
                                                         </td>
                                                         <td
-                                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                            class="px-6 py-4 font-semibold whitespace-nowrap text-sm text-indigo-800"
                                                         >
-                                                            {{ item.subtotal }}
+                                                            {{ formatCurrencyVND(item.subtotal) }}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -476,7 +477,7 @@
                                                     >Tổng tiền đơn:</span
                                                 >
                                                 <span class="font-medium">{{
-                                                    selectedOrder.total_amount
+                                                    formatCurrencyVND(selectedOrder.total_amount)
                                                 }}</span>
                                             </div>
                                             <div
@@ -499,7 +500,7 @@
                                                 <span
                                                     class="text-gray-900 font-medium"
                                                     >{{
-                                                        selectedOrder.total_amount
+                                                        formatCurrencyVND(selectedOrder.total_amount)
                                                     }}</span
                                                 >
                                             </div>
@@ -603,18 +604,15 @@ function closeModal() {
     isModalOpen.value = false;
 }
 
-// Computed property for filtered orders
 const filteredOrders = computed(() => {
     let orders = listOrders.data || [];
 
-    // Filter by tab
     if (activeTab.value !== "all") {
         orders = orders.filter(
             (order) => order.status.toLowerCase() === activeTab.value
         );
     }
 
-    // Apply filters
     if (filters.value.supplier) {
         orders = orders.filter((order) =>
             order.supplier.name
@@ -650,7 +648,7 @@ const getStatusText = (status) => {
         case 0:
             return "Chờ duyệt";
         case 1:
-            return "Chờ vận chuyển";
+            return "Đã duyệt";
         case 2:
             return "Nhập một phần";
         case 3:
@@ -665,24 +663,20 @@ const getStatusText = (status) => {
 .hihi {
     background-color: rgba(0, 0, 0, 0.5);
 }
-/* Ensure table headers and cells align properly */
 th,
 td {
     vertical-align: middle;
 }
 
-/* Hover effect for table rows */
 tr:hover {
     transition: background-color 0.2s ease;
 }
 
-/* Style for input and select elements */
 input,
 select {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Modal animation */
 .fixed.inset-0 {
     animation: fadeIn 0.3s ease-in-out;
 }

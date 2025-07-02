@@ -19,7 +19,33 @@ class SupplierRepository extends BaseRepository
 
     public function getList($data)
     {
-        $query = $this->handleModel->select(['*']);
+        $query = $this->handleModel::with([
+            'purchaseOrders' => function ($query) {
+                return $query->select(['id', 'supplier_id']);
+            },
+            'purchaseOrders.goodReceipts' => function ($query) {
+                return $query->select(['id', 'purchase_order_id', 'code', 'receipt_date', 'note', 'status', 'approved_by', 'created_by', 'total_amount']);
+            },
+            'purchaseOrders.goodReceipts.supplierTransaction' => function ($query) {
+                return $query->select(['id', 'goods_receipt_id', 'paid_amount', 'transaction_date', 'credit_due_date', 'description']);
+            },
+        ])
+        ->select(['id', 'name', 'contact_person', 'phone', 'email', 'address', 'current_debt'])
+        ->selectRaw('
+            (SELECT SUM(total_amount) 
+             FROM good_receipts 
+             WHERE good_receipts.purchase_order_id IN (
+                 SELECT id FROM purchase_orders WHERE purchase_orders.supplier_id = suppliers.id
+             )) - 
+            COALESCE((SELECT SUM(paid_amount) 
+             FROM supplier_transactions 
+             WHERE supplier_transactions.goods_receipt_id IN (
+                 SELECT id FROM good_receipts 
+                 WHERE good_receipts.purchase_order_id IN (
+                     SELECT id FROM purchase_orders WHERE purchase_orders.supplier_id = suppliers.id
+                 )
+             )), 0) as debt
+        ');
         $filters = [
             'search' => [
                 'name' => $data->search ?? "",
@@ -27,7 +53,7 @@ class SupplierRepository extends BaseRepository
         ];
         $query = $this->filterData($query, $filters);
         $query->orderBy('id', 'desc');
-        return $query->paginate(10);;
+        return $query->paginate(20);;
     }
     public function createData($data = [])
     {

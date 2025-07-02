@@ -97,7 +97,7 @@ class SupplierTransactionRepository extends BaseRepository
                 throw new \Exception("Hạn công nợ cần lớn hơn ngày giao dịch");
             }
             if ($obj->credit_due_date > $data["credit_due_date"]) {
-                throw new \Exception("Hạn công nợ cầh lớn hạn cũ");
+                throw new \Exception("Hạn công nợ cần lớn hạn cũ");
             }
             $newObj = [];
             $newObj["credit_due_date"] = $data["credit_due_date"];
@@ -122,11 +122,11 @@ class SupplierTransactionRepository extends BaseRepository
     public function hanldeUpdatePayment($id, $data)
     {
         try {
-            $obj = $this->handleModel::with("purchaseOrder")->where("id", $id)->firstOrFail();
+            $obj = $this->handleModel::with("goodReceipt")->where("id", $id)->firstOrFail();
             $newObj = [];
 
             $newObj["paid_amount"] = $obj['paid_amount'] + $data["payment"];
-            if ($newObj["paid_amount"] > $obj->purchaseOrder->total_amount) {
+            if ($newObj["paid_amount"] > $obj->goodReceipt->total_amount) {
                 throw new \Exception("Tổng tiền thanh toán đã vượt quá đơn hàng");
             }
             if ($data["payment"] <= 0) {
@@ -173,70 +173,79 @@ class SupplierTransactionRepository extends BaseRepository
     }
     public function getDataForShowTransaction($id)
     {
-        // Eager load tất cả relationships cần thiết trong một truy vấn
-        $obj = $this->handleModel->with([
-            'purchaseOrder.supplier',
-            'purchaseOrder.items.productVariant.product.unitConversions.toUnit',
-            'supplierDebtHistories'
-        ])->findOrFail($id);
 
-        // Lấy items và transform ngay trong query
-        $listItem = $obj->purchaseOrder->items->map(function ($item) {
-            $variant = $item->productVariant;
-            $product = $variant->product;
 
-            // Tạo danh sách conversion
-            $conversions = $product->unitConversions->map(function ($conversion) use ($item) {
-                return sprintf(
-                    "1 %s = %s %s",
-                    $item->unit->name,
-                    $this->formatNumberDemical($conversion->conversion_factor),
-                    $conversion->toUnit->name
-                );
-            })->toArray();
-
-            return [
-                'product_name' => sprintf(
-                    "%s - %s",
-                    $product->name,
-                    $variant->attributes->pluck('name')->implode(' - ')
-                ),
-                'quantity_ordered' => "{$item->quantity_ordered} - {$item->unit->name}",
-                'convertion' => $conversions,
-                'quantity_received' => "{$item->quantity_received} - {$item->unit->name}",
-                'unit_price' => $this->formatNumberInt($item->unit_price) . " ₫",
-                'subtotal' => $this->formatNumberInt($item->subtotal) . " ₫",
-            ];
-        })->toArray();
+        $query = $this->handleModel::with(
+            [
+            'goodReceipt' => function ($query) {
+                return $query->select(['id','code', 'receipt_date', 'status', 'approved_by', 'approved_at', 'total_amount', 'created_by', 'purchase_order_id']);
+            },
+            'goodReceipt.purchaseOrder.supplier' => function ($query) {
+                return $query;
+            },
+            'goodReceipt.createBy' => function ($query){
+                return $query->select(['id','name']);
+            },
+            'goodReceipt.approvedBy' => function ($query){
+                return $query->select(['id','name']);
+            },
+            'goodReceipt.items' => function ($query){
+                return $query->select(['id', 'good_receipt_id','product_variant_id', 'unit_id', 'quantity_expected', 'quantity_received', 'subtotal', 'unit_price']);
+            },
+            'goodReceipt.items.productVariant' => function ($query){
+                return $query;
+            },
+            'goodReceipt.items.productVariant.attributes' => function ($query){
+                return $query;
+            },
+            'goodReceipt.items.productVariant.product' => function ($query){
+                return $query->select(['id', 'description','name']);
+            },
+            'goodReceipt.items.productVariant.product.unitConversions' => function ($query){
+                return $query;
+            },
+            'goodReceipt.items.productVariant.product.unitConversions.fromUnit' => function ($query){
+                return $query;
+            },
+            'goodReceipt.items.productVariant.product.unitConversions.toUnit' => function ($query){
+                return $query;
+            },
+            'goodReceipt.items.unit' => function ($query){
+                return $query;
+            }
+        
+            ])->where('goods_receipt_id', $id)->select(['id','paid_amount', 'transaction_date', 'credit_due_date', 'description', 'goods_receipt_id'])->first();
+            
         $supplierDebtHistory = $this->supplierDebt::where("supplier_transaction_id", $id)->orderBy("created_at", 'desc')->get();
-        // $supplierDebtHistory = $subSupplierDebtHistory->map(function ($history) {
-        //     $formated = $history->toArray();
-        //     if ($history->update_type === 'payment') {
-        //         $formatted['new_value'] = $this->formatNumberInt($history->new_value); 
-        //     } elseif ($history->update_type === 'due_date') {
-        //         $formatted['new_value'] = $this->formatDate($history->new_value); 
-        //     }
-        //     // $formated['created_date'] = $this->formatDate($history->created);
-        //     return $formated;
-        // });
+        $supplierDebtHistory = $supplierDebtHistory->map(function ($history) {
+            $formated = $history->toArray();
+            if ($history->update_type === 'payment') {
+                $formatted['new_value'] = $this->formatNumberInt($history->new_value); 
+            } elseif ($history->update_type === 'due_date') {
+                $formatted['new_value'] = $this->formatDate($history->new_value); 
+            }
+            return $formated;
+        });
 
-        // dd($supplierDebtHistory);
         return [
-            'name_supplier' => $obj->purchaseOrder->supplier->name,
-            'contact_person' => $obj->purchaseOrder->supplier->contact_person,
-            'phone' => $obj->purchaseOrder->supplier->phone,
-            'email' => $obj->purchaseOrder->supplier->email,
-            'address' => $obj->purchaseOrder->supplier->address,
-            'order_code' => 'MDH - ' . $obj->purchaseOrder->id,
-            'order_date' => $this->formatDate($obj->purchaseOrder->order_date),
-            'total_amount' => $obj->purchaseOrder->total_amount,
-            'paid_amount' => $obj->paid_amount,
-            'transaction_date' => $this->formatDate($obj->transaction_date),
-            'credit_due_date' => $this->formatDate($obj->credit_due_date),
-            'description' => $obj->description,
-            'status' => $this->getStatusBySupplierTransaction($obj->id),
-            'list_item_order' => $listItem,
-            'supplier_debt_histort' => $supplierDebtHistory,
+            'name_supplier' => $query->goodReceipt->purchaseOrder->supplier->name,
+            'contact_person' => $query->goodReceipt->purchaseOrder->supplier->contact_person,
+            'phone' => $query->goodReceipt->purchaseOrder->supplier->phone,
+            'email' => $query->goodReceipt->purchaseOrder->supplier->email,
+            'address' => $query->goodReceipt->purchaseOrder->supplier->address,
+            'order_code' => $query->goodReceipt->code,
+            'order_date' => $query->goodReceipt->purchaseOrder->order_date,
+            'total_amount' => $query->goodReceipt->total_amount,
+            'paid_amount' => $query->paid_amount,
+            'transaction_date' => $query->transaction_date,
+            'credit_due_date' => $query->credit_due_date,
+            'description' => $query->description,
+            'status' => $query->goodReceipt->status,
+            'list_item_order' => $query->goodReceipt->items,
+            'supplier_debt_history' => $supplierDebtHistory,
+            'approved_by' => $query->goodReceipt->approvedBy->name,
+            'created_by' => $query->goodReceipt->createBy->name,
+            // 'approved_by' => $query->goodReceipt->approved_by,
         ];
     }
     private function getStatusBySupplierTransaction($id)
