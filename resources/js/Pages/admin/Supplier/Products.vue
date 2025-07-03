@@ -267,7 +267,6 @@ const { supplier, products, listVariants } = defineProps({
     products: Array,
     listVariants: Object,
 });
-console.log(listVariants);
 const showAddProductModal = ref(false);
 const searchQuery = ref("");
 const searchResults = ref([]);

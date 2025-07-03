@@ -568,7 +568,6 @@ import AppLayout from "../Layouts/AppLayout.vue";
 const { supplierTransaction } = defineProps({
     supplierTransaction: Object,
 });
-console.log(supplierTransaction);
 const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString("vi-VN");
 };
