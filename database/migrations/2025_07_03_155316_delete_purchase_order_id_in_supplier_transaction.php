@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('supplier_transactions', function (Blueprint $table) {
-            $table->dropForeign(['purchase_order_id']);
-            $table->integer('goods_receipt_id')->nullable();
+           $table->dropColumn('purchase_order_id');
         });
     }
 
@@ -23,8 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('supplier_transactions', function (Blueprint $table) {
-            $table->dropColumn('goods_receipt_id');
-            $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('set null');
+            $table->bigInteger('purchase_order_id')->nullable()->unsigned()->after('id');
         });
     }
 };

@@ -83,8 +83,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(InventoryAudit::class, 'approved_by');
     }
-    public function approvedGoodReceipt(){
-        return  $this->hasOne(GoodReceipt::class, 'approved_by');
-    }
 
 }

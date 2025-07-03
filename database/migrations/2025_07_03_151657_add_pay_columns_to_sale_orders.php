@@ -11,6 +11,7 @@ class AddPayColumnsToSaleOrders extends Migration
         Schema::table('sale_orders', function (Blueprint $table) {
             $table->decimal('pay_before', 15, 2)->default(0)->after('total_amount');
             $table->decimal('pay_after', 15, 2)->default(0)->after('pay_before');
+            $table->enum('status', ['pending', 'shipped', 'completed'])->default('pending')->change();
         });
     }
 
@@ -18,6 +19,7 @@ class AddPayColumnsToSaleOrders extends Migration
     {
         Schema::table('sale_orders', function (Blueprint $table) {
             $table->dropColumn(['pay_before', 'pay_after']);
+            $table->enum('status', ['pending', 'shipped', 'closed'])->default('pending')->change();
         });
     }
 }
