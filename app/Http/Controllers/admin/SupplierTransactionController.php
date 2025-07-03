@@ -26,11 +26,11 @@ class SupplierTransactionController extends Controller
     public function update(int $id){
         // dd(request()->all());
         $supplierTransaction = $this->handleRepository->hanldeUpdateCreditDueDate($id, request()->all());
-        return $this->returnInertia($supplierTransaction, "Cập nhật hạn công nợ thành công", 'admin.suppliers.index');
+        return $this->returnInertia($supplierTransaction, "Cập nhật hạn công nợ thành công", 'admin.supplier-transaction.index');
     }
     public function updatePayment(int $id){
         $supplierTransaction = $this->handleRepository->hanldeUpdatePayment($id, request()->all());
-        return $this->returnInertia($supplierTransaction, "Cập nhật công nợ thành công", 'admin.suppliers.index');
+        return $this->returnInertia($supplierTransaction, "Cập nhật công nợ thành công", 'admin.supplier-transaction.index');
     }
     public function show($id){
         $supplierTransaction = $this->handleRepository->getDataForShowTransaction($id);

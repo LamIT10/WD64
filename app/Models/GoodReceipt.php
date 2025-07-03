@@ -31,10 +31,4 @@ class GoodReceipt extends Model
     public function createBy(){
         return $this->belongsTo(User::class, 'created_by');
     }
-    public function supplierTransaction(){
-        return $this->hasOne(SupplierTransaction::class, 'goods_receipt_id');
-    }
-    public function approvedBy(){
-        return $this->belongsTo(User::class, 'approved_by');
-    }
 }

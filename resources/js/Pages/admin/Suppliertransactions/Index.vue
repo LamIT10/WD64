@@ -318,6 +318,7 @@ import { route } from 'ziggy-js';
 import Pagination from '../../components/Pagination.vue';
 import { useAuthStore } from '../../../stores/auth';
 
+
 const authStore = useAuthStore();
 
 const formPerpage = useForm({

@@ -13,23 +13,23 @@
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span v-if="supplierTransaction.status == 0"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                            Chờ duyệt
-                        </span>
-                        <span v-else-if="supplierTransaction.status == 1"
+                        <span v-if="supplierTransaction.status == 4"
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                            Đã duyệt
-                        </span>
-                        <span v-else-if="supplierTransaction.status == 2"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                            Nhập một phần
+                            Đã thanh toán
                         </span>
                         <span v-else-if="supplierTransaction.status == 3"
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                            Đã hoàn thành
+                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            Sắp hết hạn
                         </span>
-                        <Waiting route-name="admin.suppliers.index">
+                        <span v-else-if="supplierTransaction.status == 2"
+                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            Còn hạn
+                        </span>
+                        <span v-else-if="supplierTransaction.status == 1"
+                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            Hết hạn
+                        </span>
+                        <Waiting route-name="admin.supplier-transaction.index">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </Waiting>
                     </div>
@@ -89,7 +89,7 @@
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                     </path>
                                 </svg>
-                                Ngày giao dịch: {{ formatDate(supplierTransaction.transaction_date) }}
+                                Ngày giao dịch: {{ supplierTransaction.transaction_date }}
                             </p>
                             <p class="flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
@@ -97,30 +97,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                                Hạn công nợ: {{ formatDate(supplierTransaction.credit_due_date) }}
+                                Hạn công nợ: {{ supplierTransaction.credit_due_date }}
                             </p>
-                        </div>
-                        <div v-if="supplierTransaction.created_by">
-                            <h2 class="text-sm font-semibold text-indigo-700">Thông tin duyệt</h2>
-                            <div class="mt-2 space-y-2 text-gray-800">
-                                <p class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    Mgười tạo: {{ supplierTransaction.created_by }}
-                                </p>
-                                <p class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Người duyệt: {{ supplierTransaction.approved_by }}
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -158,54 +136,59 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Trạng thái
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Tổng tiền đơn hàng
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Đã thanh toán
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Số tiền nợ
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Ghi chú
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <span v-if="supplierTransaction.status == 0"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                        Chờ duyệt
-                                    </span>
-                                    <span v-else-if="supplierTransaction.status == 1"
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span v-if="supplierTransaction.status == 4"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                        Đã duyệt
-                                    </span>
-                                    <span v-else-if="supplierTransaction.status == 2"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                        Nhập một phần
+                                        Đã thanh toán
                                     </span>
                                     <span v-else-if="supplierTransaction.status == 3"
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                        Sắp hết hạn
+                                    </span>
+                                    <span v-else-if="supplierTransaction.status == 2"
                                         class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                        Đã hoàn thành
+                                        Còn hạn
+                                    </span>
+                                    <span v-else-if="supplierTransaction.status == 1"
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                        Hết hạn
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-right">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
                                     {{ formatNumber(supplierTransaction.total_amount) + " ₫" }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-right">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
                                     {{ formatNumber(supplierTransaction.paid_amount) + " ₫" }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-right">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
                                     {{ formatNumber(supplierTransaction.total_amount -
                                         supplierTransaction.paid_amount) + " ₫" }}
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 text-center">
+                                <td class="px-6 py-4 text-gray-900">
                                     {{ supplierTransaction.description || 'Không có ghi chú' }}
                                 </td>
                             </tr>
@@ -221,54 +204,60 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     STT
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Tên sản phẩm
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                                    Số lượng nhập
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Số lượng đặt
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Số lượng thực tế
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Quy đổi
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Giá trên đơn vị
                                 </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Tổng giá
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr class="hover:bg-gray-50" v-for="(item, index) in supplierTransaction.list_item_order">
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     {{ index }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-center" >
-                                    {{ item.product_variant.product.name }}
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                    {{ item.product_name }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-center">
-                                    {{ item.quantity_expected }}
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                                    {{ item.quantity_ordered }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900">
                                     {{ item.quantity_received }}
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 text-center">
-                                    <p v-for="value in item.product_variant.product.unit_conversions">
-                                        {{ "1 " + value.from_unit.name + " " + " = " +
-                                            formatNumber(value.conversion_factor, 2) + value.to_unit.name }}
+                                <td class="px-6 py-4 text-gray-900">
+                                    <p v-for="value in item.convertion">
+                                        {{ value }}
                                     </p>
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 text-right">
-                                    {{ formatNumber(item.unit_price) + " ₫" }}
+                                <td class="px-6 py-4 text-gray-900">
+                                    {{ item.unit_price }}
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 text-right">
-                                    {{ formatNumber(item.subtotal) + " ₫" }}
+                                <td class="px-6 py-4 text-gray-900">
+                                    {{ item.subtotal }}
                                 </td>
 
                             </tr>
@@ -284,26 +273,31 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
                             <tr>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     STT
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wide text-centerr">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Giá trị cập nhật
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Loại
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Ghi chú
                                 </th>
-                                <th class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Ngày thực hiện
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr class="hover:bg-gray-50"
-                                v-for="(item, index) in supplierTransaction.supplier_debt_history">
+                                v-for="(item, index) in supplierTransaction.supplier_debt_histort">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     {{ index + 1 }}
                                 </td>
@@ -316,22 +310,22 @@
                                         {{ formatDate(item.new_value) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap  text-center">
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <span v-if="item.update_type == 'payment'">
 
-                                        Cập nhật thanh toán công nợ
+                                       Cập nhật thanh toán công nợ
                                     </span>
                                     <span v-else>
                                         Cập nhật hạn công nợ
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900  text-right">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
                                     {{ item.note }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-gray-900  text-center">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 auto-format-number">
                                     {{ formatDate(item.created_at) }}
                                 </td>
-
+                              
                             </tr>
                         </tbody>
                     </table>
@@ -348,12 +342,12 @@ import AppLayout from '../Layouts/AppLayout.vue';
 const { supplierTransaction } = defineProps({
     supplierTransaction: Object,
 })
-console.log(supplierTransaction);
+
 const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('vi-VN');
 };
 
-const formatNumber = (rawNumber, i = 0) => {
+const formatNumber = (rawNumber) => {
     try {
         const number = parseFloat(rawNumber);
         if (isNaN(number)) {
@@ -361,7 +355,7 @@ const formatNumber = (rawNumber, i = 0) => {
         }
         return number.toLocaleString('vi-VN', {
             minimumFractionDigits: 0,
-            maximumFractionDigits: i
+            maximumFractionDigits: 0
         }).replace(/,/g, '.');
     } catch (error) {
         console.error('Error formatting number:', error);
