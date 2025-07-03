@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Customer;
+use App\Models\CustomerTransaction;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductUnitConversion;
@@ -236,6 +237,11 @@ class SaleOrdersRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
+
+            $customer = Customer::findOrFail($data['customer_id']);
+            $creditTerm = $customer->credit_term ?? 30;
+            $creditDueDate = now()->addDays($creditTerm);
+
             $addressComponents = [
                 $data['address_detail'] ?? '',
                 $data['ward'] ?? '',
@@ -243,13 +249,16 @@ class SaleOrdersRepository extends BaseRepository
                 $data['province'] ?? '',
             ];
             $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
+
             Log::info('Address components:', $addressComponents);
             Log::info('Address delivery:', ['value' => $addressDelivery]);
+
             $newSaleOrder = [
                 'customer_id' => $data['customer_id'],
                 'order_date' => now(),
                 'status' => 'pending',
                 'total_amount' => $data['total_amount'],
+                'credit_due_date' => $creditDueDate,
                 'address_delivery' => $addressDelivery,
             ];
 
@@ -257,15 +266,14 @@ class SaleOrdersRepository extends BaseRepository
             if (!$saleOrder) {
                 throw new \Exception('Không thể tạo đơn hàng');
             }
+
             Log::info('Sale Order created with ID: ' . $saleOrder->id);
+
             foreach ($data['items'] as $item) {
-                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
-                    ->first();
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
 
                 if (!$inventory) {
-                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
-                        ->with(['product', 'attributes'])
-                        ->first();
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
                     $productName = $productVariant ? $productVariant->product->name : 'Unknown';
                     $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
                     $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
@@ -274,14 +282,13 @@ class SaleOrdersRepository extends BaseRepository
 
                 $quantityRequested = $item['quantity'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1);
                 if ($quantityRequested > $inventory->quantity_on_hand) {
-                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
-                        ->with(['product', 'attributes'])
-                        ->first();
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
                     $productName = $productVariant ? $productVariant->product->name : 'Unknown';
                     $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
                     $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
                     throw new \Exception("Số lượng yêu cầu cho sản phẩm {$fullName} vượt quá số lượng trong kho (còn {$inventory->quantity_on_hand}).");
                 }
+
                 $this->saleOrderItem->create([
                     'sales_order_id' => $saleOrder->id,
                     'product_variant_id' => $item['product_variant_id'],
@@ -291,11 +298,13 @@ class SaleOrdersRepository extends BaseRepository
                     'subtotal' => $item['quantity'] * ($item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1)),
                     'quantity_shipped' => $item['quantity'],
                 ]);
+
                 $inventory->update([
                     'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
                 ]);
             }
-            $customer = Customer::find($data['customer_id']);
+
+            // Cập nhật thông tin địa chỉ khách hàng nếu thay đổi
             if ($customer) {
                 $updateData = [];
                 if (!empty($data['province']) && $customer->province !== $data['province']) {
@@ -311,8 +320,6 @@ class SaleOrdersRepository extends BaseRepository
                     $customer->update($updateData);
                     Log::info('Updated customer address:', ['customer_id' => $customer->id, 'updated_fields' => $updateData]);
                 }
-            } else {
-                Log::warning('Customer not found for ID: ' . $data['customer_id']);
             }
 
             DB::commit();
@@ -323,6 +330,7 @@ class SaleOrdersRepository extends BaseRepository
             return ['error' => $th->getMessage()];
         }
     }
+
 
     public function getInventoryQuantity($productVariantId)
     {
@@ -418,7 +426,12 @@ class SaleOrdersRepository extends BaseRepository
             Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
             return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
         }
+
+        if ($saleOrder->status !== 'pending') {
+            throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
+        }
     }
+
 
     public function completeOrder($orderId, $pay_after)
     {

@@ -114,7 +114,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-span-3">
+                        <!-- <div class="col-span-3">
                             <div class="grid grid-cols-1 grid-rows-1 gap-4">
                                 <div class="col-span-2">
                                     <div class="space-y-1">
@@ -129,7 +129,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <!-- <div class="col-span-2">
+                                <div class="col-span-2">
                                     <div class="space-y-2">
                                         <label for="expiration-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày hết hạn
@@ -141,9 +141,9 @@
                                             {{ form.errors.expiration_date }}
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- Mô tả sản phẩm -->

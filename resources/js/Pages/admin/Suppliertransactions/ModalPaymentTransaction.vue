@@ -38,7 +38,7 @@
                                 <p class="mt-2 text-sm text-gray-500">
                                     Công nợ còn lại:
                                     <span class="font-semibold text-indigo-600">
-                                        {{ transactionSupplierEdit.outstanding_amount }} ₫
+                                        {{ formatNumber(initialPayment) }} ₫
                                     </span>
                                 </p>
                           
@@ -78,7 +78,6 @@ import { ref } from 'vue';
 const { transactionSupplierEdit } = defineProps({
     transactionSupplierEdit: Object,
 })
-
 // Format số tiền
 const formatNumber = (value) => {
     return new Intl.NumberFormat('vi-VN').format(value);
@@ -98,7 +97,8 @@ const formatCurrency = (event) => {
 };
 
 // Khởi tạo form với giá trị đã format
-const initialPayment = transactionSupplierEdit.outstanding_amount.replace(".", "").replace(".", "");
+const subInitialPayment =  transactionSupplierEdit.value.total_amount - transactionSupplierEdit.value.supplier_transaction.paid_amount
+const initialPayment = subInitialPayment;
 const form = useForm({
     payment: initialPayment,
     note: ""
@@ -109,7 +109,7 @@ const formattedInitialValue = ref(formatNumber(initialPayment));
 
 const handleSubmit = () => {
     form.patch(route('admin.supplier-transaction.updatePayment', {
-        id: transactionSupplierEdit.id,
+        id: transactionSupplierEdit.value.supplier_transaction.id,
     }), {
         onSuccess: () => {
             emit('closeModal');
