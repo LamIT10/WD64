@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://127.0.0.1:8000",
+    url: "http://localhost",
     port: null,
     defaults: {},
     routes: {
@@ -521,6 +521,11 @@ const Ziggy = {
         "admin.sale-orders.export": {
             uri: "admin/sale-orders/export",
             methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.complete": {
+            uri: "admin/sale-orders/{id}/complete",
+            methods: ["POST"],
+            parameters: ["id"],
         },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
