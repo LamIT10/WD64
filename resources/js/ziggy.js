@@ -139,6 +139,35 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["productId", "supplierId"],
         },
+        "admin.attributes.index": {
+            uri: "admin/attributes",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.attributes.store": {
+            uri: "admin/attributes",
+            methods: ["POST"],
+        },
+        "admin.attributes.destroy": {
+            uri: "admin/attributes/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.attribute-values.store": {
+            uri: "admin/attribute-values",
+            methods: ["POST"],
+        },
+        "admin.attribute-values.destroy": {
+            uri: "admin/attribute-values/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.units.index": { uri: "admin/units", methods: ["GET", "HEAD"] },
+        "admin.units.store": { uri: "admin/units", methods: ["POST"] },
+        "admin.units.destroy": {
+            uri: "admin/units/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
         "admin.customers.index": {
             uri: "admin/customers",
             methods: ["GET", "HEAD"],
@@ -444,6 +473,56 @@ const Ziggy = {
             uri: "admin/users/bulk-delete",
             methods: ["POST"],
         },
+        "admin.sale-orders.index": {
+            uri: "admin/sale-orders",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.create": {
+            uri: "admin/sale-orders/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.products.search": {
+            uri: "admin/sale-orders/search/products",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.variants.all": {
+            uri: "admin/sale-orders/variants/{productId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productId"],
+        },
+        "admin.sale-orders.unit.all": {
+            uri: "admin/sale-orders/unit-conversions/{productId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productId"],
+        },
+        "admin.sale-orders.customer.search": {
+            uri: "admin/sale-orders/search/customers",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.inventory": {
+            uri: "admin/sale-orders/inventory/{productVariantId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productVariantId"],
+        },
+        "admin.sale-orders.reject": {
+            uri: "admin/sale-orders/{id}/reject",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.sale-orders.approve": {
+            uri: "admin/sale-orders/{id}/approve",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.sale-orders.store": {
+            uri: "admin/sale-orders/store",
+            methods: ["POST"],
+        },
+        "admin.sale-orders.export": {
+            uri: "admin/sale-orders/export",
+            methods: ["GET", "HEAD"],
+        },
+        dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
         logout: { uri: "logout", methods: ["POST"] },
         "password.request": {

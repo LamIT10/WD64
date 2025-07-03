@@ -30,7 +30,7 @@ class CustomerTransactionController extends Controller
     public function show($orderId)
     {
         $detail = $this->customerTransactionRepo->getDebtDetailByOrderId($orderId);
- 
+        // dd($detail);
         return Inertia::render('admin/Customers/Transaction/ShowTransaction', [
             'debt' => $detail,
         ]);

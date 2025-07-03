@@ -42,7 +42,4 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(Receiving::class);
     }
-    public function goodReceipts(){
-        return $this->hasMany(GoodReceipt::class, 'purchase_order_id');
-    }
 }

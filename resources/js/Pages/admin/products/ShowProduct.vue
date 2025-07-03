@@ -42,7 +42,7 @@
                                     {{ product.default_unit?.name }} ({{ product.default_unit?.symbol }})
                                 </p>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <p class="text-gray-500 font-medium">Ngày sản xuất</p>
                                 <p class="font-semibold mt-1">
                                     {{ product.production_date ? formatDate(product.production_date) : '—' }}
@@ -53,7 +53,7 @@
                                 <p class="font-semibold mt-1">
                                     {{ product.expiration_date ? formatDate(product.expiration_date) : '—' }}
                                 </p>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="mt-4">
                             <p class="text-gray-500 font-medium">Mô tả</p>
@@ -103,12 +103,9 @@
                     <div class="bg-white p-6 rounded shadow" v-if="product.inventory_locations?.length">
                         <h2 class="text-md font-semibold text-indigo-700 mb-4 border-b pb-2">Vị trí kho</h2>
                         <div v-for="(loc, i) in product.inventory_locations" :key="i" class="flex items-center mb-3">
-                            <div class="h-10 w-10 bg-blue-100 rounded-full flex justify-center items-center">
-                                <i class="fas fa-map-marker-alt text-blue-600"></i>
-                            </div>
                             <div class="ml-3">
-                                <p class="font-medium">{{ loc.zone?.name }}</p>
-                                <p class="text-sm text-gray-500">{{ loc.custom_location_name }}</p>
+                                <p class="font-medium">Khu Vực: {{ loc.zone?.name }}</p>
+                                <p class="text-sm text-gray-500">Ghi chú: {{ loc.custom_location_name }}</p>
                             </div>
                         </div>
                     </div>
@@ -146,29 +143,21 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Mã vạch</th>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Giá bán</th>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Thuộc tính</th>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tồn kho</th>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Vị trí</th>
-                                <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nhà CC</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Biến thể</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã vạch</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá bán</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thuộc tính</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tồn kho</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhà CC</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="(variant, i) in product.product_variants" :key="variant.id"
                                 class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ variant.code || '—' }}
+                                </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                                     {{ variant.barcode || '—' }}
                                 </td>
@@ -199,7 +188,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-500">
                                     {{ variant.supplier_variants?.length ? variant.supplier_variants[0].supplier?.name :
-                                    '—' }}
+                                        '—' }}
                                 </td>
                             </tr>
                         </tbody>
@@ -222,10 +211,10 @@ const totalQuantity = computed(() =>
     props.product?.product_variants?.reduce((sum, pv) => sum + (pv.inventory?.quantity_on_hand || 0), 0)
 );
 
-const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('vi-VN');
-};
+// const formatDate = (dateStr) => {
+//     const d = new Date(dateStr);
+//     return d.toLocaleDateString('vi-VN');
+// };
 </script>
 
 <style scoped></style>
