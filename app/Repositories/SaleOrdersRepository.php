@@ -68,13 +68,25 @@ class SaleOrdersRepository extends BaseRepository
                     'status',
                     'total_amount',
                     'address_delivery',
-                    'created_at'
+                    'created_at',
+                    'pay_before',
+                    'pay_after'
                 );
 
             if ($request->has('status') && !empty($request->status)) {
                 $query->where('status', $request->status);
             }
-            $orders = $query->get()->map(function ($order) {
+            if ($request->has('customer') && !empty($request->customer)) {
+                $query->whereHas('customer', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->input('customer') . '%');
+                });
+            }
+            if ($request->has('order_date') && !empty($request->order_date)) {
+                $query->whereDate('created_at', $request->order_date);
+            }
+
+            $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
+            $orders = $query->orderBy('created_at', 'desc')->paginate($perPage)->through(function ($order) {
                 $order->total_quantity = $order->items->sum('quantity_ordered');
                 return $order;
             });
@@ -375,7 +387,7 @@ class SaleOrdersRepository extends BaseRepository
             return ['error' => "Lỗi khi từ chối đơn hàng: {$th->getMessage()}"];
         }
     }
-    public function approveOrder($orderId)
+    public function approveOrder($orderId, $pay_before)
     {
         try {
             DB::beginTransaction();
@@ -389,8 +401,15 @@ class SaleOrdersRepository extends BaseRepository
                 throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
             }
 
-            $saleOrder->update(['status' => 'shipped']);
-            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped.");
+            if ($pay_before > $saleOrder->total_amount) {
+                throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'shipped',
+                'pay_before' => $pay_before
+            ]);
+            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
             return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
@@ -398,6 +417,40 @@ class SaleOrdersRepository extends BaseRepository
             DB::rollBack();
             Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
             return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
+        }
+    }
+
+    public function completeOrder($orderId, $pay_after)
+    {
+        try {
+            DB::beginTransaction();
+
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            if ($saleOrder->status !== 'shipped') {
+                throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái đang giao hàng.");
+            }
+
+            $remainingAmount = $saleOrder->total_amount - ($saleOrder->pay_before ?? 0);
+            if ($pay_after > $remainingAmount) {
+                throw new \Exception("Số tiền thanh toán sau ({$pay_after} VND) không được vượt quá số tiền còn lại ({$remainingAmount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'completed',
+                'pay_after' => $pay_after
+            ]);
+            Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
+
+            DB::commit();
+            return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi xác nhận hoàn thành đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi xác nhận hoàn thành đơn hàng: {$th->getMessage()}"];
         }
     }
 }

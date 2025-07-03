@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http:127.0.0.1:8000",
+    url: "http://127.0.0.1:8000/",
     port: null,
     defaults: {},
     routes: {
@@ -129,6 +129,44 @@ const Ziggy = {
             uri: "admin/products/{product}",
             methods: ["DELETE"],
             parameters: ["product"],
+        },
+        "admin.products.search": {
+            uri: "admin/products/search",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.products.variants": {
+            uri: "admin/products/{productId}/variants/{supplierId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productId", "supplierId"],
+        },
+        "admin.attributes.index": {
+            uri: "admin/attributes",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.attributes.store": {
+            uri: "admin/attributes",
+            methods: ["POST"],
+        },
+        "admin.attributes.destroy": {
+            uri: "admin/attributes/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.attribute-values.store": {
+            uri: "admin/attribute-values",
+            methods: ["POST"],
+        },
+        "admin.attribute-values.destroy": {
+            uri: "admin/attribute-values/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
+        "admin.units.index": { uri: "admin/units", methods: ["GET", "HEAD"] },
+        "admin.units.store": { uri: "admin/units", methods: ["POST"] },
+        "admin.units.destroy": {
+            uri: "admin/units/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
         },
         "admin.customers.index": {
             uri: "admin/customers",
@@ -294,6 +332,16 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
+        "admin.suppliers.products.store": {
+            uri: "admin/suppliers/{supplierId}/products",
+            methods: ["POST"],
+            parameters: ["supplierId"],
+        },
+        "admin.suppliers.variants": {
+            uri: "admin/suppliers/{supplierId}/products/{productId}/variants",
+            methods: ["GET", "HEAD"],
+            parameters: ["supplierId", "productId"],
+        },
         "admin.customer-transaction.index": {
             uri: "admin/customer-transaction",
             methods: ["GET", "HEAD"],
@@ -336,6 +384,61 @@ const Ziggy = {
             methods: ["PATCH"],
             parameters: ["id"],
         },
+        "admin.purchases.index": {
+            uri: "admin/purchases",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.purchases.create": {
+            uri: "admin/purchases/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.purchases.approve": {
+            uri: "admin/purchases/{id}/approve",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.purchases.getVariants": {
+            uri: "admin/purchases/{id}/get-variants",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.purchases.getSupplierAndUnit": {
+            uri: "admin/purchases/{id}/get-supplier-and-unit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.purchases.store": {
+            uri: "admin/purchases/store",
+            methods: ["POST"],
+        },
+        "admin.receiving.index": {
+            uri: "admin/receiving",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.receiving.create": {
+            uri: "admin/receiving/{id}/create",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.receiving.approve": {
+            uri: "admin/receiving/{id}/approve",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.receiving.getVariants": {
+            uri: "admin/receiving/{id}/get-variants",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.receiving.getSupplierAndUnit": {
+            uri: "admin/receiving/{id}/get-supplier-and-unit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.receiving.store": {
+            uri: "admin/receiving/store",
+            methods: ["POST"],
+        },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {
             uri: "admin/users/create",
@@ -370,6 +473,56 @@ const Ziggy = {
             uri: "admin/users/bulk-delete",
             methods: ["POST"],
         },
+        "admin.sale-orders.index": {
+            uri: "admin/sale-orders",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.create": {
+            uri: "admin/sale-orders/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.products.search": {
+            uri: "admin/sale-orders/search/products",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.variants.all": {
+            uri: "admin/sale-orders/variants/{productId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productId"],
+        },
+        "admin.sale-orders.unit.all": {
+            uri: "admin/sale-orders/unit-conversions/{productId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productId"],
+        },
+        "admin.sale-orders.customer.search": {
+            uri: "admin/sale-orders/search/customers",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.inventory": {
+            uri: "admin/sale-orders/inventory/{productVariantId}",
+            methods: ["GET", "HEAD"],
+            parameters: ["productVariantId"],
+        },
+        "admin.sale-orders.reject": {
+            uri: "admin/sale-orders/{id}/reject",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.sale-orders.approve": {
+            uri: "admin/sale-orders/{id}/approve",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.sale-orders.store": {
+            uri: "admin/sale-orders/store",
+            methods: ["POST"],
+        },
+        "admin.sale-orders.export": {
+            uri: "admin/sale-orders/export",
+            methods: ["GET", "HEAD"],
+        },
+        dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
         logout: { uri: "logout", methods: ["POST"] },
         "password.request": {
