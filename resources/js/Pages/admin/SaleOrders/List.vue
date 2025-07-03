@@ -71,7 +71,7 @@
                                 :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:bg-blue-100 hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer'"
                                 @click="setActiveTab('shipped')"
                             >
-                                <span class="fa-solid fa-truck text-xl"></span>
+                                <i class="fa-solid fa-truck text-xl"></i>
                                 Đang giao hàng
                             </Waiting>
                             <Waiting
@@ -115,6 +115,7 @@
                                     v-model="filters.customer"
                                     class="peer w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm placeholder-gray-400 transition-all"
                                     placeholder="Nhập tên hoặc mã khách hàng..."
+                                    @input="applyFilters"
                                 />
                                 <i
                                     class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm peer-focus:text-indigo-500 transition"
@@ -131,6 +132,7 @@
                                 type="date"
                                 v-model="filters.order_date"
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm transition-all"
+                                @input="applyFilters"
                             />
                         </div>
                         <div>
@@ -142,6 +144,7 @@
                             <select
                                 v-model="filters.status"
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm bg-white transition-all"
+                                @change="applyFilters"
                             >
                                 <option value="">Tất cả</option>
                                 <option value="pending">Chờ duyệt</option>
@@ -252,8 +255,8 @@
                                                 order.status === 'rejected',
                                         }"
                                     >
-                                        {{ getStatusText(order.status) }}</span
-                                    >
+                                        {{ getStatusText(order.status) }}
+                                    </span>
                                 </td>
                                 <td
                                     class="px-4 py-2 text-orange-600 font-semibold text-center"
@@ -272,6 +275,54 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="text-sm text-gray-700">
+                        Hiển thị {{ listOrders.meta.current_page }} /
+                        {{ listOrders.meta.last_page }} trang (Tổng cộng
+                        {{ listOrders.meta.total }} đơn hàng)
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            @click="
+                                changePage(listOrders.meta.current_page - 1)
+                            "
+                            :disabled="listOrders.meta.current_page === 1"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+                        <button
+                            v-for="page in Object.keys(listOrders.meta.links)"
+                            :key="page"
+                            @click="changePage(parseInt(page))"
+                            :class="{
+                                'px-4 py-2 rounded-md': true,
+                                'bg-indigo-600 text-white':
+                                    parseInt(page) ===
+                                    listOrders.meta.current_page,
+                                'bg-gray-200 text-gray-700 hover:bg-gray-300':
+                                    parseInt(page) !==
+                                    listOrders.meta.current_page,
+                            }"
+                        >
+                            {{ parseInt(page) }}
+                        </button>
+                        <button
+                            @click="
+                                changePage(listOrders.meta.current_page + 1)
+                            "
+                            :disabled="
+                                listOrders.meta.current_page ===
+                                listOrders.meta.last_page
+                            "
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Modal -->
@@ -329,6 +380,12 @@
                                                     />
                                                 </svg>
                                             </button>
+                                        </div>
+                                        <div
+                                            v-if="errorMessage"
+                                            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                                        >
+                                            {{ errorMessage }}
                                         </div>
                                         <table
                                             class="w-full border border-gray-300 rounded-lg overflow-hidden text-sm"
@@ -419,6 +476,70 @@
                                                                 )
                                                             }}
                                                         </span>
+                                                    </td>
+                                                </tr>
+                                                <!-- Input pay_before khi trạng thái là pending -->
+                                                <tr
+                                                    v-if="
+                                                        selectedOrder.status ===
+                                                        'pending'
+                                                    "
+                                                >
+                                                    <td
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                    >
+                                                        💰 Thanh toán trước
+                                                    </td>
+                                                    <td class="px-4 py-2">
+                                                        <input
+                                                            v-model.number="
+                                                                pay_before
+                                                            "
+                                                            type="number"
+                                                            min="0"
+                                                            :max="
+                                                                selectedOrder.total_amount
+                                                            "
+                                                            step="1000"
+                                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm"
+                                                            placeholder="Nhập số tiền thanh toán trước"
+                                                            @input="
+                                                                validatePayBefore
+                                                            "
+                                                        />
+                                                    </td>
+                                                </tr>
+                                                <!-- Input pay_after khi trạng thái là shipped -->
+                                                <tr
+                                                    v-if="
+                                                        selectedOrder.status ===
+                                                        'shipped'
+                                                    "
+                                                >
+                                                    <td
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                    >
+                                                        💰 Thanh toán sau
+                                                    </td>
+                                                    <td class="px-4 py-2">
+                                                        <input
+                                                            v-model.number="
+                                                                pay_after
+                                                            "
+                                                            type="number"
+                                                            min="0"
+                                                            :max="
+                                                                selectedOrder.total_amount -
+                                                                (selectedOrder.pay_before ||
+                                                                    0)
+                                                            "
+                                                            step="1000"
+                                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm"
+                                                            placeholder="Nhập số tiền thanh toán sau"
+                                                            @input="
+                                                                validatePayAfter
+                                                            "
+                                                        />
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -551,10 +672,28 @@
                                                     class="flex justify-between mb-2"
                                                 >
                                                     <span class="text-gray-600"
-                                                        >Đã thanh toán:</span
+                                                        >Đã thanh toán
+                                                        trước:</span
                                                     >
                                                     <span class="font-medium">{{
-                                                        formatCurrencyVND(0)
+                                                        formatCurrencyVND(
+                                                            selectedOrder.pay_before ||
+                                                                0
+                                                        )
+                                                    }}</span>
+                                                </div>
+                                                <div
+                                                    class="flex justify-between mb-2"
+                                                >
+                                                    <span class="text-gray-600"
+                                                        >Đã thanh toán
+                                                        sau:</span
+                                                    >
+                                                    <span class="font-medium">{{
+                                                        formatCurrencyVND(
+                                                            selectedOrder.pay_after ||
+                                                                0
+                                                        )
                                                     }}</span>
                                                 </div>
                                                 <div
@@ -566,12 +705,18 @@
                                                     >
                                                     <span
                                                         class="text-gray-900 font-medium"
-                                                        >{{
-                                                            formatCurrencyVND(
-                                                                selectedOrder.total_amount
-                                                            )
-                                                        }}</span
                                                     >
+                                                        {{
+                                                            formatCurrencyVND(
+                                                                (selectedOrder.total_amount ||
+                                                                    0) -
+                                                                    (selectedOrder.pay_before ||
+                                                                        0) -
+                                                                    (selectedOrder.pay_after ||
+                                                                        0)
+                                                            )
+                                                        }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -585,6 +730,7 @@
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="approveOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                    :disabled="errorMessage || approve.isDirty"
                                 >
                                     <i class="fa-regular fa-circle-check"></i>
                                     Duyệt đơn
@@ -596,6 +742,15 @@
                                 >
                                     <i class="fa-solid fa-ban"></i>
                                     Từ chối
+                                </button>
+                                <button
+                                    v-if="selectedOrder.status === 'shipped'"
+                                    @click="completeOrder(selectedOrder.id)"
+                                    class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                    :disabled="errorMessage || complete.isDirty"
+                                >
+                                    <i class="fa-solid fa-check-double"></i>
+                                    Xác nhận hoàn thành
                                 </button>
                                 <button
                                     @click="closeModal"
@@ -632,15 +787,87 @@
 import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
-import { useForm } from "@inertiajs/vue3";
+import { useForm, router } from "@inertiajs/vue3";
 
 const { listOrders } = defineProps({
     listOrders: {
-        default: () => ({ data: [] }),
+        default: () => ({
+            data: [],
+            meta: {
+                current_page: 1,
+                last_page: 1,
+                per_page: 10,
+                total: 0,
+                links: [],
+            },
+        }),
     },
 });
 
 console.log("listOrders:", listOrders);
+
+const pay_before = ref(0);
+const pay_after = ref(0);
+const isModalOpen = ref(false);
+const errorMessage = ref("");
+const selectedOrder = ref({
+    items: [],
+    customer: { phone: "", email: "" },
+    pay_before: 0,
+    pay_after: 0,
+});
+const activeTab = ref("all");
+const filters = ref({
+    customer: "",
+    order_date: "",
+    status: "",
+});
+
+function setActiveTab(tab) {
+    activeTab.value = tab;
+    applyFilters();
+}
+
+function applyFilters() {
+    router.get(
+        route("admin.sale-orders.index"),
+        {
+            status: filters.value.status,
+            customer: filters.value.customer,
+            order_date: filters.value.order_date,
+            page: 1, // Reset về trang đầu khi thay đổi bộ lọc
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
+}
+
+function openModal(order) {
+    selectedOrder.value = order;
+    pay_before.value = order.pay_before || 0;
+    pay_after.value = order.pay_after || 0;
+    errorMessage.value = "";
+    isModalOpen.value = true;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "Chưa xác định";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Chưa xác định";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
+function closeModal() {
+    isModalOpen.value = false;
+    pay_before.value = 0;
+    pay_after.value = 0;
+    errorMessage.value = "";
+}
 
 function formatCurrencyVND(value) {
     if (value == null || isNaN(value)) return "0 ₫";
@@ -651,34 +878,84 @@ function formatCurrencyVND(value) {
     }).format(value);
 }
 
-const isModalOpen = ref(false);
-const selectedOrder = ref({ items: [], customer: { phone: "", email: "" } });
-const activeTab = ref("all");
-const filters = ref({
-    customer: "",
-    order_date: "",
-    status: "",
-});
-
-function setActiveTab(tab) {
-    activeTab.value = tab;
+function formatPageNumber(page) {
+    return page; // Trả về số trang không có dấu chấm
 }
 
-function openModal(order) {
-    selectedOrder.value = order;
-    isModalOpen.value = true;
+function validatePayBefore() {
+    if (
+        isNaN(pay_before.value) ||
+        pay_before.value === null ||
+        !/^\d+$/.test(pay_before.value.toString())
+    ) {
+        errorMessage.value =
+            "Số tiền thanh toán trước phải là một số nguyên dương hợp lệ.";
+        pay_before.value = 0;
+        return;
+    }
+    if (pay_before.value < 0) {
+        errorMessage.value = "Số tiền thanh toán trước không được nhỏ hơn 0.";
+        pay_before.value = 0;
+        return;
+    }
+    if (pay_before.value > selectedOrder.value.total_amount) {
+        errorMessage.value = `Số tiền thanh toán trước (${formatCurrencyVND(
+            pay_before.value
+        )}) không được vượt quá tổng tiền đơn hàng (${formatCurrencyVND(
+            selectedOrder.value.total_amount
+        )}).`;
+        pay_before.value = selectedOrder.value.total_amount;
+        return;
+    }
+    errorMessage.value = "";
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+function validatePayAfter() {
+    if (
+        isNaN(pay_after.value) ||
+        pay_after.value === null ||
+        !/^\d+$/.test(pay_after.value.toString())
+    ) {
+        errorMessage.value =
+            "Số tiền thanh toán sau phải là một số nguyên dương hợp lệ.";
+        pay_after.value = 0;
+        return;
+    }
+    if (pay_after.value < 0) {
+        errorMessage.value = "Số tiền thanh toán sau không được nhỏ hơn 0.";
+        pay_after.value = 0;
+        return;
+    }
+    const maxPayAfter =
+        selectedOrder.value.total_amount -
+        (selectedOrder.value.pay_before || 0);
+    if (pay_after.value > maxPayAfter) {
+        errorMessage.value = `Số tiền thanh toán sau (${formatCurrencyVND(
+            pay_after.value
+        )}) không được vượt quá số tiền còn lại (${formatCurrencyVND(
+            maxPayAfter
+        )}).`;
+        pay_after.value = maxPayAfter;
+        return;
+    }
+    errorMessage.value = "";
 }
 
-function closeModal() {
-    isModalOpen.value = false;
+function changePage(page) {
+    if (page < 1 || page > listOrders.meta.last_page) return;
+    router.get(
+        route("admin.sale-orders.index"),
+        {
+            page,
+            status: filters.value.status,
+            customer: filters.value.customer,
+            order_date: filters.value.order_date,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
 }
 
 function exportExcel() {
@@ -704,7 +981,7 @@ const filteredOrders = computed(() => {
     if (filters.value.order_date) {
         orders = orders.filter(
             (order) =>
-                new Date(order.order_date).toDateString() ===
+                new Date(order.created_at).toDateString() ===
                 new Date(filters.value.order_date).toDateString()
         );
     }
@@ -717,33 +994,130 @@ const filteredOrders = computed(() => {
     return orders;
 });
 
-const approve = useForm({});
+const approve = useForm({ pay_before: 0 });
 const approveOrder = (id) => {
+    console.log("Attempting to approve order:", {
+        id,
+        pay_before: pay_before.value,
+    });
+    if (
+        isNaN(pay_before.value) ||
+        pay_before.value === null ||
+        !/^\d+$/.test(pay_before.value.toString())
+    ) {
+        errorMessage.value =
+            "Số tiền thanh toán trước phải là một số nguyên dương hợp lệ.";
+        return;
+    }
+    if (pay_before.value < 0) {
+        errorMessage.value = "Số tiền thanh toán trước không được nhỏ hơn 0.";
+        return;
+    }
+    if (pay_before.value > selectedOrder.value.total_amount) {
+        errorMessage.value = `Số tiền thanh toán trước (${formatCurrencyVND(
+            pay_before.value
+        )}) không được vượt quá tổng tiền đơn hàng (${formatCurrencyVND(
+            selectedOrder.value.total_amount
+        )}).`;
+        return;
+    }
+    approve.pay_before = pay_before.value;
     approve.post(route("admin.sale-orders.approve", id), {
         onSuccess: () => {
+            console.log("Order approved successfully:", {
+                id,
+                pay_before: approve.pay_before,
+            });
             closeModal();
             const order = listOrders.data.find((o) => o.id === id);
             if (order) {
                 order.status = "shipped";
+                order.pay_before = approve.pay_before;
             }
         },
         onError: (errors) => {
-            console.error("Lỗi khi phê duyệt đơn hàng:", errors);
+            console.error("Error approving order:", errors);
+            errorMessage.value =
+                errors.pay_before || "Lỗi khi phê duyệt đơn hàng";
+        },
+        onFinish: () => {
+            console.log("Approve request finished");
+        },
+    });
+};
+
+const complete = useForm({ pay_after: 0 });
+const completeOrder = (id) => {
+    console.log("Attempting to complete order:", {
+        id,
+        pay_after: pay_after.value,
+    });
+    if (
+        isNaN(pay_after.value) ||
+        pay_after.value === null ||
+        !/^\d+$/.test(pay_after.value.toString())
+    ) {
+        errorMessage.value =
+            "Số tiền thanh toán sau phải là một số nguyên dương hợp lệ.";
+        return;
+    }
+    if (pay_after.value < 0) {
+        errorMessage.value = "Số tiền thanh toán sau không được nhỏ hơn 0.";
+        return;
+    }
+    const maxPayAfter =
+        selectedOrder.value.total_amount -
+        (selectedOrder.value.pay_before || 0);
+    if (pay_after.value > maxPayAfter) {
+        errorMessage.value = `Số tiền thanh toán sau (${formatCurrencyVND(
+            pay_after.value
+        )}) không được vượt quá số tiền còn lại (${formatCurrencyVND(
+            maxPayAfter
+        )}).`;
+        return;
+    }
+    complete.pay_after = pay_after.value;
+    complete.post(route("admin.sale-orders.complete", id), {
+        onSuccess: () => {
+            console.log("Order completed successfully:", {
+                id,
+                pay_after: complete.pay_after,
+            });
+            closeModal();
+            const order = listOrders.data.find((o) => o.id === id);
+            if (order) {
+                order.status = "completed";
+                order.pay_after = complete.pay_after;
+            }
+        },
+        onError: (errors) => {
+            console.error("Error completing order:", errors);
+            errorMessage.value =
+                errors.pay_after || "Lỗi khi xác nhận hoàn thành đơn hàng";
+        },
+        onFinish: () => {
+            console.log("Complete request finished");
         },
     });
 };
 
 const reject = useForm({});
 const rejectOrder = (id) => {
+    console.log("Attempting to reject order:", { id });
     reject.post(route("admin.sale-orders.reject", id), {
         onSuccess: () => {
+            console.log("Order rejected successfully:", { id });
             closeModal();
             listOrders.data = listOrders.data.filter(
                 (order) => order.id !== id
             );
         },
         onError: (errors) => {
-            console.error("Lỗi khi từ chối đơn hàng:", errors);
+            console.error("Error rejecting order:", errors);
+            errorMessage.value = "Lỗi khi từ chối đơn hàng";
+        },
+        onFinish: () => {
+            console.log("Reject request finished");
         },
     });
 };
