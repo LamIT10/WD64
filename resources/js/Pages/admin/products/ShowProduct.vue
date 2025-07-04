@@ -149,7 +149,6 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thuộc tính</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tồn kho</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhà CC</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -185,10 +184,6 @@
                                         </span>
                                     </span>
                                     <span v-else>—</span>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-500">
-                                    {{ variant.supplier_variants?.length ? variant.supplier_variants[0].supplier?.name :
-                                        '—' }}
                                 </td>
                             </tr>
                         </tbody>
