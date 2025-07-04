@@ -42,7 +42,17 @@ class ProductController extends Controller
         $data = $this->productRepository->getCreateData();
         return Inertia::render('admin/products/CreateProduct', $data);
     }
+    public function generateCode()
+    {
+        $code = app(ProductRepository::class)->generateProductCode();
+        return response()->json(['code' => $code]);
+    }
 
+    public function generateVariantCode()
+    {
+        $code = app(ProductRepository::class)->generateVariantCode();
+        return response()->json(['code' => $code]);
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -89,6 +99,7 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, string $id)
     {
         $data = $request->validated();
+
         $product = $this->productRepository->update($id, $data);
 
         return $this->returnInertia($product, 'Cập nhật thành công', 'admin.products.index');
@@ -100,6 +111,6 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $success = $this->productRepository->destroy($id);
-        return $this->returnInertia($success, 'Xóa nhà cung cấp thông', 'admin.products.index');
+        return $this->returnInertia($success, 'Xóa sản phẩm thành công', 'admin.products.index');
     }
 }

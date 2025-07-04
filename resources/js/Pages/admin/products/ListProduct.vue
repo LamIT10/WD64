@@ -230,7 +230,7 @@
                                         <div class="text-sm font-medium"
                                             :class="getStockStatusClass(product).textClass">
                                             Số lượng: {{ getTotalStock(product) }} {{ product.default_unit?.name ||
-                                            '...' }}
+                                                '...' }}
                                         </div>
                                         <div class="text-xs text-gray-400">
                                             SL tối thiểu: {{ product.min_stock }}
@@ -301,16 +301,11 @@
                                         <i class="fas fa-edit text-sm"></i>
 
                                         </Link>
-                                        <ConfirmModal :route-name="'admin.products.destroy'" :route-params="{
-                                            id: product.id,
-                                        }" title="Xác nhận xóa sản phẩm"
-                                            :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${product.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
-                                            <template #trigger="{
-                                                openModal,
-                                            }">
-                                                <button @click="
-                                                    openModal
-                                                "
+                                        <ConfirmModal :route-name="'admin.products.destroy'"
+                                            :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm"
+                                            :message="`Bạn có chắc chắn muốn xóa sản phẩm ${product.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
+                                            <template #trigger="{ openModal }">
+                                                <button @click="openModal"
                                                     class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors">
                                                     <i class="fas fa-trash text-sm"></i>
                                                 </button>
@@ -478,7 +473,7 @@ const getStockStatusText = (product) => {
     const minStock = product.min_stock || 0;
 
     if (totalStock === 0) return 'Hết hàng';
-    if (totalStock <= minStock) return 'Sắp hết hàng';
+    if (totalStock <= minStock) return 'Sắp hết hàng!';
     return 'Bình thường';
 };
 
