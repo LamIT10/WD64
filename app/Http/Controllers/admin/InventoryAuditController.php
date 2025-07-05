@@ -136,13 +136,16 @@ class InventoryAuditController extends Controller
             'items.*.discrepancy_reason' => 'nullable|string|max:255',
         ]);
         DB::transaction(function () use ($auditData, $request) {
-            $audit = InventoryAudit::create([
+           $audit = new InventoryAudit([
                 'notes' => $auditData['notes'],
                 'audit_date' => $auditData['audit_date'],
                 'status' => $auditData['status'],
-                'user_id' => $request->user()->id
+                'user_id' => $request->user()->id,
             ]);
-
+            
+            $audit->save(); // tạo mới để lấy $audit->id
+            $audit->code = 'KK-' . $audit->id;
+            $audit->save(); // cập nhật lại code
             // Tạo nhiều bản ghi con thông qua quan hệ
             $audit->items()->createMany($auditData['items']);
         });

@@ -27,7 +27,7 @@
                         <h5 class="text-lg font-bold text-indigo-800">Phiếu Kiểm Kho</h5>
                     </div>
                     <span class="text-xs text-gray-500 font-semibold">Mã phiếu: <span class="text-indigo-700">{{
-                            audit.id }}</span></span>
+                            audit.code }}</span></span>
                 </div>
 
                 <!-- Thông tin tổng quan phiếu kiểm kho -->
