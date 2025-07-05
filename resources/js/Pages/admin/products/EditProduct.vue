@@ -113,7 +113,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-span-3">
+                        <!-- <div class="col-span-3">
                             <div class="grid grid-cols-1 grid-rows-1 gap-4">
                                 <div class="col-span-1">
                                     <div class="space-y-2">
@@ -129,7 +129,7 @@
                                     </div>
                                 </div>
 
-                                <!-- <div class="col-span-2">
+                                <div class="col-span-2">
                                     <div class="space-y-2">
                                         <label for="expiration-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày hết hạn
@@ -141,9 +141,9 @@
                                             {{ form.errors.expiration_date }}
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- Mô tả sản phẩm -->
@@ -165,13 +165,19 @@
                             <label for="base-unit" class="block text-sm font-medium text-indigo-700">
                                 Đơn vị cơ bản <span class="text-red-500">*</span>
                             </label>
-                            <select v-model="form.base_unit_id" id="base-unit"
-                                class="mt-1 w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200">
-                                <option value="">Chọn đơn vị cơ bản</option>
-                                <option v-for="unit in units" :key="unit.id" :value="unit.id">
-                                    {{ unit.name }} ({{ unit.symbol }})
-                                </option>
-                            </select>
+                            <div class="flex gap-3">
+                                <select v-model="form.base_unit_id" id="base-unit"
+                                    class="mt-1 w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200">
+                                    <option value="">Chọn đơn vị cơ bản</option>
+                                    <option v-for="unit in units" :key="unit.id" :value="unit.id">
+                                        {{ unit.name }} ({{ unit.symbol }})
+                                    </option>
+                                </select>
+                                <button type="button" @click="openUnitModal"
+                                    class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                             <p v-if="form.errors.base_unit_id" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.base_unit_id }}
                             </p>
@@ -317,19 +323,29 @@
                                 <div v-for="(attribute, attrIndex) in form.variants[0].attributes" :key="attrIndex"
                                     class="mb-4 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-1">
-                                        <Multiselect v-model="attribute.attribute_id"
-                                            :options="getAvailableAttributes(form.variants[0], attribute.attribute_id)"
-                                            label="name" value-prop="id" placeholder="Chọn thuộc tính"
-                                            :searchable="true" :can-clear="true" :create-option="true"
-                                            @create-option="handleCreateAttribute" />
-                                        <p v-if="form.errors[`variants.0.attributes.${attrIndex}.attribute_id`]"
-                                            class="text-red-500 text-sm mt-1">
-                                            {{ form.errors[`variants.0.attributes.${attrIndex}.attribute_id`] }}
-                                        </p>
+                                        <div class="flex gap-3 items-start">
+                                            <button type="button" @click="openAttributeModal(0, attrIndex)"
+                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <Multiselect v-model="attribute.attribute_id"
+                                                :options="getAvailableAttributes(form.variants[0], attribute.attribute_id)"
+                                                label="name" value-prop="id" placeholder="Chọn thuộc tính"
+                                                :searchable="true" :can-clear="true" :create-option="true"
+                                                @create-option="handleCreateAttribute" />
+                                            <p v-if="form.errors[`variants.0.attributes.${attrIndex}.attribute_id`]"
+                                                class="text-red-500 text-sm mt-1">
+                                                {{ form.errors[`variants.0.attributes.${attrIndex}.attribute_id`] }}
+                                            </p>
+                                        </div>
                                     </div>
-
                                     <div class="space-y-1">
                                         <div class="flex gap-3 items-start">
+                                            <button type="button" @click="openAttributeValueModal(0, attrIndex)"
+                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100"
+                                                :disabled="!attribute.attribute_id">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
                                             <div class="w-full">
                                                 <Multiselect v-model="attribute.attribute_value_ids"
                                                     :options="attributeValues[attribute.attribute_id] || []"
@@ -456,6 +472,11 @@
                 </form>
             </div>
         </div>
+        <UnitCreateModal :show="showUnitModal" @close="closeUnitModal" @created="handleUnitCreated" />
+        <AttributeCreateModal :show="showAttributeModal" @close="closeAttributeModal"
+            @created="handleAttributeCreated" />
+        <AttributeValueCreateModal :show="showAttributeValueModal" :attributeId="modalAttributeId"
+            @close="closeAttributeValueModal" @created="handleAttributeValueCreated" />
     </AppLayout>
 </template>
 
@@ -466,6 +487,9 @@ import Waiting from '../../components/Waiting.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref, onMounted, computed, watch } from 'vue';
 import Multiselect from '@vueform/multiselect';
+import UnitCreateModal from '../../components/UnitCreateModal.vue';
+import AttributeCreateModal from '../../components/AttributeCreateModal.vue';
+import AttributeValueCreateModal from '../../components/AttributeValueCreateModal.vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -782,6 +806,60 @@ const resetForm = () => {
 
 // Các hàm liên quan đến thuộc tính
 const attributeValues = ref({});
+const showAttributeModal = ref(false);
+const showAttributeValueModal = ref(false);
+const modalAttributeId = ref(null);
+const currentVariantIndex = ref(null);
+const currentAttrIndex = ref(null);
+
+const openAttributeModal = (variantIndex, attrIndex) => {
+    currentVariantIndex.value = variantIndex;
+    currentAttrIndex.value = attrIndex;
+    showAttributeModal.value = true;
+};
+
+const closeAttributeModal = () => {
+    showAttributeModal.value = false;
+    currentVariantIndex.value = null;
+    currentAttrIndex.value = null;
+};
+
+const handleAttributeCreated = (data) => {
+    props.attributes.push(data);
+    attributeValues.value[data.id] = [];
+    form.variants[currentVariantIndex.value].attributes[currentAttrIndex.value].attribute_id = data.id;
+    closeAttributeModal();
+};
+
+const openAttributeValueModal = (variantIndex, attrIndex) => {
+    const attributeId = form.variants[variantIndex].attributes[attrIndex].attribute_id;
+    if (!attributeId) return;
+    currentVariantIndex.value = variantIndex;
+    currentAttrIndex.value = attrIndex;
+    modalAttributeId.value = attributeId;
+    showAttributeValueModal.value = true;
+};
+
+const closeAttributeValueModal = () => {
+    showAttributeValueModal.value = false;
+    modalAttributeId.value = null;
+    currentVariantIndex.value = null;
+    currentAttrIndex.value = null;
+};
+
+const handleAttributeValueCreated = (data) => {
+    if (!attributeValues.value[modalAttributeId.value]) {
+        attributeValues.value[modalAttributeId.value] = [];
+    }
+    attributeValues.value[modalAttributeId.value].push(data);
+    const attr = form.variants[currentVariantIndex.value].attributes[currentAttrIndex.value];
+    if (!Array.isArray(attr.attribute_value_ids)) {
+        attr.attribute_value_ids = [];
+    }
+    attr.attribute_value_ids.push(data.id);
+    closeAttributeValueModal();
+};
+
 const handleCreateAttribute = async (name) => {
     try {
         const response = await axios.post(route('admin.attributes.store'), { name });
@@ -821,7 +899,22 @@ const addVariantAttribute = () => {
 };
 
 const removeVariantAttribute = (attrIndex) => {
-    form.variants[0].attributes.splice(attrIndex, 1);
+    const variant = form.variants[0];
+    variant.attributes.splice(attrIndex, 1);
+    const validValueIds = new Set(
+        variant.attributes.flatMap(attr => Array.isArray(attr.attribute_value_ids) ? attr.attribute_value_ids : [])
+    );
+    if (variant.combinationData) {
+        Object.keys(variant.combinationData).forEach(key => {
+            const valueIds = key.split('-').map(id => parseInt(id));
+            if (!valueIds.every(id => validValueIds.has(id))) {
+                delete variant.combinationData[key];
+                if (!deletedCombinationKeys.value.includes(key)) {
+                    deletedCombinationKeys.value.push(key);
+                }
+            }
+        });
+    }
 };
 
 // Danh mục sản phẩm
@@ -869,6 +962,22 @@ const filteredCategories = computed(() => {
 });
 
 // Đơn vị sản phẩm
+const showUnitModal = ref(false);
+
+const openUnitModal = () => {
+    showUnitModal.value = true;
+};
+
+const closeUnitModal = () => {
+    showUnitModal.value = false;
+};
+
+const handleUnitCreated = (unit) => {
+    props.units.push(unit);
+    form.base_unit_id = unit.id;
+    closeUnitModal();
+};
+
 const addConversion = () => {
     form.unit_conversions.push({
         to_unit_id: '',
@@ -901,32 +1010,30 @@ const generateCombinations = (attributes) => {
 
 const variantCombinations = computed(() => {
     if (!form.variants.length || !hasVariant.value) return [];
-
     const variant = form.variants[0];
-    console.log('biến thể:', JSON.parse(JSON.stringify(variant)));
-
     if (!variant.combinationData) variant.combinationData = {};
 
-    const newCombinations = generateCombinations(variant.attributes);
-    const combinationSet = new Set();
+    // Sinh tổ hợp từ thuộc tính hiện tại
+    const generatedKeys = generateCombinations(variant.attributes).map(combo => combo.join('-'));
 
-    const combinations = [];
+    let keys = [];
+    if (variant.combinations && variant.combinations.length) {
+        // Lấy các tổ hợp đã lưu trong DB
+        const oldKeys = variant.combinations.map(c => c.attribute_value_ids.join('-'));
+        // Nếu số lượng tổ hợp sinh ra từ thuộc tính > số tổ hợp cũ => có thuộc tính mới => gộp cả hai, loại trùng
+        if (generatedKeys.length > oldKeys.length) {
+            keys = Array.from(new Set([...oldKeys, ...generatedKeys]));
+        } else {
+            // Nếu không có thuộc tính mới, chỉ lấy tổ hợp cũ
+            keys = oldKeys;
+        }
+    } else {
+        // Nếu tạo mới, sinh tổ hợp từ thuộc tính
+        keys = generatedKeys;
+    }
 
-    // 1. Xử lý tổ hợp mới
-    newCombinations.forEach((combo) => {
-        const key = combo.join('-');
-        combinationSet.add(key);
-
-        if (deletedCombinationKeys.value.includes(key)) return;
-
-        const labels = combo.map((id) => {
-            const attrId = variant.attributes.find((attr) =>
-                attr.attribute_value_ids.includes(id)
-            )?.attribute_id;
-            const value = attributeValues.value[attrId]?.find((v) => v.id === id);
-            return value?.name || '';
-        });
-
+    // Khởi tạo dữ liệu rỗng cho tổ hợp mới (nếu chưa có)
+    keys.forEach(key => {
         if (!variant.combinationData[key]) {
             variant.combinationData[key] = {
                 code: '',
@@ -938,39 +1045,28 @@ const variantCombinations = computed(() => {
                 custom_location_name: '',
             };
         }
-
-        combinations.push({
-            key,
-            label: labels.join(' - '),
-            data: variant.combinationData[key],
-        });
     });
 
-    // 2. Xử lý tổ hợp cũ từ combinationData
-    Object.keys(variant.combinationData).forEach((key) => {
-        if (combinationSet.has(key) || deletedCombinationKeys.value.includes(key)) return;
+    const result = keys
+        .filter(key => !deletedCombinationKeys.value.includes(key))
+        .map(key => {
+            const valueIds = key.split('-').map(id => parseInt(id));
+            const labels = valueIds.map(id => {
+                const attrId = variant.attributes.find(attr => attr.attribute_value_ids.includes(id))?.attribute_id;
+                const value = attributeValues.value[attrId]?.find(v => v.id === id);
+                return value?.name || '';
+            });
+            const data = variant.combinationData[key];
+            if (!data) return null;
+            return {
+                key,
+                label: labels.join(' - '),
+                data,
+            };
+        })
+        .filter(Boolean);
 
-        const valueIds = key.split('-').map(id => parseInt(id));
-        const labels = valueIds.map((id) => {
-            let attrId = null;
-            for (const [attributeId, values] of Object.entries(attributeValues.value)) {
-                if (values.some(v => v.id === id)) {
-                    attrId = attributeId;
-                    break;
-                }
-            }
-            const value = attributeValues.value[attrId]?.find((v) => v.id === id);
-            return value?.name || 'Không xác định';
-        });
-
-        combinations.push({
-            key,
-            label: labels.join(' - '),
-            data: variant.combinationData[key],
-        });
-    });
-    return combinations;
-    // return combinations.sort((a, b) => a.label.localeCompare(b.label));
+    return result;
 });
 const deletedCombinationKeys = ref([]);
 const removeCombinationItem = (key) => {
@@ -986,36 +1082,36 @@ const transformFormBeforeSubmit = () => {
     if (hasVariant.value) {
         const variant = form.variants[0];
         if (!variant.combinationData) return;
-
+        const validValueIds = new Set(
+            variant.attributes.flatMap(attr => Array.isArray(attr.attribute_value_ids) ? attr.attribute_value_ids : [])
+        );
+        const validKeys = generateCombinations(variant.attributes)
+            .map(combo => combo.join('-'))
+            .filter(key => !deletedCombinationKeys.value.includes(key));
         const combinations = [];
-        const keyToIndexMap = {}; // Ánh xạ key -> index
-
-        for (const key in variant.combinationData) {
-            if (deletedCombinationKeys.value.includes(key)) continue;
-            const valueIds = key.split('-').map((id) => parseInt(id));
+        const keyToIndexMap = {};
+        validKeys.forEach((key) => {
             const comboData = variant.combinationData[key];
-
-            const index = combinations.length;
-            keyToIndexMap[key] = index; // Lưu ánh xạ key -> index
-
-            combinations.push({
-                attribute_value_ids: valueIds,
-                code: comboData.code ?? null,
-                barcode: comboData.barcode ?? null,
-                sale_price: Number(comboData.sale_price ?? 0),
-                quantity_on_hand: Number(comboData.quantity_on_hand ?? 0),
-                supplier_ids: comboData.supplier_ids ?? [],
-                warehouse_zone_id: comboData.warehouse_zone_id ?? null,
-                custom_location_name: comboData.custom_location_name ?? null,
-            });
-        }
-
+            if (!comboData) return;
+            const valueIds = key.split('-').map(id => parseInt(id));
+            if (valueIds.every(id => validValueIds.has(id))) {
+                const index = combinations.length;
+                keyToIndexMap[key] = index;
+                combinations.push({
+                    attribute_value_ids: valueIds,
+                    code: comboData.code ?? null,
+                    barcode: comboData.barcode ?? null,
+                    sale_price: Number(comboData.sale_price ?? 0),
+                    quantity_on_hand: Number(comboData.quantity_on_hand ?? 0),
+                    supplier_ids: comboData.supplier_ids ?? [],
+                    warehouse_zone_id: comboData.warehouse_zone_id ?? null,
+                    custom_location_name: comboData.custom_location_name ?? null,
+                });
+            }
+        });
         variant.combinations = combinations;
         delete variant.combinationData;
-
-        // Lưu ánh xạ keyToIndexMap vào form để sử dụng khi hiển thị lỗi
         form.keyToIndexMap = keyToIndexMap;
-
         form.variants = [variant];
         form.simple_sale_price = null;
         form.simple_quantity = null;
@@ -1036,4 +1132,20 @@ const transformFormBeforeSubmit = () => {
     }
 };
 </script>
-<style></style>
+<style scoped>
+/* Đảm bảo nút + căn chỉnh đẹp */
+button i.fas.fa-plus {
+    font-size: 0.875rem;
+}
+
+/* Modal backdrop */
+.fixed.inset-0 {
+    z-index: 50;
+}
+
+/* Modal container */
+.bg-white.rounded-lg {
+    max-width: 32rem;
+    width: 100%;
+}
+</style>

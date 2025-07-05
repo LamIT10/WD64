@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\InventoryAuditController;
 use App\Http\Controllers\Api\InventoryController;
@@ -13,3 +14,5 @@ Route::patch('/inventory/update', [InventoryController::class, 'update']);
 Route::get('/inventory-audit/{id}', [InventoryAuditController::class, 'show']);
 
 });
+Route::get('/generate-code', [ProductController::class, 'generateCode'])->name('generate-code');
+Route::get('/generate-variant-code', [ProductController::class, 'generateVariantCode'])->name('generate-variant-code');

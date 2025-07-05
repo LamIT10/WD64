@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Customer;
+use App\Models\CustomerTransaction;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductUnitConversion;
@@ -68,13 +69,25 @@ class SaleOrdersRepository extends BaseRepository
                     'status',
                     'total_amount',
                     'address_delivery',
-                    'created_at'
+                    'created_at',
+                    'pay_before',
+                    'pay_after'
                 );
 
             if ($request->has('status') && !empty($request->status)) {
                 $query->where('status', $request->status);
             }
-            $orders = $query->get()->map(function ($order) {
+            if ($request->has('customer') && !empty($request->customer)) {
+                $query->whereHas('customer', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->input('customer') . '%');
+                });
+            }
+            if ($request->has('order_date') && !empty($request->order_date)) {
+                $query->whereDate('created_at', $request->order_date);
+            }
+
+            $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
+            $orders = $query->orderBy('created_at', 'desc')->paginate($perPage)->through(function ($order) {
                 $order->total_quantity = $order->items->sum('quantity_ordered');
                 return $order;
             });
@@ -224,6 +237,11 @@ class SaleOrdersRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
+
+            $customer = Customer::findOrFail($data['customer_id']);
+            $creditTerm = $customer->credit_term ?? 30;
+            $creditDueDate = now()->addDays($creditTerm);
+
             $addressComponents = [
                 $data['address_detail'] ?? '',
                 $data['ward'] ?? '',
@@ -231,13 +249,16 @@ class SaleOrdersRepository extends BaseRepository
                 $data['province'] ?? '',
             ];
             $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
+
             Log::info('Address components:', $addressComponents);
             Log::info('Address delivery:', ['value' => $addressDelivery]);
+
             $newSaleOrder = [
                 'customer_id' => $data['customer_id'],
                 'order_date' => now(),
                 'status' => 'pending',
                 'total_amount' => $data['total_amount'],
+                'credit_due_date' => $creditDueDate,
                 'address_delivery' => $addressDelivery,
             ];
 
@@ -245,15 +266,14 @@ class SaleOrdersRepository extends BaseRepository
             if (!$saleOrder) {
                 throw new \Exception('Không thể tạo đơn hàng');
             }
+
             Log::info('Sale Order created with ID: ' . $saleOrder->id);
+
             foreach ($data['items'] as $item) {
-                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])
-                    ->first();
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
 
                 if (!$inventory) {
-                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
-                        ->with(['product', 'attributes'])
-                        ->first();
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
                     $productName = $productVariant ? $productVariant->product->name : 'Unknown';
                     $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
                     $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
@@ -262,14 +282,13 @@ class SaleOrdersRepository extends BaseRepository
 
                 $quantityRequested = $item['quantity'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1);
                 if ($quantityRequested > $inventory->quantity_on_hand) {
-                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])
-                        ->with(['product', 'attributes'])
-                        ->first();
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
                     $productName = $productVariant ? $productVariant->product->name : 'Unknown';
                     $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
                     $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
                     throw new \Exception("Số lượng yêu cầu cho sản phẩm {$fullName} vượt quá số lượng trong kho (còn {$inventory->quantity_on_hand}).");
                 }
+
                 $this->saleOrderItem->create([
                     'sales_order_id' => $saleOrder->id,
                     'product_variant_id' => $item['product_variant_id'],
@@ -279,11 +298,13 @@ class SaleOrdersRepository extends BaseRepository
                     'subtotal' => $item['quantity'] * ($item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1)),
                     'quantity_shipped' => $item['quantity'],
                 ]);
+
                 $inventory->update([
                     'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
                 ]);
             }
-            $customer = Customer::find($data['customer_id']);
+
+            // Cập nhật thông tin địa chỉ khách hàng nếu thay đổi
             if ($customer) {
                 $updateData = [];
                 if (!empty($data['province']) && $customer->province !== $data['province']) {
@@ -299,8 +320,6 @@ class SaleOrdersRepository extends BaseRepository
                     $customer->update($updateData);
                     Log::info('Updated customer address:', ['customer_id' => $customer->id, 'updated_fields' => $updateData]);
                 }
-            } else {
-                Log::warning('Customer not found for ID: ' . $data['customer_id']);
             }
 
             DB::commit();
@@ -311,6 +330,7 @@ class SaleOrdersRepository extends BaseRepository
             return ['error' => $th->getMessage()];
         }
     }
+
 
     public function getInventoryQuantity($productVariantId)
     {
@@ -375,7 +395,7 @@ class SaleOrdersRepository extends BaseRepository
             return ['error' => "Lỗi khi từ chối đơn hàng: {$th->getMessage()}"];
         }
     }
-    public function approveOrder($orderId)
+    public function approveOrder($orderId, $pay_before)
     {
         try {
             DB::beginTransaction();
@@ -389,8 +409,15 @@ class SaleOrdersRepository extends BaseRepository
                 throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
             }
 
-            $saleOrder->update(['status' => 'shipped']);
-            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped.");
+            if ($pay_before > $saleOrder->total_amount) {
+                throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'shipped',
+                'pay_before' => $pay_before
+            ]);
+            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
             return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
@@ -398,6 +425,45 @@ class SaleOrdersRepository extends BaseRepository
             DB::rollBack();
             Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
             return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
+        }
+
+        if ($saleOrder->status !== 'pending') {
+            throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
+        }
+    }
+
+
+    public function completeOrder($orderId, $pay_after)
+    {
+        try {
+            DB::beginTransaction();
+
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            if ($saleOrder->status !== 'shipped') {
+                throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái đang giao hàng.");
+            }
+
+            $remainingAmount = $saleOrder->total_amount - ($saleOrder->pay_before ?? 0);
+            if ($pay_after > $remainingAmount) {
+                throw new \Exception("Số tiền thanh toán sau ({$pay_after} VND) không được vượt quá số tiền còn lại ({$remainingAmount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'completed',
+                'pay_after' => $pay_after
+            ]);
+            Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
+
+            DB::commit();
+            return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi xác nhận hoàn thành đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi xác nhận hoàn thành đơn hàng: {$th->getMessage()}"];
         }
     }
 }
