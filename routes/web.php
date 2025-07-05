@@ -221,6 +221,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{id}/approve', [SaleOrderController::class, 'approve'])->name('approve');
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
+        Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
     });
 });
 

@@ -69,13 +69,25 @@ class SaleOrdersRepository extends BaseRepository
                     'status',
                     'total_amount',
                     'address_delivery',
-                    'created_at'
+                    'created_at',
+                    'pay_before',
+                    'pay_after'
                 );
 
             if ($request->has('status') && !empty($request->status)) {
                 $query->where('status', $request->status);
             }
-            $orders = $query->get()->map(function ($order) {
+            if ($request->has('customer') && !empty($request->customer)) {
+                $query->whereHas('customer', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->input('customer') . '%');
+                });
+            }
+            if ($request->has('order_date') && !empty($request->order_date)) {
+                $query->whereDate('created_at', $request->order_date);
+            }
+
+            $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
+            $orders = $query->orderBy('created_at', 'desc')->paginate($perPage)->through(function ($order) {
                 $order->total_quantity = $order->items->sum('quantity_ordered');
                 return $order;
             });
@@ -222,102 +234,102 @@ class SaleOrdersRepository extends BaseRepository
     }
 
     public function createSaleOrder(array $data)
-{
-    try {
-        DB::beginTransaction();
+    {
+        try {
+            DB::beginTransaction();
 
-        $customer = Customer::findOrFail($data['customer_id']);
-        $creditTerm = $customer->credit_term ?? 30;
-        $creditDueDate = now()->addDays($creditTerm);
+            $customer = Customer::findOrFail($data['customer_id']);
+            $creditTerm = $customer->credit_term ?? 30;
+            $creditDueDate = now()->addDays($creditTerm);
 
-        $addressComponents = [
-            $data['address_detail'] ?? '',
-            $data['ward'] ?? '',
-            $data['district'] ?? '',
-            $data['province'] ?? '',
-        ];
-        $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
+            $addressComponents = [
+                $data['address_detail'] ?? '',
+                $data['ward'] ?? '',
+                $data['district'] ?? '',
+                $data['province'] ?? '',
+            ];
+            $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
 
-        Log::info('Address components:', $addressComponents);
-        Log::info('Address delivery:', ['value' => $addressDelivery]);
+            Log::info('Address components:', $addressComponents);
+            Log::info('Address delivery:', ['value' => $addressDelivery]);
 
-        $newSaleOrder = [
-            'customer_id' => $data['customer_id'],
-            'order_date' => now(),
-            'status' => 'pending',
-            'total_amount' => $data['total_amount'],
-            'credit_due_date' => $creditDueDate,
-            'address_delivery' => $addressDelivery,
-        ];
+            $newSaleOrder = [
+                'customer_id' => $data['customer_id'],
+                'order_date' => now(),
+                'status' => 'pending',
+                'total_amount' => $data['total_amount'],
+                'credit_due_date' => $creditDueDate,
+                'address_delivery' => $addressDelivery,
+            ];
 
-        $saleOrder = $this->handleModel->create($newSaleOrder);
-        if (!$saleOrder) {
-            throw new \Exception('Không thể tạo đơn hàng');
+            $saleOrder = $this->handleModel->create($newSaleOrder);
+            if (!$saleOrder) {
+                throw new \Exception('Không thể tạo đơn hàng');
+            }
+
+            Log::info('Sale Order created with ID: ' . $saleOrder->id);
+
+            foreach ($data['items'] as $item) {
+                $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
+
+                if (!$inventory) {
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    throw new \Exception("Sản phẩm {$fullName} không tồn tại trong kho.");
+                }
+
+                $quantityRequested = $item['quantity'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1);
+                if ($quantityRequested > $inventory->quantity_on_hand) {
+                    $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    throw new \Exception("Số lượng yêu cầu cho sản phẩm {$fullName} vượt quá số lượng trong kho (còn {$inventory->quantity_on_hand}).");
+                }
+
+                $this->saleOrderItem->create([
+                    'sales_order_id' => $saleOrder->id,
+                    'product_variant_id' => $item['product_variant_id'],
+                    'quantity_ordered' => $item['quantity'],
+                    'unit_id' => $item['useCustomUnit'] && $item['selectedUnitId'] ? $item['selectedUnitId'] : $item['defaultUnitId'],
+                    'unit_price' => $item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1),
+                    'subtotal' => $item['quantity'] * ($item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1)),
+                    'quantity_shipped' => $item['quantity'],
+                ]);
+
+                $inventory->update([
+                    'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
+                ]);
+            }
+
+            // Cập nhật thông tin địa chỉ khách hàng nếu thay đổi
+            if ($customer) {
+                $updateData = [];
+                if (!empty($data['province']) && $customer->province !== $data['province']) {
+                    $updateData['province'] = $data['province'];
+                }
+                if (!empty($data['district']) && $customer->district !== $data['district']) {
+                    $updateData['district'] = $data['district'];
+                }
+                if (!empty($data['ward']) && $customer->ward !== $data['ward']) {
+                    $updateData['ward'] = $data['ward'];
+                }
+                if (!empty($updateData)) {
+                    $customer->update($updateData);
+                    Log::info('Updated customer address:', ['customer_id' => $customer->id, 'updated_fields' => $updateData]);
+                }
+            }
+
+            DB::commit();
+            return $saleOrder;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi tạo đơn hàng: ' . $th->getMessage());
+            return ['error' => $th->getMessage()];
         }
-
-        Log::info('Sale Order created with ID: ' . $saleOrder->id);
-
-        foreach ($data['items'] as $item) {
-            $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
-
-            if (!$inventory) {
-                $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
-                $productName = $productVariant ? $productVariant->product->name : 'Unknown';
-                $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
-                $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
-                throw new \Exception("Sản phẩm {$fullName} không tồn tại trong kho.");
-            }
-
-            $quantityRequested = $item['quantity'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1);
-            if ($quantityRequested > $inventory->quantity_on_hand) {
-                $productVariant = ProductVariant::where('id', $item['product_variant_id'])->with(['product', 'attributes'])->first();
-                $productName = $productVariant ? $productVariant->product->name : 'Unknown';
-                $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
-                $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
-                throw new \Exception("Số lượng yêu cầu cho sản phẩm {$fullName} vượt quá số lượng trong kho (còn {$inventory->quantity_on_hand}).");
-            }
-
-            $this->saleOrderItem->create([
-                'sales_order_id' => $saleOrder->id,
-                'product_variant_id' => $item['product_variant_id'],
-                'quantity_ordered' => $item['quantity'],
-                'unit_id' => $item['useCustomUnit'] && $item['selectedUnitId'] ? $item['selectedUnitId'] : $item['defaultUnitId'],
-                'unit_price' => $item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1),
-                'subtotal' => $item['quantity'] * ($item['price'] * ($item['useCustomUnit'] ? $item['conversionFactor'] : 1)),
-                'quantity_shipped' => $item['quantity'],
-            ]);
-
-            $inventory->update([
-                'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
-            ]);
-        }
-
-        // Cập nhật thông tin địa chỉ khách hàng nếu thay đổi
-        if ($customer) {
-            $updateData = [];
-            if (!empty($data['province']) && $customer->province !== $data['province']) {
-                $updateData['province'] = $data['province'];
-            }
-            if (!empty($data['district']) && $customer->district !== $data['district']) {
-                $updateData['district'] = $data['district'];
-            }
-            if (!empty($data['ward']) && $customer->ward !== $data['ward']) {
-                $updateData['ward'] = $data['ward'];
-            }
-            if (!empty($updateData)) {
-                $customer->update($updateData);
-                Log::info('Updated customer address:', ['customer_id' => $customer->id, 'updated_fields' => $updateData]);
-            }
-        }
-
-        DB::commit();
-        return $saleOrder;
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        Log::error('Lỗi tạo đơn hàng: ' . $th->getMessage());
-        return ['error' => $th->getMessage()];
     }
-}
 
 
     public function getInventoryQuantity($productVariantId)
@@ -383,44 +395,75 @@ class SaleOrdersRepository extends BaseRepository
             return ['error' => "Lỗi khi từ chối đơn hàng: {$th->getMessage()}"];
         }
     }
-   public function approveOrder($orderId)
-{
-    try {
-        DB::beginTransaction();
+    public function approveOrder($orderId, $pay_before)
+    {
+        try {
+            DB::beginTransaction();
 
-        $saleOrder = $this->handleModel->find($orderId);
-        if (!$saleOrder) {
-            throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            if ($saleOrder->status !== 'pending') {
+                throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
+            }
+
+            if ($pay_before > $saleOrder->total_amount) {
+                throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'shipped',
+                'pay_before' => $pay_before
+            ]);
+            Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
+
+            DB::commit();
+            return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
         }
 
         if ($saleOrder->status !== 'pending') {
             throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái chờ duyệt.");
         }
-
-        $saleOrder->update(['status' => 'shipped']);
-        Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped.");
-
-        // Tạo công nợ
-        $alreadyExists = $saleOrder->transactions()->where('type', 'debt')->exists();
-        if (!$alreadyExists) {
-            CustomerTransaction::create([
-                'sales_order_id' => $saleOrder->id,
-                'type' => 'debt',
-                'paid_amount' => 0,
-                'transaction_date' => now(),
-                'credit_due_date' => $saleOrder->credit_due_date,
-                'description' => 'Phát sinh công nợ sau khi duyệt đơn #' . $saleOrder->id,
-            ]);
-            Log::info("Đã tạo công nợ cho đơn hàng xuất {$orderId} sau khi duyệt.");
-        }
-
-        DB::commit();
-        return ['success' => true, 'message' => " Duyệt đơn hàng {$orderId} thành công."];
-    } catch (\Throwable $th) {
-        DB::rollBack();
-        Log::error('Lỗi khi duyệt đơn hàng: ' . $th->getMessage());
-        return ['error' => "Lỗi khi duyệt đơn hàng: {$th->getMessage()}"];
     }
-}
 
+
+    public function completeOrder($orderId, $pay_after)
+    {
+        try {
+            DB::beginTransaction();
+
+            $saleOrder = $this->handleModel->find($orderId);
+            if (!$saleOrder) {
+                throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
+            }
+
+            if ($saleOrder->status !== 'shipped') {
+                throw new \Exception("Đơn hàng xuất {$orderId} không ở trạng thái đang giao hàng.");
+            }
+
+            $remainingAmount = $saleOrder->total_amount - ($saleOrder->pay_before ?? 0);
+            if ($pay_after > $remainingAmount) {
+                throw new \Exception("Số tiền thanh toán sau ({$pay_after} VND) không được vượt quá số tiền còn lại ({$remainingAmount} VND).");
+            }
+
+            $saleOrder->update([
+                'status' => 'completed',
+                'pay_after' => $pay_after
+            ]);
+            Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
+
+            DB::commit();
+            return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi xác nhận hoàn thành đơn hàng: ' . $th->getMessage());
+            return ['error' => "Lỗi khi xác nhận hoàn thành đơn hàng: {$th->getMessage()}"];
+        }
+    }
 }

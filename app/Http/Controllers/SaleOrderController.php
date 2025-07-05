@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\SaleOrderExport;
 use App\Http\Requests\StoreSaleOrderRequest;
+use App\Http\Requests\UpdatePayBeforeSaleOrderRequest;
 use App\Repositories\CustomerRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\SaleOrdersRepository;
@@ -31,9 +32,32 @@ class SaleOrderController extends Controller
     }
     public function index(Request $request)
     {
-        $orders = $this->saleOrdersRepository->index($request);
+        $result = $this->saleOrdersRepository->index($request);
+        if (isset($result['error'])) {
+            return Inertia::render('admin/SaleOrders/List', [
+                'listOrders' => [
+                    'data' => [],
+                    'error' => $result['error'],
+                    'meta' => [
+                        'current_page' => 1,
+                        'last_page' => 1,
+                        'per_page' => 10,
+                        'total' => 0,
+                    ],
+                ]
+            ]);
+        }
         return Inertia::render('admin/SaleOrders/List', [
-            'listOrders' => ['data' => $orders]
+            'listOrders' => [
+                'data' => $result->items(),
+                'meta' => [
+                    'current_page' => $result->currentPage(),
+                    'last_page' => $result->lastPage(),
+                    'per_page' => $result->perPage(),
+                    'total' => $result->total(),
+                    'links' => $result->getUrlRange(1, $result->lastPage()),
+                ],
+            ]
         ]);
     }
     public function create()
@@ -81,11 +105,26 @@ class SaleOrderController extends Controller
 
         return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
     }
-    public function approve($id)
+    public function approve(UpdatePayBeforeSaleOrderRequest $request, $id)
     {
-        $result = $this->saleOrdersRepository->approveOrder($id);
+
+        $result = $this->saleOrdersRepository->approveOrder($id,  $request->validated()['pay_before']);
         if (isset($result['error'])) {
-            return redirect()->back()->withErrors(['error' => $result['error']]);
+            return redirect()->back()->withErrors(['pay_before' => $result['error']]);
+        }
+
+        return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
+    }
+
+    public function complete(Request $request, $id)
+    {
+        $data = $request->validate([
+            'pay_after' => 'required|numeric|min:0',
+        ]);
+
+        $result = $this->saleOrdersRepository->completeOrder($id, $data['pay_after']);
+        if (isset($result['error'])) {
+            return redirect()->back()->withErrors(['pay_after' => $result['error']]);
         }
 
         return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
