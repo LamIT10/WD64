@@ -8,6 +8,7 @@ use App\Models\ProductUnitConversion;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,7 @@ class PurchaseOrderRepository extends BaseRepository
                 $query->select(['id', 'name']);
             },
             'items' => function ($query) {
-                $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered', 'unit_price', 'unit_id', 'subtotal']);
+                $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered', 'quantity_received', 'unit_price', 'unit_id', 'subtotal']);
             },
             'items.productVariant' => function ($query) {
                 $query->select(['id', 'product_id']);
@@ -43,6 +44,9 @@ class PurchaseOrderRepository extends BaseRepository
             },
             'items.unit' => function ($query) {
                 $query->select(['id', 'name']);
+            },
+            'goodReceipts' => function ($query) {
+                $query->select(['id', 'code', 'purchase_order_id']);
             },
         ]);
         if (isset($request->order_status)) {
@@ -229,5 +233,43 @@ class PurchaseOrderRepository extends BaseRepository
             Log::error('Lỗi khi phê duyệt đơn hàng: ' . $th->getMessage());
             return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
         }
+    }
+    public function getPurchaseDetail($id)
+    {
+        $data = [];
+        $purchase = $this->handleModel
+            ->with([
+                'items' => function ($query) {
+                    $query->select(['*']);
+                },
+                'items.unit' => function ($query) {
+                    $query->select(['id', 'name', 'symbol']);
+                },
+                'supplier' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'user' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'items.productVariant' => function ($query) {
+                    $query->select(['id', 'product_id']);
+                },
+                'items.productVariant.product' => function ($query) {
+                    $query->select(['id', 'name', 'default_unit_id']);
+                },
+                'items.productVariant.attributes' => function ($query) {
+                    $query->select(['*']);
+                },
+                'items.unit' => function ($query) {
+                    $query->select('id', 'name');
+                }
+            ])->find($id);
+
+        $listUser = User::select('id', 'name')->get();
+        $data = [
+            'purchase' => $purchase,
+            'user' => $listUser
+        ];
+        return $data;
     }
 }

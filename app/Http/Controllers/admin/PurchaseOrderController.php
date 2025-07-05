@@ -46,4 +46,13 @@ class PurchaseOrderController extends Controller
         $success = $this->handleRepository->approve($id);
         return $this->returnInertia($success, 'Phê duyệt đơn hàng thành công', 'admin.purchases.index');
     }
+    public function edit($id)
+    {
+        $data = $this->handleRepository->getPurchaseDetail($id);
+        // return response()->json($data);
+        return Inertia::render('admin/PurchaseOrders/FormUpdate',  [
+            'purchase' => $data['purchase'],
+            'users' => $data['user']
+        ]);
+    }
 }

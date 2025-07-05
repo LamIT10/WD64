@@ -52,6 +52,9 @@ class GoodReceiptRepository extends BaseRepository
             },
         ]);
         $query->orderBy('created_at', 'desc');
+        if (isset($request->code)) {
+            $query->where('code', $request->code);
+        }
         $list = $query->get();
         return $list;
     }

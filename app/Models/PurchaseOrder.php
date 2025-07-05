@@ -38,8 +38,8 @@ class PurchaseOrder extends Model
         return $this->hasMany(SupplierTransaction::class);
     }
 
-    public function receiving()
+    public function goodReceipts()
     {
-        return $this->hasMany(Receiving::class);
+        return $this->hasMany(GoodReceipt::class);
     }
 }
