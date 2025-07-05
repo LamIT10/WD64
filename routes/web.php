@@ -181,6 +181,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->name('index');
