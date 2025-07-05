@@ -175,7 +175,7 @@
                                 }}
                             </p>
                         </div>
-                        <div v-if="supplierTransaction.created_by">
+                        <div v-if="supplierTransaction.approved_by != ''">
                             <h2 class="text-sm font-semibold text-indigo-700">
                                 Thông tin duyệt
                             </h2>
