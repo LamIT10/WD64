@@ -227,7 +227,6 @@ class SupplierTransactionRepository extends BaseRepository
             }
             return $formated;
         });
-
         return [
             'name_supplier' => $query->goodReceipt->purchaseOrder->supplier->name ?? "",
             'contact_person' => $query->goodReceipt->purchaseOrder->supplier->contact_person ?? "",
@@ -241,7 +240,7 @@ class SupplierTransactionRepository extends BaseRepository
             'transaction_date' => $query->transaction_date ?? "",
             'credit_due_date' => $query->credit_due_date ?? "",
             'description' => $query->description ?? "",
-            'status' => $query->goodReceipt->status ?? 0,
+            'status' => $query->goodReceipt->status ?? -1,
             'list_item_order' => $query->goodReceipt->items ?? "",
             'supplier_debt_history' => $supplierDebtHistory ?? "",
             'approved_by' => $query->goodReceipt->approvedBy->name ?? "",

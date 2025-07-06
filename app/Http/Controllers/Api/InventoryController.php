@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\WarehouseZone;
 use App\Repositories\DashboardRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -73,6 +74,7 @@ class InventoryController extends Controller
             }
 
             // Cập nhật trạng thái phiếu kiểm kho
+            $audit->approved_by = $request->user()->id;
             $audit->is_adjusted = 1;
             $audit->adjusted_at = now();
             $audit->save();

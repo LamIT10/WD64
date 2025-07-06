@@ -92,7 +92,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -899,7 +899,22 @@ const addVariantAttribute = () => {
 };
 
 const removeVariantAttribute = (attrIndex) => {
-    form.variants[0].attributes.splice(attrIndex, 1);
+    const variant = form.variants[0];
+    variant.attributes.splice(attrIndex, 1);
+    const validValueIds = new Set(
+        variant.attributes.flatMap(attr => Array.isArray(attr.attribute_value_ids) ? attr.attribute_value_ids : [])
+    );
+    if (variant.combinationData) {
+        Object.keys(variant.combinationData).forEach(key => {
+            const valueIds = key.split('-').map(id => parseInt(id));
+            if (!valueIds.every(id => validValueIds.has(id))) {
+                delete variant.combinationData[key];
+                if (!deletedCombinationKeys.value.includes(key)) {
+                    deletedCombinationKeys.value.push(key);
+                }
+            }
+        });
+    }
 };
 
 // Danh mục sản phẩm
@@ -995,32 +1010,30 @@ const generateCombinations = (attributes) => {
 
 const variantCombinations = computed(() => {
     if (!form.variants.length || !hasVariant.value) return [];
-
     const variant = form.variants[0];
-    console.log('biến thể:', JSON.parse(JSON.stringify(variant)));
-
     if (!variant.combinationData) variant.combinationData = {};
 
-    const newCombinations = generateCombinations(variant.attributes);
-    const combinationSet = new Set();
+    // Sinh tổ hợp từ thuộc tính hiện tại
+    const generatedKeys = generateCombinations(variant.attributes).map(combo => combo.join('-'));
 
-    const combinations = [];
+    let keys = [];
+    if (variant.combinations && variant.combinations.length) {
+        // Lấy các tổ hợp đã lưu trong DB
+        const oldKeys = variant.combinations.map(c => c.attribute_value_ids.join('-'));
+        // Nếu số lượng tổ hợp sinh ra từ thuộc tính > số tổ hợp cũ => có thuộc tính mới => gộp cả hai, loại trùng
+        if (generatedKeys.length > oldKeys.length) {
+            keys = Array.from(new Set([...oldKeys, ...generatedKeys]));
+        } else {
+            // Nếu không có thuộc tính mới, chỉ lấy tổ hợp cũ
+            keys = oldKeys;
+        }
+    } else {
+        // Nếu tạo mới, sinh tổ hợp từ thuộc tính
+        keys = generatedKeys;
+    }
 
-    // 1. Xử lý tổ hợp mới
-    newCombinations.forEach((combo) => {
-        const key = combo.join('-');
-        combinationSet.add(key);
-
-        if (deletedCombinationKeys.value.includes(key)) return;
-
-        const labels = combo.map((id) => {
-            const attrId = variant.attributes.find((attr) =>
-                attr.attribute_value_ids.includes(id)
-            )?.attribute_id;
-            const value = attributeValues.value[attrId]?.find((v) => v.id === id);
-            return value?.name || '';
-        });
-
+    // Khởi tạo dữ liệu rỗng cho tổ hợp mới (nếu chưa có)
+    keys.forEach(key => {
         if (!variant.combinationData[key]) {
             variant.combinationData[key] = {
                 code: '',
@@ -1032,39 +1045,28 @@ const variantCombinations = computed(() => {
                 custom_location_name: '',
             };
         }
-
-        combinations.push({
-            key,
-            label: labels.join(' - '),
-            data: variant.combinationData[key],
-        });
     });
 
-    // 2. Xử lý tổ hợp cũ từ combinationData
-    Object.keys(variant.combinationData).forEach((key) => {
-        if (combinationSet.has(key) || deletedCombinationKeys.value.includes(key)) return;
+    const result = keys
+        .filter(key => !deletedCombinationKeys.value.includes(key))
+        .map(key => {
+            const valueIds = key.split('-').map(id => parseInt(id));
+            const labels = valueIds.map(id => {
+                const attrId = variant.attributes.find(attr => attr.attribute_value_ids.includes(id))?.attribute_id;
+                const value = attributeValues.value[attrId]?.find(v => v.id === id);
+                return value?.name || '';
+            });
+            const data = variant.combinationData[key];
+            if (!data) return null;
+            return {
+                key,
+                label: labels.join(' - '),
+                data,
+            };
+        })
+        .filter(Boolean);
 
-        const valueIds = key.split('-').map(id => parseInt(id));
-        const labels = valueIds.map((id) => {
-            let attrId = null;
-            for (const [attributeId, values] of Object.entries(attributeValues.value)) {
-                if (values.some(v => v.id === id)) {
-                    attrId = attributeId;
-                    break;
-                }
-            }
-            const value = attributeValues.value[attrId]?.find((v) => v.id === id);
-            return value?.name || 'Không xác định';
-        });
-
-        combinations.push({
-            key,
-            label: labels.join(' - '),
-            data: variant.combinationData[key],
-        });
-    });
-    return combinations;
-    // return combinations.sort((a, b) => a.label.localeCompare(b.label));
+    return result;
 });
 const deletedCombinationKeys = ref([]);
 const removeCombinationItem = (key) => {
@@ -1080,36 +1082,36 @@ const transformFormBeforeSubmit = () => {
     if (hasVariant.value) {
         const variant = form.variants[0];
         if (!variant.combinationData) return;
-
+        const validValueIds = new Set(
+            variant.attributes.flatMap(attr => Array.isArray(attr.attribute_value_ids) ? attr.attribute_value_ids : [])
+        );
+        const validKeys = generateCombinations(variant.attributes)
+            .map(combo => combo.join('-'))
+            .filter(key => !deletedCombinationKeys.value.includes(key));
         const combinations = [];
-        const keyToIndexMap = {}; // Ánh xạ key -> index
-
-        for (const key in variant.combinationData) {
-            if (deletedCombinationKeys.value.includes(key)) continue;
-            const valueIds = key.split('-').map((id) => parseInt(id));
+        const keyToIndexMap = {};
+        validKeys.forEach((key) => {
             const comboData = variant.combinationData[key];
-
-            const index = combinations.length;
-            keyToIndexMap[key] = index; // Lưu ánh xạ key -> index
-
-            combinations.push({
-                attribute_value_ids: valueIds,
-                code: comboData.code ?? null,
-                barcode: comboData.barcode ?? null,
-                sale_price: Number(comboData.sale_price ?? 0),
-                quantity_on_hand: Number(comboData.quantity_on_hand ?? 0),
-                supplier_ids: comboData.supplier_ids ?? [],
-                warehouse_zone_id: comboData.warehouse_zone_id ?? null,
-                custom_location_name: comboData.custom_location_name ?? null,
-            });
-        }
-
+            if (!comboData) return;
+            const valueIds = key.split('-').map(id => parseInt(id));
+            if (valueIds.every(id => validValueIds.has(id))) {
+                const index = combinations.length;
+                keyToIndexMap[key] = index;
+                combinations.push({
+                    attribute_value_ids: valueIds,
+                    code: comboData.code ?? null,
+                    barcode: comboData.barcode ?? null,
+                    sale_price: Number(comboData.sale_price ?? 0),
+                    quantity_on_hand: Number(comboData.quantity_on_hand ?? 0),
+                    supplier_ids: comboData.supplier_ids ?? [],
+                    warehouse_zone_id: comboData.warehouse_zone_id ?? null,
+                    custom_location_name: comboData.custom_location_name ?? null,
+                });
+            }
+        });
         variant.combinations = combinations;
         delete variant.combinationData;
-
-        // Lưu ánh xạ keyToIndexMap vào form để sử dụng khi hiển thị lỗi
         form.keyToIndexMap = keyToIndexMap;
-
         form.variants = [variant];
         form.simple_sale_price = null;
         form.simple_quantity = null;

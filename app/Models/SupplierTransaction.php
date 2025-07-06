@@ -15,7 +15,8 @@ class SupplierTransaction extends Model
         'remaining_amount',
         'transaction_date',
         'credit_due_date',
-        'description'
+        'description',
+        'goods_receipt_id',
     ];
 
     protected $casts = [

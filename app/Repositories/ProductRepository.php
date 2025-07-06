@@ -62,7 +62,7 @@ class ProductRepository extends BaseRepository
                 if ($filters['stock_status'] === 'out_of_stock') {
                     $variantQuery->whereDoesntHave('inventory')
                         ->orWhereHas('inventory', function ($q) {
-                            $q->where('quantity_on_hand', '<=', 0);
+                            $q->where('quantity_on_hand', '==', 0);
                         });
                 }
 
@@ -94,7 +94,21 @@ class ProductRepository extends BaseRepository
     {
         return $this->handleModel::with(['category'])->find($id);
     }
+    public function generateProductCode()
+    {
+        $today = now()->format('Ymd');
+        $countToday = Product::whereDate('created_at', today())->count() + 1;
 
+        return 'PRO-' . $today . str_pad($countToday, 3, '0', STR_PAD_LEFT);
+    }
+
+    public function generateVariantCode()
+    {
+        $today = now()->format('Ymd');
+        $countToday = ProductVariant::whereDate('created_at', today())->count() + 1;
+
+        return 'VAR-' . $today . str_pad($countToday, 3, '0', STR_PAD_LEFT);
+    }
     public function getCreateData()
     {
         $attributes = Attribute::with('values')->get();
