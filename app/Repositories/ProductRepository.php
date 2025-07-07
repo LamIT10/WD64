@@ -413,9 +413,21 @@ class ProductRepository extends BaseRepository
             }
 
             $attributes = Attribute::with('values')->get();
+            // 1. Lấy toàn bộ attribute_value_id đang được dùng trong các variant
+            $usedAttributeValueIds = collect();
+            foreach ($product->productVariants as $variant) {
+                foreach ($variant->attributes as $attrVal) {
+                    $usedAttributeValueIds->push($attrVal->id);
+                }
+            }
+            $usedAttributeValueIds = $usedAttributeValueIds->unique()->values();
+            // 2. Gắn is_locked vào các attribute value
             $attributeValues = [];
             foreach ($attributes as $attribute) {
-                $attributeValues[$attribute->id] = $attribute->values;
+                $attributeValues[$attribute->id] = $attribute->values->map(function ($val) use ($usedAttributeValueIds) {
+                    $val->is_locked = $usedAttributeValueIds->contains($val->id);
+                    return $val;
+                });
             }
 
             $productData = [

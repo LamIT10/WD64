@@ -93,7 +93,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -336,12 +336,21 @@
                                     class="mb-4 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-1">
                                         <div class="flex gap-3 items-start">
-                                            <button type="button" @click="openAttributeModal(index, attrIndex)"
-                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                            <button type="button" @click="() => {
+                                                if (!attribute.attribute_id) openAttributeModal(index, attrIndex);
+                                            }" :disabled="!!attribute.attribute_id"
+                                                class="mt-1 px-3 py-1 text-sm rounded transition-all duration-150"
+                                                :class="[
+                                                    attribute.attribute_id
+                                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                                                ]">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                             <Multiselect v-model="attribute.attribute_id"
                                                 :options="getAvailableAttributes(variant, attribute.attribute_id)"
+                                                @update:modelValue="() => 
+                                                cleanUpEmptyAttributes()"
                                                 label="name" value-prop="id" placeholder="Chọn thuộc tính"
                                                 :searchable="true" :can-clear="true" />
                                             <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]"
@@ -933,6 +942,9 @@ const currentVariantIndex = ref(null);
 const currentAttrIndex = ref(null);
 
 const openAttributeModal = (variantIndex, attrIndex) => {
+    const currentAttr = form.variants[variantIndex].attributes[attrIndex];
+    if (currentAttr.attribute_id) return; 
+
     currentVariantIndex.value = variantIndex;
     currentAttrIndex.value = attrIndex;
     showAttributeModal.value = true;
@@ -1024,6 +1036,15 @@ watch(variantCombinations, async (newVal) => {
         }
     }
 });
+const cleanUpEmptyAttributes = () => {
+    form.variants.forEach((variant) => {
+        variant.attributes.forEach((attr) => {
+            if (!attr.attribute_id) {
+                attr.attribute_value_ids = [];
+            }
+        });
+    });
+};
 </script>
 
 <style scoped>
