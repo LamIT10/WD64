@@ -218,6 +218,11 @@ const Ziggy = {
             uri: "admin/customers/customers/export",
             methods: ["GET", "HEAD"],
         },
+        "admin.customers.debt-orders": {
+            uri: "admin/customers/{customer}/debt-orders",
+            methods: ["GET", "HEAD"],
+            parameters: ["customer"],
+        },
         "admin.ranks.index": { uri: "admin/ranks", methods: ["GET", "HEAD"] },
         "admin.ranks.create": {
             uri: "admin/ranks/create",
@@ -346,10 +351,6 @@ const Ziggy = {
             uri: "admin/suppliers/{supplierId}/products/{productId}/variants",
             methods: ["GET", "HEAD"],
             parameters: ["supplierId", "productId"],
-        },
-        "admin.customer-transaction.index": {
-            uri: "admin/customer-transaction",
-            methods: ["GET", "HEAD"],
         },
         "admin.customer-transaction.add": {
             uri: "admin/customer-transaction/{order}/add",

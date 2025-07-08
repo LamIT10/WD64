@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+// use App\Repositories\CustomerTransactionRepository;
 use App\Models\Customer;
 use App\Models\Rank;
 use App\Repositories\CustomerRepository;
+use App\Repositories\CustomerTransactionRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -49,8 +51,20 @@ class CustomerController extends Controller
                 ] : null,
             ],
         ];
-
+        // sử lí công nợ
+        $debts = app(CustomerTransactionRepository::class)->getDebtSummaryByCustomer();
         $customers = $this->customerRepo->getAll($perPage, $filters);
+        // gán công nợ cho từng khách hàng
+        $customers->getCollection()->transform(function ($customer) use ($debts) {
+            $debt = $debts->firstWhere('customer_id', $customer->id);
+
+            $customer->remaining_amount = $debt['remaining_amount'] ?? 0;
+       
+
+            return $customer;
+        });
+        // dd($customers->toArray());
+
         return $this->renderView(['customers' => $customers], 'admin/Customers/Index');
     }
     public function show(Customer $customer)
