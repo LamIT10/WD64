@@ -19,7 +19,9 @@ class Customer extends Model
         'rank_id',
         'province',
         'district',
-        'ward'
+        'ward',
+        'avatar',
+        'status',
     ];
 
     protected $hidden = ['password'];

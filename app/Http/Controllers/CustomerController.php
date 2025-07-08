@@ -26,16 +26,6 @@ class CustomerController extends Controller
         $filters = [
             'search' => ['search' => request()->input('search')],
             'absoluteFilter' => request()->only(['status']),
-            'between' => [
-                'total_spent' => [
-                    'min' => request()->input('total_spent_min'),
-                    'max' => request()->input('total_spent_max'),
-                ],
-                'current_debt' => [
-                    'min' => request()->input('current_debt_min'),
-                    'max' => request()->input('current_debt_max'),
-                ],
-            ],
             'relation' => [
                 'rank' => request()->input('rank_name') ? [
                     'field' => 'name',
@@ -53,6 +43,7 @@ class CustomerController extends Controller
         $customers = $this->customerRepo->getAll($perPage, $filters);
         return $this->renderView(['customers' => $customers], 'admin/Customers/Index');
     }
+
     public function show(Customer $customer)
     {
         return $this->renderView(['customer' => $customer->load('rank')], 'admin/Customers/Show');
