@@ -29,7 +29,7 @@ class ProductRepository extends BaseRepository
         $this->repositoryCategory = $category;
     }
 
-    public function getAll(array $filters = [], $perPage = 15)
+    public function getAll(array $filters = [], $perPage = 20)
     {
         $query = $this->handleModel::with([
             'category',
@@ -45,7 +45,7 @@ class ProductRepository extends BaseRepository
             'unitConversions.fromUnit',
             'unitConversions.toUnit',
             'defaultUnit',
-        ]);
+        ])->where('status_product', 1);
 
         if (!empty($filters['name'])) {
             $query->where('name', 'like', '%' . $filters['name'] . '%');
@@ -792,79 +792,102 @@ class ProductRepository extends BaseRepository
         }
     }
 
-    public function destroy($id)
+    // public function destroy($id)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Tìm sản phẩm với các liên kết cần xóa
+    //         $product = $this->handleModel::with([
+    //             'images',
+    //             'productVariants.inventory',
+    //             'productVariants.inventoryLocations',
+    //             'productVariants.supplierVariants',
+    //             'unitConversions'
+    //         ])->findOrFail($id);
+
+    //         Log::info('Bắt đầu xóa sản phẩm:', ['product_id' => $id]);
+
+    //         // Kiểm tra trạng thái sản phẩm (không xóa nếu có liên kết đơn hàng)
+    //         foreach ($product->productVariants as $variant) {
+    //             if (
+    //                 $variant->purchaseOrderItems()->exists() ||
+    //                 $variant->salesOrderItems()->exists() ||
+    //                 $variant->receivingItems()->exists() ||
+    //                 $variant->shippingItems()->exists() ||
+    //                 $variant->inventoryAuditItems()->exists() ||
+    //                 $variant->damagedExpiredProducts()->exists()
+    //             ) {
+    //                 throw new \Exception('Không thể xóa sản phẩm vì đang được sử dụng trong đơn hàng hoặc kiểm kho.');
+    //             }
+    //         }
+
+    //         // 1. Xóa ảnh
+    //         foreach ($product->images as $image) {
+    //             if (Storage::disk('public')->exists($image->url)) {
+    //                 Storage::disk('public')->delete($image->url);
+    //                 Log::info('Xóa file ảnh thành công:', ['image_id' => $image->id, 'url' => $image->url]);
+    //             } else {
+    //                 Log::warning('File ảnh không tồn tại:', ['image_id' => $image->id, 'url' => $image->url]);
+    //             }
+    //             $image->delete();
+    //         }
+
+    //         // 2. Xóa các biến thể và liên kết
+    //         $variantIds = $product->productVariants->pluck('id')->toArray();
+    //         if (!empty($variantIds)) {
+    //             // Xóa inventory, inventory_locations, supplier_variants
+    //             Inventory::whereIn('product_variant_id', $variantIds)->delete();
+    //             InventoryLocation::whereIn('product_variant_id', $variantIds)->delete();
+    //             SupplierProductVariant::whereIn('product_variant_id', $variantIds)->delete();
+
+    //             // Xóa các biến thể (liên kết trong product_variant_attributes tự động xóa nhờ cascade)
+    //             $product->productVariants()->delete();
+    //             Log::info('Xóa biến thể thành công:', ['variant_ids' => $variantIds]);
+    //         }
+
+    //         // 3. Xóa đơn vị quy đổi
+    //         $product->unitConversions()->delete();
+    //         Log::info('Xóa đơn vị quy đổi thành công:', ['product_id' => $id]);
+
+    //         // 4. Xóa sản phẩm chính
+    //         $product->delete();
+    //         Log::info('Xóa sản phẩm chính thành công:', ['product_id' => $id]);
+
+    //         DB::commit();
+    //         Log::info('Xóa sản phẩm hoàn tất:', ['product_id' => $id]);
+    //         return true;
+    //     } catch (\Throwable $th) {
+    //         DB::rollBack();
+    //         Log::error('Lỗi khi xóa sản phẩm:', [
+    //             'product_id' => $id,
+    //             'error' => $th->getMessage(),
+    //             'trace' => $th->getTraceAsString()
+    //         ]);
+    //         return $this->returnError('Lỗi khi xóa sản phẩm: ' . $th->getMessage());
+    //     }
+    // }
+
+
+    public function destroy(string $id)
     {
         try {
             DB::beginTransaction();
+                $product = $this->handleModel->find($id);
 
-            // Tìm sản phẩm với các liên kết cần xóa
-            $product = $this->handleModel::with([
-                'images',
-                'productVariants.inventory',
-                'productVariants.inventoryLocations',
-                'productVariants.supplierVariants',
-                'unitConversions'
-            ])->findOrFail($id);
-
-            Log::info('Bắt đầu xóa sản phẩm:', ['product_id' => $id]);
-
-            // Kiểm tra trạng thái sản phẩm (không xóa nếu có liên kết đơn hàng)
-            foreach ($product->productVariants as $variant) {
-                if (
-                    $variant->purchaseOrderItems()->exists() ||
-                    $variant->salesOrderItems()->exists() ||
-                    $variant->receivingItems()->exists() ||
-                    $variant->shippingItems()->exists() ||
-                    $variant->inventoryAuditItems()->exists() ||
-                    $variant->damagedExpiredProducts()->exists()
-                ) {
-                    throw new \Exception('Không thể xóa sản phẩm vì đang được sử dụng trong đơn hàng hoặc kiểm kho.');
+                if (!$product) {
+                    throw new Exception('Không tìm thấy sản phẩm.');
                 }
-            }
-
-            // 1. Xóa ảnh
-            foreach ($product->images as $image) {
-                if (Storage::disk('public')->exists($image->url)) {
-                    Storage::disk('public')->delete($image->url);
-                    Log::info('Xóa file ảnh thành công:', ['image_id' => $image->id, 'url' => $image->url]);
-                } else {
-                    Log::warning('File ảnh không tồn tại:', ['image_id' => $image->id, 'url' => $image->url]);
-                }
-                $image->delete();
-            }
-
-            // 2. Xóa các biến thể và liên kết
-            $variantIds = $product->productVariants->pluck('id')->toArray();
-            if (!empty($variantIds)) {
-                // Xóa inventory, inventory_locations, supplier_variants
-                Inventory::whereIn('product_variant_id', $variantIds)->delete();
-                InventoryLocation::whereIn('product_variant_id', $variantIds)->delete();
-                SupplierProductVariant::whereIn('product_variant_id', $variantIds)->delete();
-
-                // Xóa các biến thể (liên kết trong product_variant_attributes tự động xóa nhờ cascade)
-                $product->productVariants()->delete();
-                Log::info('Xóa biến thể thành công:', ['variant_ids' => $variantIds]);
-            }
-
-            // 3. Xóa đơn vị quy đổi
-            $product->unitConversions()->delete();
-            Log::info('Xóa đơn vị quy đổi thành công:', ['product_id' => $id]);
-
-            // 4. Xóa sản phẩm chính
-            $product->delete();
-            Log::info('Xóa sản phẩm chính thành công:', ['product_id' => $id]);
-
+            $product->update(['status_product' => 0]);
             DB::commit();
-            Log::info('Xóa sản phẩm hoàn tất:', ['product_id' => $id]);
-            return true;
+
+            return $product;
         } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error('Lỗi khi xóa sản phẩm:', [
+            Log::error('Lỗi khi cập nhật trạng thái sản phẩm:', [
                 'product_id' => $id,
-                'error' => $th->getMessage(),
-                'trace' => $th->getTraceAsString()
+                'error' => $th->getMessage()
             ]);
-            return $this->returnError('Lỗi khi xóa sản phẩm: ' . $th->getMessage());
+            return $this->returnError('Lỗi khi cập nhật trạng thái sản phẩm.');
         }
     }
 
@@ -904,6 +927,88 @@ class ProductRepository extends BaseRepository
             })->toArray();
     }
 
+    public function getInactive(array $filters = [], $perPage = 20)
+    {
+        $query = $this->handleModel::with([
+            'category',
+            'images',
+            'productVariants' => function ($query) {
+                $query->with([
+                    'attributes',
+                    'inventory',
+                    'inventoryLocations.zone',
+                    'supplierVariants'
+                ]);
+            },
+            'unitConversions.fromUnit',
+            'unitConversions.toUnit',
+            'defaultUnit',
+        ])->where('status_product', 0);
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['code'])) {
+            $query->where('code', 'like', '%' . $filters['code'] . '%');
+        }
+
+        if (!empty($filters['stock_status'])) {
+            $query->whereHas('productVariants', function ($variantQuery) use ($filters) {
+                $variantQuery->with('inventory');
+
+                if ($filters['stock_status'] === 'out_of_stock') {
+                    $variantQuery->whereDoesntHave('inventory')
+                        ->orWhereHas('inventory', function ($q) {
+                            $q->where('quantity_on_hand', '==', 0);
+                        });
+                }
+
+                if ($filters['stock_status'] === 'low_stock') {
+                    $variantQuery->where(function ($q) {
+                        $q->whereHas('inventory', function ($inv) {
+                            $inv->select('product_variant_id')
+                                ->groupBy('product_variant_id')
+                                ->havingRaw('SUM(quantity_on_hand) <= MIN(min_stock)')
+                                ->havingRaw('SUM(quantity_on_hand) !=    0');
+                        });
+                    });
+                }
+
+                if ($filters['stock_status'] === 'normal') {
+                    $variantQuery->whereHas('inventory', function ($inv) {
+                        $inv->select('product_variant_id')
+                            ->groupBy('product_variant_id')
+                            ->havingRaw('SUM(quantity_on_hand) > MIN(min_stock)');
+                    });
+                }
+            });
+        }
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function restore (string $id)
+    {
+        try {
+            DB::beginTransaction();
+                $product = $this->handleModel->find($id);
+
+                if (!$product) {
+                    throw new Exception('Không tìm thấy sản phẩm.');
+                }
+            $product->update(['status_product' => 1]);
+            DB::commit();
+
+            return $product;
+        } catch (\Throwable $th) {
+            Log::error('Lỗi khi cập nhật trạng thái sản phẩm:', [
+                'product_id' => $id,
+                'error' => $th->getMessage()
+            ]);
+            return $this->returnError('Lỗi khi cập nhật trạng thái sản phẩm.');
+        }
+    }
     public function getProductVariantsById($productId)
     {
         return DB::table('products as p')
