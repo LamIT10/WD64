@@ -211,7 +211,7 @@ class DashboardRepository extends BaseRepository
         return DB::table('sale_orders')
             ->join('customers', 'sale_orders.customer_id', '=', 'customers.id')
             ->where('sale_orders.order_date', '>=', $startDate)
-            ->where('sale_orders.status', '=', 'closed')
+            ->where('sale_orders.status', '=', 'completed') 
             ->select(
                 'customers.id as customer_id',
                 'customers.name as customer_name',
@@ -229,7 +229,7 @@ class DashboardRepository extends BaseRepository
     {
         $query = DB::table('sale_orders')
             ->selectRaw('SUM(total_amount) as total_revenue')
-            ->where('status', 'closed'); // chỉ lấy đơn đã hoàn thành
+            ->where('status', 'completed'); // chỉ lấy đơn đã hoàn thành
 
         $today = Carbon::now();
 
@@ -242,7 +242,7 @@ class DashboardRepository extends BaseRepository
                     ->selectRaw("DATE(order_date) as label, SUM(total_amount) as revenue")
                     ->where('order_date', '>=', $start)
                     ->where('order_date', '<=', $end)
-                    ->where('status', 'closed')
+                    ->where('status', 'completed')
                     ->groupBy(DB::raw("DATE(order_date)"))
                     ->orderBy('label')
                     ->get();
@@ -253,7 +253,7 @@ class DashboardRepository extends BaseRepository
                 $results = DB::table('sale_orders')
                     ->selectRaw("MONTH(order_date) as label, SUM(total_amount) as revenue")
                     ->where('order_date', '>=', $start)
-                    ->where('status', 'closed')
+                    ->where('status', 'completed')
                     ->groupBy(DB::raw("MONTH(order_date)"))
                     ->orderBy('label')
                     ->get();
@@ -264,7 +264,7 @@ class DashboardRepository extends BaseRepository
                 $results = DB::table('sale_orders')
                     ->selectRaw("QUARTER(order_date) as label, SUM(total_amount) as revenue")
                     ->where('order_date', '>=', $start)
-                    ->where('status', 'closed')
+                    ->where('status', 'completed')
                     ->groupBy(DB::raw("QUARTER(order_date)"))
                     ->orderBy('label')
                     ->get();
@@ -276,7 +276,7 @@ class DashboardRepository extends BaseRepository
                 $results = DB::table('sale_orders')
                     ->selectRaw("DATE_FORMAT(order_date, '%x-W%v') as label, SUM(total_amount) as revenue")
                     ->where('order_date', '>=', $start)
-                    ->where('status', 'closed')
+                    ->where('status', 'completed')
                     ->groupBy(DB::raw("DATE_FORMAT(order_date, '%x-W%v')"))
                     ->orderBy('label')
                     ->get();
