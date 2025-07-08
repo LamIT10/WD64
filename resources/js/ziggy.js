@@ -416,6 +416,11 @@ const Ziggy = {
             uri: "admin/purchases/store",
             methods: ["POST"],
         },
+        "admin.purchases.edit": {
+            uri: "admin/purchases/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
         "admin.receiving.index": {
             uri: "admin/receiving",
             methods: ["GET", "HEAD"],

@@ -168,7 +168,7 @@
         <!-- Header section -->
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h4 class="text-xl font-bold text-gray-800">Thống kê đơn nhập kho hàng</h4>
+            <h4 class="text-xl font-bold text-gray-800">Thống kê phiếu nhập kho hàng</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình nhập hàng trong tháng</p>
           </div>
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
@@ -209,8 +209,8 @@
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng đơn hàng</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_purchase.count_purchase_in_month
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng phiếu nhập</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_good_receipt.count_good_receipt_in_month
                 }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
@@ -230,9 +230,9 @@
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đang chuẩn bị</p>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Chờ duyệt</p>
                 <p class="text-2xl font-bold text-yellow-600 mt-1">{{
-                  data.statistical_purchase.count_purchase_in_month_pending }}</p>
+                  data.statistical_good_receipt.count_good_receipt_in_month_pending }}</p>
                 <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
               </div>
               <div class="bg-yellow-50 p-3 rounded-lg">
@@ -251,7 +251,7 @@
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
                 <p class="text-2xl font-bold text-green-600 mt-1">{{
-                  data.statistical_purchase.count_purchase_in_month_received }}</p>
+                  data.statistical_good_receipt.count_good_receipt_in_month_received }}</p>
                 <p class="text-xs text-gray-400 mt-1">Đã nhập kho</p>
               </div>
               <div class="bg-green-50 p-3 rounded-lg">
@@ -269,7 +269,7 @@
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn huỷ</p>
                 <p class="text-2xl font-bold text-red-600 mt-1">{{
-                  data.statistical_purchase.count_purchase_in_month_closed }}</p>
+                  data.statistical_good_receipt.count_good_receipt_in_month_closed }}</p>
                 <p class="text-xs text-gray-400 mt-1">Không thực hiện</p>
               </div>
               <div class="bg-red-50 p-3 rounded-lg">
@@ -288,7 +288,7 @@
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
                 <p class="text-2xl font-bold text-indigo-600 mt-1">{{
-                  data.statistical_purchase.sum_value_purchase_in_month }}</p>
+                  data.statistical_good_receipt.sum_value_good_receipt_in_month }}</p>
                 <p class="text-xs text-gray-400 mt-1">Tổng chi phí</p>
               </div>
               <div class="bg-indigo-50 p-3 rounded-lg">
@@ -304,7 +304,7 @@
         </div>
       </div>
       <div class="flex">
-        <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_purchase.purchase_change_in_seven_day"
+        <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_good_receipt.good_receipt_change_in_seven_day"
           :chartTitle="'Đơn nhập hàng trong 7 ngày'" />
       <ChangePurchaseSevenDayAgo
           :purchaseChangeInSevenDay="data.statistical_sale_order.sale_order_change_in_seven_day"

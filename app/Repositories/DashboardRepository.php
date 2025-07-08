@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Category;
+use App\Models\GoodReceipt;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\SaleOrder;
@@ -40,47 +41,46 @@ class DashboardRepository extends BaseRepository
         // lấy ra thông kê đơn xuất theo tháng đơn nhập
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
-        $totalPurchaseInMonth = PurchaseOrder::select(['order_date', 'total_amount']);
-        if (!empty($query['fromDatePurchase']) || !empty($query['toDatePurchase'])) {
-            if (!empty($query['fromDatePurchase'])) {
-                $totalPurchaseInMonth->where('order_date', ">=", $query['fromDatePurchase']);
+        $totalGoodReceiptInMonth = GoodReceipt::select(['created_at', 'total_amount']);
+        if (!empty($query['fromDateGoodReceipt']) || !empty($query['toDateGoodReceipt'])) {
+            if (!empty($query['fromDateGoodReceipt'])) {
+                $totalGoodReceiptInMonth->where('created_at', ">=", $query['fromDateGoodReceipt']);
             }
-            if (!empty($query['toDatePurchase'])) {
-                $totalPurchaseInMonth->where('order_date', "<=", $query['toDatePurchase']);
+            if (!empty($query['toDateGoodReceipt'])) {
+                $totalGoodReceiptInMonth->where('created_at', "<=", $query['toDateGoodReceipt']);
             }
         } else {
-            $totalPurchaseInMonth->whereMonth('order_date', $currentMonth)
-                ->whereYear('order_date', $currentYear);
+            $totalGoodReceiptInMonth->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear);
         }
-
         // Đếm tổng số đơn
-        $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
+        $countGoodReceiptInMonth = (clone $totalGoodReceiptInMonth)->count();
 
         // Đếm theo từng trạng thái
-        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
-        $countPurchaseInMonthReceived = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
-        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('order_status', 0)->count();
-        $sumValuePurchaseInMonth = (clone $totalPurchaseInMonth)->where('order_status', 0)->sum('total_amount');
+        $countGoodReceiptInMonthPending = (clone $totalGoodReceiptInMonth)->where('status', 0)->count(); 
+        $countGoodReceiptInMonthReceived = (clone $totalGoodReceiptInMonth)->where('status', 0)->count();
+        $countGoodReceiptInMonthClosed = (clone $totalGoodReceiptInMonth)->where('status', 0)->count();
+        $sumValueGoodReceiptInMonth = (clone $totalGoodReceiptInMonth)->where('status', 3)->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
-        $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
-            ->whereBetween('order_date', [$sevenDayAgo->startOfDay(), $current->endOfDay()])
-            ->groupBy(DB::raw('DATE(order_date)'))
+        $GoodReceiptChangeInSevenDay = GoodReceipt::select(DB::raw("Date(created_at) as date"), DB::raw('COUNT(*) as total_orders'))
+            ->whereBetween('created_at', [$sevenDayAgo->startOfDay(), $current->endOfDay()])
+            ->groupBy(DB::raw('DATE(created_at)'))
             ->orderBy('date', 'asc')
             ->get()->toArray();
 
         // lấy ra thông kê đơn xuất theo tháng đơn xuất
-        $totalSaleOrderInMonth = SaleOrder::select(['order_date', 'total_amount']);
+        $totalSaleOrderInMonth = SaleOrder::select(['created_at', 'total_amount']);
         if (!empty($query['fromDateSaleOrder']) || !empty($query['toDateSaleOrder'])) {
             if (!empty($query['fromDateSaleOrder'])) {
-                $totalSaleOrderInMonth->where('order_date', ">=", $query['fromDateSaleOrder']);
+                $totalSaleOrderInMonth->where('created_at', ">=", $query['fromDateSaleOrder']);
             }
             if (!empty($query['toDateSaleOrder'])) {
-                $totalSaleOrderInMonth->where('order_date', "<=", $query['toDateSaleOrder']);
+                $totalSaleOrderInMonth->where('created_at', "<=", $query['toDateSaleOrder']);
             }
         } else {
-            $totalSaleOrderInMonth->whereMonth('order_date', $currentMonth)
-                ->whereYear('order_date', $currentYear);
+            $totalSaleOrderInMonth->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear);
         }
 
         // Đếm tổng số đơn
@@ -106,13 +106,13 @@ class DashboardRepository extends BaseRepository
             'count_product' => Product::get()->count(), // số lượng sản phẩm trong kho
             'sum_product_inventory_value' => $this->sumProductInventoryValue,
             'product_is_out_of_stock' => $productIsOutOfStock,
-            'statistical_purchase' => [
-                'count_purchase_in_month' => $countPurchaseInMonth,
-                'count_purchase_in_month_pending' => $countPurchaseInMonthPending,
-                'count_purchase_in_month_received' => $countPurchaseInMonthReceived,
-                'count_purchase_in_month_closed' => $countPurchaseInMonthClosed,
-                'sum_value_purchase_in_month' => $this->formatNumberInt($sumValuePurchaseInMonth) . " ₫",
-                'purchase_change_in_seven_day' => $purchaseChangeInSevenDay,
+            'statistical_good_receipt' => [
+                'count_good_receipt_in_month' => $countGoodReceiptInMonth,
+                'count_good_receipt_in_month_pending' => $countGoodReceiptInMonthPending,
+                'count_good_receipt_in_month_received' => $countGoodReceiptInMonthReceived,
+                'count_good_receipt_in_month_closed' => $countGoodReceiptInMonthClosed,
+                'sum_value_good_receipt_in_month' => $this->formatNumberInt($sumValueGoodReceiptInMonth) . " ₫",
+                'good_receipt_change_in_seven_day' => $GoodReceiptChangeInSevenDay,
             ],
             'statistical_sale_order' => [
                 'count_sale_order_in_month' => $countSaleOrderInMonth,
@@ -149,7 +149,6 @@ class DashboardRepository extends BaseRepository
         ];
 
 
-        // dd($data);
         return $data;
     }
 
