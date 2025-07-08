@@ -7,6 +7,11 @@ const Ziggy = {
             uri: "sanctum/csrf-cookie",
             methods: ["GET", "HEAD"],
         },
+        "generate-code": { uri: "api/generate-code", methods: ["GET", "HEAD"] },
+        "generate-variant-code": {
+            uri: "api/generate-variant-code",
+            methods: ["GET", "HEAD"],
+        },
         "admin.dashboard": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
         "admin.inventory-audit.index": {
             uri: "admin/inventory-audit",
@@ -521,6 +526,11 @@ const Ziggy = {
         "admin.sale-orders.export": {
             uri: "admin/sale-orders/export",
             methods: ["GET", "HEAD"],
+        },
+        "admin.sale-orders.complete": {
+            uri: "admin/sale-orders/{id}/complete",
+            methods: ["POST"],
+            parameters: ["id"],
         },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
