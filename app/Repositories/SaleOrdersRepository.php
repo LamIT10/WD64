@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductUnitConversion;
 use App\Models\ProductVariant;
+use App\Models\Rank;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\Unit;
@@ -20,11 +21,13 @@ class SaleOrdersRepository extends BaseRepository
 {
     protected $product;
     protected $saleOrderItem;
-    public function __construct(SaleOrder $saleOrder, Product $product, SaleOrderItem $saleOrderItem)
+    protected $rank;
+    public function __construct(SaleOrder $saleOrder, Product $product, SaleOrderItem $saleOrderItem, Rank $rank)
     {
         $this->handleModel = $saleOrder;
         $this->saleOrderItem = $saleOrderItem;
         $this->product = $product;
+        $this->rank = $rank;
     }
     public function index(Request $request)
     {
@@ -222,13 +225,17 @@ class SaleOrdersRepository extends BaseRepository
         $searchTerm = $request->input('searchCustomer', '');
         $customers = Customer::query()
             ->where('name', 'LIKE', "%{$searchTerm}%")
+            ->with(['rank' => function ($query) {
+                $query->select('id', 'discount_percent');
+            }])
             ->get([
                 'id',
                 'name',
                 'phone',
                 'province',
                 'district',
-                'ward'
+                'ward',
+                'rank_id',
             ]);
         return response()->json($customers);
     }
@@ -433,12 +440,15 @@ class SaleOrdersRepository extends BaseRepository
     }
 
 
-    public function completeOrder($orderId, $pay_after)
+    public function completeOrder($orderId, $pay_after, $customerId)
     {
         try {
             DB::beginTransaction();
-
+            $customer = Customer::findOrFail($customerId);
             $saleOrder = $this->handleModel->find($orderId);
+            $MaxMinTotalSpentRank = $this->rank->latest('min_total_spent')->first();
+            $MinMinTotalSpentRank = $this->rank->oldest('min_total_spent')->first();
+            $AllMinTotalSpentRanks = $this->rank->select('min_total_spent', 'id')->get();
             if (!$saleOrder) {
                 throw new \Exception("Đơn hàng xuất {$orderId} không tồn tại.");
             }
@@ -456,6 +466,46 @@ class SaleOrdersRepository extends BaseRepository
                 'status' => 'completed',
                 'pay_after' => $pay_after
             ]);
+            // Thêm tổng tiền đã thanh toán vào tích số tiền đã tiêu của khách hàng
+            $totalSpent = $this->handleModel
+                ->where('customer_id', $customerId)
+                ->where('status', 'completed')
+                ->whereRaw('total_amount = pay_before + pay_after')
+                ->sum('total_amount');
+            if ($saleOrder->total_amount - $saleOrder->pay_before == $pay_after) {
+                $customer->update(
+                    [
+                        'total_spent' => $totalSpent
+                    ]
+                );
+                // Cập nhật rank của khách hàng khi đơn hàng hoàn thành và không nợ
+                if ($MaxMinTotalSpentRank->min_total_spent <= $customer->total_spent) {
+                    $customer->update(
+                        [
+                            'rank_id' => $MaxMinTotalSpentRank->id
+                        ]
+                    );
+                } else if ($customer->total_spent == $MinMinTotalSpentRank->min_total_spent) {
+                    $customer->update(
+                        [
+                            'rank_id' => $MinMinTotalSpentRank->id
+                        ]
+                    );
+                } else if ($customer->total_spent > $MinMinTotalSpentRank->min_total_spent  && $customer->total_spent < $MaxMinTotalSpentRank->min_total_spent) {
+                    $previousRank = $MinMinTotalSpentRank;
+                    foreach ($AllMinTotalSpentRanks as $rank) {
+                        if ($customer->total_spent < $rank->min_total_spent) {
+                            $customer->update(
+                                [
+                                    'rank_id' => $previousRank->id
+                                ]
+                            );
+                            break;
+                        }
+                        $previousRank = $rank;
+                    }
+                }
+            }
             Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
 
             DB::commit();
