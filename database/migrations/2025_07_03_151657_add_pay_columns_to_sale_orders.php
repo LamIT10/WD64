@@ -18,8 +18,12 @@ class AddPayColumnsToSaleOrders extends Migration
     public function down()
     {
         Schema::table('sale_orders', function (Blueprint $table) {
-            $table->dropColumn(['pay_before', 'pay_after']);
-            $table->enum('status', ['pending', 'shipped', 'closed'])->default('pending')->change();
+            if (Schema::hasColumn('sale_orders', 'pay_before')) {
+                $table->dropColumn('pay_before');
+            }
+            if (Schema::hasColumn('sale_orders', 'pay_after')) {
+                $table->dropColumn('pay_after');
+            }
         });
     }
 }
