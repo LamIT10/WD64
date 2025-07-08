@@ -17,7 +17,7 @@
             <!-- Page Numbers -->
             <template v-for="page in data.links">
                 <Link v-if="page.url && !page.active && page.label !== '...'"
-                    :href="page.url +  '&perPage=' + newPerPage"
+                    :href="page.url + '&perPage=' + newPerPage + '&'+ newUrl" 
                     class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
                 {{ page.label }}
                 </Link>
@@ -27,10 +27,10 @@
                 <span v-else-if="page.label === '...'"
                     class="px-3 py-1 border border-gray-300 rounded-md text-gray-600">
                     {{ page.label }}
-                </span>
+                </span> 
             </template>
 
-            <Link v-if="data.next_page_url" :href="data.next_page_url +'&perPage=' + newPerPage "
+            <Link v-if="data.next_page_url" :href="data.next_page_url + '&perPage=' + newPerPage + '&' + newUrl" 
                 class="px-3 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-50">
             <i class="fas fa-chevron-right"></i>
             </Link>
@@ -43,11 +43,35 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
-const {data, perPage} = defineProps({
+import { ref } from 'vue';
+const { data, perPage, searchForm } = defineProps({
     data: Object,
-    perPage:String
+    perPage: String,
+    searchForm: Object
 })
-const newPerPage = perPage == null ? "20" : perPage.trim == "" ? "20" : perPage ;
+const array = Object.entries(searchForm)
+console.log(array);
+const newUrl = ref("");
+for (let index = 0; index < array.length; index++) {
+    if(array[index][0] == 'perPage' || array[index][0] ==    'page') {
+        continue; 
+    }
+    else if (array.length - 1 == index) {
+        newUrl.value +=     array[index][0] +"=" + array[index][1];
+    } else {
+        newUrl.value += array[index][0] + "=" + array[index][1] + "&";
+    }
+}
+console.log(newUrl.value);
+const newPerPage = perPage == null ? "20" : perPage.trim == "" ? "20" : perPage;
+const editLabel = () => {
+    data.links.forEach(element => {
+        if (element.label == "&laquo; Previous") element.label = "Previous";
+        if (element.label == "Next &raquo;") element.label = "Next"
+    });
+}
+editLabel();
+
 </script>
 
 <style lang="scss" scoped></style>

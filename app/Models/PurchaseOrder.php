@@ -20,7 +20,7 @@ class PurchaseOrder extends Model
 
     public function supplier()
     {
-        return $this->belongsTo(Supplier::class);
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     public function user()
@@ -37,9 +37,7 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(SupplierTransaction::class);
     }
-
-    public function receiving()
-    {
-        return $this->hasMany(Receiving::class);
+    public function goodReceipts(){
+        return $this->hasMany(GoodReceipt::class, 'purchase_order_id');
     }
 }

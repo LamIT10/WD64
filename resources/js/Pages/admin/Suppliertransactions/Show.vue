@@ -175,7 +175,7 @@
                                 }}
                             </p>
                         </div>
-                        <div v-if="supplierTransaction.created_by">
+                        <div v-if="supplierTransaction.approved_by != ''">
                             <h2 class="text-sm font-semibold text-indigo-700">
                                 Thông tin duyệt
                             </h2>
@@ -279,7 +279,7 @@
                                 <th
                                     class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider"
                                 >
-                                    Tổng tiền đơn hàng
+                                    Tổng tiền phiếu nhập
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider"
@@ -376,7 +376,7 @@
             <div class="bg-white rounded-lg shadow overflow-hidden mt-10">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-indigo-800">
-                        Chi tiết đơn hàng
+                        Chi tiết phiếu nhập hàng
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
@@ -393,15 +393,11 @@
                                 >
                                     Tên sản phẩm
                                 </th>
+                         
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider"
                                 >
-                                    Số lượng nhập
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider"
-                                >
-                                    Số lượng thực tế
+                                    Số lượng 
                                 </th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-indigo-700 uppercase tracking-wider"
@@ -435,19 +431,15 @@
                                 <td
                                     class="px-6 py-4 whitespace-nowrap text-gray-900 text-center"
                                 >
-                                    {{ item.product_variant.product.name }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 whitespace-nowrap text-gray-900 text-center"
-                                >
-                                    {{ item.quantity_expected }}
+                                    {{ item.product_variant.product.name  }}
+                                    <span v-for="att in  item.product_variant.attributes">{{ " - " + att.name }}</span>
                                 </td>
                                 <td
                                     class="px-6 py-4 whitespace-nowrap text-gray-900 text-center"
                                 >
                                     {{ item.quantity_received }}
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 text-center">
+                                <td class="px-6 py-4 text-gray-900 text-center">        
                                     <p
                                         v-for="value in item.product_variant
                                             .product.unit_conversions"
@@ -568,11 +560,10 @@ import AppLayout from "../Layouts/AppLayout.vue";
 const { supplierTransaction } = defineProps({
     supplierTransaction: Object,
 });
-console.log(supplierTransaction);
 const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString("vi-VN");
 };
-
+console.log(supplierTransaction);
 const formatNumber = (rawNumber, i = 0) => {
     try {
         const number = parseFloat(rawNumber);

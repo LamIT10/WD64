@@ -10,13 +10,13 @@ class SupplierTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'supplier_id',
-        'purchase_order_id',
+        'goods_receipt_id',
         'paid_amount',
         'remaining_amount',
         'transaction_date',
         'credit_due_date',
-        'description'
+        'description',
+        'goods_receipt_id',
     ];
 
     protected $casts = [
@@ -35,5 +35,8 @@ class SupplierTransaction extends Model
     }
     public function supplierDebtHistories(){
         return $this->belongsTo(PurchaseOrder::class, "supplier_transaction_id");
+    }
+    public function goodReceipt(){
+        return $this->belongsTo(GoodReceipt::class, 'goods_receipt_id');
     }
 }

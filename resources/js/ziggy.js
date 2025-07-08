@@ -7,6 +7,11 @@ const Ziggy = {
             uri: "sanctum/csrf-cookie",
             methods: ["GET", "HEAD"],
         },
+        "generate-code": { uri: "api/generate-code", methods: ["GET", "HEAD"] },
+        "generate-variant-code": {
+            uri: "api/generate-variant-code",
+            methods: ["GET", "HEAD"],
+        },
         "admin.dashboard": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
         "admin.inventory-audit.index": {
             uri: "admin/inventory-audit",
@@ -213,6 +218,11 @@ const Ziggy = {
             uri: "admin/customers/customers/export",
             methods: ["GET", "HEAD"],
         },
+        "admin.customers.debt-orders": {
+            uri: "admin/customers/{customer}/debt-orders",
+            methods: ["GET", "HEAD"],
+            parameters: ["customer"],
+        },
         "admin.ranks.index": { uri: "admin/ranks", methods: ["GET", "HEAD"] },
         "admin.ranks.create": {
             uri: "admin/ranks/create",
@@ -342,10 +352,6 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["supplierId", "productId"],
         },
-        "admin.customer-transaction.index": {
-            uri: "admin/customer-transaction",
-            methods: ["GET", "HEAD"],
-        },
         "admin.customer-transaction.add": {
             uri: "admin/customer-transaction/{order}/add",
             methods: ["POST"],
@@ -410,6 +416,11 @@ const Ziggy = {
         "admin.purchases.store": {
             uri: "admin/purchases/store",
             methods: ["POST"],
+        },
+        "admin.purchases.edit": {
+            uri: "admin/purchases/{id}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["id"],
         },
         "admin.receiving.index": {
             uri: "admin/receiving",

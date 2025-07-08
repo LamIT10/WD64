@@ -404,6 +404,8 @@ const { purchaseOrder } = defineProps({
         required: true,
     },
 });
+console.log(purchaseOrder);
+
 const realQuantity = ref(0);
 const totalAmount = ref(0);
 const debtAmount = ref(0);
@@ -461,15 +463,19 @@ const form = useForm({
     items: [],
     purchase_order_id: purchaseOrder.id,
     receive_type: "full",
+    payment: 0,
 });
 const submitGoodReceipt = () => {
     form.total_amount = totalAmount.value;
+    form.payment = realQuantity.value;
 
     form.items = purchaseOrder.items
         .filter((item) => receiptForm.value[item.id] > 0)
         .map((item) => ({
             product_variant_id: item.product_variant.id,
             unit_id: item.unit.id,
+            unit_default: item.product_variant.product.default_unit_id,
+            product_id: item.product_variant.product_id,
             quantity_expected: item.quantity_ordered,
             quantity_received: receiptForm.value[item.id],
             unit_price: item.unit_price,

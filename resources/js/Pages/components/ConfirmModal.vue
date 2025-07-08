@@ -4,25 +4,14 @@
         <slot name="trigger" :openModal="openModal"></slot>
 
         <!-- Modal -->
-        <div
-            v-if="isOpen"
-            class="fixed inset-0 z-[99999] flex items-start justify-center pt-20"
-            style="background-color: rgba(0, 0, 0, 0.6)"
-            @click.self="closeModal"    
-        >
-            <div
-                class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 animate-slide-down"
-            >
-                <div
-                    class="flex justify-between items-center p-4 border-b border-gray-200"
-                >
+        <div v-if="isOpen" class="fixed inset-0 z-[99999] flex items-start justify-center pt-20"
+            style="background-color: rgba(0, 0, 0, 0.6)" @click.self="closeModal">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 animate-slide-down">
+                <div class="flex justify-between items-center p-4 border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900">
                         {{ title }}
                     </h3>
-                    <button
-                        @click="closeModal"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
+                    <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -37,14 +26,15 @@
                     <button
                         @click="closeModal"
                         class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition"
-                    >
+                        :disabled="isProcessing">
                         Hủy
                     </button>
                     <button
                         @click="confirmAction"
                         class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-                    >
-                        Xác nhận xoá
+                        :disabled="isProcessing">
+                        <span v-if="isProcessing">Đang xử lý...</span>
+                        <span v-else>Xác nhận xoá</span>
                     </button>
                 </div>
             </div>
@@ -76,20 +66,33 @@ const props = defineProps({
 });
 
 const isOpen = ref(false);
+const isProcessing = ref(false);
 
 const openModal = () => {
     isOpen.value = true;
+    isProcessing.value = false; 
 };
 
 const closeModal = () => {
-    isOpen.value = false;
+    if (!isProcessing.value) {
+        isOpen.value = false;
+    }
 };
 
 const confirmAction = () => {
+    if (isProcessing.value) return; 
+
+    isProcessing.value = true; 
     const form = useForm({});
+
     form.delete(route(props.routeName, props.routeParams), {
+        preserveScroll: true,
         onSuccess: () => {
+            isProcessing.value = false;
             closeModal();
+        },
+        onError: () => {
+            isProcessing.value = false; 
         },
     });
 };

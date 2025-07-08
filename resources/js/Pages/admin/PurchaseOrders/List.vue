@@ -361,7 +361,9 @@
                                             </tr>
 
                                             <!-- Trạng thái -->
-                                            <tr>
+                                            <tr
+                                                class="border-b border-gray-200"
+                                            >
                                                 <td
                                                     class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
                                                 >
@@ -393,6 +395,77 @@
                                                     </span>
                                                 </td>
                                             </tr>
+                                            <tr
+                                                class="border-b border-gray-200"
+                                            >
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                >
+                                                    Danh sách phiếu nhập
+                                                </td>
+                                                <td
+                                                    class="px-4 py-2"
+                                                    v-if="
+                                                        selectedOrder
+                                                            .good_receipts
+                                                            .length > 0
+                                                    "
+                                                >
+                                                    <Link
+                                                        :href="
+                                                            route(
+                                                                'admin.receiving.index'
+                                                            )
+                                                        "
+                                                        class="mr-2 px-2 py-1 cursor-pointer hover:bg-indigo-100 rounded text-indigo-600 bg-indigo-50"
+                                                        v-for="good in selectedOrder.good_receipts"
+                                                        :data="{
+                                                            code: good.code,
+                                                        }"
+                                                        :key="good.id"
+                                                    >
+                                                        {{ good.code }}
+                                                    </Link>
+                                                </td>
+                                                <td
+                                                    v-else
+                                                    class="text-gray-500"
+                                                >
+                                                    <span class="ml-4"
+                                                        >Chưa nhập hàng</span
+                                                    >
+                                                </td>
+                                            </tr>
+                                            <tr
+                                                class="border-b border-gray-200"
+                                            >
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                >
+                                                    Người tạo đơn
+                                                </td>
+                                                <td>
+                                                    <span class="ml-4">{{
+                                                        selectedOrder.user.name
+                                                    }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr
+                                                class="border-b border-gray-200"
+                                            >
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                >
+                                                    Ngày tạo đơn
+                                                </td>
+                                                <td>
+                                                    <span class="ml-4">{{
+                                                        formatDate(
+                                                            selectedOrder.created_at
+                                                        )
+                                                    }}</span>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
 
@@ -409,28 +482,44 @@
                                                 class="min-w-full divide-y divide-gray-200"
                                             >
                                                 <thead
-                                                    class="bg-indigo-500 text-white"
+                                                    class="bg-indigo-500 text-white text-xs uppercase"
                                                 >
                                                     <tr>
                                                         <th
-                                                            class="px-6 py-3 border border-white text-left text-xs font-medium uppercase tracking-wider"
+                                                            rowspan="2"
+                                                            class="px-6 py-3 border border-white text-left font-medium tracking-wider"
                                                         >
                                                             Sản phẩm
                                                         </th>
                                                         <th
-                                                            class="px-6 py-3 border border-white text-left text-xs font-medium uppercase tracking-wider"
+                                                            colspan="2"
+                                                            class="px-6 py-3 border border-white text-center font-medium tracking-wider"
                                                         >
                                                             Số lượng
                                                         </th>
                                                         <th
-                                                            class="px-6 py-3 border border-white text-left text-xs font-medium uppercase tracking-wider"
+                                                            rowspan="2"
+                                                            class="px-6 py-3 border border-white text-center font-medium tracking-wider"
                                                         >
                                                             Đơn vị
                                                         </th>
                                                         <th
-                                                            class="px-6 py-3 border border-white text-left text-xs font-medium uppercase tracking-wider"
+                                                            rowspan="2"
+                                                            class="px-6 py-3 border border-white text-left font-medium tracking-wider"
                                                         >
                                                             Thành tiền
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th
+                                                            class="px-6 py-2 border border-white text-center font-medium tracking-wider"
+                                                        >
+                                                            Đặt
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-2 border border-white text-center font-medium tracking-wider"
+                                                        >
+                                                            Đã nhận
                                                         </th>
                                                     </tr>
                                                 </thead>
@@ -450,7 +539,6 @@
                                                                     .product
                                                                     .name
                                                             }}
-                                                            -
                                                             <span
                                                                 v-for="(
                                                                     attribute,
@@ -459,6 +547,7 @@
                                                                     .product_variant
                                                                     .attributes"
                                                                 :key="index"
+                                                                class="ml-1"
                                                             >
                                                                 {{
                                                                     attribute.name
@@ -468,18 +557,29 @@
                                                                 }}
                                                             </span>
                                                         </td>
+
                                                         <td
-                                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                            class="px-6 py-4 text-center whitespace-nowrap text-sm text-blue-600"
                                                         >
                                                             {{
                                                                 item.quantity_ordered
                                                             }}
                                                         </td>
+
                                                         <td
-                                                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                                            class="px-6 py-4 text-center whitespace-nowrap text-sm text-indigo-700 font-semibold"
+                                                        >
+                                                            {{
+                                                                item.quantity_received
+                                                            }}
+                                                        </td>
+
+                                                        <td
+                                                            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500"
                                                         >
                                                             {{ item.unit.name }}
                                                         </td>
+
                                                         <td
                                                             class="px-6 py-4 font-semibold whitespace-nowrap text-sm text-indigo-800"
                                                         >
@@ -511,30 +611,13 @@
                                                     )
                                                 }}</span>
                                             </div>
-                                            <div
-                                                class="flex justify-between mb-2"
-                                            >
-                                                <span class="text-gray-600"
-                                                    >Đã thanh toán:</span
-                                                >
+                                            <div class="text-right mb-2">
                                                 <span class="font-medium"
-                                                    >0</span
-                                                >
-                                            </div>
-                                            <div
-                                                class="flex justify-between border-t border-gray-200 pt-2 mt-2"
-                                            >
-                                                <span
-                                                    class="text-gray-900 font-medium"
-                                                    >Cần thanh toán:</span
-                                                >
-                                                <span
-                                                    class="text-gray-900 font-medium"
                                                     >{{
-                                                        formatCurrencyVND(
-                                                            selectedOrder.total_amount
-                                                        )
-                                                    }}</span
+                                                        selectedOrder.items
+                                                            .length
+                                                    }}
+                                                    sản phẩm</span
                                                 >
                                             </div>
                                         </div>
@@ -555,18 +638,19 @@
                             </button>
                             <button
                                 v-if="selectedOrder.order_status == 0"
+                                @click="editOrder(selectedOrder.id)"
+                                class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                <i class="fa-regular fa-circle-check"></i>
+                                Chỉnh sửa
+                            </button>
+                            <button
+                                v-if="selectedOrder.order_status == 0"
                                 type="button"
                                 class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-solid fa-ban"></i>
                                 Từ chối
-                            </button>
-                            <button
-                                @click="closeModal"
-                                type="button"
-                                class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                            >
-                                Đóng
                             </button>
                             <Waiting
                                 v-if="
@@ -594,7 +678,7 @@
 import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
-import { useForm } from "@inertiajs/vue3";
+import { Link, useForm } from "@inertiajs/vue3";
 
 const { listOrders } = defineProps({
     listOrders: {
@@ -669,8 +753,16 @@ const filteredOrders = computed(() => {
     return orders;
 });
 const approve = useForm({});
+const edit = useForm({});
 const approveOrder = (id) => {
     approve.post(route("admin.purchases.approve", id), {
+        onSuccess: () => {
+            closeModal();
+        },
+    });
+};
+const editOrder = (id) => {
+    edit.get(route("admin.purchases.edit", id), {
         onSuccess: () => {
             closeModal();
         },

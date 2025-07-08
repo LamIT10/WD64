@@ -85,7 +85,7 @@
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
                         >
-                            <i class="fas fa-arrow-down text-xs"></i>
+                            <i class="fa-solid fa-file-lines text-xl mr-1"></i>
                         </div>
                         <Link
                             :href="route('admin.receiving.index')"
@@ -93,17 +93,17 @@
                             >Phiếu nhập kho</Link
                         >
                     </div>
-               <Link
-                        :href="route('admin.sale-orders.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
+                    <a
+                        href="export.html"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
                     >
                         <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
                         >
-                            <i class="fas fa-tags text-xs"></i>
+                            <i class="fas fa-arrow-up text-xs"></i>
                         </div>
-                        <span class="text-xs">Đơn hàng xuất</span>
-                    </Link>
+                        <span class="text-xs">Xuất kho</span>
+                    </a>
                     <a
                         href="/admin/inventory-audit"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
@@ -225,7 +225,6 @@
                 </div>
             </div>
 
-
             <!-- Suppliers -->
             <div class="mb-2">
                 <button
@@ -313,7 +312,7 @@
                 </div>
             </div>
             <!-- Customers transaction -->
-            <div class="mb-1">
+            <!-- <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('customer-transaction-menu')"
@@ -360,7 +359,7 @@
                         <span class="text-xs">Công nợ nhà cung cấp</span>
                     </Link>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">
