@@ -265,8 +265,8 @@
 
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Mã vạch</label>
-                            <input v-model="form.simple_barcode" type="text"
-                                class="w-full px-3 py-2 border rounded border-gray-300" />
+                            <input v-model="form.simple_barcode" type="text" disabled
+                                class="w-full px-3 py-2 border rounded border-gray-300 bg-gray-100" />
                             <p v-if="form.errors.simple_barcode" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_barcode }}
                             </p>
@@ -421,8 +421,8 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch" disabled
+                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none bg-gray-100" />
                                     <p v-if="form.errorsByKey[item.key]?.barcode" class="text-red-500 text-sm mt-1">
                                         {{ form.errorsByKey[item.key].barcode }}
                                     </p>
@@ -1206,11 +1206,26 @@ const fetchGeneratedCode = async (isVariant = false) => {
         return '';
     }
 };
+const fetchGeneratedBarcode = async () => {
+    const url = 'http://127.0.0.1:8000/api/generate-barcode';
+
+    try {
+        const response = await axios.get(url);
+        return response.data.code || '';
+    } catch (err) {
+        console.error('Lỗi gọi API generate barcode:', err);
+        return '';
+    }
+};
 watch(variantCombinations, async (newVal) => {
     for (const item of newVal) {
         if (!item.data.code) {
             const autoCode = await fetchGeneratedCode(true);
             item.data.code = autoCode;
+        }
+        if (!item.data.barcode) {
+            const autoBarcode = await fetchGeneratedBarcode();
+            item.data.barcode = autoBarcode;
         }
     }
 });

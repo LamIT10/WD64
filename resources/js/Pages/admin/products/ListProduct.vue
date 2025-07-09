@@ -5,7 +5,7 @@
             <div
                 class="p-3 bg-white mb-4 flex justify-between items-center rounded-lg shadow-sm border border-gray-200">
                 <h5 class="text-lg text-indigo-700 font-semibold" v-if="$page.url === '/admin/products/get-inactive'">
-                    Danh sách Sản phẩm đã ẩn
+                    Danh sách Sản phẩm Đã xóa
                 </h5>
                 <h5 class="text-lg text-indigo-700 font-semibold" v-else>
                     Danh sách Sản phẩm
@@ -14,7 +14,7 @@
                     <Waiting v-if="$page.url.startsWith('/admin/products') && !isInactivePage"
                         route-name="admin.products.get_inactive" :route-params="{}"
                         :color="'bg-red-500 hover:bg-red-700 text-white'">
-                        <span>Danh Sách Đã Ẩn</span>
+                        <span>Danh Sách Đã Xóa</span>
                     </Waiting>
                     <!-- Search Toggle Button -->
                     <button @click="toggleSearchForm"
@@ -320,13 +320,13 @@
                                             <i class="fas fa-undo text-sm"></i>
                                         </button>
 
-                                        <!-- Nếu là trang active, hiện nút ConfirmModal để ẩn -->
+                                        <!-- Nếu là trang active, hiện nút ConfirmModal để xóa -->
                                         <ConfirmModal v-else :route-name="'admin.products.destroy'"
-                                            :route-params="{ id: product.id }" title="Xác nhận ẩn sản phẩm">
+                                            :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm">
                                             <template #trigger="{ openModal }">
                                                 <button @click="openModal"
                                                     class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-                                                    title="Ẩn sản phẩm">
+                                                    title="Xóa sản phẩm">
                                                     <i class="fas fa-trash text-sm"></i>
                                                 </button>
                                             </template>
