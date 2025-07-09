@@ -28,7 +28,7 @@ class InventoryAuditController extends Controller
                 ->whereNotNull('zone_id')
                 ->distinct()
                 ->pluck('zone_id');
-            $zones = \App\Models\WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+            $zones = WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
             $audit->audited_zones = $zones;
         }
 
