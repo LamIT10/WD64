@@ -59,6 +59,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::prefix('products')->as('products.')->group(function () {
         Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
         Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
+        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');

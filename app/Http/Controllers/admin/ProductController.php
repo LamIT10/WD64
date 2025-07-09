@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ProductRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -63,6 +64,11 @@ class ProductController extends Controller
     public function generateVariantCode()
     {
         $code = app(ProductRepository::class)->generateVariantCode();
+        return response()->json(['code' => $code]);
+    }
+    public function generateNumericBarcode()
+    {
+        $code = app(ProductRepository::class)->generateNumericBarcode();
         return response()->json(['code' => $code]);
     }
     /**
@@ -130,5 +136,13 @@ class ProductController extends Controller
     {
         $success = $this->productRepository->restore($id);
         return $this->returnInertia($success, 'Khổi phục sản phẩm thái thành công', 'admin.products.get_inactive');
+    }
+
+    public function printBarcode(Request $request)
+    {
+        $product = $this->productRepository->getProductWithVariants($request->product_id);
+
+        return Pdf::loadView('pdf.barcode', compact('product'))
+            ->stream("barcode-{$product->code}.pdf");
     }
 }
