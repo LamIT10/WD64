@@ -31,13 +31,6 @@
                 {{ listOrders.error }}
             </div>
 
-            <div
-                v-else-if="!filteredOrders.length"
-                class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6"
-            >
-                Không có đơn hàng nào để hiển thị.
-            </div>
-
             <div v-else>
                 <div class="mb-6">
                     <div class="bg-white rounded p-3">
@@ -157,7 +150,16 @@
                 </div>
 
                 <!-- Table -->
-                <div class="bg-white shadow overflow-hidden overflow-x-auto">
+                <div
+                    v-if="!filteredOrders.length"
+                    class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6"
+                >
+                    Không có đơn hàng nào để hiển thị.
+                </div>
+                <div
+                    v-else
+                    class="bg-white shadow overflow-hidden overflow-x-auto"
+                >
                     <table class="w-full text-left shadow-sm text-gray-500">
                         <thead
                             class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300"
@@ -276,7 +278,6 @@
                         </tbody>
                     </table>
                 </div>
-
                 <!-- Pagination -->
                 <div class="mt-4 flex justify-between items-center">
                     <div class="text-sm text-gray-700">
@@ -292,7 +293,7 @@
                             :disabled="listOrders.meta.current_page === 1"
                             class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
                         >
-                            Previous
+                            Sau
                         </button>
                         <button
                             v-for="page in Object.keys(listOrders.meta.links)"
@@ -320,7 +321,7 @@
                             "
                             class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
                         >
-                            Next
+                            Trước
                         </button>
                     </div>
                 </div>
@@ -1046,7 +1047,7 @@ const approveOrder = (id) => {
     });
 };
 
-const complete = useForm({ pay_after: 0 });
+const complete = useForm({ pay_after: 0, customer_id: null });
 const completeOrder = (id) => {
     console.log("Attempting to complete order:", {
         id,
@@ -1077,11 +1078,13 @@ const completeOrder = (id) => {
         return;
     }
     complete.pay_after = pay_after.value;
+    complete.customer_id = selectedOrder.value.customer.id;
     complete.post(route("admin.sale-orders.complete", id), {
         onSuccess: () => {
             console.log("Order completed successfully:", {
                 id,
                 pay_after: complete.pay_after,
+                customer_id: complete.customer_id,
             });
             closeModal();
             const order = listOrders.data.find((o) => o.id === id);

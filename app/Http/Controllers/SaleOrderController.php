@@ -120,9 +120,9 @@ class SaleOrderController extends Controller
     {
         $data = $request->validate([
             'pay_after' => 'required|numeric|min:0',
+            'customer_id' => 'required|exists:customers,id',
         ]);
-
-        $result = $this->saleOrdersRepository->completeOrder($id, $data['pay_after']);
+        $result = $this->saleOrdersRepository->completeOrder($id,  $data['pay_after'], $data['customer_id']);
         if (isset($result['error'])) {
             return redirect()->back()->withErrors(['pay_after' => $result['error']]);
         }
