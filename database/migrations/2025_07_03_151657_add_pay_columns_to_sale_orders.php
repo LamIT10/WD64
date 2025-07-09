@@ -24,6 +24,7 @@ class AddPayColumnsToSaleOrders extends Migration
             if (Schema::hasColumn('sale_orders', 'pay_after')) {
                 $table->dropColumn('pay_after');
             }
+            $table->enum('status', ['pending', 'shipped', 'closed'])->default('pending')->change();
         });
     }
 }

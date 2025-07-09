@@ -345,7 +345,7 @@ class SaleOrdersRepository extends BaseRepository
             ->first();
         return $inventory ? $inventory->quantity_on_hand : 0;
     }
-    public function rejectOrder($orderId)
+    public function rejectOrder($orderId, $rejectReason = null)
     {
         try {
             DB::beginTransaction();
@@ -390,9 +390,8 @@ class SaleOrdersRepository extends BaseRepository
                     Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
                 }
             }
-            $this->saleOrderItem->where('sales_order_id', $orderId)->delete();
+            $saleOrder->update(['status' => 'cancelled', 'note' => $rejectReason]);
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
-            $saleOrder->delete();
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
