@@ -312,7 +312,7 @@
                 </div>
             </div>
             <!-- Customers transaction -->
-            <div class="mb-1">
+            <!-- <div class="mb-1">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('customer-transaction-menu')"
@@ -359,7 +359,7 @@
                         <span class="text-xs">Công nợ nhà cung cấp</span>
                     </Link>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">

@@ -122,7 +122,7 @@
                                 </td>
                                 <td v-if="visibleColumns.includes('current_debt')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ formatNumber(customer.current_debt) }}
+                                    {{ formatNumber(customer.remaining_amount) }}
                                 </td>
                                 <td v-if="visibleColumns.includes('total_spent')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -169,6 +169,10 @@
                                                 <Link :href="route('admin.customers.edit', customer.id)"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                                 <i class="fas fa-edit mr-2 text-indigo-600"></i> Sửa
+                                                </Link>
+                                                <Link :href="route('admin.customers.debt-orders', customer.id)"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                                                      <i class="fa fa-credit-card-alt text-indigo-600 mr-2"  aria-hidden="true"></i> Công nợ
                                                 </Link>
                                                 <ConfirmModal :route-name="'admin.customers.destroy'" :route-params="{
                                                     id: customer.id,
@@ -235,6 +239,7 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import Toast from '../../components/Toast.vue';
 import ConfirmModal from '../../components/ConfirmModal.vue';
+import { route } from 'ziggy-js';
 
 const { customers } = defineProps({
     customers: Object,

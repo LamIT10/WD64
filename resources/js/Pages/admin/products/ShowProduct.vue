@@ -14,6 +14,11 @@
                         class="btn bg-indigo-100 text-indigo-700">
                         <i class="fas fa-arrow-left mr-1"></i> Quay lại
                     </Waiting>
+                    <button @click="printBarcode"
+                        class="btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded flex items-center gap-2">
+                        <i class="fas fa-barcode"></i>
+                        In mã vạch
+                    </button>
                 </div>
             </div>
 
@@ -143,12 +148,24 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Biến thể</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã vạch</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá bán</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thuộc tính</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tồn kho</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vị trí</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Mã Biến thể</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Mã vạch</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Giá bán</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Thuộc tính</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tồn kho</th>
+                                <th
+                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Vị trí</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -210,6 +227,10 @@ const totalQuantity = computed(() =>
 //     const d = new Date(dateStr);
 //     return d.toLocaleDateString('vi-VN');
 // };
+const printBarcode = () => {
+    const url = route('admin.products.print_barcode', { product_id: props.product.id });
+    window.open(url, '_blank');
+};
 </script>
 
 <style scoped></style>

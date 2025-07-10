@@ -57,6 +57,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     // Routes cho Products (Sản phẩm)
     Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
+        Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
+        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -98,6 +101,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulk-delete');
         Route::get('customers/import', [CustomerController::class, 'import'])->name('customers.import');
         Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
+        Route::get('/{customer}/debt-orders', [CustomerTransactionController::class, 'debtOrdersByCustomer'])
+            ->name('debt-orders');
     });
 
 
@@ -162,7 +167,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
-        Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
+        // Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
         Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
         Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');

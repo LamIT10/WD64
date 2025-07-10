@@ -439,18 +439,19 @@
                         <div class="flex justify-between">
                             <span>Tạm tính</span>
                             <div class="flex items-center space-x-4">
-                                <span>{{ totalQuantity }}</span>
                                 <span>{{ formatPrice(totalAmount) }}</span>
                             </div>
                         </div>
                         <div class="flex justify-between">
                             <span>Giảm giá</span>
-                            <span>0</span>
+                            <span>{{ customer_discount }} %</span>
                         </div>
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Tổng cộng</span>
                             <span class="text-blue-600">{{
-                                formatPrice(totalAmount)
+                                formatPrice(
+                                    totalAmount * (1 - customer_discount / 100)
+                                )
                             }}</span>
                         </div>
                     </div>
@@ -492,28 +493,6 @@
                     <div class="text-right">
                         <div class="text-sm text-gray-500">
                             {{ currentDateTime }}
-                        </div>
-                        <div class="flex items-center space-x-2 text-blue-600">
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                            </svg>
-                            <span class="text-sm">Công KiotViet</span>
                         </div>
                     </div>
                 </div>
@@ -971,7 +950,9 @@
                             </label>
                         </div>
                         <span class="text-2xl font-bold">{{
-                            formatPrice(totalAmount)
+                            formatPrice(
+                                totalAmount * (1 - customer_discount / 100)
+                            )
                         }}</span>
                     </div>
                 </div>
@@ -984,26 +965,6 @@
                 >
                     {{ form.processing ? "Đang xử lý..." : "COMPLETE" }}
                 </button>
-            </div>
-        </div>
-
-        <!-- Support Footer -->
-        <div class="fixed bottom-0 right-4 text-sm text-gray-500 mb-16">
-            <div class="flex items-center space-x-2">
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 01.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                </svg>
-                <span>Support: 1900 6522</span>
             </div>
         </div>
     </div>
@@ -1037,6 +998,7 @@ const props = defineProps({
 });
 
 // Reactive state
+const customer_discount = ref(0);
 const showProductMenu = ref(null);
 const codEnabled = ref(true);
 const packageWeight = ref(500);
@@ -1168,16 +1130,17 @@ const totalQuantity = computed(() =>
     )
 );
 
-const totalAmount = computed(() =>
-    localProducts.value.reduce(
+const totalAmount = computed(() => {
+    const subtotal = localProducts.value.reduce(
         (sum, product) =>
             sum +
             (Number(product.price) || 0) *
                 (product.quantity || 1) *
                 (product.conversionFactor || 1),
         0
-    )
-);
+    );
+    return subtotal * (1 - customer_discount.value / 100);
+});
 
 const hasQuantityError = computed(() =>
     localProducts.value.some((product) => product.quantityError)
@@ -1271,7 +1234,8 @@ const selectCustomer = async (customer) => {
     form.customer_id = customer.id;
     form.phone = customer.phone || "";
     form.recipientName = customer.name;
-
+    const customer_ranking = customer.rank_id || null;
+    customer_discount.value = customer.rank.discount_percent || 0;
     // Reset address fields
     form.province = "";
     form.district = "";

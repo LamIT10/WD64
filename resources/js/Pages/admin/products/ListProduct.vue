@@ -4,10 +4,18 @@
             <!-- Header với các bộ lọc -->
             <div
                 class="p-3 bg-white mb-4 flex justify-between items-center rounded-lg shadow-sm border border-gray-200">
-                <h5 class="text-lg text-indigo-700 font-semibold">
+                <h5 class="text-lg text-indigo-700 font-semibold" v-if="$page.url === '/admin/products/get-inactive'">
+                    Danh sách Sản phẩm Đã xóa
+                </h5>
+                <h5 class="text-lg text-indigo-700 font-semibold" v-else>
                     Danh sách Sản phẩm
                 </h5>
                 <div class="flex items-center space-x-3">
+                    <Waiting v-if="$page.url.startsWith('/admin/products') && !isInactivePage"
+                        route-name="admin.products.get_inactive" :route-params="{}"
+                        :color="'bg-red-500 hover:bg-red-700 text-white'">
+                        <span>Danh Sách Đã Xóa</span>
+                    </Waiting>
                     <!-- Search Toggle Button -->
                     <button @click="toggleSearchForm"
                         class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
@@ -15,7 +23,12 @@
                         <span>Tìm kiếm</span>
                     </button>
                     <!-- Add Product Button -->
-                    <Waiting route-name="admin.products.create" :route-params="{}"
+                    <Waiting v-if="$page.url.includes('/admin/products/get-inactive')" route-name="admin.products.index"
+                        :route-params="{}" :color="'bg-gray-200 hover:bg-gray-300 text-gray-800'">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span>Quay lại</span>
+                    </Waiting>
+                    <Waiting v-else route-name="admin.products.create" :route-params="{}"
                         :color="'bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus mr-1"></i>
                         <span>Thêm mới</span>
@@ -295,18 +308,25 @@
                                             title="Xem chi tiết">
                                         <i class="fas fa-eye text-sm"></i>
                                         </Link>
-                                        <Link :href="route('admin.products.edit', product.id)"
+                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Chỉnh sửa">
                                         <i class="fas fa-edit text-sm"></i>
 
                                         </Link>
-                                        <ConfirmModal :route-name="'admin.products.destroy'"
-                                            :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm"
-                                            :message="`Bạn có chắc chắn muốn xóa sản phẩm ${product.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
+                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"
+                                            class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+                                            title="Khôi phục">
+                                            <i class="fas fa-undo text-sm"></i>
+                                        </button>
+
+                                        <!-- Nếu là trang active, hiện nút ConfirmModal để xóa -->
+                                        <ConfirmModal v-else :route-name="'admin.products.destroy'"
+                                            :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm">
                                             <template #trigger="{ openModal }">
                                                 <button @click="openModal"
-                                                    class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors">
+                                                    class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                                    title="Xóa sản phẩm">
                                                     <i class="fas fa-trash text-sm"></i>
                                                 </button>
                                             </template>
@@ -343,7 +363,7 @@
 </template>
 
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import ConfirmModal from '../../components/ConfirmModal.vue';
 import ModalProductVariant from '../../components/ModalProductVariant.vue';
 import Waiting from '../../components/Waiting.vue';
@@ -363,17 +383,24 @@ const searchForm = useForm({
 const toggleSearchForm = () => {
     showSearchForm.value = !showSearchForm.value;
 };
+
+const page = usePage()
+
+const isInactivePage = page.url === '/admin/products/get-inactive'
+
 const submitSearch = () => {
-    searchForm.get(route('admin.products.index'), {
+    const routeName = isInactivePage ? 'admin.products.get_inactive' : 'admin.products.index'
+    searchForm.get(route(routeName), {
         preserveState: true,
         replace: true
     });
 };
 const resetSearch = () => {
-    searchForm.name = '';
-    searchForm.code = '';
-    searchForm.stock_status = '';
-    searchForm.get(route('admin.products.index'), {
+    searchForm.name = ''
+    searchForm.code = ''
+    searchForm.stock_status = ''
+    const routeName = isInactivePage ? 'admin.products.get_inactive' : 'admin.products.index'
+    searchForm.get(route(routeName), {
         preserveState: true,
         replace: true
     });
@@ -442,6 +469,17 @@ const getMaxSalePrice = (product) => {
     return isNaN(maxSale) ? 'N/A' : maxSale;
 };
 
+const restoreForm = useForm({
+    id: null
+});
+
+const restoreProduct = (id) => {
+    restoreForm.id = id;
+    restoreForm.post(route('admin.products.restore', { id }), {
+        preserveScroll: true,
+        onFinish: () => restoreForm.reset('id')
+    });
+};
 
 const getStockStatusClass = (product) => {
     const totalStock = getTotalStock(product);
