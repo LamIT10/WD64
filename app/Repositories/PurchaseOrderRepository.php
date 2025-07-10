@@ -63,6 +63,9 @@ class PurchaseOrderRepository extends BaseRepository
                 case 3:
                     $query->where('order_status', 3);
                     break;
+                case 4:
+                    $query->where('order_status', 4);
+                    break;
                 default:
                     break;
             }
@@ -234,6 +237,35 @@ class PurchaseOrderRepository extends BaseRepository
             return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
+    public function cancel($data, $id)
+    {
+        try {
+            DB::beginTransaction();
+            $purchaseOrder = $this->handleModel->find($id);
+            if (!$purchaseOrder) {
+                return $this->returnError('Đơn hàng không tồn tại');
+            }
+            if ($purchaseOrder->order_status != 0) {
+                DB::rollBack();
+                return $this->returnError('Đơn đã duyệt, không thể từ chối');
+            }
+            if ($purchaseOrder->order_status == 4) {
+                DB::rollBack();
+                return $this->returnError('Đơn hàng đang ở trạng thái từ chối');
+            }
+            $orderApproved = [];
+            $orderApproved['reason'] = $data['reason'];
+            $orderApproved['order_status'] = 4;
+            $purchaseOrder->update($orderApproved);
+
+            DB::commit();
+            return $purchaseOrder;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi phê duyệt đơn hàng: ' . $th->getMessage());
+            return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
+        }
+    }
     public function getPurchaseDetail($id)
     {
         $data = [];
@@ -257,6 +289,36 @@ class PurchaseOrderRepository extends BaseRepository
                 'items.productVariant.product' => function ($query) {
                     $query->select(['id', 'name', 'default_unit_id']);
                 },
+                'items.productVariant.product.unitConversions' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'items.productVariant.product.unitDefault' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'items.productVariant.product.unitConversions.toUnit' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'items.productVariant.attributes' => function ($query) {
+                    $query->select(['*']);
+                },
+                'items.unit' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'items.productVariant' => function ($query) {
+                    $query->select(['id', 'product_id']);
+                },
+                'items.productVariant.product' => function ($query) {
+                    $query->select(['id', 'name', 'default_unit_id']);
+                },
+                'items.productVariant.product.unitConversions' => function ($query) {
+                    $query->select(['*']);
+                },
+                'items.productVariant.product.unitConversions.fromUnit' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'items.productVariant.product.unitConversions.toUnit' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
                 'items.productVariant.attributes' => function ($query) {
                     $query->select(['*']);
                 },
@@ -266,10 +328,49 @@ class PurchaseOrderRepository extends BaseRepository
             ])->find($id);
 
         $listUser = User::select('id', 'name')->get();
+        $listProduct = Product::get();
         $data = [
             'purchase' => $purchase,
-            'user' => $listUser
+            'user' => $listUser,
+            'product' => $listProduct
         ];
         return $data;
+    }
+    public function update($data, $id){
+        try {
+            DB::beginTransaction();
+            $purchase = $this->handleModel->find($id);
+            if(!$purchase){
+                DB::rollBack();
+                return $this->returnError('Đơn hàng không tồn tại');
+            }
+            $dataUpdate = [];
+            $dataUpdate['user_id'] = $data['user_id'];
+            $dataUpdate['order_date'] = $data['order_date'];
+            $dataUpdate['total_amount'] = $data['total_amount'];
+            
+            $purchase->update($dataUpdate);
+            foreach ($data['items'] as $key => $value) {
+                $orderItem = PurchaseOrderItem::find($value['id']);
+                if(!$orderItem){
+                    DB::rollBack();
+                    return $this->returnError('Có lỗi khi cập nhật sản phẩm trong đơn');
+                }
+                $dataItemUpdate = [];
+                
+                $dataItemUpdate['quantity_ordered'] = $value['quantity_ordered'];
+                $dataItemUpdate['unit_id'] = $value['unit_id'];
+                $dataItemUpdate['unit_price'] = $value['unit_price'];
+                $dataItemUpdate['subtotal'] = $value['subtotal'];
+
+                $orderItem->update($dataItemUpdate);
+            }
+            DB::commit();
+            return $purchase;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi cập nhật đơn hàng');
+            return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
+        }
     }
 }
