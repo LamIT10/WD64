@@ -73,6 +73,14 @@
                             ></i>
                             Hoàn thành
                         </Waiting>
+                        <Waiting
+                            route-name="admin.purchases.index"
+                            :route-params="{ order_status: 4 }"
+                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                        >
+                            <i class="fa-solid fa-ban text-xl"></i>
+                            Từ chối
+                        </Waiting>
                     </nav>
                 </div>
             </div>
@@ -218,6 +226,8 @@
                                             order.order_status == 2,
                                         'text-purple-600 bg-purple-100 px-2 py-1 rounded-xl':
                                             order.order_status == 3,
+                                        'text-red-600 bg-red-100 px-2 py-1 rounded-xl':
+                                            order.order_status == 4,
                                     }"
                                 >
                                     {{
@@ -482,7 +492,7 @@
                                                 class="min-w-full divide-y divide-gray-200"
                                             >
                                                 <thead
-                                                    class="bg-indigo-500 text-white text-xs uppercase"
+                                                    class="bg-indigo-400 text-white text-xs uppercase"
                                                 >
                                                     <tr>
                                                         <th
@@ -631,6 +641,7 @@
                             <button
                                 v-if="selectedOrder.order_status == 0"
                                 @click="approveOrder(selectedOrder.id)"
+                                style="height: max-content"
                                 class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
@@ -638,20 +649,61 @@
                             </button>
                             <button
                                 v-if="selectedOrder.order_status == 0"
+                                style="height: max-content"
                                 @click="editOrder(selectedOrder.id)"
                                 class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
                                 Chỉnh sửa
                             </button>
+                            <!-- Nút Từ chối mở box lý do -->
                             <button
-                                v-if="selectedOrder.order_status == 0"
-                                type="button"
-                                class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
+                                v-if="
+                                    selectedOrder.order_status == 0 &&
+                                    !isRejecting
+                                "
+                                @click="isRejecting = true"
+                                class="w-full flex justify-center gap-1 items-center rounded-md px-4 py-2 bg-red-600 text-white hover:bg-red-800 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-solid fa-ban"></i>
                                 Từ chối
                             </button>
+
+                            <!-- Khung nhập lý do -->
+                            <div v-if="isRejecting" class="mt-4 w-[50%]">
+                                <label
+                                    class="block text-sm font-medium text-gray-700 mb-1"
+                                    for="rejectionReason"
+                                >
+                                    Lý do từ chối
+                                </label>
+                                <textarea
+                                    id="rejectionReason"
+                                    v-model="rejectionReason"
+                                    rows="4"
+                                    placeholder="Nhập lý do từ chối đơn nhập..."
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500"
+                                ></textarea>
+                                <div class="flex justify-end gap-2 mt-3">
+                                    <button
+                                        @click="
+                                            isRejecting = false;
+                                            rejectionReason = '';
+                                        "
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                                    >
+                                        Huỷ
+                                    </button>
+                                    <button
+                                        @click="cancelOrder(selectedOrder.id)"
+                                        :disabled="!rejectionReason.trim()"
+                                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                                    >
+                                        Xác nhận từ chối
+                                    </button>
+                                </div>
+                            </div>
+
                             <Waiting
                                 v-if="
                                     selectedOrder.order_status == 1 ||
@@ -685,6 +737,8 @@ const { listOrders } = defineProps({
         default: () => ({}),
     },
 });
+const isRejecting = ref(false);
+const rejectionReason = ref("");
 
 function formatCurrencyVND(value) {
     if (value == null || isNaN(value)) return "0 ₫";
@@ -753,11 +807,28 @@ const filteredOrders = computed(() => {
     return orders;
 });
 const approve = useForm({});
+const cancel = useForm({
+    reason: "",
+});
 const edit = useForm({});
 const approveOrder = (id) => {
     approve.post(route("admin.purchases.approve", id), {
         onSuccess: () => {
             closeModal();
+        },
+    });
+};
+const cancelOrder = (id) => {
+    if (!rejectionReason.value.trim()) return;
+
+    cancel.reason = rejectionReason.value;
+
+    cancel.post(route("admin.purchases.cancel", id), {
+        onSuccess: () => {
+            closeModal();
+            isRejecting.value = false;
+            rejectionReason.value = "";
+            cancel.reset();
         },
     });
 };
@@ -778,6 +849,8 @@ const getStatusText = (status) => {
             return "Nhập một phần";
         case 3:
             return "Đã hoàn thành";
+        case 4:
+            return "Đã từ chối";
         default:
             return "Không xác định";
     }

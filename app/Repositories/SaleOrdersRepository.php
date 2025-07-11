@@ -307,7 +307,7 @@ class SaleOrdersRepository extends BaseRepository
                 ]);
 
                 $inventory->update([
-                    'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
+                    'quantity_reserved' => $inventory->quantity_reserved + $quantityRequested
                 ]);
             }
 
@@ -343,9 +343,9 @@ class SaleOrdersRepository extends BaseRepository
     {
         $inventory = Inventory::where('product_variant_id', $productVariantId)
             ->first();
-        return $inventory ? $inventory->quantity_on_hand : 0;
+        return $inventory ? ($inventory->quantity_on_hand - $inventory->quantity_reserved) : 0;
     }
-    public function rejectOrder($orderId)
+    public function rejectOrder($orderId, $rejectReason = null)
     {
         try {
             DB::beginTransaction();
@@ -383,16 +383,15 @@ class SaleOrdersRepository extends BaseRepository
                     $quantityToRestore = $item->quantity_ordered * $conversionFactor;
 
                     $inventory->update([
-                        'quantity_on_hand' => $inventory->quantity_on_hand + $quantityToRestore
+                        'quantity_reserved' => $inventory->quantity_reserved - $quantityToRestore
                     ]);
                     Log::info("Khôi phục tồn kho cho sản phẩm {$fullName}: +{$quantityToRestore}");
                 } else {
                     Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
                 }
             }
-            $this->saleOrderItem->where('sales_order_id', $orderId)->delete();
+            $saleOrder->update(['status' => 'cancelled', 'note' => $rejectReason]);
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
-            $saleOrder->delete();
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
@@ -418,6 +417,41 @@ class SaleOrdersRepository extends BaseRepository
 
             if ($pay_before > $saleOrder->total_amount) {
                 throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
+            }
+            // Lấy danh sách sale_order_items
+            $items = $this->saleOrderItem->where('sales_order_id', $orderId)->get();
+
+            // Khôi phục inventory
+            foreach ($items as $item) {
+                $inventory = Inventory::where('product_variant_id', $item->product_variant_id)
+                    ->first();
+
+                if ($inventory) {
+                    // Tính số lượng khôi phục dựa trên quantity_ordered và conversion_factor
+                    $productVariant = ProductVariant::where('id', $item->product_variant_id)
+                        ->with(['product', 'attributes'])
+                        ->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    $conversionFactor = 1;
+                    $unitConversion = ProductUnitConversion::where('product_id', $productVariant->product_id)
+                        ->where('to_unit_id', $item->unit_id)
+                        ->first();
+                    if ($unitConversion) {
+                        $conversionFactor = $unitConversion->conversion_factor;
+                    }
+
+                    $quantityToRestore = $item->quantity_ordered * $conversionFactor;
+
+                    $inventory->update([
+                        'quantity_on_hand' => $inventory->quantity_on_hand - $inventory->quantity_reserved,
+                        'quantity_reserved' => $inventory->quantity_reserved - $quantityToRestore
+                    ]);
+                    Log::info("Khôi phục tồn kho cho sản phẩm {$fullName}: +{$quantityToRestore}");
+                } else {
+                    Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
+                }
             }
 
             $saleOrder->update([

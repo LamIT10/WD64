@@ -98,7 +98,10 @@ class SaleOrderController extends Controller
     }
     public function rejectSaleOrder($id)
     {
-        $result = $this->saleOrdersRepository->rejectOrder($id);
+        $rejectReason = request()->validate([
+            'reject_reason' => 'required|string|max:255',
+        ])['reject_reason'];
+        $result = $this->saleOrdersRepository->rejectOrder($id, $rejectReason);
         if (isset($result['error'])) {
             return redirect()->back()->withErrors(['error' => $result['error']]);
         }
