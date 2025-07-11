@@ -78,7 +78,7 @@ const closeModal = () => {
         isOpen.value = false;
     }
 };
-
+const emit = defineEmits(["close"]);
 const confirmAction = () => {
     if (isProcessing.value) return; 
 
@@ -90,6 +90,7 @@ const confirmAction = () => {
         onSuccess: () => {
             isProcessing.value = false;
             closeModal();
+            emit("close", props.routeParams);
         },
         onError: () => {
             isProcessing.value = false; 
