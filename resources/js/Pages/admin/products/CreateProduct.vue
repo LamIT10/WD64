@@ -93,7 +93,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -277,8 +277,8 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Mã vạch</label>
-                            <input v-model="form.simple_barcode" type="text"
-                                class="w-full px-3 py-2 border rounded border-gray-300" />
+                            <input v-model="form.simple_barcode" type="text" disabled
+                                class="w-full px-3 py-2 border rounded border-gray-300 bg-gray-100" />
                             <p v-if="form.errors.simple_barcode" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_barcode }}
                             </p>
@@ -336,14 +336,22 @@
                                     class="mb-4 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-1">
                                         <div class="flex gap-3 items-start">
-                                            <button type="button" @click="openAttributeModal(index, attrIndex)"
-                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                            <button type="button" @click="() => {
+                                                if (!attribute.attribute_id) openAttributeModal(index, attrIndex);
+                                            }" :disabled="!!attribute.attribute_id"
+                                                class="mt-1 px-3 py-1 text-sm rounded transition-all duration-150"
+                                                :class="[
+                                                    attribute.attribute_id
+                                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                                                ]">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                             <Multiselect v-model="attribute.attribute_id"
                                                 :options="getAvailableAttributes(variant, attribute.attribute_id)"
-                                                label="name" value-prop="id" placeholder="Chọn thuộc tính"
-                                                :searchable="true" :can-clear="true" />
+                                                @update:modelValue="() =>
+                                                    cleanUpEmptyAttributes()" label="name" value-prop="id"
+                                                placeholder="Chọn thuộc tính" :searchable="true" :can-clear="true" />
                                             <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]"
                                                 class="text-red-500 text-sm mt-1">
                                                 {{ form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]
@@ -406,9 +414,10 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch" :class="[
-                                        'w-full px-2 py-1 border rounded text-sm border-gray-300'
-                                    ]" />
+                                    <input v-model="item.data.barcode" type="text" disabled placeholder="Mã vạch"
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm border-gray-300 bg-gray-100'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.barcode`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.barcode`] }}
@@ -603,11 +612,12 @@ watch(hasVariant, async (newVal) => {
         }
     } else {
         const newCode = await fetchGeneratedCode(false);
+        const newBarcode = await fetchGeneratedBarcode();
         form.code = newCode;
         form.variants = [];
         form.simple_sale_price = '';
         form.simple_quantity = '';
-        form.simple_barcode = '';
+        form.simple_barcode = newBarcode;
         form.supplier_ids = [];
         form.warehouse_zone_id = null;
         form.custom_location_name = null;
@@ -925,6 +935,10 @@ onMounted(async () => {
         const newCode = await fetchGeneratedCode(false);
         form.code = newCode;
     }
+    if (!hasVariant.value && !form.simple_barcode) {
+        const newBarcode = await fetchGeneratedBarcode();
+        form.simple_barcode = newBarcode;
+    }
 });
 const showAttributeModal = ref(false);
 const showAttributeValueModal = ref(false);
@@ -933,6 +947,9 @@ const currentVariantIndex = ref(null);
 const currentAttrIndex = ref(null);
 
 const openAttributeModal = (variantIndex, attrIndex) => {
+    const currentAttr = form.variants[variantIndex].attributes[attrIndex];
+    if (currentAttr.attribute_id) return;
+
     currentVariantIndex.value = variantIndex;
     currentAttrIndex.value = attrIndex;
     showAttributeModal.value = true;
@@ -1016,14 +1033,38 @@ const fetchGeneratedCode = async (isVariant = false) => {
         return '';
     }
 };
+const fetchGeneratedBarcode = async () => {
+    const url = 'http://127.0.0.1:8000/api/generate-barcode';
+
+    try {
+        const response = await axios.get(url);
+        return response.data.code || '';
+    } catch (err) {
+        console.error('Lỗi gọi API generate barcode:', err);
+        return '';
+    }
+};
 watch(variantCombinations, async (newVal) => {
     for (const item of newVal) {
         if (!item.data.code) {
             const autoCode = await fetchGeneratedCode(true);
             item.data.code = autoCode;
         }
+        if (!item.data.barcode) {
+            const autoBarcode = await fetchGeneratedBarcode();
+            item.data.barcode = autoBarcode;
+        }
     }
 });
+const cleanUpEmptyAttributes = () => {
+    form.variants.forEach((variant) => {
+        variant.attributes.forEach((attr) => {
+            if (!attr.attribute_id) {
+                attr.attribute_value_ids = [];
+            }
+        });
+    });
+};
 </script>
 
 <style scoped>

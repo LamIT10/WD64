@@ -28,7 +28,7 @@ class SupplierController extends Controller
     }
     public function getList(Request $request)
     {
-        $suppliers = $this->supplierRepository->getList($request);
+        $suppliers = $this->supplierRepository->getList($request->all());
         return inertia('admin/Supplier/List', [
             'suppliers' => $suppliers
         ]);
@@ -66,12 +66,12 @@ class SupplierController extends Controller
     {
 
         $data = $this->supplierRepository->getProductBySupplierId($id);
-        if(isset($data['status']) && $data['status'] == false){
-            
+        if (isset($data['status']) && $data['status'] == false) {
+
             return $this->returnInertia($data, '', '');
         }
         return Inertia::render('admin/Supplier/Products', [
-            'supplier' =>$data['supplier'],
+            'supplier' => $data['supplier'],
             'products' => $data['products'],
             'listVariants' => $data['listVariants'],
         ]);
@@ -92,16 +92,23 @@ class SupplierController extends Controller
 
     public function storeSupplierProducts(StoreSupplierProductRequest $request, $supplierId)
     {
-      $data = $request->validated();
-      $data['supplier_id'] = $supplierId;
-      $supplierProduct = $this->supplierRepository->handleCreateSupplierProduct($data);
-      return $this->returnInertia($supplierProduct, "Thêm biến thể cho nhà cung cấp thành công", 'admin.suppliers.products', ['id' => $supplierId]);
+        $data = $request->validated();
+        $data['supplier_id'] = $supplierId;
+        $supplierProduct = $this->supplierRepository->handleCreateSupplierProduct($data);
+        return $this->returnInertia($supplierProduct, "Thêm biến thể cho nhà cung cấp thành công", 'admin.suppliers.products', ['id' => $supplierId]);
+    }
+    public function destroySupplierProducts($id, $variantId)
+    {
+        //   $data = $$variantId->validated();
+        $data = [];
+        $data['id'] = $id;
+        $data['variantId'] = $variantId;
+        $supplierProduct = $this->supplierRepository->handleDeleteProductVariant($data);
+        return $this->returnInertia($supplierProduct, "Xoá biến thể của nhà cung cấp thành công", 'admin.suppliers.products',['id' => $data['id']]);
     }
     public function getVariantsByProductId($supplierId, $productId)
     {
         $variants = $this->productRepository->getProductVariantsById($productId);
-
-
         // Kiểm tra xem sản phẩm có được liên kết với nhà cung cấp không
         $variantIds = collect($variants)->pluck('variant_id')->unique()->toArray();
         $isLinked = SupplierProductVariant::where('supplier_id', $supplierId)

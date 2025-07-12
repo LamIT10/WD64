@@ -18,8 +18,7 @@ class TransactionStatusConstant{
     public const shipped = [
         'text' => "Đã giao cho đơn vị vận chuyển",
         'value' => "shipped",
-    ];
-    public const delivered = [
+    ];     public const delivered = [
         'text' => "Giao thành công",
         'value' => "delivered",
     ];

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Repositories\CategoryRepository;
 use App\Repositories\ProductRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -33,6 +34,18 @@ class ProductController extends Controller
             'filters' => $filters,
         ]);
     }
+    public function getInactive(Request $request)
+    {
+        $filters = $request->only(['name', 'code', 'stock_status']);
+
+        $products = $this->productRepository->getInactive($filters, 20);
+
+
+        return Inertia::render('admin/products/ListProduct', [
+            'products' => $products,
+            'filters' => $filters,
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -51,6 +64,11 @@ class ProductController extends Controller
     public function generateVariantCode()
     {
         $code = app(ProductRepository::class)->generateVariantCode();
+        return response()->json(['code' => $code]);
+    }
+    public function generateNumericBarcode()
+    {
+        $code = app(ProductRepository::class)->generateNumericBarcode();
         return response()->json(['code' => $code]);
     }
     /**
@@ -111,6 +129,20 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $success = $this->productRepository->destroy($id);
-        return $this->returnInertia($success, 'Xóa sản phẩm thành công', 'admin.products.index');
+        return $this->returnInertia($success, 'Ẩn sản phẩm thành công', 'admin.products.index');
+    }
+
+    public function restore(string $id)
+    {
+        $success = $this->productRepository->restore($id);
+        return $this->returnInertia($success, 'Khổi phục sản phẩm thái thành công', 'admin.products.get_inactive');
+    }
+
+    public function printBarcode(Request $request)
+    {
+        $product = $this->productRepository->getProductWithVariants($request->product_id);
+
+        return Pdf::loadView('pdf.barcode', compact('product'))
+            ->stream("barcode-{$product->code}.pdf");
     }
 }

@@ -12,16 +12,23 @@ use Illuminate\Support\Facades\Log;
 class SupplierRepository extends BaseRepository
 {
     protected $purchaseOrderRepository;
-    public function __construct(Supplier $supplier)
+    private $supplierProductVariant;
+    public function __construct(Supplier $supplier, SupplierProductVariant $supplierProductVariantModel)
     {
         $this->handleModel = $supplier;
+        $this->supplierProductVariant = $supplierProductVariantModel;
     }
 
     public function getList($data)
     {
+        $perpage = $data['perPage'] ?? 20;
         $query = $this->handleModel::with([
             'purchaseOrders' => function ($query) {
-                return $query->select(['id', 'supplier_id']);
+                return $query->select(['id', 'supplier_id'])->whereHas('goodReceipts', function ($subQuery) {
+                    $subQuery->select('id')->whereHas('supplierTransaction', function ($subSubQuery) {
+                        $subSubQuery->select('id')->where('paid_amount', '>', 0);
+                    });
+                });
             },
             'purchaseOrders.goodReceipts' => function ($query) {
                 return $query->select(['id', 'purchase_order_id', 'code', 'receipt_date', 'note', 'status', 'approved_by', 'created_by', 'total_amount']);
@@ -30,8 +37,8 @@ class SupplierRepository extends BaseRepository
                 return $query->select(['id', 'goods_receipt_id', 'paid_amount', 'transaction_date', 'credit_due_date', 'description']);
             },
         ])
-        ->select(['id', 'name', 'contact_person', 'phone', 'email', 'address', 'current_debt'])
-        ->selectRaw('
+            ->select(['id', 'name', 'contact_person', 'phone', 'email', 'address', 'current_debt'])
+            ->selectRaw('
             (SELECT SUM(total_amount) 
              FROM good_receipts 
              WHERE good_receipts.purchase_order_id IN (
@@ -46,6 +53,31 @@ class SupplierRepository extends BaseRepository
                  )
              )), 0) as debt
         ');
+
+        if (isset($data['supplierName']) && $data['supplierName'] != "") {
+            $query->where('name', 'like', '%' . $data['supplierName'] . '%');
+        };
+        if (isset($data['contactPerson']) && $data['contactPerson'] != "") {
+            $query->where('contact_person', 'like', '%' . $data['contactPerson'] . '%');
+        };
+        if (isset($data['phone']) && $data['phone'] != "") {
+            $query->where('phone', 'like', '%' . $data['phone'] . '%');
+        };
+        if (isset($data['email']) && $data['email'] != "") {
+            $query->where('email', 'like', '%' . $data['email'] . '%');
+        };
+        if (isset($data['address']) && $data['address'] != "") {
+            $query->where('address', 'like', '%' . $data['address'] . '%');
+        };
+        if (isset($data['fromPayment']) && $data['fromPayment'] != 0) {
+            $query->having('debt', '>=', $data['fromPayment']);
+        }
+
+        if (isset($data['toPayment']) && $data['toPayment'] != 0) {
+            $query->having('debt', '<=', $data['toPayment']);
+        }
+
+
         $filters = [
             'search' => [
                 'name' => $data->search ?? "",
@@ -53,7 +85,7 @@ class SupplierRepository extends BaseRepository
         ];
         $query = $this->filterData($query, $filters);
         $query->orderBy('id', 'desc');
-        return $query->paginate(20);;
+        return $query->paginate($perpage);;
     }
     public function createData($data = [])
     {
@@ -117,6 +149,23 @@ class SupplierRepository extends BaseRepository
             return $this->returnError("Lỗi khi xoá nhà cung cấp");
         }
     }
+    public function handleDeleteProductVariant($data)
+    {
+        try {
+            DB::beginTransaction();
+            $supplierProductVariant = $this->supplierProductVariant::where('product_variant_id', $data['variantId'])->where('supplier_id', $data['id'])->first();
+            if (!$supplierProductVariant) {
+                return $this->returnError("Không tìm thấy nhà biến thể sản phẩm của nhà cung cấp");
+            }
+            $supplierProductVariant->delete();
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Lỗi khi xoá nhà cung cấp, " . $th->getMessage());
+            return $this->returnError("Lỗi khi xoá biến thể");
+        }
+    }
     public function listSelectSupplier()
     {
         $data = $this->handleModel->select(['id', 'name'])->get()->toArray();
@@ -156,11 +205,14 @@ class SupplierRepository extends BaseRepository
                     'name' => $product->name,
                     'category' => $product->category ? ['name' => $product->category->name] : null,
                     'product_variants' => $variants->map(function ($variant) {
+                        $product_variant_supplier = SupplierProductVariant::where('product_variant_id', $variant->id)->first();
                         $att = [
                             'att_value' => "",
                             "att" => "",
+                            'cost_price' => $product_variant_supplier ? $product_variant_supplier->cost_price : 0,
+                            'min_order_quantity' => $product_variant_supplier->min_order_quantity  != null ? $product_variant_supplier->min_order_quantity : 0,
+                            'id' => $product_variant_supplier->id,
                         ];
-
                         foreach ($variant->attributes as $key => $item) {
                             $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
                             $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;

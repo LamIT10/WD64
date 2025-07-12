@@ -103,7 +103,7 @@ watch(() => props.debt, (newDebt) => {
 
 const handleSubmit = () => {
   router.post(route('admin.customer-transaction.add', props.debt.id), form, {
-    onSuccess: () => emit('closeModal'),
+    onSuccess: () =>emit('closeModal'),
     onError: () => alert('Có lỗi xảy ra khi thêm giao dịch.'),
   })
 }
