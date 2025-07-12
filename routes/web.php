@@ -163,6 +163,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
         Route::get('{id}/products', [SupplierController::class, 'getProducts'])->name('products');
         Route::post('/{supplierId}/products', [SupplierController::class, 'storeSupplierProducts'])->name('products.store');
+        Route::delete('{id}/products/{variantId}/destroy', [SupplierController::class, 'destroySupplierProducts'])->name('products.destroy');
         Route::get('/{supplierId}/products/{productId}/variants', [SupplierController::class, 'getVariantsByProductId'])->name('variants');
     });
 
