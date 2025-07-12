@@ -98,103 +98,86 @@ class InventoryController extends Controller
 
     public function statistics(Request $request)
     {
-        $month = $request->input('month'); // định dạng YYYY-MM
-
-        if (!$month) {
-            $month = date('Y-m');
+        // Nhận nhiều tháng, ví dụ: 2025-02,2025-03,2025-04
+        $months = $request->input('months');
+        if ($months) {
+            $months = is_array($months) ? $months : explode(',', $months);
+            sort($months); // Đảm bảo theo thứ tự thời gian
+            $firstMonth = $months[0];
+            $lastMonth = $months[count($months) - 1];
+        } else {
+            $month = $request->input('month') ?: date('Y-m');
+            $months = [$month];
+            $firstMonth = $lastMonth = $month;
         }
 
-        $startDate = Carbon::parse($month . '-01')->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
+        // Tính khoảng thời gian tổng hợp
+        $startDate = Carbon::parse($firstMonth . '-01')->startOfMonth();
+        $endDate = Carbon::parse($lastMonth . '-01')->endOfMonth();
 
         $variants = ProductVariant::with(['product.defaultUnit'])->get();
 
-        $data = $variants->map(function ($variant) use ($startDate, $endDate) {
-            // Lấy tồn cuối kỳ (số lượng hiện tại trong kho)
+        $data = $variants->map(function ($variant) use ($startDate, $endDate, $months) {
+            // 1. Số lượng ban đầu khi tạo sản phẩm (tính ngược)
             $inventory = Inventory::where('product_variant_id', $variant->id)->first();
             $currentQty = $inventory ? $inventory->quantity_on_hand : 0;
-            Log::info('Total: ' . $currentQty);
+            $totalReceivedAll = GoodReceiptItem::where('product_variant_id', $variant->id)->sum('quantity_received');
+            $totalShippedAll = $variant->salesOrderItems()->sum('quantity_shipped');
+            $openingStock = $currentQty - $totalReceivedAll + $totalShippedAll;
 
-            // Tổng nhập từ trước tới nay (không dùng cho tồn đầu kỳ, chỉ dùng tính initial_qty)
-            $totalReceivedAll = GoodReceiptItem::where('product_variant_id', $variant->id)
+            // 2. Tổng nhập đến hết tháng trước đầu tiên
+            $beforeStart = $startDate->copy()->startOfMonth();
+            $totalReceivedBefore = GoodReceiptItem::where('product_variant_id', $variant->id)
+                ->whereHas('goodReceipt', fn($q) => $q->where('receipt_date', '<', $beforeStart))
                 ->sum('quantity_received');
-            // Log thử giá trị để kiểm tra
-            Log::info('Variant ID: ' . $variant->id . ', Total Received All: ' . $totalReceivedAll);
-
-            // Tổng xuất từ trước tới nay (không dùng cho tồn đầu kỳ, chỉ dùng tính initial_qty)
-            $totalShippedAll = $variant->salesOrderItems()
+            $totalShippedBefore = $variant->salesOrderItems()
+                ->whereHas('salesOrder', fn($q) => $q->where('order_date', '<', $beforeStart))
                 ->sum('quantity_shipped');
+            $openingQty = $openingStock + $totalReceivedBefore - $totalShippedBefore;
 
-            Log::info('Variant ID: ' . $variant->id . ', Total Received All: ' . $totalShippedAll);
-
-            // Số lượng ban đầu khi tạo sp (dùng cho mục đích thống kê)
-            $initialQty = $currentQty + $totalShippedAll - $totalReceivedAll;
-
-            // return [
-            //     'id' => $variant->id,
-            //     'code' => $variant->code,
-            //     'name' => $variant->product->name,
-            //     'unit' => $variant->product->defaultUnit->name ?? '',
-            //     'current_qty' => $currentQty, // Tồn cuối kỳ
-            //     'totalReceivedAll' => $totalReceivedAll, // Tồn cuối kỳ
-            //     'totalShippedAll' => $totalShippedAll, // Tồn cuối kỳ
-            //     'initial_qty' => $initialQty, // Số lượng ban đầu khi tạo sp
-            // ];
-
-            // Nhập trong kỳ (từ đầu tháng đến cuối tháng)
-            $receivedInPeriod = GoodReceiptItem::where('product_variant_id', $variant->id)
+            // 3. Tổng nhập trong các tháng đã chọn
+            $receivedQty = GoodReceiptItem::where('product_variant_id', $variant->id)
                 ->whereHas('goodReceipt', fn($q) => $q->whereBetween('receipt_date', [$startDate, $endDate]))
-                ->get(['quantity_received', 'unit_price', 'subtotal']);
-            $receivedQty = $receivedInPeriod->sum('quantity_received');
-            $receivedTotal = $receivedInPeriod->sum('subtotal');
+                ->sum('quantity_received');
+            $receivedTotal = GoodReceiptItem::where('product_variant_id', $variant->id)
+                ->whereHas('goodReceipt', fn($q) => $q->whereBetween('receipt_date', [$startDate, $endDate]))
+                ->sum('subtotal');
 
-            // Xuất trong kỳ (từ đầu tháng đến cuối tháng)
-            $shippedInPeriod = $variant->salesOrderItems()
-                ->whereHas('salesOrder', fn($query) => $query->whereBetween('order_date', [$startDate, $endDate]))
-                ->get(['quantity_shipped', 'unit_price']);
-            $shippedQty = $shippedInPeriod->sum('quantity_shipped');
-            $shippedTotal = $shippedInPeriod->sum(fn($item) => $item->quantity_shipped * $item->unit_price);
+            // 4. Tổng xuất trong các tháng đã chọn
+            $shippedQty = $variant->salesOrderItems()
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
+                ->sum('quantity_shipped');
+            $shippedTotal = $variant->salesOrderItems()
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
+                ->sum(DB::raw('quantity_shipped * unit_price'));
 
-            // Tính tồn đầu kỳ: Tồn cuối - Nhập trong kỳ + Xuất trong kỳ
-            // Giải thích:
-            // - Tồn cuối là số lượng hiện tại trong kho
-            // - Nhập trong kỳ đã cộng vào kho, nên phải trừ ra để quay về đầu kỳ
-            // - Xuất trong kỳ đã trừ khỏi kho, nên phải cộng lại để quay về đầu kỳ
+            // 5. Tồn cuối kỳ = tồn đầu kỳ + nhập - xuất
+            $closingQty = $openingQty + $receivedQty - $shippedQty;
 
-            $openingQty = $currentQty - $receivedQty + $shippedQty;
-
-            // Đơn giá xuất (có thể lấy giá trung bình, ở đây lấy sale_price)
             $unitPrice = $variant->sale_price ?? 0;
-
-            // Giá trị tồn đầu kỳ = tồn đầu kỳ * đơn giá
             $openingValue = $openingQty * $unitPrice;
-
-            // Giá trị tồn cuối kỳ = tồn cuối kỳ * đơn giá
-            $closingQty = $currentQty + $receivedQty - $shippedQty;
             $closingValue = $closingQty * $unitPrice;
 
             return [
-                'month' => $startDate->format('Y-m'),
+                'months' => $months,
                 'item_code' => $variant->code,
                 'item_name' => $variant->product->name,
                 'unit' => $variant->product->defaultUnit->name ?? '',
-                'currentQty' => $currentQty,      // Tồn đầu kỳ
-                'opening_qty' => $openingQty,      // Tồn đầu kỳ
-                'opening_value' => $openingValue,  // Giá trị tồn đầu kỳ
-                'received_qty' => $receivedQty,    // Nhập trong kỳ
-                'received_value' => $receivedTotal,// Thành tiền nhập trong kỳ
-                'shipped_qty' => $shippedQty,      // Xuất trong kỳ
-                'shipped_value' => $shippedTotal,  // Thành tiền xuất trong kỳ
-                'closing_qty' => $closingQty,      // Tồn cuối kỳ
-                'closing_value' => $closingValue,  // Giá trị tồn cuối kỳ
-                'unit_price' => $unitPrice,        // Đơn giá xuất
-                'initial_qty' => $initialQty,      // Số lượng ban đầu khi tạo sp
+                'opening_qty' => $openingQty,
+                'opening_value' => $openingValue,
+                'received_qty' => $receivedQty,
+                'received_value' => $receivedTotal,
+                'shipped_qty' => $shippedQty,
+                'shipped_value' => $shippedTotal,
+                'closing_qty' => $closingQty,
+                'closing_value' => $closingValue,
+                'unit_price' => $unitPrice,
             ];
         });
 
         return response()->json([
             'data' => $data,
-            'month' => $month,
+            'months' => $months,
         ]);
     }
 }
