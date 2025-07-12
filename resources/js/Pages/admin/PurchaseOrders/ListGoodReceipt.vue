@@ -101,7 +101,7 @@
                                         }}
                                     </td>
                                     <td class="px-4 py-2">
-                                        {{ goodReceipt.receipt_date }}
+                                        {{ formatDate(goodReceipt.receipt_date) }}
                                     </td>
                                     <td class="px-4 py-2">
                                         {{ goodReceipt.create_by.name }}
@@ -139,7 +139,7 @@
                     </div>
 
                     <div
-                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                        class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full"
                     >
                         <div class="bg-white px-4 p-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
@@ -210,7 +210,7 @@
                                                     class="px-4 py-2 text-gray-900"
                                                 >
                                                     {{
-                                                        selectedGoodReceipt.receipt_date
+                                                        formatDate(selectedGoodReceipt.receipt_date)
                                                     }}
                                                 </td>
                                             </tr>
@@ -375,6 +375,13 @@ function formatCurrencyVND(value) {
         currency: "VND",
         minimumFractionDigits: 0,
     }).format(value);
+}
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 }
 </script>
 <style lang="css" scoped>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PurchaseOrderRequest;
 use App\Repositories\PurchaseOrderRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,8 +36,9 @@ class PurchaseOrderController extends Controller
         $data = $this->handleRepository->getSupplierAndUnit($idVariant);
         return response()->json($data);
     }
-    public function store(Request $request)
+    public function store(PurchaseOrderRequest $request)
     {
+        dd($request->all());
         $dataCreate = $request->all();
         $success = $this->handleRepository->store($dataCreate);
         return $this->returnInertia($success, 'Tạo đơn hàng thành công', 'admin.purchases.index');

@@ -476,6 +476,18 @@
                                                     }}</span>
                                                 </td>
                                             </tr>
+                                            <tr v-if="selectedOrder.order_status == 4">
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                >
+                                                    Lý do từ chối
+                                                </td>
+                                                <td>
+                                                    <span class="ml-4 font-bold text-red-600">
+                                                        {{selectedOrder.reason}}
+                                                    </span>
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
 
