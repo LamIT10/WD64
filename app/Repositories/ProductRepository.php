@@ -36,6 +36,7 @@ class ProductRepository extends BaseRepository
             'images',
             'productVariants' => function ($query) {
                 $query->with([
+                    'product',
                     'attributes',
                     'inventory',
                     'inventoryLocations.zone',

@@ -179,17 +179,28 @@ const getStockBreakdown = (variant) => {
 
 const getVariantStockStatus = (variant) => {
     const stock = getVariantStock(variant);
-    return stock === 0 ? 'Hết hàng' : 'Còn hàng';
+    const minStock = variant.product?.min_stock ?? 0;
+    
+    if (stock === 0) return 'Hết hàng';
+    if (stock <= minStock) return 'Sắp hết hàng!';
+    return 'Bình thường';
 };
 
 const getVariantStockClass = (variant) => {
     const stock = getVariantStock(variant);
+    const minStock = variant.product?.min_stock ?? 0;
 
     if (stock === 0) {
         return {
             textClass: 'text-red-600',
             bgClass: 'bg-red-100 text-red-700',
             dotClass: 'bg-red-400'
+        };
+    } else if (stock <= minStock) {
+        return {
+            textClass: 'text-yellow-600',
+            bgClass: 'bg-yellow-100 text-yellow-700',
+            dotClass: 'bg-yellow-400'
         };
     } else {
         return {
