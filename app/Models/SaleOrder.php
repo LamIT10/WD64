@@ -19,6 +19,7 @@ class SaleOrder extends Model
         'credit_due_date',
         'pay_before',
         'pay_after',
+        'note'
     ];
 
     protected $casts = [

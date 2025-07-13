@@ -98,7 +98,10 @@ class SaleOrderController extends Controller
     }
     public function rejectSaleOrder($id)
     {
-        $result = $this->saleOrdersRepository->rejectOrder($id);
+        $rejectReason = request()->validate([
+            'reject_reason' => 'required|string|max:255',
+        ])['reject_reason'];
+        $result = $this->saleOrdersRepository->rejectOrder($id, $rejectReason);
         if (isset($result['error'])) {
             return redirect()->back()->withErrors(['error' => $result['error']]);
         }
@@ -120,17 +123,18 @@ class SaleOrderController extends Controller
     {
         $data = $request->validate([
             'pay_after' => 'required|numeric|min:0',
+            'customer_id' => 'required|exists:customers,id',
         ]);
-
-        $result = $this->saleOrdersRepository->completeOrder($id, $data['pay_after']);
+        $result = $this->saleOrdersRepository->completeOrder($id,  $data['pay_after'], $data['customer_id']);
         if (isset($result['error'])) {
             return redirect()->back()->withErrors(['pay_after' => $result['error']]);
         }
 
         return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
     }
-    public function export()
+    public function export(Request $request)
+
     {
-        return Excel::download(new SaleOrderExport(), 'Đơn_Xuất.xlsx');
+        return Excel::download(new SaleOrderExport($request->only(['status', 'customer', 'order_date'])), 'Đơn_Xuất.xlsx');
     }
 }

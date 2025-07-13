@@ -38,6 +38,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     Route::resource('inventory-audit', InventoryAuditController::class);
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('inventory/statistics', [InventoryController::class, 'statistics'])->name('inventory.statistics');
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store');
     Route::get('inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
@@ -57,6 +58,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     // Routes cho Products (Sản phẩm)
     Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
+        Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
+        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -160,6 +164,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
         Route::get('{id}/products', [SupplierController::class, 'getProducts'])->name('products');
         Route::post('/{supplierId}/products', [SupplierController::class, 'storeSupplierProducts'])->name('products.store');
+        Route::delete('{id}/products/{variantId}/destroy', [SupplierController::class, 'destroySupplierProducts'])->name('products.destroy');
         Route::get('/{supplierId}/products/{productId}/variants', [SupplierController::class, 'getVariantsByProductId'])->name('variants');
     });
 
@@ -183,7 +188,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
+        Route::post('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
         Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
+        Route::post('{id}/cancel', [PurchaseOrderController::class, 'cancel'])->name('cancel');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->name('index');

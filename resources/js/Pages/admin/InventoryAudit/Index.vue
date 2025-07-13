@@ -65,7 +65,7 @@
         <table class="min-w-full text-xs border-separate border-spacing-0">
           <thead class="bg-gradient-to-r from-indigo-50 to-indigo-100">
             <tr>
-              <th v-if="visibleColumns.includes('id')"
+              <th v-if="visibleColumns.includes('code')"
                 class="px-2 py-2 text-left font-bold text-indigo-800 border-b border-indigo-50 uppercase tracking-wide"
                 title="Mã phiếu kiểm kho">
                 Mã
@@ -111,14 +111,14 @@
             <tr v-for="item in props.audits.data" :key="item.id"
               class="hover:bg-indigo-50 transition cursor-pointer group"
               @click="$inertia.visit(route('admin.audits.show', item.id))"
-              :title="`Xem chi tiết phiếu kiểm kho #${item.id}`">
-              <td v-if="visibleColumns.includes('id')"
+              :title="`Xem chi tiết phiếu kiểm kho #${item.code}`">
+              <td v-if="visibleColumns.includes('code')"
                 class="px-2 py-2 font-bold text-indigo-900 border-b border-indigo-50 align-middle"
-                :title="`Mã phiếu: #${item.id}`">
+                :title="`Mã phiếu: #${item.code}`">
                 <span class="inline-flex items-center gap-1">
                   <span
                     class="bg-indigo-600 text-white rounded px-2 py-0.5 text-xs font-bold shadow group-hover:bg-indigo-700 transition">
-                    #{{ item.id }}
+                    #{{ item.code }}
                   </span>
                 </span>
               </td>
@@ -285,13 +285,14 @@ const props = defineProps({
   audits: Object,
   status: String,
 });
+console.log(props.audits?.data)
 
 // Tab control
 const activeTab = ref(props.status || 'in_stock');
 
 // Column options and labels
 const columnOptions = [
-  'id',
+  'code',
   'location',
   'audit_date',
   'created_at',
@@ -302,7 +303,7 @@ const columnOptions = [
 ];
 
 const columnLabels = {
-  id: 'Mã phi',
+  code: 'Mã phiếu',
   location: 'Khu vực',
   audit_date: 'Ngày kiểm',
   created_at: 'Ngày lưu',
@@ -416,7 +417,7 @@ watch(() => page.props.flash, (flash) => {
 const exportToExcel = () => {
   // Lấy dữ liệu hiện tại (props.audits.data)
   const data = (props.audits?.data || []).map(item => ({
-    'ID': item.id,
+    'ID': item.code,
     'Khu vực': (item.audited_zones || []).join(', '),
     'Ngày kiểm': item.audit_date,
     'Ngày lưu': item.created_at,

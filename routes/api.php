@@ -12,7 +12,9 @@ Route::patch('/inventory-audit/update', [InventoryAuditController::class, 'updat
 Route::get('/inventory/stats', [InventoryController::class, 'stats']);
 Route::patch('/inventory/update', [InventoryController::class, 'update']);
 Route::get('/inventory-audit/{id}', [InventoryAuditController::class, 'show']);
+Route::get('inventory/statistics', [InventoryController::class, 'statistics']);
 
 });
 Route::get('/generate-code', [ProductController::class, 'generateCode'])->name('generate-code');
 Route::get('/generate-variant-code', [ProductController::class, 'generateVariantCode'])->name('generate-variant-code');
+Route::get('/generate-barcode', [ProductController::class, 'generateNumericBarcode'])->name('generate-barcode');

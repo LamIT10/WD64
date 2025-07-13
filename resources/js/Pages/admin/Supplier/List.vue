@@ -10,8 +10,8 @@
                         <div class="relative">
                             <select @change="handlePerpage()" v-model="formPerpage.perPage"
                                 class="appearance-none bg-indigo-50 border border-indigo-200 text-indigo-700 py-2 px-4 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors cursor-pointer">
-                                <option value="1">20</option>
-                                <option value="1">50</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
                                 <option value="75">75</option>
                                 <option value="100">100</option>
                             </select>
