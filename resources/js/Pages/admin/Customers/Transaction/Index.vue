@@ -67,7 +67,7 @@
                     {{ debt.status }}
                   </span>
                 </td> 
-                <td class="px-6 py-4 whitespace-nowrap text-xs text-red-600 font-semibold font-sans">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold font-sans">
                   {{ formatCurrency(debt.remaining_amount)}}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate font-sans">

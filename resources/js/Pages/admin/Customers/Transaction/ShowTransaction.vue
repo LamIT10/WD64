@@ -9,7 +9,7 @@
                             Công nợ khách hàng: {{ debt.customer.name }}
                         </h1>
                         <p class="text-indigo-800 font-medium">
-                            Mã đơn hàng: DH{{ debt.id.toString().padStart(4, '0') }}
+                            Mã đơn hàng: DH-{{ debt.id.toString().padStart(4, '0') }}
                         </p>
                     </div>
                     <div class="flex items-center space-x-2">
