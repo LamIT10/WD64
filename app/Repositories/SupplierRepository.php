@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Log;
 class SupplierRepository extends BaseRepository
 {
     protected $purchaseOrderRepository;
-    public function __construct(Supplier $supplier)
+    private $supplierProductVariant;
+    public function __construct(Supplier $supplier, SupplierProductVariant $supplierProductVariantModel)
     {
         $this->handleModel = $supplier;
+        $this->supplierProductVariant = $supplierProductVariantModel;
     }
 
     public function getList($data)
@@ -147,6 +149,23 @@ class SupplierRepository extends BaseRepository
             return $this->returnError("Lỗi khi xoá nhà cung cấp");
         }
     }
+    public function handleDeleteProductVariant($data)
+    {
+        try {
+            DB::beginTransaction();
+            $supplierProductVariant = $this->supplierProductVariant::where('product_variant_id', $data['variantId'])->where('supplier_id', $data['id'])->first();
+            if (!$supplierProductVariant) {
+                return $this->returnError("Không tìm thấy nhà biến thể sản phẩm của nhà cung cấp");
+            }
+            $supplierProductVariant->delete();
+            DB::commit();
+            return true;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Lỗi khi xoá nhà cung cấp, " . $th->getMessage());
+            return $this->returnError("Lỗi khi xoá biến thể");
+        }
+    }
     public function listSelectSupplier()
     {
         $data = $this->handleModel->select(['id', 'name'])->get()->toArray();
@@ -186,11 +205,14 @@ class SupplierRepository extends BaseRepository
                     'name' => $product->name,
                     'category' => $product->category ? ['name' => $product->category->name] : null,
                     'product_variants' => $variants->map(function ($variant) {
+                        $product_variant_supplier = SupplierProductVariant::where('product_variant_id', $variant->id)->first();
                         $att = [
                             'att_value' => "",
                             "att" => "",
+                            'cost_price' => $product_variant_supplier ? $product_variant_supplier->cost_price : 0,
+                            'min_order_quantity' => $product_variant_supplier->min_order_quantity  != null ? $product_variant_supplier->min_order_quantity : 0,
+                            'id' => $product_variant_supplier->id,
                         ];
-
                         foreach ($variant->attributes as $key => $item) {
                             $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
                             $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;

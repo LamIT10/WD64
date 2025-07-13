@@ -82,9 +82,9 @@
                   </template>
                 </td>
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_reserved }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_in_transit }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand ?? 0 }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_reserved ?? 0 }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_in_transit ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
