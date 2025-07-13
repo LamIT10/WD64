@@ -132,8 +132,9 @@ class SaleOrderController extends Controller
 
         return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
     }
-    public function export()
+    public function export(Request $request)
+
     {
-        return Excel::download(new SaleOrderExport(), 'Đơn_Xuất.xlsx');
+        return Excel::download(new SaleOrderExport($request->only(['status', 'customer', 'order_date'])), 'Đơn_Xuất.xlsx');
     }
 }

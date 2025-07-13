@@ -20,20 +20,30 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class SaleOrderExport implements WithMultipleSheets
 {
+    protected $filters;
+    public function __construct($filters = [])
+    {
+        $this->filters = $filters;
+    }
     public function sheets(): array
     {
         return [
-            'Sale Orders' => new SaleOrdersSheet(),
-            'Order Items' => new OrderItemsSheet(),
+            'Sale Orders' => new SaleOrdersSheet($this->filters),
+            'Order Items' => new OrderItemsSheet($this->filters),
         ];
     }
 }
 
 class SaleOrdersSheet implements FromCollection, WithHeadings, WithEvents
 {
+    protected $filters;
+    public function __construct($filters = [])
+    {
+        $this->filters = $filters;
+    }
     public function collection()
     {
-        $rawData = DB::table('sale_orders')
+        $query = DB::table('sale_orders')
             ->select(
                 'sale_orders.id',
                 'customers.name as customer_name',
@@ -42,8 +52,17 @@ class SaleOrdersSheet implements FromCollection, WithHeadings, WithEvents
                 'sale_orders.total_amount',
                 'sale_orders.address_delivery'
             )
-            ->leftJoin('customers', 'sale_orders.customer_id', '=', 'customers.id')
-            ->get();
+            ->leftJoin('customers', 'sale_orders.customer_id', '=', 'customers.id');
+        if (!empty($this->filters['status'])) {
+            $query->where('sale_orders.status', $this->filters['status']);
+        }
+        if (!empty($this->filters['customer'])) {
+            $query->where('customers.name', 'like', '%' . $this->filters['customer'] . '%');
+        }
+        if (!empty($this->filters['order_date'])) {
+            $query->whereDate('sale_orders.created_at', $this->filters['order_date']);
+        }
+        $rawData = $query->get();
 
         return $rawData->map(function ($order) {
             // Tính tổng số lượng từ items
@@ -170,9 +189,14 @@ class SaleOrdersSheet implements FromCollection, WithHeadings, WithEvents
 
 class OrderItemsSheet implements FromCollection, WithHeadings, WithEvents
 {
+    protected $filters;
+    public function __construct($filters = [])
+    {
+        $this->filters = $filters;
+    }
     public function collection()
     {
-        $items = SaleOrderItem::select(
+        $query = SaleOrderItem::select(
             'sale_order_items.id',
             'sale_order_items.sales_order_id',
             'products.name as product_name',
@@ -187,16 +211,26 @@ class OrderItemsSheet implements FromCollection, WithHeadings, WithEvents
             ->leftJoin('units', 'sale_order_items.unit_id', '=', 'units.id')
             ->leftJoin('product_variant_attributes', 'product_variants.id', '=', 'product_variant_attributes.variant_id')
             ->leftJoin('attribute_values', 'product_variant_attributes.attribute_value_id', '=', 'attribute_values.id')
-            ->groupBy(
-                'sale_order_items.id',
-                'sale_order_items.sales_order_id',
-                'products.name',
-                'sale_order_items.quantity_ordered',
-                'units.name',
-                'sale_order_items.unit_price',
-                'sale_order_items.subtotal'
-            )
-            ->get();
+            ->leftJoin('sale_orders', 'sale_order_items.sales_order_id', '=', 'sale_orders.id');
+        if (!empty($this->filters['status'])) {
+            $query->where('sale_orders.status', $this->filters['status']);
+        }
+        if (!empty($this->filters['customer'])) {
+            $query->where('customers.name', 'like', '%' . $this->filters['customer'] . '%');
+        }
+        if (!empty($this->filters['order_date'])) {
+            $query->whereDate('sale_orders.created_at', $this->filters['order_date']);
+        }
+        $query->groupBy(
+            'sale_order_items.id',
+            'sale_order_items.sales_order_id',
+            'products.name',
+            'sale_order_items.quantity_ordered',
+            'units.name',
+            'sale_order_items.unit_price',
+            'sale_order_items.subtotal'
+        );
+        $items = $query->get();
 
         // Trả về array đúng thứ tự headings
         return $items->map(function ($item) {

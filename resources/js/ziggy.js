@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://127.0.0.1:8000/",
+    url: "http://localhost",
     port: null,
     defaults: {},
     routes: {
@@ -10,6 +10,10 @@ const Ziggy = {
         "generate-code": { uri: "api/generate-code", methods: ["GET", "HEAD"] },
         "generate-variant-code": {
             uri: "api/generate-variant-code",
+            methods: ["GET", "HEAD"],
+        },
+        "generate-barcode": {
+            uri: "api/generate-barcode",
             methods: ["GET", "HEAD"],
         },
         "admin.dashboard": { uri: "admin/dashboard", methods: ["GET", "HEAD"] },
@@ -105,6 +109,19 @@ const Ziggy = {
             uri: "admin/categories/{category}",
             methods: ["DELETE"],
             parameters: ["category"],
+        },
+        "admin.products.get_inactive": {
+            uri: "admin/products/get-inactive",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.products.restore": {
+            uri: "admin/products/restore/{id}",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.products.print_barcode": {
+            uri: "admin/products/print-barcode",
+            methods: ["GET", "HEAD"],
         },
         "admin.products.index": {
             uri: "admin/products",
@@ -417,9 +434,19 @@ const Ziggy = {
             uri: "admin/purchases/store",
             methods: ["POST"],
         },
+        "admin.purchases.update": {
+            uri: "admin/purchases/{id}/update",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
         "admin.purchases.edit": {
             uri: "admin/purchases/{id}/edit",
             methods: ["GET", "HEAD"],
+            parameters: ["id"],
+        },
+        "admin.purchases.cancel": {
+            uri: "admin/purchases/{id}/cancel",
+            methods: ["POST"],
             parameters: ["id"],
         },
         "admin.receiving.index": {
