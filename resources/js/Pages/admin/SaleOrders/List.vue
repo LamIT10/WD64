@@ -330,6 +330,7 @@
                 <div
                     v-if="isModalOpen"
                     class="fixed inset-0 overflow-y-auto z-50"
+                    @click="clearErrorMessage"
                 >
                     <div
                         class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
@@ -880,6 +881,7 @@ import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
 import { useForm, router } from "@inertiajs/vue3";
+import { clearCanvas } from "chart.js/helpers";
 
 const { listOrders } = defineProps({
     listOrders: {
@@ -1034,6 +1036,11 @@ function validatePayAfter() {
     }
     errorMessage.value = "";
 }
+function clearErrorMessage() {
+    if (errorMessage.value) {
+        errorMessage.value = "";
+    }
+}
 
 function changePage(page) {
     if (page < 1 || page > listOrders.meta.last_page) return;
@@ -1053,7 +1060,11 @@ function changePage(page) {
 }
 
 function exportExcel() {
-    window.location.href = route("admin.sale-orders.export");
+    window.location.href = route("admin.sale-orders.export", {
+        status: filters.value.status,
+        customer: filters.value.customer,
+        order_date: filters.value.order_date,
+    });
 }
 
 const filteredOrders = computed(() => {
