@@ -38,7 +38,6 @@ class PurchaseOrderController extends Controller
     }
     public function store(PurchaseOrderRequest $request)
     {
-        dd($request->all());
         $dataCreate = $request->all();
         $success = $this->handleRepository->store($dataCreate);
         return $this->returnInertia($success, 'Tạo đơn hàng thành công', 'admin.purchases.index');
