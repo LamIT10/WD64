@@ -93,7 +93,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                            }}</span>
+                                        }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -209,7 +209,8 @@
                                         <label class="block text-sm font-medium text-indigo-700">
                                             Hệ số quy đổi
                                         </label>
-                                        <input v-model="conversion.conversion_factor" type="number" step="0.0001"
+                                        <input v-model="conversion.conversion_factor"
+                                            v-format-number="conversion.conversion_factor" type="text" step="0.0001"
                                             min="0.0001" placeholder="Ví dụ: 10"
                                             class="mt-1 w-full px-4 py-2 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300" />
                                         <p v-if="form.errors[`unit_conversions.${index}.conversion_factor`]"
@@ -261,7 +262,7 @@
                     <div v-if="!hasVariant" class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Giá bán</label>
-                            <input v-model="form.simple_sale_price" type="number" min="0"
+                            <input v-model="form.simple_sale_price" v-format-number="form.simple_sale_price" type="text" placeholder="Giá bán"
                                 class="w-full px-3 py-2 border rounded border-gray-300" />
                             <p v-if="form.errors.simple_sale_price" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_sale_price }}
@@ -269,7 +270,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Số lượng tồn kho ban đầu</label>
-                            <input v-model="form.simple_quantity" type="number" min="0"
+                            <input v-model="form.simple_quantity" v-format-number="form.simple_quantity" type="text" placeholder="Số lượng tồn kho"
                                 class="w-full px-3 py-2 border rounded border-gray-300" />
                             <p v-if="form.errors.simple_quantity" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_quantity }}
@@ -424,8 +425,8 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model.number="item.data.sale_price" type="number" placeholder="Giá bán"
-                                        :class="[
+                                    <input v-model="item.data.sale_price" v-format-number="item.data.sale_price"
+                                        type="text" placeholder="Giá bán" :class="[
                                             'w-full px-2 py-1 border rounded text-sm border-gray-300'
                                         ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.sale_price`]"
@@ -434,7 +435,8 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model.number="item.data.quantity_on_hand" type="number"
+                                    <input v-model="item.data.quantity_on_hand"
+                                        v-format-number="item.data.quantity_on_hand" type="text"
                                         placeholder="Tồn kho ban đầu" :class="[
                                             'w-full px-2 py-1 border rounded text-sm border-gray-300'
                                         ]" />
@@ -549,6 +551,40 @@ const form = useForm({
     deleted_combination_keys: [],
 });
 
+const vFormatNumber = {
+    mounted(el) {
+        const formatNumber = (value) => {
+            if (!value) return '';
+            const cleanValue = value.toString().replace(/[^0-9.]/g, '');
+            const parts = cleanValue.split('.');
+            let integerPart = parts[0];
+            const decimalPart = parts[1] ? `.${parts[1]}` : '';
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return integerPart + decimalPart;
+        };
+
+        const handleInput = (event) => {
+            const selectionStart = el.selectionStart;
+            const rawValue = el.value.replace(/,/g, '');
+            const formatted = formatNumber(rawValue);
+
+            if (el.value === formatted) return;
+
+            el.value = formatted;
+
+            el.setSelectionRange(selectionStart, selectionStart);
+
+            el.dispatchEvent(new Event('change'));
+        };
+
+        el.addEventListener('input', handleInput);
+
+        // Format ban đầu
+        el.value = formatNumber(el.value);
+    }
+};
+
+
 // Image Handling
 const maxImages = 4;
 const imagePreviews = ref([]);
@@ -604,7 +640,7 @@ watch(hasVariant, async (newVal) => {
             form.variants = [{
                 code: '',
                 barcode: '',
-                sale_price: 0,
+                sale_price: '',
                 unit_id: '',
                 attributes: [{ attribute_id: '', attribute_value_ids: [] }],
                 combinationData: {},
@@ -677,8 +713,8 @@ const variantCombinations = computed(() => {
                 variant.combinationData[key] = {
                     code: '',
                     barcode: '',
-                    sale_price: 0,
-                    quantity_on_hand: 0,
+                    sale_price: '',
+                    quantity_on_hand: '',
                     supplier_ids: [],
                     warehouse_zone_id: null,
                     custom_location_name: '',
