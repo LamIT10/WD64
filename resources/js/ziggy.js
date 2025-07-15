@@ -1,5 +1,5 @@
 const Ziggy = {
-    url: "http://localhost",
+    url: "http://127.0.0.1:8000",
     port: null,
     defaults: {},
     routes: {
@@ -51,6 +51,10 @@ const Ziggy = {
         },
         "admin.inventory.index": {
             uri: "admin/inventory",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.inventory.statistics": {
+            uri: "admin/inventory/statistics",
             methods: ["GET", "HEAD"],
         },
         "admin.inventory.create": {
@@ -364,6 +368,11 @@ const Ziggy = {
             methods: ["POST"],
             parameters: ["supplierId"],
         },
+        "admin.suppliers.products.destroy": {
+            uri: "admin/suppliers/{id}/products/{variantId}/destroy",
+            methods: ["DELETE"],
+            parameters: ["id", "variantId"],
+        },
         "admin.suppliers.variants": {
             uri: "admin/suppliers/{supplierId}/products/{productId}/variants",
             methods: ["GET", "HEAD"],
@@ -384,18 +393,10 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["order"],
         },
-        "admin.supplier-transaction.index": {
-            uri: "admin/supplier-transaction",
-            methods: ["GET", "HEAD"],
-        },
         "admin.supplier-transaction.show": {
             uri: "admin/supplier-transaction/{id}/show",
             methods: ["GET", "HEAD"],
             parameters: ["id"],
-        },
-        "admin.supplier-transaction.store": {
-            uri: "admin/supplier-transaction/store",
-            methods: ["POST"],
         },
         "admin.supplier-transaction.update": {
             uri: "admin/supplier-transaction/{id}/update",
@@ -476,6 +477,10 @@ const Ziggy = {
         "admin.receiving.store": {
             uri: "admin/receiving/store",
             methods: ["POST"],
+        },
+        "admin.reports.index": {
+            uri: "admin/reports",
+            methods: ["GET", "HEAD"],
         },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {

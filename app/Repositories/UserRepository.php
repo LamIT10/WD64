@@ -206,8 +206,14 @@ class UserRepository extends BaseRepository
     public function getDataRenderEdit(int $id)
     {
         $query = $this->handleModel::where("id", $id)->firstOrFail();
-        $query['role'] = array_values($query->roles->pluck("id")->toArray());
-
+        $query['role'] = array_values($query->roles->where('name', "!=", 'admin')->pluck("id")->toArray());
+        $idAdmin = Role::where('name', 'admin')->first()->id;
+        if(in_array($idAdmin, $query['role'])) {
+            $query['role'] = array_filter($query['role'], function($role) use ($idAdmin) {
+                return $role !== $idAdmin;
+            });
+        }
+        // dd($query->toArray());
         return $query;
     }
 }

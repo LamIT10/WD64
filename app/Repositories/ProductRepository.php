@@ -86,7 +86,9 @@ class ProductRepository extends BaseRepository
                 }
             });
         }
-
+        if(isset($filters['get_count']) && $filters['get_count'] == true) {
+            return $query->count();
+        }
         return $query->paginate($perPage)->withQueryString();
     }
 
