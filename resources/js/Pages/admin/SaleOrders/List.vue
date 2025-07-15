@@ -1,5 +1,6 @@
 <template>
     <AppLayout>
+        <ToastClient ref="toastRef" class="z-100" />
         <div class="px-4 py-6">
             <div
                 class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center"
@@ -846,6 +847,14 @@
                                     Xác nhận hoàn thành
                                 </button>
                                 <button
+                                    @click="generateQR(selectedOrder.id)"
+                                    type="button"
+                                    class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    <i class="fa-solid fa-qrcode"></i>
+                                    Thanh toán OR Code
+                                </button>
+                                <button
                                     @click="closeModal"
                                     type="button"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
@@ -871,6 +880,51 @@
                         </div>
                     </div>
                 </div>
+                <div
+                    v-if="qrData"
+                    class="fixed inset-0 overflow-y-auto z-60"
+                    @click="closeQRModal"
+                >
+                    <div
+                        class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20"
+                    >
+                        <div
+                            class="fixed inset-0 z-50 transition-opacity"
+                            aria-hidden="true"
+                        >
+                            <div
+                                class="absolute inset-0 bg-gray-900 opacity-75"
+                            ></div>
+                        </div>
+                        <div
+                            class="inline-block relative z-60 pb-[20px] bg-white rounded-lg overflow-hidden shadow-xl transform transition-all"
+                            @click.stop
+                        >
+                            <div
+                                class="p-6 text-center flex flex-wrap justify-center items-center w-[500px] h-[700px] gap-[5px]"
+                            >
+                                <img
+                                    :src="qrData"
+                                    alt="QR Code"
+                                    class="w-full h-[85%] mx-auto mb-4"
+                                />
+                                <button
+                                    @click="closeQRModal"
+                                    type="button"
+                                    class="w-full text-center h-[8%] inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                                >
+                                    Đóng
+                                </button>
+                                <button
+                                    @click="copyQR()"
+                                    class="w-full mb-[20px] text-center h-[8%] inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-6 py-2 bg-blue-600 text-base font-medium text-[#fff] hover:bg-blue-700"
+                                >
+                                    Copy QR code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AppLayout>
@@ -880,9 +934,10 @@
 import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
+import ToastClient from "../../components/ToastClient.vue";
 import { useForm, router } from "@inertiajs/vue3";
 import { clearCanvas } from "chart.js/helpers";
-
+import axios from "axios";
 const { listOrders } = defineProps({
     listOrders: {
         default: () => ({
@@ -899,6 +954,7 @@ const { listOrders } = defineProps({
 });
 
 console.log("listOrders:", listOrders);
+const showQRModal = ref(false);
 const showRejectModal = ref(false);
 const rejectReason = ref("");
 const selectedOrderId = ref(null);
@@ -1275,6 +1331,72 @@ const getStatusText = (status) => {
             return "Không xác định";
     }
 };
+const qrData = ref(null);
+const isLoadingQR = ref(false);
+const qrError = ref(null);
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+};
+
+const generateQR = async (orderId) => {
+    isLoadingQR.value = true;
+    qrError.value = null;
+    try {
+        const response = await axios.post(
+            route("admin.sale-orders.generate-qr", orderId),
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN"),
+                },
+            }
+        );
+        qrData.value = response.data.qrDataURL;
+        console.log("QR created:", response.data);
+    } catch (error) {
+        qrError.value = error.response?.data?.error || "Lỗi không xác định";
+        console.error("Lỗi tạo QR:", qrError.value);
+    } finally {
+        isLoadingQR.value = false;
+    }
+};
+const toastRef = ref();
+
+function toastSuccess(message) {
+    toastRef.value?.triggerToast(message, "success");
+}
+function toastError(message) {
+    toastRef.value?.triggerToast(message, "error");
+}
+const copyQR = async () => {
+    if (!qrData.value) {
+        console.error("Không có QR để copy");
+        qrError.value = "Không có QR để copy";
+        return;
+    }
+
+    try {
+        const response = await fetch(qrData.value);
+        const blob = await response.blob();
+
+        await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob }),
+        ]);
+        console.log("toastRef:", toastRef.value);
+        toastSuccess("Copy QR thành công");
+        console.log("QR copied to clipboard successfully");
+    } catch (error) {
+        console.error("Lỗi copy QR:", error);
+        qrError.value =
+            "Copy không hỗ trợ trên browser này. Vui lòng screenshot QR.";
+    }
+};
+function closeQRModal() {
+    qrData.value = null;
+}
 </script>
 
 <style scoped>

@@ -27,6 +27,7 @@ use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\WarehouseZoneController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -87,6 +88,13 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/', [UnitController::class, 'index'])->name('index');
         Route::post('/', [UnitController::class, 'store'])->name('store');
         Route::delete('/{id}', [UnitController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix('warehouse-zones')->as('warehouse-zones.')->group(function () {
+        Route::get('/', [WarehouseZoneController::class, 'index'])->name('index');
+        Route::post('/', [WarehouseZoneController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [WarehouseZoneController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [WarehouseZoneController::class, 'update'])->name('update');
+        Route::delete('/{id}', [WarehouseZoneController::class, 'destroy'])->name('destroy');
     });
 
     Route::group([
@@ -233,6 +241,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
         Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
+        Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
     });
 });
 

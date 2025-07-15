@@ -18,6 +18,6 @@ class WarehouseZone extends Model
 
     public function locations()
     {
-        return $this->hasMany(InventoryLocation::class);
+        return $this->hasMany(InventoryLocation::class, 'zone_id', 'id');
     }
 }
