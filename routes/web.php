@@ -26,6 +26,7 @@ use App\Http\Controllers\RankController;
 use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -183,9 +184,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
-        Route::get('/', [SupplierTransactionController::class, 'index'])->name('index')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_INDEX);
         Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
-        Route::post('store', [SupplierTransactionController::class, 'store'])->name('store');
         Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
         Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
     });
@@ -207,6 +206,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
+    });
+    Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
     });
 
 
