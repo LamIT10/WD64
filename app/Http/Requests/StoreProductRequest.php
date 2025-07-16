@@ -50,8 +50,8 @@ class StoreProductRequest extends FormRequest
             $rules['variants.*.combinations.*.warehouse_zone_id'] = ['nullable', 'exists:warehouse_zones,id'];
             $rules['variants.*.combinations.*.custom_location_name'] = ['nullable', 'string', 'max:100'];
         } else {
-            $rules['simple_sale_price'] = ['required', 'numeric', 'min:0'];
-            $rules['simple_quantity'] = ['required', 'numeric', 'min:0'];
+            $rules['simple_sale_price'] = ['nullable', 'numeric', 'min:0'];
+            $rules['simple_quantity'] = ['nullable', 'numeric', 'min:0'];
             $rules['simple_barcode'] = ['nullable', 'string', 'max:100'];
             $rules['supplier_ids'] = ['required', 'array'];
             $rules['supplier_ids.*'] = ['exists:suppliers,id'];
@@ -93,10 +93,8 @@ class StoreProductRequest extends FormRequest
             'unit_conversions.*.conversion_factor.required_with' => 'Vui lòng nhập hệ số quy đổi.',
             'unit_conversions.*.conversion_factor.numeric' => 'Hệ số quy đổi phải là số.',
             'unit_conversions.*.conversion_factor.min' => 'Hệ số quy đổi phải lớn hơn 0.',
-            'simple_sale_price.required' => 'Vui lòng nhập giá bán.',
             'simple_sale_price.numeric' => 'Giá bán phải là số.',
             'simple_sale_price.min' => 'Giá bán không được âm.',
-            'simple_quantity.required' => 'Vui lòng nhập tồn kho.',
             'simple_quantity.numeric' => 'Tồn kho phải là số.',
             'simple_quantity.min' => 'Tồn kho không được âm.',
             'simple_barcode.string' => 'Mã vạch phải là chuỗi.',

@@ -14,6 +14,7 @@ use App\Models\SaleOrderItem;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 
@@ -549,5 +550,35 @@ class SaleOrdersRepository extends BaseRepository
             Log::error('Lỗi khi xác nhận hoàn thành đơn hàng: ' . $th->getMessage());
             return ['error' => "Lỗi khi xác nhận hoàn thành đơn hàng: {$th->getMessage()}"];
         }
+    }
+    public function generateQR($id, Request $request)
+    {
+        $order = $this->handleModel->findOrFail($id);
+        $amount = $order->total_amount;
+        $body = [
+            'accountNo' => env('VIETQR_ACCOUNT_NO'),
+            'accountName' => env('VIETQR_ACCOUNT_NAME'),
+            'acqId' => env('VIETQR_ACQ_ID'),
+            'amount' => $amount,
+            'addInfo' => "Thanh toan don hang {$order->id}",
+            'format' => 'text',
+            'template' => env('VIETQR_TEMPLATE', 'compact'),
+        ];
+        $response = Http::withHeaders([
+            'x-client-id' => env('VIETQR_CLIENT_ID'),
+            'x-api-key' => env('VIETQR_API_KEY'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.vietqr.io/v2/generate', $body);
+        if ($response->failed()) {
+            Log::error('VietQR HTTP failed', ['status' => $response->status(), 'body' => $response->body()]);
+            return response()->json(['error' => 'Lỗi tạo QR: ' . $response->body()], 500);
+        }
+
+        $data = $response->json();
+        Log::info('VietQR Response Data', ['data' => $data]);  // Log mảng $data để xem có key 'data' không
+        return [
+            'qrDataURL' => $data['data']['qrDataURL'],
+            'qrCode' => $data['data']['qrCode'],
+        ];
     }
 }

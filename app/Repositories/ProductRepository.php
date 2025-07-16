@@ -36,6 +36,7 @@ class ProductRepository extends BaseRepository
             'images',
             'productVariants' => function ($query) {
                 $query->with([
+                    'product',
                     'attributes',
                     'inventory',
                     'inventoryLocations.zone',
@@ -86,7 +87,9 @@ class ProductRepository extends BaseRepository
                 }
             });
         }
-
+        if(isset($filters['get_count']) && $filters['get_count'] == true) {
+            return $query->count();
+        }
         return $query->paginate($perPage)->withQueryString();
     }
 
