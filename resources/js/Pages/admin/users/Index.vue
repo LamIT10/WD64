@@ -29,7 +29,7 @@
                         <button @click="toggleDropdown"
                             class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 flex items-center gap-2">
                             <i class="fas fa-columns"></i>
-                            Cột hiển thị
+                            Hiển thị
                         </button>
 
                         <div v-if="showColumnDropdown"
@@ -523,7 +523,7 @@ onMounted(() => {
         const cleanUrl = params.toString()
             ? `${window.location.pathname}?${params.toString()}`
             : window.location.pathname;
-        window.location.replace(cleanUrl); // ← chuyển URL, reload lại ngay
+        window.location.replace(cleanUrl); //  chuyển URL, reload lại ngay
     }
 });
 //ava mac dinh
@@ -586,5 +586,9 @@ const getBgColor = (name) => {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+input[type="checkbox"] {
+  accent-color: #4f46e5;
 }
 </style>
