@@ -1,14 +1,17 @@
 <template>
   <AppLayout>
     <div class="bg-gradient-to-b from-gray-100 to-gray-50 p-6 min-h-screen font-sans">
+
       <!-- Header -->
-      <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-start border border-gray-200">
+      <div class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200">
         <div>
-          
-          <h5 class="text-lg text-indigo-700 font-semibold mb-2 font-sans"><i class="fas fa-receipt mr-3 text-indigo-500 text-lg"></i>
-             Công nợ của khách hàng: <span class="text-indigo-700">{{ customer.name }}</span>
+          <h5 class="text-lg text-indigo-700 font-semibold mb-2 font-sans">
+            <i class="fas fa-receipt mr-3 text-indigo-500 text-lg"></i>
+            Công nợ của khách hàng: <span class="text-indigo-700">{{ customer.name }}</span>
           </h5>
         </div>
+
+        <!-- Bên phải: Search + Quay lại -->
         <div class="flex items-center space-x-3">
           <!-- Search bar -->
           <div class="relative">
@@ -16,8 +19,19 @@
               class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all font-sans" />
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
+
+          <!-- Bọc nút quay lại để ép height và align -->
+          <div class="h-10 flex items-center">
+            <Waiting route-name="admin.customers.index" :route-params="{}"
+              :color="'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'"
+              class="text-sm font-medium px-4 py-2 rounded-md min-w-[120px] justify-center">
+              <i class="fas fa-arrow-left mr-2"></i> Quay lại
+            </Waiting>
+          </div>
         </div>
       </div>
+
+
 
       <!-- Table -->
       <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-fade-in">
@@ -25,28 +39,22 @@
           <table class="w-full text-left rtl:text-right text-gray-500 dark:text-gray-400 font-sans">
             <thead class="text-xs text-gray-700 bg-indigo-50">
               <tr>
-                <th
-                  scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Mã đơn hàng
                 </th>
-                <th
-                 scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Trạng thái
                 </th>
-                <th
-                   scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Tông tiền nợ
                 </th>
-                <th
-                  scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Hạn công nợ
                 </th>
-                <th
-                    scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Ngày giao dịch
                 </th>
-                <th
-                    scope="col" class="px-6 py-3 font-semibold">
+                <th scope="col" class="px-6 py-3 font-semibold">
                   Điều chỉnh
                 </th>
               </tr>
@@ -57,18 +65,19 @@
                 <td class="px-6 py-4 whitespace-nowrap text-left text-sm text-gray-500 font-medium font-sans">
                   {{ 'DH-' + debt.id.toString().padStart(4, '0') }}
                 </td>
-              
-                <td class="px-6 py-4 whitespace-nowrap ">
+
+                <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="{
-                    'bg-green-100 text-green-700': debt.status === 'Đã thanh toán',
-                    'bg-yellow-100 text-yellow-700': debt.status === 'Chưa thanh toán',
-                    'bg-red-100 text-red-700': debt.status === 'Đã quá hạn',
+                    'bg-green-100 text-green-800': debt.status === 'Đã thanh toán',
+                    'bg-blue-100 text-blue-800': debt.status === 'Chưa thanh toán',
+                    'bg-orange-100 text-orange-800': debt.status === 'Sắp quá hạn',
+                    'bg-red-100 text-red-800': debt.status === 'Đã quá hạn',
                   }" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold font-sans">
                     {{ debt.status }}
                   </span>
-                </td> 
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold font-sans">
-                  {{ formatCurrency(debt.remaining_amount)}}
+                  {{ formatCurrency(debt.remaining_amount) }}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate font-sans">
                   {{
@@ -77,19 +86,21 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-sans">
                   {{ debt.transaction_date ? formatDate(debt.transaction_date) : 'Chưa giao dịch' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="relative inline-block text-left">
+                <td class="px-6 py-4 whitespace-nowrap ">
+                  <div class="relative inline-block ">
                     <div>
                       <button v-if="debt.status !== 'Đã thanh toán'" @click.stop="toggleDropdown(debt.id)" type="button"
                         class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                          viewBox="0 0 4 15">
                           <path
-                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
                         </svg>
                       </button>
                     </div>
                     <!-- Dropdown menu -->
-                    <transition v-if="debt.status !== 'Đã thanh toán'" enter-active-class="transition ease-out duration-100"
+                    <transition v-if="debt.status !== 'Đã thanh toán'"
+                      enter-active-class="transition ease-out duration-100"
                       enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
                       leave-active-class="transition ease-in duration-75"
                       leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
@@ -155,6 +166,7 @@ import AppLayout from '../../Layouts/AppLayout.vue';
 import PaymentEditModal from './PaymentEditModal.vue';
 import DueDateEditModal from './DueDateEditModal.vue'
 import { route } from 'ziggy-js';
+import Waiting from '../../../components/Waiting.vue';
 const props = defineProps({
   customerTransaction: Object,
   customer: Object,
@@ -202,13 +214,10 @@ const formatDate = (dateStr) => {
 };
 
 const handleClick = (debtId) => {
-  // Kiểm tra xem có văn bản nào đang được chọn không
   if (window.getSelection().toString()) {
-    // Nếu có, ngừng hành động click (không chuyển hướng)
     return;
   }
-  // Nếu không có văn bản đang được chọn, chuyển hướng
-  router.visit(route('admin.customer-transaction.show', debtId));
+router.visit(route('admin.customer-transaction.show', { order: debtId }) + `?customer_id=${props.customer?.id ?? ''}`)
 };
 </script>
 

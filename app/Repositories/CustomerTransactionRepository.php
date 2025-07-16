@@ -19,11 +19,9 @@ class CustomerTransactionRepository extends BaseRepository
             ->orderBy('created_at', 'desc')
             ->get();
 
-            
-    if ($customerId) {
-        $orders = $orders->where('customer_id', $customerId);
-    }
-
+        if ($customerId) {
+            $orders = $orders->where('customer_id', $customerId);
+        }
 
         $filtered = $orders->map(function ($order) {
             $total = $order->total_amount ?? 0;
@@ -34,15 +32,25 @@ class CustomerTransactionRepository extends BaseRepository
 
             $remaining = $total - $paid;
 
-            if ($remaining <= 0) return null;
+
+            if ($remaining <= 0 && $order->transactions->isEmpty()) {
+                return null;
+            }
 
             $dueDate = $order->credit_due_date
                 ? Carbon::parse($order->credit_due_date)
                 : Carbon::parse($order->created_at)->addDays(30);
 
-            $isOverdue = $dueDate->lt(now());
 
-            $status = $isOverdue ? 'Đã quá hạn' : 'Chưa thanh toán';
+            $daysUntilDue = $dueDate->diffInDays(now(), false);
+
+
+            $status = match (true) {
+                $remaining <= 0 => 'Đã thanh toán',
+                $daysUntilDue > 0 => 'Đã quá hạn',
+                $daysUntilDue >= -7 => 'Sắp quá hạn',
+                default => 'Chưa thanh toán',
+            };
 
             return [
                 'id' => $order->id,
@@ -70,6 +78,7 @@ class CustomerTransactionRepository extends BaseRepository
 
         return $paginated;
     }
+
 
 
     public function getDebtSummaryByCustomer()
@@ -128,86 +137,93 @@ class CustomerTransactionRepository extends BaseRepository
         })->filter()->sortByDesc('remaining_amount')->values();
     }
 
-    public function getDebtDetailByOrderId($orderId)
-    {
-        $order = SaleOrder::with([
-            'customer',
-            'transactions',
-            'items.productVariant.product',
-            'items.unit'
-        ])->findOrFail($orderId);
+  public function getDebtDetailByOrderId($orderId)
+{
+    $order = SaleOrder::with([
+        'customer',
+        'transactions',
+        'items' => function ($query) {
+            $query->with([
+                'productVariant' => function ($q) {
+                    $q->with([
+                        'product:id,name',
+                        'attributes:id,name'
+                    ]);
+                },
+                'unit:id,name'
+            ]);
+        }
+    ])->findOrFail($orderId);
 
-        $total = $order->total_amount;
+    $total = $order->total_amount;
 
-        $paid = ($order->pay_before ?? 0) + ($order->pay_after ?? 0)
-            + $order->transactions->where('type', 'payment')->sum('paid_amount');
+    $paid = ($order->pay_before ?? 0) + ($order->pay_after ?? 0)
+        + $order->transactions->where('type', 'payment')->sum('paid_amount');
 
-        $remaining = $total - $paid;
+    $remaining = $total - $paid;
 
-        $dueDate = $order->credit_due_date
-            ? Carbon::parse($order->credit_due_date)
-            : Carbon::parse($order->created_at)->addDays(30);
+    $dueDate = $order->credit_due_date
+        ? Carbon::parse($order->credit_due_date)
+        : Carbon::parse($order->created_at)->addDays(30);
 
-        $isOverdue = $dueDate->lt(now()) && $remaining > 0;
+    $daysUntilDue = $dueDate->diffInDays(now(), false);
 
-        $status = match (true) {
-            $remaining <= 0 => 'Đã thanh toán',
-            $isOverdue => 'Đã quá hạn',
-            default => 'Chưa thanh toán',
-        };
+    $status = match (true) {
+        $remaining <= 0 => 'Đã thanh toán',
+        $daysUntilDue > 0 => 'Đã quá hạn',
+        $daysUntilDue >= -7 => 'Sắp quá hạn',
+        default => 'Chưa thanh toán',
+    };
 
+    return [
+        'id' => $order->id,
+        'order_code' => 'DH' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
+        'total_amount' => $total,
+        'paid_amount' => $paid,
+        'remaining_amount' => $remaining,
+        'status' => $status,
+        'credit_due_date' => $dueDate,
+        'transaction_date' => optional($order->transactions->last())->transaction_date,
+        'customer' => [
+            'name' => $order->customer->name ?? null,
+            'phone' => $order->customer->phone ?? null,
+            'email' => $order->customer->email ?? null,
+        ],
+        'items' => $order->items->map(function ($item) {
+            $productName = optional($item->productVariant?->product)->name ?? 'Không xác định';
+            $variantAttributes = $item->productVariant?->attributes->pluck('name')->toArray() ?? [];
+            $variantName = implode(' - ', $variantAttributes);
+            $fullName = trim($productName . ' - ' . $variantName);
+
+            return [
+                'product_variant_id' => $item->product_variant_id,
+                'product_name' => $fullName,
+                'quantity_ordered' => $item->quantity_ordered,
+                'quantity_shipped' => $item->quantity_shipped,
+                'unit_price' => $item->unit_price,
+                'subtotal' => $item->subtotal,
+                'unit_name' => optional($item->unit)->name ?? '-',
+            ];
+        }),
+     'history' => $order->transactions
+    ->filter(fn ($t) => in_array($t->type, ['payment', 'adjustment']))
+    ->sortByDesc(fn ($t) => $t->transaction_date ?? $t->created_at)
+    ->values()
+    ->map(function ($t) {
         return [
-            'id' => $order->id,
-            'order_code' => 'DH' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
-            'total_amount' => $total,
-            'paid_amount' => $paid,
-            'remaining_amount' => $remaining,
-            'status' => $status,
-            'credit_due_date' => $dueDate,
-            'transaction_date' => optional($order->transactions->last())->transaction_date,
-            'customer' => [
-                'name' => $order->customer->name ?? null,
-                'phone' => $order->customer->phone ?? null,
-                'email' => $order->customer->email ?? null,
-            ],
-            'items' => $order->items->map(function ($item) {
-                return [
-                    'product_variant_id' => $item->product_variant_id,
-                    'product_name' => optional($item->productVariant->product)->name ?? 'Không xác định',
-                    'quantity_ordered' => $item->quantity_ordered,
-                    'quantity_shipped' => $item->quantity_shipped,
-                    'unit_price' => $item->unit_price,
-                    'subtotal' => $item->subtotal,
-                    'unit_name' => optional($item->unit)->name ?? '-',
-                ];
-            }),
-            'payment_history' => $order->transactions
-                ->where('type', 'payment')
-                ->sortByDesc('transaction_date')
-                ->values()
-                ->map(function ($t) {
-                    return [
-                        'id' => $t->id,
-                        'paid_amount' => $t->paid_amount,
-                        'transaction_date' => $t->transaction_date,
-                        'note' => $t->description,
-                    ];
-                }),
-            'adjustment_history' => $order->transactions
-                ->where('type', 'adjustment')
-                ->sortByDesc('transaction_date')
-                ->values()
-                ->map(function ($t) {
-                    return [
-                        'id' => $t->id,
-                        'type' => $t->type,
-                        'credit_due_date' => $t->credit_due_date,
-                        'transaction_date' => $t->transaction_date,
-                        'note' => $t->description,
-                    ];
-                }),
+            'id' => $t->id,
+            'type' => $t->type, // 'payment' hoặc 'adjustment'
+            'paid_amount' => $t->type === 'payment' ? $t->paid_amount : null,
+            'credit_due_date' => $t->type === 'adjustment' ? $t->credit_due_date : null,
+            'transaction_date' => $t->transaction_date,
+            'created_at' => $t->created_at,
+            'note' => $t->description,
         ];
-    }
+    }),
+
+    ];
+}
+
 
     public function updateTransaction($orderId, array $data)
     {
@@ -280,6 +296,4 @@ class CustomerTransactionRepository extends BaseRepository
             return $this->returnError($e->getMessage());
         }
     }
-
-    
 }

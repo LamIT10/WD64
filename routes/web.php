@@ -178,10 +178,10 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
-        // Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
         Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
         Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
+    
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
         Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
