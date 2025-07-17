@@ -1,7 +1,11 @@
 <template>
 
     <!-- Tiêu đề -->
-    <h2 v-if="!filters.sub_from_date || !filter.sub_to_date  " class="text-xl font-semibold mb-4">
+    <h2 v-if="filter.start_date != '' || filter.end_date != ''" class="text-xl font-semibold mb-4">
+        Thống kê đơn nhập từ ngày {{ formatDateForDisplay(filter.start_date) }} đến ngày {{
+            formatDateForDisplay(filter.end_date) }}
+    </h2>
+    <h2 v-else class="text-xl font-semibold mb-4">
         Thống kê đơn nhập trong tháng {{ month }}
     </h2>
 
@@ -22,6 +26,14 @@
                 class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
                 v-model="filters.sub_to_date" v-date-picker @change="handleFilterPurchase" />
         </div>
+        <button class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition-all"
+            @click="resetDateFilter">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        </button>
     </div>
 
     <div class="w-full flex justify-center">
@@ -34,26 +46,27 @@
 import { ref, onMounted, reactive } from 'vue';
 import Chart from 'chart.js/auto';
 const formatDateForSubmit = (dateString) => {
-  if (!dateString) return '';
-  const [day, month, year] = dateString.split('/');
-  return `${year}-${month}-${day}`;
+    if (!dateString) return '';
+    const [day, month, year] = dateString.split('/');
+    return `${year}-${month}-${day}`;
 };
 const formatDateForDisplay = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return '';
-  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
 };
 const { purchase_order, filter } = defineProps({
     purchase_order: {
         type: Object,
         default: () => ({}),
     },
-    filter : {
+    filter: {
         type: Object,
         default: () => ({}),
     },
 });
+console.log(filter);
 const filters = reactive({
     sub_from_date: formatDateForDisplay(filter.start_date) || '',
     sub_to_date: formatDateForDisplay(filter.end_date) || '',
@@ -67,6 +80,11 @@ const emit = defineEmits(['filterPurchase']);
 const handleFilterPurchase = () => {
     filterDateEmit.start_date = formatDateForSubmit(filters.sub_from_date);
     filterDateEmit.end_date = formatDateForSubmit(filters.sub_to_date);
+    emit('filterPurchase', filterDateEmit);
+}
+const resetDateFilter = () => {
+    filterDateEmit.start_date = "";
+    filterDateEmit.end_date = "";
     emit('filterPurchase', filterDateEmit);
 }
 const date = new Date();
