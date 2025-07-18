@@ -113,9 +113,10 @@
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Nhập TT</th>
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Xuất SL</th>
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Xuất TT</th>
+              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Điều chỉnh</th>
+              <!-- <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Điều chỉnh -</th> -->
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn cuối SL</th>
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn cuối TT</th>
-              <!-- <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Đơn giá nhập BQGQ</th> -->
               <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Đơn giá xuất BQGQ</th>
             </tr>
           </thead>
@@ -130,10 +131,10 @@
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.received_value) }}</td>
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.shipped_qty) }}</td>
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.shipped_value) }}</td>
+              <td class="px-3 py-3 text-right border-b border-indigo-100 text-red-700 font-semibold">{{ format(item.increase_qty) }}</td>
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.closing_qty) }}</td>
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.closing_value) }}</td>
               <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(importBQGQ(item)) }}</td>
-              <!-- <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(exportBQGQ(item)) }}</td> -->
             </tr>
           </tbody>
           <tbody v-else-if="!loading">
@@ -153,9 +154,10 @@
               <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('received_value') }}</td>
               <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('shipped_qty') }}</td>
               <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('shipped_value') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ totalClosingQty }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ totalClosingValue }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs"></td>
+              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs text-green-700">{{ total('increase_qty') }}</td>
+              <!-- <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs text-red-700">{{ total('decrease_qty') }}</td> -->
+              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('closing_qty') }}</td>
+              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('closing_value') }}</td>
               <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs"></td>
             </tr>
             <!-- <tr class="bg-indigo-200">
@@ -168,7 +170,7 @@
       </div>
       <div v-else class="text-center text-gray-500 py-20 text-lg font-semibold bg-white rounded-xl shadow-lg border border-indigo-100">
         <i class="fas fa-calendar-alt text-4xl mb-2 text-indigo-400"></i>
-        <div>Vui lòng chọn 1 tháng hoặc 1 năm để xem báo cáo tồn kho.</div>
+        <div>Vui lòng chọn thời gian 1 tháng hoặc 1 năm.</div>
       </div>
     </div>
   </AppLayout>
@@ -185,7 +187,7 @@ const currentYear = new Date().getFullYear()
 const yearOptions = ref(Array.from({ length: 5 }, (_, i) => currentYear - i)) // 5 năm gần nhất
 
 const filter = ref({
-  periods: [], // Chỉ chứa 1 giá trị: 'YYYY-MM' hoặc 'YYYY-all'
+  periods: [],
   months: [],
   keyword: ''
 })
@@ -319,82 +321,253 @@ const exportBQGQ = (item) => {
   return shipQty > 0 ? shipVal / shipQty : 0
 }
 
-// Chức năng xuất Excel
 const exportExcel = () => {
   if (!filteredData.value.length) {
     alert('Không có dữ liệu để xuất Excel!')
     return
   }
 
-  // Header của bảng
+  // Tạo workbook và worksheet
+  const wb = XLSX.utils.book_new()
+  const ws = {}
+
+  // Thiết lập tiêu đề báo cáo
+  const reportTitle = 'BÁO CÁO TỒN KHO'
+  const periodTitle = `Kỳ báo cáo: ${displayPeriod.value}`
+
+  // Style chung (giữ nguyên để đẹp lộng lẫy, khoa học)
+  const titleStyle = {
+    font: { name: 'Arial', sz: 18, bold: true, color: { rgb: 'FFFFFF' } },
+    fill: { fgColor: { rgb: '4472C4' } }, // Xanh dương đậm, lộng lẫy
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: { 
+      top: { style: 'thick', color: { rgb: '000000' } }, 
+      bottom: { style: 'thick', color: { rgb: '000000' } }, 
+      left: { style: 'thick', color: { rgb: '000000' } }, 
+      right: { style: 'thick', color: { rgb: '000000' } } 
+    }
+  }
+
+  const periodStyle = {
+    font: { name: 'Arial', sz: 14, italic: true, color: { rgb: '000000' } },
+    fill: { fgColor: { rgb: 'DDEBF7' } }, // Xanh nhạt
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: { 
+      bottom: { style: 'thick', color: { rgb: '000000' } },
+      top: { style: 'thin', color: { rgb: '000000' } },
+      left: { style: 'thin', color: { rgb: '000000' } },
+      right: { style: 'thin', color: { rgb: '000000' } }
+    }
+  }
+
+  const headerStyle = {
+    font: { name: 'Arial', sz: 12, bold: true, color: { rgb: '000000' } },
+    fill: { fgColor: { rgb: 'BFBFBF' } }, // Xám nhạt
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+    border: { 
+      top: { style: 'thick', color: { rgb: '000000' } }, 
+      bottom: { style: 'thick', color: { rgb: '000000' } }, 
+      left: { style: 'thin', color: { rgb: '000000' } }, 
+      right: { style: 'dashed', color: { rgb: '000000' } }  // Dashed để phân cách khoa học
+    }
+  }
+
+  const dataStyleTextEven = {  // Nền xám nhạt cho row chẵn
+    font: { name: 'Arial', sz: 11 },
+    fill: { fgColor: { rgb: 'F2F2F2' } }, // Xám rất nhạt, xen kẽ
+    alignment: { horizontal: 'left', vertical: 'center', wrapText: true },
+    border: { 
+      top: { style: 'thin', color: { rgb: '000000' } }, 
+      bottom: { style: 'thin', color: { rgb: '000000' } }, 
+      left: { style: 'thin', color: { rgb: '000000' } }, 
+      right: { style: 'thin', color: { rgb: '000000' } } 
+    }
+  }
+
+  const dataStyleTextOdd = { ...dataStyleTextEven, fill: { fgColor: { rgb: 'FFFFFF' } } }; // Trắng cho row lẻ
+
+  const dataStyleNumEven = { ...dataStyleTextEven, alignment: { horizontal: 'right', vertical: 'center' }, numFmt: '#,##0' };
+  const dataStyleNumOdd = { ...dataStyleTextOdd, alignment: { horizontal: 'right', vertical: 'center' }, numFmt: '#,##0' };
+
+  const dataStyleValueEven = { ...dataStyleNumEven, numFmt: '#,##0.00' };
+  const dataStyleValueOdd = { ...dataStyleNumOdd, numFmt: '#,##0.00' };
+
+  const dataStyleAdjustmentEven = { ...dataStyleNumEven, fill: { fgColor: { rgb: 'FFE4E1' } }, font: { name: 'Arial', sz: 11, color: { rgb: 'FF0000' } } }; // Hồng nhạt + đỏ
+  const dataStyleAdjustmentOdd = { ...dataStyleAdjustmentEven, fill: { fgColor: { rgb: 'FFFFFF' } } }; // Xen kẽ
+
+  const totalStyle = {
+    font: { name: 'Arial', sz: 12, bold: true, color: { rgb: '000000' } },
+    fill: { fgColor: { rgb: 'FFF2CC' } }, // Vàng nhạt
+    alignment: { horizontal: 'right', vertical: 'center' },
+    border: { 
+      top: { style: 'thick', color: { rgb: '000000' } }, 
+      bottom: { style: 'thick', color: { rgb: '000000' } }, 
+      left: { style: 'thin', color: { rgb: '000000' } }, 
+      right: { style: 'dashed', color: { rgb: '000000' } } 
+    },
+    numFmt: '#,##0.00'
+  }
+
+  const totalStyleAdjustment = { ...totalStyle, font: { ...totalStyle.font, color: { rgb: '008000' } }, numFmt: '#,##0' };
+
+  const footerStyle = {
+    font: { name: 'Arial', sz: 10, italic: true, color: { rgb: '808080' } },
+    fill: { fgColor: { rgb: 'EDEDED' } }, // Xám nhạt
+    alignment: { horizontal: 'center', vertical: 'center' },
+    border: { top: { style: 'thin', color: { rgb: '000000' } } }
+  };
+
+  // Thiết lập tiêu đề với style
+  ws['A1'] = { v: reportTitle, t: 's', s: titleStyle }
+  ws['A2'] = { v: periodTitle, t: 's', s: periodStyle }
+
+  // Header của bảng (bắt đầu từ dòng 4, row 3 zero-based)
   const headers = [
-    'Mã VT',
-    'Tên vật tư',
-    'ĐVT',
-    'Tồn đầu SL',
-    'Tồn đầu TT',
-    'Nhập SL',
-    'Nhập TT',
-    'Xuất SL',
-    'Xuất TT',
-    'Tồn cuối SL',
-    'Tồn cuối TT',
-    'Đơn giá xuất BQGQ' // Hoặc thêm 'Đơn giá nhập BQGQ' nếu cần
+    'Mã VT', 'Tên vật tư', 'ĐVT',
+    'Tồn đầu SL', 'Tồn đầu TT',
+    'Nhập SL', 'Nhập TT',
+    'Xuất SL', 'Xuất TT',
+    'Điều chỉnh',
+    'Tồn cuối SL', 'Tồn cuối TT',
+    'Đơn giá xuất BQGQ'
   ]
 
-  // Dữ liệu rows
-  const rows = filteredData.value.map(item => [
-    item.item_code,
-    item.item_name,
-    item.unit,
-    Number(item.opening_qty) || 0,
-    Number(item.opening_value) || 0,
-    Number(item.received_qty) || 0,
-    Number(item.received_value) || 0,
-    Number(item.shipped_qty) || 0,
-    Number(item.shipped_value) || 0,
-    Number(item.closing_qty) || 0,
-    Number(item.closing_value) || 0,
-    importBQGQ(item) // Sử dụng importBQGQ như trong template (cột cuối là Đơn giá xuất BQGQ, nhưng hàm là import - có thể điều chỉnh nếu cần)
-    // exportBQGQ(item) // Nếu cần thêm cột
-  ])
+  headers.forEach((header, index) => {
+    const cellRef = XLSX.utils.encode_cell({ r: 3, c: index })
+    ws[cellRef] = { v: header, t: 's', s: headerStyle }
+  })
 
-  // Thêm dòng tổng cộng
-  rows.push([
-    'Tổng cộng:', '', '',
-    filteredData.value.reduce((acc, item) => acc + (Number(item.opening_qty) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + (Number(item.opening_value) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + (Number(item.received_qty) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + (Number(item.received_value) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + (Number(item.shipped_qty) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + (Number(item.shipped_value) || 0), 0),
-    filteredData.value.reduce((acc, item) => acc + ((Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0) - (Number(item.shipped_qty) || 0)), 0),
-    filteredData.value.reduce((acc, item) => {
-      const closingQty = (Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0) - (Number(item.shipped_qty) || 0)
-      return acc + (closingQty * (Number(item.unit_price) || 0))
-    }, 0),
-    '' // Không tổng cho đơn giá
-  ])
+  // Dữ liệu rows (bắt đầu từ row 5, sử dụng cả giá trị tính toán (v) và công thức (f))
+  const rows = filteredData.value.map((item, rowIndex) => {
+    const isEven = rowIndex % 2 === 0; // Xen kẽ nền
+    const textStyle = isEven ? dataStyleTextEven : dataStyleTextOdd;
+    const numStyle = isEven ? dataStyleNumEven : dataStyleNumOdd;
+    const valueStyle = isEven ? dataStyleValueEven : dataStyleValueOdd;
+    const adjStyle = isEven ? dataStyleAdjustmentEven : dataStyleAdjustmentOdd;
 
-  // Thêm dòng tổng BQGQ nếu cần (hiện đang comment trong template)
-  // rows.push([
-  //   'Tổng theo BQGQ (Tồn cuối TT):', '', '', '', '', '', '', '', '', '', totalClosingValueBQGQ.value, ''
-  // ])
+    const rowNum = rowIndex + 5; // Row thực tế trong Excel (1-based)
 
-  // Tạo worksheet
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+    // Tính toán giá trị trước bằng JS cho các cột công thức
+    const closingQty = (Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0) - (Number(item.shipped_qty) || 0) + (Number(item.increase_qty) || 0);
+    const closingValue = (Number(item.opening_value) || 0) + (Number(item.received_value) || 0) - (Number(item.shipped_value) || 0);
+    const unitPriceBQGQ = (Number(item.shipped_qty) || 0) > 0 ? (Number(item.shipped_value) || 0) / (Number(item.shipped_qty) || 0) : 0;
 
-  // Tạo workbook và thêm sheet
-  const wb = XLSX.utils.book_new()
+    return [
+      { v: item.item_code, t: 's', s: textStyle },
+      { v: item.item_name, t: 's', s: textStyle },
+      { v: item.unit, t: 's', s: textStyle },
+      { v: Number(item.opening_qty) || 0, t: 'n', s: numStyle }, // Giá trị tĩnh
+      { v: Number(item.opening_value) || 0, t: 'n', s: valueStyle },
+      { v: Number(item.received_qty) || 0, t: 'n', s: numStyle },
+      { v: Number(item.received_value) || 0, t: 'n', s: valueStyle },
+      { v: Number(item.shipped_qty) || 0, t: 'n', s: numStyle },
+      { v: Number(item.shipped_value) || 0, t: 'n', s: valueStyle },
+      { v: Number(item.increase_qty) || 0, t: 'n', s: adjStyle },
+      { v: closingQty, t: 'n', f: `=D${rowNum}+F${rowNum}-H${rowNum}+J${rowNum}`, s: numStyle }, // Giá trị + công thức (xóa khoảng trắng để Sheets parse tốt hơn)
+      { v: closingValue, t: 'n', f: `=E${rowNum}+G${rowNum}-I${rowNum}`, s: valueStyle }, // Giá trị + công thức
+      { v: unitPriceBQGQ, t: 'n', f: `=IF(H${rowNum}=0,0,I${rowNum}/H${rowNum})`, s: valueStyle } // Giá trị + công thức
+    ]
+  });
+
+  // Thêm dữ liệu vào worksheet
+  rows.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 4, c: colIndex })
+      ws[cellRef] = cell
+    })
+  })
+
+  // Tính toán dòng tổng cộng (sử dụng cả giá trị tính toán và công thức SUM động)
+  const lastDataRow = rows.length + 4; // Row cuối của data (zero-based) +1 cho 1-based
+  const totalRow = lastDataRow + 1; // Dòng total (zero-based: lastDataRow +1)
+
+  // Tính tổng bằng JS cho giá trị hiển thị
+  const totalOpeningQty = filteredData.value.reduce((acc, item) => acc + (Number(item.opening_qty) || 0), 0);
+  const totalOpeningValue = filteredData.value.reduce((acc, item) => acc + (Number(item.opening_value) || 0), 0);
+  const totalReceivedQty = filteredData.value.reduce((acc, item) => acc + (Number(item.received_qty) || 0), 0);
+  const totalReceivedValue = filteredData.value.reduce((acc, item) => acc + (Number(item.received_value) || 0), 0);
+  const totalShippedQty = filteredData.value.reduce((acc, item) => acc + (Number(item.shipped_qty) || 0), 0);
+  const totalShippedValue = filteredData.value.reduce((acc, item) => acc + (Number(item.shipped_value) || 0), 0);
+  const totalIncreaseQty = filteredData.value.reduce((acc, item) => acc + (Number(item.increase_qty) || 0), 0);
+  const totalClosingQty = filteredData.value.reduce((acc, item) => acc + (Number(item.closing_qty) || 0), 0);
+  const totalClosingValue = filteredData.value.reduce((acc, item) => acc + (Number(item.closing_value) || 0), 0);
+
+  const totals = [
+    { v: 'Tổng cộng:', t: 's', s: { ...totalStyle, alignment: { horizontal: 'left' } } },
+    { v: '', t: 's', s: totalStyle },
+    { v: '', t: 's', s: totalStyle },
+    { v: totalOpeningQty, t: 'n', f: `=SUM(D5:D${lastDataRow})`, s: { ...totalStyle, numFmt: '#,##0' } }, // Giá trị + công thức
+    { v: totalOpeningValue, t: 'n', f: `=SUM(E5:E${lastDataRow})`, s: totalStyle },
+    { v: totalReceivedQty, t: 'n', f: `=SUM(F5:F${lastDataRow})`, s: { ...totalStyle, numFmt: '#,##0' } },
+    { v: totalReceivedValue, t: 'n', f: `=SUM(G5:G${lastDataRow})`, s: totalStyle },
+    { v: totalShippedQty, t: 'n', f: `=SUM(H5:H${lastDataRow})`, s: { ...totalStyle, numFmt: '#,##0' } },
+    { v: totalShippedValue, t: 'n', f: `=SUM(I5:I${lastDataRow})`, s: totalStyle },
+    { v: totalIncreaseQty, t: 'n', f: `=SUM(J5:J${lastDataRow})`, s: totalStyleAdjustment },
+    { v: totalClosingQty, t: 'n', f: `=SUM(K5:K${lastDataRow})`, s: { ...totalStyle, numFmt: '#,##0' } },
+    { v: totalClosingValue, t: 'n', f: `=SUM(L5:L${lastDataRow})`, s: totalStyle },
+    { v: '', t: 's', s: totalStyle }
+  ];
+
+  totals.forEach((cell, colIndex) => {
+    const cellRef = XLSX.utils.encode_cell({ r: totalRow, c: colIndex })
+    ws[cellRef] = cell
+  });
+
+  // Thêm footer (dòng dưới total)
+  const footerRow = totalRow + 1;
+  ws[XLSX.utils.encode_cell({ r: footerRow, c: 0 })] = { v: 'Báo cáo được tạo bởi hệ thống - Ngày: ' + new Date().toLocaleDateString(), t: 's', s: footerStyle };
+
+  // Merge cells
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 12 } }, // Tiêu đề chính
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 12 } },  // Kỳ báo cáo
+    { s: { r: totalRow, c: 0 }, e: { r: totalRow, c: 2 } }, // Merge 'Tổng cộng:'
+    { s: { r: footerRow, c: 0 }, e: { r: footerRow, c: 12 } } // Merge footer
+  ];
+
+  // Thiết lập range
+  const range = { s: { r: 0, c: 0 }, e: { r: footerRow, c: 12 } };
+  ws['!ref'] = XLSX.utils.encode_range(range);
+
+  // Độ rộng cột và chiều cao hàng (tăng để lộng lẫy)
+  ws['!cols'] = [
+    { wch: 15 }, { wch: 35 }, { wch: 10 },
+    { wch: 15 }, { wch: 18 },
+    { wch: 15 }, { wch: 18 },
+    { wch: 15 }, { wch: 18 },
+    { wch: 15 },
+    { wch: 15 }, { wch: 18 },
+    { wch: 20 }
+  ];
+  ws['!rows'] = [
+    { hpt: 35 }, // Tiêu đề
+    { hpt: 25 }, // Kỳ
+    { hpt: 15 }, // Khoảng trống
+    { hpt: 30 }, // Header
+    // Data rows tự động, total 25pt
+    ...Array(rows.length).fill({ hpt: 20 }),
+    { hpt: 25 }, // Total
+    { hpt: 20 }  // Footer
+  ];
+
+  // Freeze panes
+  ws['!freeze'] = { xSplit: 3, ySplit: 4 }; // Freeze 3 cột đầu và header
+
+  // Thêm worksheet và xuất file với tùy chọn tối ưu cho Sheets
   XLSX.utils.book_append_sheet(wb, ws, 'BaoCaoTonKho')
-
-  // Tên file dựa trên displayPeriod
   const fileName = `BaoCaoTonKho_${displayPeriod.value.replace(/ /g, '_').replace(/\//g, '_')}.xlsx`
 
-  // Xuất file
-  XLSX.writeFile(wb, fileName)
-}
+  // Xuất với tùy chọn để tương thích tốt hơn với Google Sheets
+  XLSX.writeFile(wb, fileName, {
+    bookType: 'xlsx', // Định dạng XLSX chuẩn
+    bookSST: true, // Shared String Table để tối ưu chuỗi và công thức
+    compression: true, // Nén file để import nhanh
+    cellStyles: true, // Giữ style (màu, border) khi import vào Sheets
+    Props: { Title: 'Bao Cao Ton Kho' } // Thêm metadata
+  });
 
+  console.log('File exported:', fileName); // Debug để kiểm tra
+}
 const printReport = () => { window.print() }
 </script>
 <style scoped>
