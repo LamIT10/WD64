@@ -118,12 +118,22 @@ class InventoryController extends Controller
         $variants = ProductVariant::with(['product.defaultUnit'])->get();
 
         $data = $variants->map(function ($variant) use ($startDate, $endDate, $months) {
-            // 1. Số lượng ban đầu khi tạo sản phẩm (tính ngược)
+            // Nếu sản phẩm được tạo sau kỳ báo cáo thì không hiển thị
+            if (!$variant->created_at || Carbon::parse($variant->created_at)->gt($endDate)) {
+                return null;
+            }
+
+            // 1. Số lượng ban đầu khi tạo sản phẩm (tính ngược, có tính cả điều chỉnh kiểm kho)
             $inventory = Inventory::where('product_variant_id', $variant->id)->first();
             $currentQty = $inventory ? $inventory->quantity_on_hand : 0;
             $totalReceivedAll = GoodReceiptItem::where('product_variant_id', $variant->id)->sum('quantity_received');
             $totalShippedAll = $variant->salesOrderItems()->sum('quantity_shipped');
-            $openingStock = $currentQty - $totalReceivedAll + $totalShippedAll;
+            $totalAdjustedAll = InventoryAuditItem::where('product_variant_id', $variant->id)
+                ->whereHas('audit', function ($q) {
+                    $q->where('is_adjusted', 1);
+                })
+                ->sum(DB::raw('actual_quantity - expected_quantity'));
+            $openingStock = $currentQty - $totalReceivedAll + $totalShippedAll - $totalAdjustedAll;
 
             // 2. Tổng nhập đến hết tháng trước đầu tiên
             $beforeStart = $startDate->copy()->startOfMonth();
@@ -133,7 +143,13 @@ class InventoryController extends Controller
             $totalShippedBefore = $variant->salesOrderItems()
                 ->whereHas('salesOrder', fn($q) => $q->where('order_date', '<', $beforeStart))
                 ->sum('quantity_shipped');
-            $openingQty = $openingStock + $totalReceivedBefore - $totalShippedBefore;
+            $totalAdjustedBefore = InventoryAuditItem::where('product_variant_id', $variant->id)
+                ->whereHas('audit', function ($q) use ($beforeStart) {
+                    $q->where('is_adjusted', 1)
+                      ->where('adjusted_at', '<', $beforeStart);
+                })
+                ->sum(DB::raw('actual_quantity - expected_quantity'));
+            $openingQty = $openingStock + $totalReceivedBefore - $totalShippedBefore + $totalAdjustedBefore;
 
             // 3. Tổng nhập trong các tháng đã chọn
             $receivedQty = GoodReceiptItem::where('product_variant_id', $variant->id)
@@ -150,9 +166,16 @@ class InventoryController extends Controller
             $shippedTotal = $variant->salesOrderItems()
                 ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$startDate, $endDate]))
                 ->sum(DB::raw('quantity_shipped * unit_price'));
-
+            // 4.5. Tổng điều chỉnh trong các tháng đã chọn
+            $adjustedQty = InventoryAuditItem::where('product_variant_id', $variant->id)
+                ->whereHas('audit', function ($q) use ($startDate, $endDate) {
+                    $q->where('is_adjusted', 1)
+                        ->whereBetween('adjusted_at', [$startDate, $endDate]);
+                })
+                ->sum(DB::raw('actual_quantity - expected_quantity'));
+            $adjustedValue = $adjustedQty * ($variant->sale_price ?? 0);
             // 5. Tồn cuối kỳ = tồn đầu kỳ + nhập - xuất
-            $closingQty = $openingQty + $receivedQty - $shippedQty;
+            $closingQty = $openingQty + $receivedQty - $shippedQty + $adjustedQty;
 
             $unitPrice = $variant->sale_price ?? 0;
             $openingValue = $openingQty * $unitPrice;
@@ -165,6 +188,7 @@ class InventoryController extends Controller
                 'unit' => $variant->product->defaultUnit->name ?? '',
                 'opening_qty' => $openingQty,
                 'opening_value' => $openingValue,
+                'increase_qty' => $adjustedQty,
                 'received_qty' => $receivedQty,
                 'received_value' => $receivedTotal,
                 'shipped_qty' => $shippedQty,
@@ -173,7 +197,7 @@ class InventoryController extends Controller
                 'closing_value' => $closingValue,
                 'unit_price' => $unitPrice,
             ];
-        });
+        })->filter()->values(); // Loại bỏ các phần tử null khỏi collection
 
         return response()->json([
             'data' => $data,
