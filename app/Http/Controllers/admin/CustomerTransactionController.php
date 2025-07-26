@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdateCustommerTransactionRequest;
 use App\Models\Customer;
+use App\Models\SaleOrder;
 use App\Repositories\CustomerTransactionRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,22 +21,15 @@ class CustomerTransactionController extends Controller
     }
 
 
-    // public function index(Request $request)
-    // {
-    //     $customerTransaction = $this->customerTransactionRepo->getDebtSummaryByOrder();
-    //     $totalforCustomer = $this->customerTransactionRepo->getDebtSummaryByCustomer();
-    //     // dd($totalforCustomer->toArray());
-    //     // dd($customerTransaction->toArray());
-    //     return Inertia::render('admin/Customers/Transaction/Index', [
-    //         'customerTransaction' => $customerTransaction,
-    //     ]);
-    // }
+    
     public function show($orderId)
     {
         $detail = $this->customerTransactionRepo->getDebtDetailByOrderId($orderId);
-        // dd($detail);
+        $customerId = SaleOrder::findOrFail($orderId)->customer_id;
+        // dd($detail,  $customerId);
         return Inertia::render('admin/Customers/Transaction/ShowTransaction', [
             'debt' => $detail,
+            'customerId' => $customerId,
         ]);
     }
 

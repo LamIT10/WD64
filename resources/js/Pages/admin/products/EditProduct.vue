@@ -209,8 +209,9 @@
                                         <label class="block text-sm font-medium text-indigo-700">
                                             Hệ số quy đổi
                                         </label>
-                                        <input v-model="conversion.conversion_factor" type="number" step="0.0001"
-                                            min="0.0001" placeholder="Ví dụ: 10"
+                                        <input v-model="conversion.conversion_factor"
+                                            v-format-number="conversion.conversion_factor" type="text"
+                                            placeholder="Ví dụ: 10.0001"
                                             class="mt-1 w-full px-4 py-2 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300" />
                                         <p v-if="form.errors[`unit_conversions.${index}.conversion_factor`]"
                                             class="text-red-500 text-sm mt-1">
@@ -247,8 +248,9 @@
                     <div v-if="!hasVariant" class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Giá bán</label>
-                            <input v-model="form.simple_sale_price" type="number" min="0"
-                                class="w-full px-3 py-2 border rounded border-gray-300" />
+                            <input v-model="form.simple_sale_price" v-format-number="form.simple_sale_price" type="text"
+                                placeholder="Nhập giá bán"
+                                class="w-full px-3 py-2 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300" />
                             <p v-if="form.errors.simple_sale_price" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_sale_price }}
                             </p>
@@ -256,8 +258,9 @@
 
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Số lượng tồn kho ban đầu</label>
-                            <input v-model="form.simple_quantity" type="number" min="0"
-                                class="w-full px-3 py-2 border rounded border-gray-300" />
+                            <input v-model="form.simple_quantity" v-format-number="form.simple_quantity" type="text"
+                                disabled placeholder="Nhập số lượng tồn kho"
+                                class="w-full px-3 py-2 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-gray-100" />
                             <p v-if="form.errors.simple_quantity" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_quantity }}
                             </p>
@@ -265,8 +268,8 @@
 
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Mã vạch</label>
-                            <input v-model="form.simple_barcode" type="text"
-                                class="w-full px-3 py-2 border rounded border-gray-300" />
+                            <input v-model="form.simple_barcode" type="text" disabled
+                                class="w-full px-3 py-2 border rounded border-gray-300 bg-gray-100" />
                             <p v-if="form.errors.simple_barcode" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_barcode }}
                             </p>
@@ -421,23 +424,25 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                    <input v-model="item.data.barcode" type="text" placeholder="Mã vạch" disabled
+                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none bg-gray-100" />
                                     <p v-if="form.errorsByKey[item.key]?.barcode" class="text-red-500 text-sm mt-1">
                                         {{ form.errorsByKey[item.key].barcode }}
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model.number="item.data.sale_price" type="number" placeholder="Giá bán"
+                                    <input v-model="item.data.sale_price" v-format-number="item.data.sale_price"
+                                        type="text" placeholder="Nhập giá bán"
                                         class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
                                     <p v-if="form.errorsByKey[item.key]?.sale_price" class="text-red-500 text-sm mt-1">
                                         {{ form.errorsByKey[item.key].sale_price }}
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model.number="item.data.quantity_on_hand" type="number"
-                                        placeholder="Tồn kho ban đầu"
-                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
+                                    <input v-model="item.data.quantity_on_hand"
+                                        v-format-number="item.data.quantity_on_hand" type="text" disabled
+                                        placeholder="Nhập số lượng tồn kho"
+                                        class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none bg-gray-100" />
                                     <p v-if="form.errorsByKey[item.key]?.quantity_on_hand"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errorsByKey[item.key].quantity_on_hand }}
@@ -511,7 +516,7 @@ import { route } from 'ziggy-js';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { ref, onMounted, computed, watch, nextTick, getCurrentInstance } from 'vue';
 import Multiselect from '@vueform/multiselect';
 import UnitCreateModal from '../../components/UnitCreateModal.vue';
 import AttributeCreateModal from '../../components/AttributeCreateModal.vue';
@@ -527,6 +532,46 @@ const props = defineProps({
     warehouseZones: Array,
     suppliers: Array,
 });
+const app = getCurrentInstance().appContext.app;
+
+const formatNumber = (value) => {
+    if (!value && value !== 0) return '';
+    const stringValue = value.toString().replace(/[^0-9.]/g, '');
+    const parts = stringValue.split('.');
+    let integerPart = parts[0].replace(/^0+(?!$)/, '') || '0'; 
+    let decimalPart = '';
+    if (parts[1] && parseInt(parts[1]) !== 0) {
+        decimalPart = `.${parts[1].slice(0, 2)}`;
+    }
+    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+    return integerPart + decimalPart;
+};
+app.directive('format-number', {
+    mounted(el, binding) {
+        const handleInput = (event) => {
+            const selectionStart = el.selectionStart;
+            const rawValue = el.value.replace(/,/g, '');
+            const formatted = formatNumber(rawValue);
+
+            if (el.value === formatted) return;
+
+            el.value = formatted;
+            const newSelectionStart = selectionStart + (formatted.length - el.value.length);
+            el.setSelectionRange(newSelectionStart, newSelectionStart);
+
+            binding.instance[binding.expression] = rawValue;
+            el.dispatchEvent(new Event('input'));
+        };
+
+        el.addEventListener('input', handleInput);
+        el.value = formatNumber(binding.value);
+    },
+    updated(el, binding) {
+        el.value = formatNumber(binding.value);
+    }
+});
+
 
 // Hàm gộp biến thể
 const mergeVariants = (variants) => {
@@ -1206,11 +1251,26 @@ const fetchGeneratedCode = async (isVariant = false) => {
         return '';
     }
 };
+const fetchGeneratedBarcode = async () => {
+    const url = 'http://127.0.0.1:8000/api/generate-barcode';
+
+    try {
+        const response = await axios.get(url);
+        return response.data.code || '';
+    } catch (err) {
+        console.error('Lỗi gọi API generate barcode:', err);
+        return '';
+    }
+};
 watch(variantCombinations, async (newVal) => {
     for (const item of newVal) {
         if (!item.data.code) {
             const autoCode = await fetchGeneratedCode(true);
             item.data.code = autoCode;
+        }
+        if (!item.data.barcode) {
+            const autoBarcode = await fetchGeneratedBarcode();
+            item.data.barcode = autoBarcode;
         }
     }
 });

@@ -10,8 +10,8 @@
                         <div class="relative">
                             <select @change="handlePerpage()" v-model="formPerpage.perPage"
                                 class="appearance-none bg-indigo-50 border border-indigo-200 text-indigo-700 py-2 px-4 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors cursor-pointer">
-                                <option value="1">20</option>
-                                <option value="1">50</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
                                 <option value="75">75</option>
                                 <option value="100">100</option>
                             </select>
@@ -280,8 +280,8 @@
                                     </td>
                                 </tr>
                                 <tr v-if="expandedRows[supplier.id]" class="bg-indigo-100">
-                                    <td colspan="7" class="px-6 py-4">
-                                        <div class="ml-8 my-4 bg-white rounded-xl shadow-sm border border-indigo-200">
+                                    <td colspan="7" class="px-2 py-2">
+                                        <div class="ml-2 my-4 bg-white rounded-xl shadow-sm border border-indigo-200">
                                             <div class="flex items-center p-5 border-b border-indigo-100">
                                                 <i class="fas fa-receipt mr-3 text-indigo-500 text-lg"></i>
                                                 <h6 class="font-bold text-indigo-700 text-xl">
@@ -334,13 +334,8 @@
                                                         <template v-for="purchase_order in supplier.purchase_orders || {
                                                             good_receipts: false,
                                                         }">
-                                                            <tr v-for="(
-receipt,
-    indexNum
-                                                                ) in purchase_order.good_receipts ||
-        []" :key="receipt.id
-                                                                                "
-                                                                class="bg-white hover:bg-indigo-50 transition-colors border-b border-indigo-100">
+                                                            <tr v-for="(receipt,indexNumber) in purchase_order.good_receipts ||[]" :key="receipt.id"
+                                                             class="bg-white hover:bg-indigo-50 transition-colors border-b border-indigo-100 relative">
                                                                 <td class="px-6 py-3 font-medium text-indigo-600"
                                                                     @click="
                                                                         ShowDetail(
@@ -513,16 +508,15 @@ receipt,
                                                                     }}
                                                                 </td>
                                                                 <td class="px-4 py-3 text-sm text-gray-500 absolute">
-
                                                                     <button @click="
                                                                         toggleActionPopup(
                                                                             receipt.id,
                                                                             $event
                                                                         )
                                                                         " :disabled="receipt
-                                                                                .supplier_transaction
-                                                                                ?.paid_amount >=
-                                                                            receipt.total_amount"
+                                                                            .supplier_transaction
+                                                                            ?.paid_amount -
+                                                                            receipt.total_amount >= 0"
                                                                         class="text-gray-500 hover:text-gray-700 focus:outline-none disabled:opacity-50"
                                                                         aria-label="Action menu">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -543,8 +537,8 @@ receipt,
                                                                         <div v-show="activePopup ===
                                                                             receipt.id
                                                                             " :id="'popup' +
-                                                                            (receipt.id)
-                                                                            "
+                                                                                (receipt.id)
+                                                                                "
                                                                             class="absolute right-0 top-8 z-[1000] w-44 max-h-64 bg-white rounded-lg shadow-md ring-1 ring-gray-200 overflow-y-auto popup">
                                                                             <div class="py-1 text-sm">
                                                                                 <button v-can="'admin.supplier_transaction.update_credit_due_date'
@@ -607,7 +601,7 @@ receipt,
                         </tbody>
                     </table>
                 </div>
-                <Pagination :data="suppliers" :perPage="formPerpage.perPage" :searchForm="queryData"/>
+                <Pagination :data="suppliers" :perPage="formPerpage.perPage" :searchForm="queryData" />
             </div>
             <ModalCreditDueDate v-if="isOpenCredit" :transactionSupplierEdit="transactionSupplierEdit"
                 @closeModal="HandleCloseModal" />
@@ -758,11 +752,11 @@ const params = new URLSearchParams(url.search);
 const queryData = reactive({
     toPayment: 0,
     fromPayment: 0,
-    supplierName : "",
-    contactPerson : "",
-    phone : "",
-    email : "",
-    address : "",
+    supplierName: "",
+    contactPerson: "",
+    phone: "",
+    email: "",
+    address: "",
 });
 // Lặp qua tất cả các tham số và lưu vào object
 params.forEach((value, key) => {
@@ -794,18 +788,18 @@ const searchForm = useForm({
 
 
 
-const handlePerpage = () => {   
+const handlePerpage = () => {
     formPerpage.get(route("admin.suppliers.index", {
         perPage: formPerpage.perPage,
-        supplierName : searchForm.supplierName,
-        contactPerson : searchForm.contactPerson,
-        phone : searchForm.phone,
-        email : searchForm.email,
-        address : searchForm.address,
-        fromPayment : searchForm.fromPayment,
-        toPayment : searchForm.toPayment,
+        supplierName: searchForm.supplierName,
+        contactPerson: searchForm.contactPerson,
+        phone: searchForm.phone,
+        email: searchForm.email,
+        address: searchForm.address,
+        fromPayment: searchForm.fromPayment,
+        toPayment: searchForm.toPayment,
     }))
-}   
+}
 
 
 // xử lý lọc dữ liệu
@@ -837,7 +831,7 @@ console.log(array);
 const newUrl = ref("");
 for (let index = 0; index < array.length; index++) {
     if (array.length - 1 == index) {
-        newUrl.value +=     array[index][0] +"=" + array[index][1];
+        newUrl.value += array[index][0] + "=" + array[index][1];
     } else {
         newUrl.value += array[index][0] + "=" + array[index][1] + "&";
     }

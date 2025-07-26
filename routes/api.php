@@ -23,3 +23,4 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 Route::get('/generate-code', [ProductController::class, 'generateCode'])->name('generate-code');
 Route::get('/generate-variant-code', [ProductController::class, 'generateVariantCode'])->name('generate-variant-code');
+Route::get('/generate-barcode', [ProductController::class, 'generateNumericBarcode'])->name('generate-barcode');

@@ -36,6 +36,7 @@ class ProductRepository extends BaseRepository
             'images',
             'productVariants' => function ($query) {
                 $query->with([
+                    'product',
                     'attributes',
                     'inventory',
                     'inventoryLocations.zone',
@@ -86,7 +87,9 @@ class ProductRepository extends BaseRepository
                 }
             });
         }
-
+        if(isset($filters['get_count']) && $filters['get_count'] == true) {
+            return $query->count();
+        }
         return $query->paginate($perPage)->withQueryString();
     }
 
@@ -108,6 +111,10 @@ class ProductRepository extends BaseRepository
         $countToday = ProductVariant::whereDate('created_at', today())->count() + 1;
 
         return 'VAR-' . $today . str_pad($countToday, 3, '0', STR_PAD_LEFT);
+    }
+    public function generateNumericBarcode()
+    {
+        return str_pad((string) random_int(0, 99999999999999999), 17, '0', STR_PAD_LEFT);
     }
     public function getCreateData()
     {
@@ -873,11 +880,11 @@ class ProductRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-                $product = $this->handleModel->find($id);
+            $product = $this->handleModel->find($id);
 
-                if (!$product) {
-                    throw new Exception('Không tìm thấy sản phẩm.');
-                }
+            if (!$product) {
+                throw new Exception('Không tìm thấy sản phẩm.');
+            }
             $product->update(['status_product' => 0]);
             DB::commit();
 
@@ -988,15 +995,15 @@ class ProductRepository extends BaseRepository
         return $query->paginate($perPage)->withQueryString();
     }
 
-    public function restore (string $id)
+    public function restore(string $id)
     {
         try {
             DB::beginTransaction();
-                $product = $this->handleModel->find($id);
+            $product = $this->handleModel->find($id);
 
-                if (!$product) {
-                    throw new Exception('Không tìm thấy sản phẩm.');
-                }
+            if (!$product) {
+                throw new Exception('Không tìm thấy sản phẩm.');
+            }
             $product->update(['status_product' => 1]);
             DB::commit();
 
@@ -1024,5 +1031,10 @@ class ProductRepository extends BaseRepository
                 'av.name as attribute_value',
             ])
             ->get();
+    }
+
+    public function getProductWithVariants($productId)
+    {
+        return $this->handleModel->with(['productVariants'])->findOrFail($productId);
     }
 }

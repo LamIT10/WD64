@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role as ModelsRole;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserRepository extends BaseRepository
 {
@@ -25,7 +27,7 @@ class UserRepository extends BaseRepository
         return $query->orderBy('created_at', 'desc')->paginate($limit);
     }
 
-     public function getFilteredUsers(array $filters)
+    public function getFilteredUsers(array $filters)
     {
         $query = $this->handleModel->query();
 
@@ -162,27 +164,45 @@ class UserRepository extends BaseRepository
             return $this->returnError($th->getMessage());
         }
     }
+public function bulkUpdateStatus(array $userIds, string $status)
+{
+    try {
+        DB::beginTransaction();
 
-    public function bulkUpdateStatus(array $userIds, string $status)
-    {
-        try {
-            DB::beginTransaction();
-            $users = $this->handleModel->whereIn('id', $userIds)->get();
-            if ($users->isEmpty()) {
-                throw new \Exception('Không tìm thấy người dùng để cập nhật trạng thái');
-            }
-            foreach ($users as $user) {
-                $user->status = $status;
-                $user->save();
-            }
-            DB::commit();
-            return $users;
-        } catch (\Throwable $th) {
-            Log::error("Cập nhật trạng thái người dùng lỗi, " . $th->getMessage());
-            DB::rollBack();
-            return $this->returnError($th->getMessage());
+        $currentUserId = Auth::id();
+
+        $filteredUserIds = array_filter($userIds, function ($id) use ($currentUserId) {
+            return $id != $currentUserId;
+        });
+
+        if (empty($filteredUserIds)) {
+            throw new \Exception('Không thể cập nhật trạng thái của chính bạn.');
         }
+
+        $users = $this->handleModel->whereIn('id', $filteredUserIds)->get();
+
+        if ($users->isEmpty()) {
+            throw new \Exception('Không tìm thấy người dùng để cập nhật trạng thái.');
+        }
+
+        foreach ($users as $user) {
+            $user->status = $status;
+            $user->save();
+        }
+
+        DB::commit();
+        return ['status' => true];
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        Log::error('Lỗi cập nhật trạng thái: ' . $th->getMessage());
+        return [
+            'status' => false,
+            'message' => $th->getMessage()
+        ];
     }
+}
+
+
 
     public function bulkDelete(array $userIds)
     {
@@ -206,8 +226,14 @@ class UserRepository extends BaseRepository
     public function getDataRenderEdit(int $id)
     {
         $query = $this->handleModel::where("id", $id)->firstOrFail();
-        $query['role'] = array_values($query->roles->pluck("id")->toArray());
-
+        $query['role'] = array_values($query->roles->where('name', "!=", 'admin')->pluck("id")->toArray());
+        $idAdmin = Role::where('name', 'admin')->first()->id;
+        if(in_array($idAdmin, $query['role'])) {
+            $query['role'] = array_filter($query['role'], function($role) use ($idAdmin) {
+                return $role !== $idAdmin;
+            });
+        }
+        // dd($query->toArray());
         return $query;
     }
 }

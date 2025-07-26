@@ -1,8 +1,8 @@
+```vue
 <template>
     <AppLayout>
         <div class="p-6">
             <!-- Flash messages -->
-
             <div class="p-3 bg-white mb-4 flex justify-between items-center">
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Sản phẩm của nhà cung cấp: {{ supplier.name }}
@@ -89,6 +89,7 @@
                 :isOpen="isModalOpen"
                 :variants="selectedProduct.product_variants"
                 :selectedProduct="selectedProduct"
+                :supplier="supplier"
                 @close="closeModal"
             />
             <!-- Modal thêm biến thể -->
@@ -114,56 +115,28 @@
                                     v-if="formAddVariant.errors.id"
                                     >{{ formAddVariant.errors.id }}</span
                                 >
-                                <select
+                                <Multiselect
                                     v-model="formAddVariant.id"
-                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30"
+                                    :options="formattedVariants"
+                                    :searchable="true"
+                                    :placeholder="'Chọn biến thể'"
+                                    label="displayName"
+                                    valueProp="id"
+                                    :filterResults="customFilter"
+                                    class="p-2 border border-indigo-100 rounded-lg bg-indigo-50/30"
                                 >
-                                    <option
-                                        v-for="item in listVariants"
-                                        :value="item.id"
-                                    >
-                                        {{ item.product.name + " / " }}
+                                    <template v-slot:option="{ option }">
+                                        {{ option.product.name }}
                                         <span
-                                            v-for="(
-                                                att, index
-                                            ) in item.attributes"
+                                            v-for="(att, index) in option.attributes"
                                             :key="index"
                                         >
-                                            <span v-if="index === 0">
-                                                {{ att.name + " - " }}
-                                            </span>
-                                            <span
-                                                v-else-if="
-                                                    index ===
-                                                    item.attributes.length - 1
-                                                "
-                                                >{{ att.name + " / " }}</span
-                                            >
-                                            <span v-else>{{
-                                                att.name + " - "
-                                            }}</span>
+                                            <span v-if="index === 0">/ {{ att.name }} -</span>
+                                            <span v-else-if="index === option.attributes.length - 1">{{ att.name }}</span>
+                                            <span v-else>{{ att.name + " - " }}</span>
                                         </span>
-                                        <span
-                                            v-for="(
-                                                att, index
-                                            ) in item.attributes"
-                                        >
-                                            <span v-if="index === 0">
-                                                {{ att.attribute.name + " - " }}
-                                            </span>
-                                            <span
-                                                v-else-if="
-                                                    index ===
-                                                    item.attributes.length - 1
-                                                "
-                                                >{{ att.attribute.name }}</span
-                                            >
-                                            <span v-else>{{
-                                                att.attribute.name + " - "
-                                            }}</span>
-                                        </span>
-                                    </option>
-                                </select>
+                                    </template>
+                                </Multiselect>
                             </div>
 
                             <div>
@@ -173,12 +146,8 @@
                                 >
                                 <span
                                     class="text-red-500"
-                                    v-if="
-                                        formAddVariant.errors.min_order_quantity
-                                    "
-                                    >{{
-                                        formAddVariant.errors.min_order_quantity
-                                    }}</span
+                                    v-if="formAddVariant.errors.min_order_quantity"
+                                    >{{ formAddVariant.errors.min_order_quantity }}</span
                                 >
                                 <input
                                     type="number"
@@ -195,9 +164,7 @@
                                 <span
                                     class="text-red-500"
                                     v-if="formAddVariant.errors.cost_price"
-                                    >{{
-                                        formAddVariant.errors.cost_price
-                                    }}</span
+                                    >{{ formAddVariant.errors.cost_price }}</span
                                 >
                                 <input
                                     type="number"
@@ -254,19 +221,48 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import ModalProductVariantDisplay from "../../Components/ModalProductVariantDisplay.vue";
 import axios from "axios";
 import { Link, useForm } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
-import { formatNumber } from "chart.js/helpers";
+import Multiselect from '@vueform/multiselect';
 
+    
+// Props
 const { supplier, products, listVariants } = defineProps({
     supplier: Object,
     products: Array,
-    listVariants: Object,
+    listVariants: Array,
 });
+
+// Transform listVariants to include displayName for Multiselect
+const formattedVariants = computed(() => {
+    return listVariants.map((item) => ({
+        ...item,
+        displayName: `${item.product.name} / ${item.attributes
+            .map((att) => att.name)
+            .join(" - ")}`,
+    }));
+});
+
+// Custom filter for Multiselect search
+const customFilter = (options, search) => {
+    if (!search) return options;
+    const searchLower = search.toLowerCase();
+    return options.filter((option) => {
+        return (
+            option.displayName.toLowerCase().includes(searchLower) ||
+            option.product.name.toLowerCase().includes(searchLower) ||
+            option.attributes.some((attr) =>
+                attr.name.toLowerCase().includes(searchLower)
+            )
+        );
+    });
+};
+
+// State
 const showAddProductModal = ref(false);
 const searchQuery = ref("");
 const searchResults = ref([]);
@@ -276,10 +272,10 @@ const isSearching = ref(false);
 const isAdding = ref(false);
 const errorMessage = ref("");
 const selectedProductId = ref(null);
-
 const isModalOpen = ref(false);
 const selectedProduct = ref({});
 
+// Methods
 const openAddProductModal = () => {
     showAddProductModal.value = true;
     resetForm();
@@ -297,6 +293,7 @@ const resetForm = () => {
     selectedVariantIds.value = [];
     selectedProductId.value = null;
     errorMessage.value = "";
+    formAddVariant.reset();
 };
 
 const formAddVariant = useForm({
@@ -319,13 +316,11 @@ const confirmAddProduct = () => {
     );
 };
 
-// ✅ Đã sửa để luôn gọi API lấy product_variants có attributes đầy đủ
 const showVariants = (product) => {
     selectedProduct.value = {
         ...product,
-        product_variants: product || {},
+        product_variants: product.product_variants || [],
     };
-
     isModalOpen.value = true;
 };
 
@@ -336,6 +331,7 @@ const closeModal = () => {
 </script>
 
 <style scoped>
+/* Scrollbar styles */
 ::-webkit-scrollbar {
     height: 6px;
     width: 6px;
@@ -352,5 +348,25 @@ const closeModal = () => {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a0a0a0;
+}
+
+/* Multiselect styles */
+.multiselect {
+    --ms-border-color: #e0e7ff;
+    --ms-ring-color: #c7d2fe;
+    --ms-bg: rgba(224, 231, 255, 0.3);
+    --ms-option-bg-selected: #e0e7ff;
+    --ms-option-color-selected: #4f46e5;
+    --ms-dropdown-bg: #ffffff;
+    --ms-border-radius: 0.5rem;
+    --ms-py: 0.625rem;
+    --ms-px: 0.625rem;
+    --ms-font-size: 0.875rem;
+    --ms-line-height: 1.25rem;
+}
+
+.multiselect.is-active {
+    border-color: #c7d2fe;
+    box-shadow: 0 0 0 1px #c7d2fe;
 }
 </style>

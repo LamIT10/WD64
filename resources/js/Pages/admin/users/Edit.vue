@@ -61,7 +61,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhân viên *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên nhân viên  <span class="text-red-500"> *</span> </label>
                                     <input v-model="form.name" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                         placeholder="Nhập tên nhân viên..." />
@@ -74,7 +74,7 @@
                             <!-- Row 2: Phone + Email -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại  <span class="text-red-500"> *</span> </label>
                                     <input v-model="form.phone" type="text"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                         placeholder="Nhập số điện thoại..." />
@@ -83,7 +83,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email  <span class="text-red-500"> *</span> </label>
                                     <input v-model="form.email" type="email"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all"
                                         placeholder="Nhập email..." />

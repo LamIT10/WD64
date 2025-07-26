@@ -28,6 +28,12 @@ class PermissionConstant
     public const SUPPLIER_TRANSACTION_SHOW = 'admin.supplier_transaction.show';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE = 'admin.supplier_transaction.update_credit_due_date';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier_transaction.update_paid_amount';
+
+//  Supplier transaction
+    public const SUPPLIER_INDEX = 'admin.supplier.index';
+    public const SUPPLIER_SHOW = 'admin.supplier.show';
+    public const SUPPLIER_UPDATE_CREDIT_DUE_DATE = 'admin.supplier.update_credit_due_date';
+    public const SUPPLIER_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier.update_paid_amount';
     public static function all(): array
     {
         return [
