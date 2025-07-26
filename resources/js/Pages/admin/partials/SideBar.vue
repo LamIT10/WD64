@@ -8,8 +8,9 @@
         <!-- Logo & Close Button -->
         <div class="flex items-center justify-center gap-2 h-16 border-b border-gray-200 bg-white px-3">
             <div
-                class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center">
-                <i class="fas fa-warehouse text-white text-base"></i>
+                class="w-14 h-14 flex items-center justify-center"
+            >
+                <img :src="`/images/logo.png`" alt="logo">
             </div>
             <div>
                 <h1 class="text-lg font-bold text-gray-900">SUVAN</h1>
@@ -65,16 +66,20 @@
                         </div>
                         <Link :href="route('admin.receiving.index')" class="text-xs">Phiếu nhập kho</Link>
                     </div>
-                    <a href="export.html"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <Link
+                        :href="route('admin.sale-orders.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-arrow-up text-xs"></i>
                         </div>
                         <span class="text-xs">Xuất kho</span>
-                    </a>
-                    <a href="/admin/inventory-audit"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    </Link>
+                    <a
+                        href="/admin/inventory-audit"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                             <i class="fas fa-clipboard-check text-xs"></i>
@@ -115,6 +120,17 @@
                     </div>
                     <span class="text-xs">Báo cáo nhập kho</span>
                     </Link>
+                    <Link
+                        :href="route('admin.reports.suggest')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
+                        >
+                            <i class="fas fa-shopping-cart text-xs"></i>
+                        </div>
+                        <span class="text-xs">Gợi ý nhập hàng</span></Link
+                    >
                 </div>
             </div>
             <!-- User Management -->
@@ -322,7 +338,6 @@
                     </Link>
                 </div>
             </div> -->
-
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">
                 <button

@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\admin\CustomerTransactionController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\Admin\SuggestController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
@@ -243,6 +244,9 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
         Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
+    });
+    Route::prefix('reports')->as('reports.')->group(function () {
+        Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
     });
 });
 
