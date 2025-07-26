@@ -10,8 +10,15 @@ class PurchaseOrder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'supplier_id', 'user_id', 'order_date', 
-        'order_status', 'total_amount', 'approved_at', 'note', 'reason'
+        'supplier_id',
+        'user_id',
+        'order_date',
+        'order_status',
+        'total_amount',
+        'approved_at',
+        'note',
+        'reason',
+        'code'
     ];
 
     protected $casts = [
@@ -37,7 +44,8 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(SupplierTransaction::class);
     }
-    public function goodReceipts(){
+    public function goodReceipts()
+    {
         return $this->hasMany(GoodReceipt::class, 'purchase_order_id');
     }
 }

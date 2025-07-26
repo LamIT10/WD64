@@ -148,6 +148,7 @@ class PurchaseOrderRepository extends BaseRepository
                 $newPurchaseOrderData['user_id'] = Auth::user()->id ?? 1;
                 $newPurchaseOrderData['order_date'] = $value['expected_date'] ?? null;
                 $newPurchaseOrderData['status'] = $value['status'] ?? 0;
+                $newPurchaseOrderData['code'] = $this->autoAddPurchaseCode();
 
                 $newPurchaseOrder = $this->handleModel->create($newPurchaseOrderData);
                 if (!$newPurchaseOrder) {
@@ -336,11 +337,12 @@ class PurchaseOrderRepository extends BaseRepository
         ];
         return $data;
     }
-    public function update($data, $id){
+    public function update($data, $id)
+    {
         try {
             DB::beginTransaction();
             $purchase = $this->handleModel->find($id);
-            if(!$purchase){
+            if (!$purchase) {
                 DB::rollBack();
                 return $this->returnError('Đơn hàng không tồn tại');
             }
@@ -348,16 +350,16 @@ class PurchaseOrderRepository extends BaseRepository
             $dataUpdate['user_id'] = $data['user_id'];
             $dataUpdate['order_date'] = $data['order_date'];
             $dataUpdate['total_amount'] = $data['total_amount'];
-            
+
             $purchase->update($dataUpdate);
             foreach ($data['items'] as $key => $value) {
                 $orderItem = PurchaseOrderItem::find($value['id']);
-                if(!$orderItem){
+                if (!$orderItem) {
                     DB::rollBack();
                     return $this->returnError('Có lỗi khi cập nhật sản phẩm trong đơn');
                 }
                 $dataItemUpdate = [];
-                
+
                 $dataItemUpdate['quantity_ordered'] = $value['quantity_ordered'];
                 $dataItemUpdate['unit_id'] = $value['unit_id'];
                 $dataItemUpdate['unit_price'] = $value['unit_price'];
@@ -372,5 +374,22 @@ class PurchaseOrderRepository extends BaseRepository
             Log::error('Lỗi khi cập nhật đơn hàng');
             return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
         }
+    }
+    public function autoAddPurchaseCode()
+    {
+        $lastExportCode = $this->handleModel
+            ->where('code', 'LIKE', 'DN-%')
+            ->orderByDesc('id')
+            ->value('code');
+
+        if ($lastExportCode) {
+            $lastExportNumber = (int) str_replace('DN-', '', $lastExportCode);
+        } else {
+            $lastExportNumber = 0;
+        }
+
+        $autoExportCode = 'DN-' . str_pad($lastExportNumber + 1, 6, '0', STR_PAD_LEFT);
+
+        return $autoExportCode;
     }
 }

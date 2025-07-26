@@ -65,7 +65,7 @@
                                     id="phone"
                                     name="phone"
                                     placeholder="Nhập số điện thoại"
-                                    class="w-full pl-12 px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200"
+                                    class="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200"
                                 />
                             </div>
                             <p v-if="form.errors.phone" class="text-red-500 text-sm mt-1">
@@ -102,7 +102,7 @@
                                 type="text"
                                 id="tax-code"
                                 v-model="form.tax_code"
-                                name="tax-code"
+                                name="tax"
                                 placeholder="Nhập mã số thuế"
                                 class="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200"
                             />
@@ -115,7 +115,7 @@
                     <!-- Row 4: Địa chỉ -->
                     <div class="space-y-2">
                         <label for="address" class="block text-sm font-medium text-indigo-700">
-                            Địa chỉ <span class="text-red-500">*</span>
+                            Địa chỉ
                         </label>
                         <textarea
                             id="address"

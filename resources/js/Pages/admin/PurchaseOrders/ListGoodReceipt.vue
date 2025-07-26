@@ -90,7 +90,7 @@
                                         {{ goodReceipt.code }}
                                     </th>
                                     <td class="px-4 py-2">
-                                        {{ goodReceipt.purchase_order.id }}
+                                        {{ goodReceipt.purchase_order.code }}
                                     </td>
                                     <td
                                         class="px-4 py-2 text-indigo-600 font-semibold"
