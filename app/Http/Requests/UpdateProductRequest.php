@@ -72,8 +72,8 @@ class UpdateProductRequest extends FormRequest
             $rules['variants.*.combinations.*.custom_location_name'] = ['nullable', 'string', 'max:100'];
         } else {
             // Validate sản phẩm đơn giản
-            $rules['simple_sale_price'] = ['required', 'numeric', 'min:0'];
-            $rules['simple_quantity'] = ['required', 'numeric', 'min:0'];
+            $rules['simple_sale_price'] = ['nullable', 'numeric', 'min:0'];
+            $rules['simple_quantity'] = ['nullable', 'numeric', 'min:0'];
             $rules['simple_barcode'] = ['nullable', 'string', 'max:100'];
             $rules['supplier_ids'] = ['required', 'array'];
             $rules['supplier_ids.*'] = ['exists:suppliers,id'];
@@ -138,11 +138,9 @@ class UpdateProductRequest extends FormRequest
             'unit_conversions.*.conversion_factor.min' => 'Hệ số quy đổi phải lớn hơn 0.',
 
             // Sản phẩm đơn giản
-            'simple_sale_price.required' => 'Vui lòng nhập giá bán.',
             'simple_sale_price.numeric' => 'Giá bán phải là số.',
             'simple_sale_price.min' => 'Giá bán không được âm.',
 
-            'simple_quantity.required' => 'Vui lòng nhập tồn kho.',
             'simple_quantity.numeric' => 'Tồn kho phải là số.',
             'simple_quantity.min' => 'Tồn kho không được âm.',
 

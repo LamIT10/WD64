@@ -132,8 +132,19 @@ class SaleOrderController extends Controller
 
         return redirect()->route('admin.sale-orders.index')->with('success', $result['message']);
     }
-    public function export()
+    public function export(Request $request)
+
     {
-        return Excel::download(new SaleOrderExport(), 'Đơn_Xuất.xlsx');
+        return Excel::download(new SaleOrderExport($request->only(['status', 'customer', 'order_date'])), 'Đơn_Xuất.xlsx');
+    }
+    public function generateQR($id, Request $request)
+    {
+        $result = $this->saleOrdersRepository->generateQR($id, $request);
+
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 400);  // Return JSON error với status 400
+        }
+
+        return response()->json($result);  // Return JSON success
     }
 }

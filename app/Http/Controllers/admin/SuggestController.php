@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\ReportRepository;
+use App\Repositories\SuggestRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ReportController extends Controller
+class SuggestController extends Controller
 {
     protected $reportRepository;
 
-    public function __construct(ReportRepository $reportRepository)
+    public function __construct(SuggestRepository $reportRepository)
     {
         $this->reportRepository = $reportRepository;
     }

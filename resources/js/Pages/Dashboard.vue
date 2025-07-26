@@ -1,32 +1,10 @@
 <template>
   <AppLayout>
     <div class="min-h-screen bg-gray-50 p-6">
-      <!-- Header Section -->
-      <!-- <div class="flex justify-between items-center mb-8">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
-          <p class="text-gray-500">Welcome back! Here's what's happening with your inventory today.</p>
-        </div>
-        <div class="flex items-center space-x-4">
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </span>
-            <input type="text" class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Search...">
-          </div>
-          <button class="p-2 bg-white rounded-lg shadow-sm border border-gray-200">
-            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-            </svg>
-          </button>
-        </div>
-      </div>   -->
 
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn xuất</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình xuất hàng trong tháng</p>
@@ -65,35 +43,16 @@
         </div>
 
         <!-- Stats cards grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-          <!-- Tổng đơn hàng trong tháng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng xuất đơn hàng</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{
-                  data.statistical_sale_order.count_sale_order_in_month }}
-                </p>
-                <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
-              </div>
-              <div class="bg-blue-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                  </path>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- Đơn hàng đang chờ xử lý -->
+        <!-- Hàng trên: 3 ô trạng thái -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-5">
+          <!-- Đang chuẩn bị -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đang chuẩn bị</p>
-                <p class="text-2xl font-bold text-yellow-600 mt-1">{{
-                  data.statistical_sale_order.count_sale_order_in_month_pending }}</p>
+                <p class="text-2xl font-bold text-yellow-600 mt-1">
+                  {{ data.statistical_sale_order.count_sale_order_in_month_pending }}
+                </p>
                 <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
               </div>
               <div class="bg-yellow-50 p-3 rounded-lg">
@@ -106,13 +65,14 @@
             </div>
           </div>
 
-          <!-- Đơn hàng đã nhận -->
+          <!-- Hoàn thành -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
-                <p class="text-2xl font-bold text-green-600 mt-1">{{
-                  data.statistical_sale_order.count_sale_order_in_month_shipped }}</p>
+                <p class="text-2xl font-bold text-green-600 mt-1">
+                  {{ data.statistical_sale_order.count_sale_order_in_month_shipped }}
+                </p>
                 <p class="text-xs text-gray-400 mt-1">Đã giao</p>
               </div>
               <div class="bg-green-50 p-3 rounded-lg">
@@ -124,51 +84,70 @@
             </div>
           </div>
 
-          <!-- Đơn hàng huỷ -->
+          <!-- Đơn huỷ -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn huỷ</p>
-                <p class="text-2xl font-bold text-red-600 mt-1">{{
-                  data.statistical_sale_order.count_sale_order_in_month_closed }}</p>
+                <p class="text-2xl font-bold text-red-600 mt-1">
+                  {{ data.statistical_sale_order.count_sale_order_in_month_closed }}
+                </p>
                 <p class="text-xs text-gray-400 mt-1">Không thực hiện</p>
               </div>
               <div class="bg-red-50 p-3 rounded-lg">
                 <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                  </path>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tổng giá trị đơn hàng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1">{{
-                  data.statistical_sale_order.sum_value_sale_order_in_month }}</p>
-                <p class="text-xs text-gray-400 mt-1">Tổng thu nhập</p>
-              </div>
-              <div class="bg-indigo-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                  </path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Hàng dưới: 2 ô -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <!-- Tổng đơn hàng -->
+          <Link :href="route('admin.sale-orders.index')"
+            class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng xuất đơn hàng</p>
+              <p class="text-2xl font-bold text-gray-800 mt-1">
+                {{ data.statistical_sale_order.count_sale_order_in_month }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
+            </div>
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                </path>
+              </svg>
+            </div>
+          </div>
+          </Link>
+
+          <!-- Tổng giá trị -->
+          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
+                <p class="text-2xl font-bold text-indigo-600 mt-1">
+                  {{ data.statistical_sale_order.sum_value_sale_order_in_month }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">Tổng thu nhập</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
-            <h4 class="text-xl font-bold text-gray-800">Thống kê phiếu nhập kho hàng</h4>
+            <h4 class="text-xl font-bold text-gray-800">Thống kê đơn nhập kho hàng</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình nhập hàng trong tháng</p>
           </div>
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
@@ -204,109 +183,95 @@
         </div>
 
         <!-- Stats cards grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-          <!-- Tổng đơn hàng trong tháng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng phiếu nhập</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_good_receipt.count_good_receipt_in_month
-                }}
-                </p>
-                <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
-              </div>
-              <div class="bg-blue-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                  </path>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <!-- Đơn hàng đang chờ xử lý -->
+        <!-- Hàng 1: 5 ô trạng thái -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-5">
+          <!-- Chờ duyệt -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Chờ duyệt</p>
-                <p class="text-2xl font-bold text-yellow-600 mt-1">{{
-                  data.statistical_good_receipt.count_good_receipt_in_month_pending }}</p>
-                <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
-              </div>
-              <div class="bg-yellow-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Chờ duyệt</p>
+              <p class="text-2xl font-bold text-yellow-600 mt-1">
+                {{ data.statistical_purchases.count_purchase_in_month_pending }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
             </div>
           </div>
 
-          <!-- Đơn hàng đã nhận -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
-                <p class="text-2xl font-bold text-green-600 mt-1">{{
-                  data.statistical_good_receipt.count_good_receipt_in_month_received }}</p>
-                <p class="text-xs text-gray-400 mt-1">Đã nhập kho</p>
-              </div>
-              <div class="bg-green-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
+          <!-- Đã duyệt -->
+          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đã duyệt</p>
+              <p class="text-2xl font-bold text-blue-600 mt-1">
+                {{ data.statistical_purchases.count_purchase_in_month_accepted }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Đã phê duyệt</p>
             </div>
           </div>
 
-          <!-- Đơn hàng huỷ -->
+          <!-- Từ chối -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn huỷ</p>
-                <p class="text-2xl font-bold text-red-600 mt-1">{{
-                  data.statistical_good_receipt.count_good_receipt_in_month_closed }}</p>
-                <p class="text-xs text-gray-400 mt-1">Không thực hiện</p>
-              </div>
-              <div class="bg-red-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                  </path>
-                </svg>
-              </div>
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Từ chối</p>
+              <p class="text-2xl font-bold text-red-600 mt-1">
+                {{ data.statistical_purchases.count_purchase_in_month_closed }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Không duyệt</p>
             </div>
           </div>
 
-          <!-- Tổng giá trị đơn hàng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1">{{
-                  data.statistical_good_receipt.sum_value_good_receipt_in_month }}</p>
-                <p class="text-xs text-gray-400 mt-1">Tổng chi phí</p>
-              </div>
-              <div class="bg-indigo-50 p-3 rounded-lg">
-                <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                  </path>
-                </svg>
-              </div>
+          <!-- Nhập một phần -->
+          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-purple-500">
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nhập một phần</p>
+              <p class="text-2xl font-bold text-purple-600 mt-1">
+                {{ data.statistical_purchases.count_purchase_in_month_import_partial }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Đang nhập</p>
+            </div>
+          </div>
+
+          <!-- Đã hoàn thành -->
+          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
+              <p class="text-2xl font-bold text-green-600 mt-1">
+                {{ data.statistical_purchases.count_purchase_in_month_completed }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Đã nhập kho</p>
             </div>
           </div>
         </div>
+
+        <!-- Hàng 2: 2 ô dài -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Tổng đơn nhập -->
+          <Link :href="route('admin.purchases.index')"
+            class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng đơn nhập</p>
+            <p class="text-2xl font-bold text-gray-800 mt-1">
+              {{ data.statistical_purchases.count_purchase_in_month }}
+            </p>
+            <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
+          </div>
+          </Link>
+
+          <!-- Tổng giá trị -->
+          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+            <div>
+              <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị nhập</p>
+              <p class="text-2xl font-bold text-indigo-600 mt-1 break-words break-all overflow-hidden">
+                {{ data.statistical_purchases.sum_value_good_receipt_in_month }}
+              </p>
+              <p class="text-xs text-gray-400 mt-1">Tổng chi phí</p>
+            </div>
+          </div>
+        </div>
+
       </div>
       <div class="flex">
-        <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_good_receipt.good_receipt_change_in_seven_day"
+        <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_purchases.purchase_change_in_seven_day"
           :chartTitle="'Đơn nhập hàng trong 7 ngày'" />
-      <ChangePurchaseSevenDayAgo
+        <ChangePurchaseSevenDayAgo
           :purchaseChangeInSevenDay="data.statistical_sale_order.sale_order_change_in_seven_day"
           :chartTitle="'Đơn xuất hàng trong 7 ngày'" />
       </div>
@@ -326,20 +291,25 @@
           <!-- <p class="text-xs text-green-500 mt-1">+12% from last month</p> -->
         </div>
         </Link>
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start">
-          <div class="p-3 bg-red-50 rounded-lg mr-4">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-              </path>
-            </svg>
-          </div>
-          <div>
-            <p class="text-sm font-medium text-gray-500">Sản phẩm sắp hết hàng</p>
-            <p class="text-2xl font-bold text-red-600 mt-1">{{ data.product_is_out_of_stock }}</p>
-            <p class="text-xs text-red-500 mt-1">Cần nhập</p>
-          </div>
+        <Link :href="route('admin.products.index', {
+          code: '',
+          name: '',
+          stock_status: 'low_stock'
+        })" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start">
+        <div class="p-3 bg-red-50 rounded-lg mr-4">
+          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+            </path>
+          </svg>
         </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Sản phẩm sắp hết hàng</p>
+          <p class="text-2xl font-bold text-red-600 mt-1">{{ data.product_is_out_of_stock }}</p>
+          <p class="text-xs text-red-500 mt-1">Cần nhập</p>
+        </div>
+        </Link>
+
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start">
           <div class="p-3 bg-blue-50 rounded-lg mr-4">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,7 +445,7 @@
               <div>
                 <p class="font-medium text-gray-800">{{ item.product_name }} - {{ item.code }}</p>
                 <p class="text-sm">
-                 {{ `Chỉ còn ${item.quantity_on_hand} ${item.unit ?? ''}` }}
+                  {{ `Chỉ còn ${item.quantity_on_hand} ${item.unit ?? ''}` }}
                 </p>
               </div>
             </div>
@@ -497,9 +467,12 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhân viên
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hoạt động</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hoạt động
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái
+                </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -520,7 +493,8 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10 phút trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang hoạt động</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang
+                    hoạt động</span>
                 </td>
               </tr>
               <tr>
@@ -540,7 +514,8 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 phút trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang hoạt động</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Đang
+                    hoạt động</span>
                 </td>
               </tr>
               <tr>
@@ -560,7 +535,8 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 giờ trước</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Đang giao hàng</span>
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Đang
+                    giao hàng</span>
                 </td>
               </tr>
             </tbody>

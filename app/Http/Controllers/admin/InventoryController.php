@@ -130,5 +130,10 @@ class InventoryController extends Controller
         //
     }
 
+    public function history()
+    {
+        // Trả về trang Inertia (Vue) cho lịch sử kho
+        return Inertia::render('admin/Inventory/History');
+    }
     
 }

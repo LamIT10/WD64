@@ -126,6 +126,8 @@ class RoleRepository extends BaseRepository
     }
     
     public function getAll(){
-        return $this->handleModel::all();
+        return $this->handleModel::where('name', '!=', 'admin')
+            ->orderBy('id', 'desc')
+            ->get();
     }
 }

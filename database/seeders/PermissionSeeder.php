@@ -70,6 +70,7 @@ class PermissionSeeder extends Seeder
                 'password' => Hash::make('admin123'),
                 'position' => 'Quản trị hệ thống',
                 'gender' => 'male',
+                'phone' => '0388954747',
                 'avatar' => 'avatars/admin.png',
                 'address' => 'Hà Nội',
                 'status' => 'active',
