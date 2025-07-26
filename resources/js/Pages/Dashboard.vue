@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="min-h-screen bg-gray-50 p-6">
+    <div class="min-h-screen bg-gray-50 p-2 sm:p-6">
       <!-- Header Section -->
       <!-- <div class="flex justify-between items-center mb-8">
         <div>
@@ -24,9 +24,9 @@
         </div>
       </div>   -->
 
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn xuất</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình xuất hàng trong tháng</p>
@@ -65,13 +65,13 @@
         </div>
 
         <!-- Stats cards grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-5">
           <!-- Tổng đơn hàng trong tháng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng xuất đơn hàng</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">{{
                   data.statistical_sale_order.count_sale_order_in_month }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
@@ -88,11 +88,11 @@
           </div>
 
           <!-- Đơn hàng đang chờ xử lý -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đang chuẩn bị</p>
-                <p class="text-2xl font-bold text-yellow-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-yellow-600 mt-1">{{
                   data.statistical_sale_order.count_sale_order_in_month_pending }}</p>
                 <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
               </div>
@@ -107,11 +107,11 @@
           </div>
 
           <!-- Đơn hàng đã nhận -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
-                <p class="text-2xl font-bold text-green-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-green-600 mt-1">{{
                   data.statistical_sale_order.count_sale_order_in_month_shipped }}</p>
                 <p class="text-xs text-gray-400 mt-1">Đã giao</p>
               </div>
@@ -125,11 +125,11 @@
           </div>
 
           <!-- Đơn hàng huỷ -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn huỷ</p>
-                <p class="text-2xl font-bold text-red-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-red-600 mt-1">{{
                   data.statistical_sale_order.count_sale_order_in_month_closed }}</p>
                 <p class="text-xs text-gray-400 mt-1">Không thực hiện</p>
               </div>
@@ -144,11 +144,11 @@
           </div>
 
           <!-- Tổng giá trị đơn hàng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-indigo-600 mt-1">{{
                   data.statistical_sale_order.sum_value_sale_order_in_month }}</p>
                 <p class="text-xs text-gray-400 mt-1">Tổng thu nhập</p>
               </div>
@@ -164,9 +164,9 @@
           </div>
         </div>
       </div>
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê phiếu nhập kho hàng</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình nhập hàng trong tháng</p>
@@ -204,13 +204,13 @@
         </div>
 
         <!-- Stats cards grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-5">
           <!-- Tổng đơn hàng trong tháng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng phiếu nhập</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_good_receipt.count_good_receipt_in_month
+                <p class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">{{ data.statistical_good_receipt.count_good_receipt_in_month
                 }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">Trong tháng</p>
@@ -227,11 +227,11 @@
           </div>
 
           <!-- Đơn hàng đang chờ xử lý -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Chờ duyệt</p>
-                <p class="text-2xl font-bold text-yellow-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-yellow-600 mt-1">{{
                   data.statistical_good_receipt.count_good_receipt_in_month_pending }}</p>
                 <p class="text-xs text-gray-400 mt-1">Chờ xử lý</p>
               </div>
@@ -246,11 +246,11 @@
           </div>
 
           <!-- Đơn hàng đã nhận -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
-                <p class="text-2xl font-bold text-green-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-green-600 mt-1">{{
                   data.statistical_good_receipt.count_good_receipt_in_month_received }}</p>
                 <p class="text-xs text-gray-400 mt-1">Đã nhập kho</p>
               </div>
@@ -264,11 +264,11 @@
           </div>
 
           <!-- Đơn hàng huỷ -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn huỷ</p>
-                <p class="text-2xl font-bold text-red-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-red-600 mt-1">{{
                   data.statistical_good_receipt.count_good_receipt_in_month_closed }}</p>
                 <p class="text-xs text-gray-400 mt-1">Không thực hiện</p>
               </div>
@@ -283,11 +283,11 @@
           </div>
 
           <!-- Tổng giá trị đơn hàng -->
-          <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
+          <div class="bg-white p-3 sm:p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị</p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1">{{
+                <p class="text-xl sm:text-2xl font-bold text-indigo-600 mt-1">{{
                   data.statistical_good_receipt.sum_value_good_receipt_in_month }}</p>
                 <p class="text-xs text-gray-400 mt-1">Tổng chi phí</p>
               </div>
