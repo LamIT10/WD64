@@ -101,45 +101,43 @@
         <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
         </div>
-        <table class="min-w-full text-sm border-separate border-spacing-0">
+        <table class="min-w-full text-sm border border-indigo-300 rounded-xl bg-white">
           <thead class="bg-gradient-to-r from-indigo-50 to-indigo-100 sticky top-0 z-10">
-            <tr>
-              <th class="px-3 py-3 text-left font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Mã VT</th>
-              <th class="px-3 py-3 text-left font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tên vật tư</th>
-              <th class="px-3 py-3 text-center font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">ĐVT</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn đầu SL</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn đầu TT</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Nhập SL</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Nhập TT</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Xuất SL</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Xuất TT</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Điều chỉnh</th>
-              <!-- <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Điều chỉnh -</th> -->
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn cuối SL</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Tồn cuối TT</th>
-              <th class="px-3 py-3 text-right font-bold text-indigo-800 border-b border-indigo-100 uppercase tracking-wider text-xs">Đơn giá xuất BQGQ</th>
+            <tr class="">
+              <th v-for="header in [
+                'Mã VT', 'Tên vật tư', 'ĐVT',
+                'Tồn đầu SL', 'Tồn đầu TT',
+                'Nhập SL', 'Nhập TT',
+                'Xuất SL', 'Xuất TT',
+                'Điều chỉnh',
+                'Tồn cuối SL', 'Tồn cuối TT',
+                'Đơn giá xuất BQGQ']"
+                :key="header"
+                class="px-3 py-3 text-xs font-bold text-indigo-800 uppercase tracking-wider border border-indigo-300 text-center bg-indigo-50">
+                {{ header }}
+              </th>
             </tr>
           </thead>
           <tbody v-if="filteredData.length && !loading">
             <tr v-for="item in filteredData" :key="item.item_code" class="hover:bg-indigo-50 transition cursor-pointer group">
-              <td class="px-3 py-3 border-b border-indigo-100">{{ item.item_code }}</td>
-              <td class="px-3 py-3 border-b border-indigo-100">{{ item.item_name }}</td>
-              <td class="px-3 py-3 text-center border-b border-indigo-100">{{ item.unit }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.opening_qty) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.opening_value) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.received_qty) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.received_value) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.shipped_qty) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.shipped_value) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100 text-red-700 font-semibold">{{ format(item.increase_qty) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.closing_qty) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(item.closing_value) }}</td>
-              <td class="px-3 py-3 text-right border-b border-indigo-100">{{ format(importBQGQ(item)) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-left">{{ item.item_code }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-left">{{ item.item_name }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-center">{{ item.unit }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.opening_qty) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.opening_value) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.received_qty) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.received_value) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.shipped_qty) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.shipped_value) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right text-red-700 font-semibold">{{ format(item.increase_qty) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.closing_qty) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.closing_value) }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(importBQGQ(item)) }}</td>
             </tr>
           </tbody>
           <tbody v-else-if="!loading">
             <tr>
-              <td colspan="12" class="text-center text-gray-500 py-12 border-b border-indigo-100">
+              <td colspan="13" class="text-center text-gray-500 py-12 border border-indigo-200">
                 <i class="fas fa-box-open text-4xl mb-2 text-indigo-400"></i>
                 <div class="text-base font-semibold text-indigo-600">Không có dữ liệu</div>
               </td>
@@ -147,24 +145,18 @@
           </tbody>
           <tfoot class="bg-indigo-100 font-semibold text-indigo-800 sticky bottom-0">
             <tr>
-              <td colspan="3" class="px-3 py-3 border-t border-indigo-100 text-right text-xs">Tổng cộng:</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('opening_qty') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('opening_value') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('received_qty') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('received_value') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('shipped_qty') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('shipped_value') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs text-green-700">{{ total('increase_qty') }}</td>
-              <!-- <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs text-red-700">{{ total('decrease_qty') }}</td> -->
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('closing_qty') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ total('closing_value') }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs"></td>
+              <td colspan="3" class="px-3 py-3 border border-indigo-300 text-right text-xs">Tổng cộng:</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('opening_qty') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('opening_value') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('received_qty') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('received_value') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('shipped_qty') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('shipped_value') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs text-green-700">{{ total('increase_qty') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('closing_qty') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs">{{ total('closing_value') }}</td>
+              <td class="px-3 py-3 border border-indigo-300 text-right text-xs"></td>
             </tr>
-            <!-- <tr class="bg-indigo-200">
-              <td colspan="4" class="px-3 py-3 border-t border-indigo-100 text-right text-xs font-bold">Tổng theo BQGQ (Tồn cuối TT):</td>
-              <td colspan="8" class="px-3 py-3 border-t border-indigo-100 text-right text-xs">{{ totalClosingValueBQGQ }}</td>
-              <td class="px-3 py-3 border-t border-indigo-100 text-right text-xs"></td>
-            </tr> -->
           </tfoot>
         </table>
       </div>
@@ -184,7 +176,7 @@ import * as XLSX from 'xlsx'
 
 const page = usePage()
 const currentYear = new Date().getFullYear()
-const yearOptions = ref(Array.from({ length: 5 }, (_, i) => currentYear - i)) // 5 năm gần nhất
+const yearOptions = ref(Array.from({ length: 3 }, (_, i) => currentYear - i)) // 5 năm gần nhất
 
 const filter = ref({
   periods: [],

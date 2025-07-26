@@ -2,9 +2,9 @@
   <AppLayout>
     <div class="min-h-screen bg-gray-50 p-6">
 
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn xuất</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình xuất hàng trong tháng</p>
@@ -143,9 +143,9 @@
         </div>
 
       </div>
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <!-- Header section -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn nhập kho hàng</h4>
             <p class="text-sm text-gray-500">Tổng quan tình hình nhập hàng trong tháng</p>

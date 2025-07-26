@@ -41,6 +41,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::resource('inventory-audit', InventoryAuditController::class);
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('inventory/statistics', [InventoryController::class, 'statistics'])->name('inventory.statistics');
+    Route::get('inventory/history', [InventoryController::class, 'history'])->name('inventory.history');
     Route::get('inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
     Route::post('inventory', [InventoryController::class, 'store'])->name('inventory.store');
     Route::get('inventory/{id}', [InventoryController::class, 'show'])->name('inventory.show');
