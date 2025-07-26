@@ -120,6 +120,17 @@
                     </div>
                     <span class="text-xs">Báo cáo nhập kho</span>
                     </Link>
+                    <Link
+                        :href="route('admin.reports.suggest')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
+                        >
+                            <i class="fas fa-shopping-cart text-xs"></i>
+                        </div>
+                        <span class="text-xs">Gợi ý nhập hàng</span></Link
+                    >
                 </div>
             </div>
             <!-- User Management -->
@@ -327,44 +338,6 @@
                     </Link>
                 </div>
             </div> -->
-
-              <div class="mb-2">
-                <button
-                    class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('report-menu')"
-                >
-                    <div
-                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors"
-                    >
-                        <i class="fa-solid fa-chart-simple"></i>
-                    </div>
-                    <span class="text-sm font-medium flex-1 text-left"
-                        >Báo cáo</span
-                    >
-                    <i
-                        class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
-                        id="report-icon"
-                    ></i>
-                </button>
-
-                <div
-                    id="report-menu"
-                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
-                >
-                    <Link
-                        :href="route('admin.reports.suggest')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
-                        >
-                            <i class="fas fa-shopping-cart text-xs"></i>
-                        </div>
-                        <span class="text-xs">Gợi ý nhập hàng</span></Link
-                    >
-                </div>
-            </div>
-
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">
                 <button

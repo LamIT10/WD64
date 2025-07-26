@@ -246,7 +246,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
     });
     Route::prefix('reports')->as('reports.')->group(function () {
-        Route::get('{day?}/', [SuggestController::class, 'suggest'])->name('suggest');
+        Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
     });
 });
 
