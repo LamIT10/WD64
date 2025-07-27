@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1 flex flex-col gap-2">
           <label class="text-sm font-medium text-gray-700">Tìm kiếm</label>
-          <input type="text" v-model="keyword" placeholder="Tìm sản phẩm, biến thể, mã chứng từ..." class="border border-indigo-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none shadow-sm transition-all w-full" />
+          <input type="text" v-model="keyword" placeholder="Tìm sản phẩm, biến thể, mã đơn hàng..." class="border border-indigo-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none shadow-sm transition-all w-full" />
         </div>
         <button @click="fetchHistory" class="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold shadow-md hover:from-indigo-600 hover:to-indigo-800 hover:shadow-lg transition-all">Lọc</button>
       </div>
@@ -25,7 +25,7 @@
             <tr class="bg-indigo-50 text-indigo-900">
               <th class="px-6 py-4 border-b font-bold text-left rounded-tl-2xl">Ngày</th>
               <th class="px-6 py-4 border-b font-bold text-left">Loại</th>
-              <th class="px-6 py-4 border-b font-bold text-left">Mã chứng từ</th>
+              <th class="px-6 py-4 border-b font-bold text-left">Mã đơn hàng</th>
               <!-- <th class="px-6 py-4 border-b font-bold text-left">Sản phẩm - Biến thể</th>
               <th class="px-6 py-4 border-b font-bold text-right">Số lượng (+/-)</th> -->
               <th class="px-6 py-4 border-b font-bold text-left">Ghi chú</th>
@@ -65,7 +65,7 @@
         <div class="relative z-10 bg-white rounded-2xl shadow-2xl p-8 min-w-[600px] max-w-2xl w-full animate-slide-up border border-indigo-100 overflow-y-auto max-h-[80vh]" @click.stop>
           <button class="absolute top-4 right-4 text-gray-400 hover:text-indigo-700 text-3xl font-bold transition-colors" @click="closeModal" title="Đóng">&times;</button>
           <h3 class="text-2xl font-bold mb-6 text-indigo-800 flex items-center gap-3">
-            <i class="fas fa-file-alt text-indigo-400 text-xl"></i> Chi tiết đon hàng
+            <i class="fas fa-file-alt text-indigo-400 text-xl"></i> Chi tiết đơn hàng
           </h3>
             <template v-if="detail">
             <!-- Nếu là Điều chỉnh kho -->
