@@ -73,7 +73,7 @@
               <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Chọn năm</label>
                 <select v-model="tempYear" class="w-full px-4 py-2 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 text-sm">
-                  <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+                  <option v-for="y in yearOptions" :key="y" :value="y" :disabled="y > currentYear">{{ y }}</option>
                 </select>
               </div>
 
@@ -81,8 +81,11 @@
               <div class="mb-4">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Chọn tháng hoặc toàn năm</label>
                 <select v-model="tempMonth" class="w-full px-4 py-2 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 text-sm">
-                  <option value="all">Toàn bộ năm</option>
-                  <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')">Tháng {{ String(m).padStart(2, '0') }}</option>
+                  <option value="all" :disabled="tempYear > currentYear || (tempYear == currentYear && currentMonth < 12)">Toàn bộ năm</option>
+                  <option v-for="m in 12" :key="m" :value="String(m).padStart(2, '0')"
+                    :disabled="tempYear > currentYear || (tempYear == currentYear && m > currentMonth)">
+                    Tháng {{ String(m).padStart(2, '0') }}
+                  </option>
                 </select>
               </div>
 
@@ -121,7 +124,11 @@
           <tbody v-if="filteredData.length && !loading">
             <tr v-for="item in filteredData" :key="item.item_code" class="hover:bg-indigo-50 transition cursor-pointer group">
               <td class="px-3 py-3 border border-indigo-200 text-left">{{ item.item_code }}</td>
-              <td class="px-3 py-3 border border-indigo-200 text-left">{{ item.item_name }}</td>
+              <td class="px-3 py-3 border border-indigo-200 text-left">
+                {{ item.item_name }}
+                <br>
+                <span class="text-xs text-gray-500 font-normal italic">{{ item.attributes }}</span>
+              </td>
               <td class="px-3 py-3 border border-indigo-200 text-center">{{ item.unit }}</td>
               <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.opening_qty) }}</td>
               <td class="px-3 py-3 border border-indigo-200 text-right">{{ format(item.opening_value) }}</td>
@@ -175,8 +182,10 @@ import AppLayout from '../Layouts/AppLayout.vue'
 import * as XLSX from 'xlsx'
 
 const page = usePage()
-const currentYear = new Date().getFullYear()
-const yearOptions = ref(Array.from({ length: 3 }, (_, i) => currentYear - i)) // 5 năm gần nhất
+const now = new Date()
+const currentYear = now.getFullYear()
+const currentMonth = now.getMonth() + 1 // JS month is 0-based
+const yearOptions = ref(Array.from({ length: 3 }, (_, i) => currentYear - i))
 
 const filter = ref({
   periods: [],
@@ -190,7 +199,7 @@ const loading = ref(false)
 // Modal refs
 const isModalOpen = ref(false)
 const tempYear = ref(currentYear)
-const tempMonth = ref('all')
+const tempMonth = ref(String(currentMonth).padStart(2, '0'))
 
 // Computed for display
 const selectedPeriod = computed(() => filter.value.periods[0] || null)
@@ -274,6 +283,7 @@ const onPeriodChange = async () => {
     const res = await fetch(`/api/inventory/statistics?months=${filter.value.months.join(',')}`)
     const json = await res.json()
     data.value = json.data || []
+    console.log(data.value);
   } catch (error) {
     console.error('Error fetching data:', error)
   } finally {
@@ -296,11 +306,22 @@ watch(isModalOpen, (val) => {
       }
     } else {
       tempYear.value = currentYear
-      tempMonth.value = 'all'
+      tempMonth.value = String(currentMonth).padStart(2, '0')
     }
   }
 })
-
+// Đảm bảo tempMonth luôn hợp lệ khi đổi năm
+watch(tempYear, (newYear) => {
+  if (newYear > currentYear) {
+    tempMonth.value = String(currentMonth).padStart(2, '0')
+  } else if (newYear == currentYear && Number(tempMonth.value) > currentMonth) {
+    tempMonth.value = String(currentMonth).padStart(2, '0')
+  } else if (newYear < currentYear && tempMonth.value === 'all') {
+    // giữ nguyên
+  } else if (newYear < currentYear && Number(tempMonth.value) > 12) {
+    tempMonth.value = '12'
+  }
+})
 const importBQGQ = (item) => {
   const totalQty = Number(item.opening_qty) + Number(item.received_qty)
   const totalVal = Number(item.opening_value) + Number(item.received_value)

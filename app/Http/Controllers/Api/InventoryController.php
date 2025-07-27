@@ -184,10 +184,23 @@ class InventoryController extends Controller
             $openingValue = $openingQty * $unitPrice;
             $closingValue = $closingQty * $unitPrice;
 
+            $variantName = $variant->name ?? '';
+            $variantCode = $variant->code ?? '';
+            // Lấy chuỗi thuộc tính của biến thể (giống history)
+            $attributeString = '';
+            if ($variant->attributes && $variant->attributes->count()) {
+                $attributeString = $variant->attributes->map(function($attrVal) {
+                    return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
+                })->implode(', ');
+            }
+
             return [
                 'months' => $months,
                 'item_code' => $variant->code,
                 'item_name' => $variant->product->name,
+                'variant_name' => $variantName,
+                'variant_code' => $variantCode,
+                'attributes' => $attributeString,
                 'unit' => $variant->product->defaultUnit->name ?? '',
                 'opening_qty' => $openingQty,
                 'opening_value' => $openingValue,
@@ -245,21 +258,6 @@ class InventoryController extends Controller
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
-
-            // Nếu chưa có bất kỳ phát sinh nào, tạo dòng nhập kho ban đầu 50 cái
-            // if (!$hasReceipt && !$hasShipment && !$hasAudit) {
-            //     $history->push([
-            //         'id' => null,
-            //         'type' => 'Nhập kho',
-            //         'date' => $variant->created_at ? $variant->created_at->format('Y-m-d') : null,
-            //         // 'code' => 'KHỞI TẠO',
-            //         'product' => $variant->product->name ?? '',
-            //         'variant' => $variant->name ?? '',
-            //         'attributes' => $attributeString,
-            //         'qty' => 50,
-            //         'note' => 'Nhập kho ban đầu',
-            //     ]);
-            // }
 
             // Lấy lịch sử nhập kho
             $receipts = GoodReceiptItem::with(['goodReceipt', 'productVariant.product', 'productVariant.attributes.attribute'])
