@@ -602,11 +602,6 @@ const Ziggy = {
             methods: ["POST"],
             parameters: ["id"],
         },
-        "admin.reports.suggest": {
-            uri: "admin/reports/{day?}",
-            methods: ["GET", "HEAD"],
-            parameters: ["day"],
-        },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
         logout: { uri: "logout", methods: ["POST"] },

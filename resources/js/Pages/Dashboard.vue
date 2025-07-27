@@ -12,31 +12,52 @@
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
 
             <!-- Phần chọn ngày bắt đầu và kết thúc -->
-            <div class="flex items-center space-x-4">
-              <!-- Ô ngày bắt đầu -->
-              <div class="flex items-center space-x-2">
-                <label for="start-date" class="text-xs text-indigo-600">Từ ngày</label>
-                <input type="text" id="start-date"
-                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
-                  v-model="dataFilterDateSaleOrder.sub_from_date" v-date-picker @change="handleFilterPurchase">
+            <div class="flex items-center bg-white p-3 rounded-xl border border-gray-200 shadow-xs w-full max-w-3xl">
+              <!-- Ngày bắt đầu -->
+              <div class="flex items-center flex-1">
+                <label for="start-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Từ ngày</label>
+                <div class="relative flex-1">
+                  <input type="text" id="start-date"
+                    class="date-picker w-full pl-3 pr-9 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all hover:border-gray-400"
+                    v-model="dataFilterDateSaleOrder.sub_from_date" v-date-picker @change="handleFilterPurchase">
+                  <svg
+                    class="w-5 h-5 text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
 
-              <!-- Ô ngày kết thúc -->
-              <div class="flex items-center space-x-2">
-                <label for="end-date" class="text-xs text-indigo-600">Đến ngày</label>
-                <input type="text" id="end-date"
-                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
-                  v-model="dataFilterDateSaleOrder.sub_to_date" v-date-picker @change="handleFilterPurchase">
+              <!-- Dấu phân cách -->
+              <span class="mx-2 text-gray-400">-</span>
+
+              <!-- Ngày kết thúc -->
+              <div class="flex items-center flex-1">
+                <label for="end-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Đến ngày</label>
+                <div class="relative flex-1">
+                  <input type="text" id="end-date"
+                    class="date-picker w-full pl-3 pr-9 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all hover:border-gray-400"
+                    v-model="dataFilterDateSaleOrder.sub_to_date" v-date-picker @change="handleFilterPurchase">
+                  <svg
+                    class="w-5 h-5 text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
 
               <!-- Nút reset -->
               <button @click="resetDateFilterSaleOrder"
-                class="p-1 text-indigo-400 hover:text-indigo-600 transition-colors" title="Reset">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                class="ml-4 px-3 py-2 flex items-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                title="Đặt lại">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
+                <span class="ml-2 text-sm">Đặt lại</span>
               </button>
             </div>
           </div>
@@ -153,30 +174,52 @@
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
 
             <!-- Phần chọn ngày bắt đầu và kết thúc -->
-            <div class="flex items-center space-x-4">
-              <!-- Ô ngày bắt đầu -->
-              <div class="flex items-center space-x-2">
-                <label for="start-date" class="text-xs text-indigo-600">Từ ngày</label>
-                <input type="text" id="start-date"
-                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
-                  v-model="dataFilterDatePurchase.sub_from_date" v-date-picker @change="handleFilterPurchase">
+            <div class="flex items-center bg-white p-3 rounded-xl border border-gray-200 shadow-xs w-full max-w-3xl">
+              <!-- Ngày bắt đầu -->
+              <div class="flex items-center flex-1">
+                <label for="start-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Từ ngày</label>
+                <div class="relative flex-1">
+                  <input type="text" id="start-date"
+                    class="date-picker w-full pl-3 pr-9 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all hover:border-gray-400"
+                    v-model="dataFilterDatePurchase.sub_from_date" v-date-picker @change="handleFilterPurchase">
+                  <svg
+                    class="w-5 h-5 text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
 
-              <!-- Ô ngày kết thúc -->
-              <div class="flex items-center space-x-2">
-                <label for="end-date" class="text-xs text-indigo-600">Đến ngày</label>
-                <input type="text" id="end-date"
-                  class="px-2 py-1 text-xs border border-indigo-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 text-indigo-700 date-picker"
-                  v-model="dataFilterDatePurchase.sub_to_date" v-date-picker @change="handleFilterPurchase">
+              <!-- Dấu phân cách -->
+              <span class="mx-2 text-gray-400">-</span>
+
+              <!-- Ngày kết thúc -->
+              <div class="flex items-center flex-1">
+                <label for="end-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Đến ngày</label>
+                <div class="relative flex-1">
+                  <input type="text" id="end-date"
+                    class="date-picker w-full pl-3 pr-9 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-blue-200 focus:border-blue-500 transition-all hover:border-gray-400"
+                    v-model="dataFilterDatePurchase.sub_to_date" v-date-picker @change="handleFilterPurchase">
+                  <svg
+                    class="w-5 h-5 text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
               </div>
+
               <!-- Nút reset -->
               <button @click="resetDateFilterPurchase"
-                class="p-1 text-indigo-400 hover:text-indigo-600 transition-colors" title="Reset">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                class="ml-4 px-3 py-2 flex items-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                title="Đặt lại">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
+                <span class="ml-2 text-sm">Đặt lại</span>
               </button>
             </div>
           </div>

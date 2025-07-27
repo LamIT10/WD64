@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full mb-30 mt-15">
+    <div class=" mb-30 me-15 ms-15 mt-15">
         <select v-model="filterYear.year" @change="handleFilterByYear"
             class="px-4 py-2 text-sm border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-700 shadow-sm">
             <option v-for="year in pluck_year" :key="year" :value="year">
@@ -73,7 +73,7 @@ const chartData = {
     datasets: [
         {
             type: 'bar',
-            label: 'Đơn nhập / tháng',
+            label: 'Đơn nhập hoàn thành / tháng',
             data: [
                 purchase_in_month_in_year.data[0].count,
                 purchase_in_month_in_year.data[1].count,

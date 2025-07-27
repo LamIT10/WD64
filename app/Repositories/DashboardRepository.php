@@ -37,19 +37,18 @@ class DashboardRepository extends BaseRepository
         // lấy ra thông kê đơn xuất theo tháng đơn nhập
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
-        $totalPurchaseInMonth = PurchaseOrder::select(['order_date', 'total_amount']);
+        $totalPurchaseInMonth = PurchaseOrder::select(['id','created_at', 'total_amount']);
         if (!empty($query['fromDatePurchase']) || !empty($query['toDatePurchase'])) {
             if (!empty($query['fromDatePurchase'])) {
-                $totalPurchaseInMonth->where('order_date', ">=", $query['fromDatePurchase']);
+                $totalPurchaseInMonth->where('created_at', ">=", $query['fromDatePurchase']);
             }
             if (!empty($query['toDatePurchase'])) {
-                $totalPurchaseInMonth->where('order_date', "<=", $query['fromDatePurchase']);
+                $totalPurchaseInMonth->where('created_at', "<=", $query['toDatePurchase']);
             }
         } else {
-            $totalPurchaseInMonth->whereMonth('order_date', $currentMonth)
-                ->whereYear('order_date', $currentYear);
+            $totalPurchaseInMonth->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear);
         }
-
         // Đếm tổng số đơn
         $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
 
@@ -60,19 +59,13 @@ class DashboardRepository extends BaseRepository
         $countPurchaseInMonthImportPartial = (clone $totalPurchaseInMonth)->where('order_status', '2')->count();
         $countPurchaseInMonthCompoleted = (clone $totalPurchaseInMonth)->where('order_status', '3')->count();
 
-        $sumValueGoodReceiptInMonth = GoodReceipt::select(['receipt_date', 'total_amount']);
-        if (!empty($query['fromDatePurchase']) || !empty($query['toDatePurchase'])) {
-            if (!empty($query['fromDatePurchase'])) {
-                $sumValueGoodReceiptInMonth->where('receipt_date', ">=", $query['fromDatePurchase']);
-            }
-            if (!empty($query['toDatePurchase'])) {
-                $sumValueGoodReceiptInMonth->where('receipt_date', ">=", $query['fromDatePurchase']);
-            }
-        } else {
-            $sumValueGoodReceiptInMonth->whereMonth('receipt_date', $currentMonth)
-                ->whereYear('receipt_date', $currentYear);
-        }
-        $sumValueGoodReceiptInMonth = (clone $sumValueGoodReceiptInMonth)->sum('total_amount');
+        $sumValueGoodReceiptInMonth = GoodReceipt::select(['purchase_order_id', 'total_amount'])
+        ->whereHas('purchaseOrder', function ($query) {
+            $query->whereIn('order_status', [2, 3]); // hoặc status bạn cần
+        })
+        ->whereIn('purchase_order_id', $totalPurchaseInMonth->pluck('id')->toArray())
+        ->get()
+        ->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
         $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"),DB::raw('COUNT(*) as total_orders'))
