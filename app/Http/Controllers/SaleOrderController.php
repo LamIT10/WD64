@@ -57,7 +57,8 @@ class SaleOrderController extends Controller
                     'total' => $result->total(),
                     'links' => $result->getUrlRange(1, $result->lastPage()),
                 ],
-            ]
+            ],
+            'sale_order_id' => $request->query('sale_order_id'),
         ]);
     }
     public function create()
@@ -146,5 +147,14 @@ class SaleOrderController extends Controller
         }
 
         return response()->json($result);  // Return JSON success
+    }
+    public function findPage(Request $request)
+    {
+        $orderId = $request->query('order_id');
+        $perPage = $request->query('per_page', 10);
+        $page = app(SaleOrdersRepository::class)
+            ->getPageOfOrder($orderId, $perPage);
+
+        return response()->json(['page' => $page]);
     }
 }

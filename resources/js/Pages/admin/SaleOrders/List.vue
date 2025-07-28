@@ -931,11 +931,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import emitter from "../../../eventBus.js";
+console.log("Emitter in List.vue:", emitter);
+import { ref, computed, onMounted, watch } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
 import ToastClient from "../../components/ToastClient.vue";
-import { useForm, router } from "@inertiajs/vue3";
+import { useForm, router, usePage } from "@inertiajs/vue3";
 import { clearCanvas } from "chart.js/helpers";
 import axios from "axios";
 const { listOrders } = defineProps({
@@ -1031,23 +1033,21 @@ function formatCurrencyVND(value) {
 }
 
 function formatPageNumber(page) {
-    return page; // Trả về số trang không có dấu chấm
+    return page;
 }
 
 function validatePayBefore() {
-    if (
-        isNaN(pay_before.value) ||
-        pay_before.value === null ||
-        !/^\d+$/.test(pay_before.value.toString())
-    ) {
+    if (pay_before.value === "" || pay_before.value === null) {
+        errorMessage.value = "";
+        return;
+    }
+    if (isNaN(pay_before.value) || !/^\d+$/.test(pay_before.value.toString())) {
         errorMessage.value =
             "Số tiền thanh toán trước phải là một số nguyên dương hợp lệ.";
-        pay_before.value = 0;
         return;
     }
     if (pay_before.value < 0) {
         errorMessage.value = "Số tiền thanh toán trước không được nhỏ hơn 0.";
-        pay_before.value = 0;
         return;
     }
     if (pay_before.value > selectedOrder.value.total_amount) {
@@ -1056,26 +1056,23 @@ function validatePayBefore() {
         )}) không được vượt quá tổng tiền đơn hàng (${formatCurrencyVND(
             selectedOrder.value.total_amount
         )}).`;
-        pay_before.value = selectedOrder.value.total_amount;
         return;
     }
     errorMessage.value = "";
 }
 
 function validatePayAfter() {
-    if (
-        isNaN(pay_after.value) ||
-        pay_after.value === null ||
-        !/^\d+$/.test(pay_after.value.toString())
-    ) {
+    if (pay_after.value === "" || pay_after.value === null) {
+        errorMessage.value = "";
+        return;
+    }
+    if (isNaN(pay_after.value) || !/^\d+$/.test(pay_after.value.toString())) {
         errorMessage.value =
             "Số tiền thanh toán sau phải là một số nguyên dương hợp lệ.";
-        pay_after.value = 0;
         return;
     }
     if (pay_after.value < 0) {
         errorMessage.value = "Số tiền thanh toán sau không được nhỏ hơn 0.";
-        pay_after.value = 0;
         return;
     }
     const maxPayAfter =
@@ -1087,7 +1084,6 @@ function validatePayAfter() {
         )}) không được vượt quá số tiền còn lại (${formatCurrencyVND(
             maxPayAfter
         )}).`;
-        pay_after.value = maxPayAfter;
         return;
     }
     errorMessage.value = "";
@@ -1195,6 +1191,7 @@ const approveOrder = (id) => {
                 order.status = "shipped";
                 order.pay_before = approve.pay_before;
             }
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error approving order:", errors);
@@ -1252,6 +1249,7 @@ const completeOrder = (id) => {
                 order.status = "completed";
                 order.pay_after = complete.pay_after;
             }
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error completing order:", errors);
@@ -1287,6 +1285,7 @@ const submitRejectReason = () => {
             alert("Đơn hàng đã được từ chối.");
             closeRejectModal();
             closeModal();
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error rejecting order:", errors);
@@ -1396,6 +1395,27 @@ const copyQR = async () => {
 };
 function closeQRModal() {
     qrData.value = null;
+}
+
+const page = usePage();
+onMounted(() => {
+    openOrderModalIfNeeded();
+});
+
+watch(
+    [() => page.props?.sale_order_id, () => listOrders.data],
+    () => {
+        openOrderModalIfNeeded();
+    },
+    { immediate: true }
+);
+
+function openOrderModalIfNeeded() {
+    const saleOrderId = page.props?.sale_order_id;
+    if (saleOrderId) {
+        const order = listOrders.data.find((o) => o.id == saleOrderId);
+        if (order) openModal(order);
+    }
 }
 </script>
 

@@ -27,6 +27,7 @@ use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -240,7 +241,12 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
         Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
+        Route::get('/find-page', [SaleOrderController::class, 'findPage'])->name('find-page');
     });
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::get('/notifications/show-all', [NotificationController::class, 'showAll'])->name('notifications.show-all');
 });
 
 

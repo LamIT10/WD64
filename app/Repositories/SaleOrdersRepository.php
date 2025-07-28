@@ -12,6 +12,7 @@ use App\Models\Rank;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\Unit;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -331,6 +332,12 @@ class SaleOrdersRepository extends BaseRepository
             }
 
             DB::commit();
+            app(NotificationService::class)->create(
+                'order_created',
+                'Đơn hàng mới',
+                "Đơn hàng #{$saleOrder->id} đã được tạo thành công.",
+                ['order_id' => $saleOrder->id]
+            );
             return $saleOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -395,6 +402,12 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
+            app(NotificationService::class)->create(
+                'order_rejected',
+                'Đơn hàng bị từ chối',
+                "Đơn hàng #{$orderId} đã bị từ chối. Lý do: {$rejectReason}",
+                ['order_id' => $orderId]
+            );
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -462,6 +475,12 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
+            app(NotificationService::class)->create(
+                'order_approved',
+                'Đơn hàng đã được duyệt',
+                "Đơn hàng #{$saleOrder->id} đã được duyệt thành công.",
+                ['order_id' => $saleOrder->id]
+            );
             return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -544,6 +563,12 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
 
             DB::commit();
+            app(NotificationService::class)->create(
+                'order_completed',
+                'Đơn hàng đã hoàn thành',
+                "Đơn hàng #{$saleOrder->id} đã được xác nhận hoàn thành.",
+                ['order_id' => $saleOrder->id]
+            );
             return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -580,5 +605,21 @@ class SaleOrdersRepository extends BaseRepository
             'qrDataURL' => $data['data']['qrDataURL'],
             'qrCode' => $data['data']['qrCode'],
         ];
+    }
+    public function getPageOfOrder($orderId, $perPage = 10)
+    {
+        $query = $this->handleModel->newQuery();
+
+
+        // Sắp xếp giống index()
+        $query->orderBy('created_at', 'desc');
+
+        // Lấy danh sách id theo thứ tự
+        $ids = $query->pluck('id')->toArray();
+        $index = array_search($orderId, $ids);
+
+        if ($index === false) return 1; // Không tìm thấy, mặc định trang 1
+
+        return intval(floor($index / $perPage)) + 1;
     }
 }

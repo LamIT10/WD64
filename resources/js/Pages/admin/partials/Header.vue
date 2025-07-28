@@ -1,8 +1,11 @@
 <template>
     <!-- Header -->
     <header
-        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
-        <div class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5">
+        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30"
+    >
+        <div
+            class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5"
+        >
             <div class="text-purple-600">
                 <i class="fas fa-layer-group"></i>
             </div>
@@ -18,10 +21,12 @@
                 <!-- QR Code Scanner -->
                 <button
                     class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 relative group"
-                    title="Quét mã vạch">
+                    title="Quét mã vạch"
+                >
                     <i class="fas fa-qrcode text-lg"></i>
                     <span
-                        class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                         Quét mã vạch
                     </span>
                 </button>
@@ -29,27 +34,139 @@
                 <!-- Dark Mode Toggle -->
                 <button
                     class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
-                    title="Chế độ tối">
+                    title="Chế độ tối"
+                >
                     <i class="fas fa-moon text-lg"></i>
                 </button>
             </div>
 
             <!-- Notifications -->
-            <div class="relative">
+            <div class="relative" ref="notificationRef">
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group">
+                    @click="toggleNotifications"
+                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                >
                     <i class="fas fa-bell text-lg"></i>
                     <span
-                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">3</span>
+                        v-if="unreadCount > 0"
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-[24px] w-[24px] flex items-center justify-center animate-pulse"
+                    >
+                        {{ unreadCount > 10 ? "10+" : unreadCount }}
+                    </span>
                     <span
-                        class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                         Thông báo
                     </span>
                 </button>
+
+                <!-- Notifications Dropdown -->
+                <transition
+                    enter-active-class="transition ease-out duration-200"
+                    enter-from-class="opacity-0 scale-95"
+                    enter-to-class="opacity-100 scale-100"
+                    leave-active-class="transition ease-in duration-150"
+                    leave-from-class="opacity-100 scale-100"
+                    leave-to-class="opacity-0 scale-95"
+                >
+                    <div
+                        v-if="showNotifications"
+                        class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-40 origin-top-right"
+                    >
+                        <!-- Header -->
+                        <div
+                            class="flex items-center justify-between p-4 border-b border-gray-100"
+                        >
+                            <h3 class="text-sm font-semibold text-gray-800">
+                                Thông báo
+                            </h3>
+                            <button
+                                v-if="unreadCount > 0"
+                                @click="markAllAsRead"
+                                class="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                            >
+                                Đánh dấu tất cả đã đọc
+                            </button>
+                        </div>
+
+                        <!-- Notifications List -->
+                        <div class="max-h-96 overflow-y-auto">
+                            <div
+                                v-if="notifications.length === 0"
+                                class="p-4 text-center text-gray-500 text-sm"
+                            >
+                                Không có thông báo nào
+                            </div>
+                            <div
+                                v-else
+                                v-for="notification in notifications"
+                                :key="notification.id"
+                                @click="markAsRead(notification)"
+                                :class="[
+                                    'p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors',
+                                    !notification.isRead ? 'bg-blue-50' : '',
+                                ]"
+                            >
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <i
+                                            :class="
+                                                getNotificationIcon(
+                                                    notification.type
+                                                )
+                                            "
+                                        ></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <p
+                                                :class="[
+                                                    'text-sm font-medium',
+                                                    !notification.isRead
+                                                        ? 'text-gray-900'
+                                                        : 'text-gray-700',
+                                                ]"
+                                            >
+                                                {{ notification.title }}
+                                            </p>
+                                            <div
+                                                v-if="!notification.isRead"
+                                                class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"
+                                            ></div>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            {{ notification.message }}
+                                        </p>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            {{ notification.time }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div
+                            v-if="notifications.length > 0"
+                            class="p-3 border-t border-gray-100 w-full flex justify-center"
+                        >
+                            <Link
+                                :href="route('admin.notifications.show-all')"
+                                class="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-medium"
+                            >
+                                Xem tất cả thông báo
+                            </Link>
+                        </div>
+                    </div>
+                </transition>
             </div>
 
             <!-- User Profile -->
-            <div class="flex items-center space-x-2 pl-2 border-l border-gray-200">
+            <div
+                class="flex items-center space-x-2 pl-2 border-l border-gray-200"
+            >
                 <div class="text-right hidden sm:block">
                     <div class="text-sm font-medium text-gray-800">
                         Nguyễn Văn Admin
@@ -57,27 +174,41 @@
                     <div class="text-xs text-gray-500">Quản trị viên</div>
                 </div>
                 <div class="relative group">
-                    <img class="inline-block h-8 w-8 rounded-full object-cover cursor-pointer"
+                    <img
+                        class="inline-block h-8 w-8 rounded-full object-cover cursor-pointer"
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="User profile" />
+                        alt="User profile"
+                    />
 
                     <!-- Dropdown arrow indicator -->
-                    <div @click.stop="showDropdown = !showDropdown"
-                        class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 cursor-pointer select-none">
+                    <div
+                        @click.stop="showDropdown = !showDropdown"
+                        class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 cursor-pointer select-none"
+                    >
                         <div
-                            class="bg-gray-200 group-hover:bg-purple-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors">
-                            <i class="fas fa-chevron-down text-[6px] text-gray-500 group-hover:text-white"></i>
+                            class="bg-gray-200 group-hover:bg-purple-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors"
+                        >
+                            <i
+                                class="fas fa-chevron-down text-[6px] text-gray-500 group-hover:text-white"
+                            ></i>
                         </div>
                     </div>
                     <!-- Dropdown menu -->
                     <transition name="fade">
-                        <div v-if="showDropdown"
-                            class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-40 py-2 text-sm">
-                            <Link :href="route('profile')" 
-                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700">Quản lí cá nhân
+                        <div
+                            v-if="showDropdown"
+                            class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-40 py-2 text-sm"
+                        >
+                            <Link
+                                :href="route('profile')"
+                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700"
+                                >Quản lí cá nhân
                             </Link>
-                            <Link :href="route('logout')" method="post" 
-                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700">Đăng xuất
+                            <Link
+                                :href="route('logout')"
+                                method="post"
+                                class="w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700"
+                                >Đăng xuất
                             </Link>
                         </div>
                     </transition>
@@ -88,31 +219,129 @@
 </template>
 
 <script setup>
-
-import { ref } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
-import { route } from 'ziggy-js';
+import emitter from "../../../eventBus.js";
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { Link, router } from "@inertiajs/vue3";
+import { route } from "ziggy-js";
+import axios from "axios";
 
 document.addEventListener("DOMContentLoaded", function () {
     const notificationBadge = document.querySelector(".animate-pulse");
-    notificationBadge.classList.add("animate-ping-once");
-
-    setTimeout(() => {
-        notificationBadge.classList.remove("animate-ping-once");
-    }, 1000);
+    if (notificationBadge) {
+        notificationBadge.classList.add("animate-ping-once");
+        setTimeout(() => {
+            notificationBadge.classList.remove("animate-ping-once");
+        }, 1000);
+    }
 });
-// Dropdown trạng thái
-const showDropdown = ref(false)
 
-// Đóng dropdown khi click ra ngoài
-function handleClickOutside(event) {
-  const dropdown = document.querySelector('.group')
-  if (dropdown && !dropdown.contains(event.target)) {
-    showDropdown.value = false
-  }
-}
-document.addEventListener('click', handleClickOutside)
+// Reactive state
+const showUserDropdown = ref(false);
+const showNotifications = ref(false);
+const notificationRef = ref(null);
+const userDropdownRef = ref(null);
+const notifications = ref([]);
+const unreadCount = ref(0);
 
+// Methods
+const toggleNotifications = () => {
+    showNotifications.value = !showNotifications.value;
+};
+const fetchNotifications = async () => {
+    try {
+        const response = await axios.get("/admin/notifications");
+        notifications.value = response.data.notifications;
+        unreadCount.value = response.data.unreadCount;
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+    }
+};
+
+const markAsRead = async (notification) => {
+    try {
+        await axios.post(`/admin/notifications/${notification.id}/read`);
+        const found = notifications.value.find((n) => n.id === notification.id);
+        if (found) found.isRead = true;
+
+        if (notification.data && notification.data.order_id) {
+            const res = await axios.get("/admin/sale-orders/find-page", {
+                params: { order_id: notification.data.order_id },
+            });
+            const page = res.data.page || 1;
+
+            router.visit(
+                route("admin.sale-orders.index", {
+                    page,
+                    sale_order_id: notification.data.order_id,
+                })
+            );
+        }
+
+        await fetchNotifications();
+    } catch (error) {
+        console.error("Error marking as read:", error);
+    }
+};
+
+const markAllAsRead = async () => {
+    try {
+        await axios.post("/admin/notifications/read-all");
+        notifications.value.forEach((n) => (n.isRead = true));
+        await fetchNotifications();
+    } catch (error) {
+        console.error("Error marking all as read:", error);
+    }
+};
+const getNotificationIcon = (type) => {
+    switch (type) {
+        case "order_created":
+            return "fas fa-shopping-cart text-blue-500";
+        case "order_approved":
+            return "fas fa-check-circle text-green-500";
+        case "order_rejected":
+            return "fas fa-times-circle text-red-500";
+        case "order_completed":
+            return "fas fa-check-double text-purple-500";
+        case "order_pending":
+            return "fas fa-clock text-yellow-500";
+        default:
+            return "fas fa-bell text-gray-500";
+    }
+};
+
+// Click outside handler
+const handleClickOutside = (event) => {
+    if (
+        notificationRef.value &&
+        !notificationRef.value.contains(event.target)
+    ) {
+        showNotifications.value = false;
+    }
+    if (
+        userDropdownRef.value &&
+        !userDropdownRef.value.contains(event.target)
+    ) {
+        showUserDropdown.value = false;
+    }
+};
+let interval = null;
+// Lifecycle hooks
+onMounted(() => {
+    fetchNotifications();
+    interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s
+    emitter.on("notification-updated", () => {
+        console.log("Received notification-updated event");
+        fetchNotifications();
+        showNotifications.value = true;
+    });
+    document.addEventListener("click", handleClickOutside);
+});
+
+onUnmounted(() => {
+    clearInterval(interval);
+    document.removeEventListener("click", handleClickOutside);
+    emitter.off("notification-updated");
+});
 </script>
 
 <style lang="css" scoped>
