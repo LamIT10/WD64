@@ -29,7 +29,7 @@ class ReportRepository extends BaseRepository
         $startDate = $params['start_date'] ?? Carbon::now()->startOfMonth()->toDateString();
         $endDate = $params['end_date'] ?? Carbon::now()->endOfMonth()->toDateString();
         $year =  $params['year'] ?? Carbon::now()->year;
-        $purchaseOrders = $this->purchase->with(['supplier', 'user'])->whereBetween('order_date', [$startDate, $endDate])
+        $purchaseOrders = $this->purchase->with(['supplier', 'user'])->whereBetween('created_at', [$startDate, $endDate])
             ->get();
         $countPendingPurchase = (clone $purchaseOrders)->where('order_status', '0')->count();
         $countAcceptedPurchase = (clone $purchaseOrders)->where('order_status', '1')->count();
@@ -38,10 +38,11 @@ class ReportRepository extends BaseRepository
         $countClosedPurchase = (clone $purchaseOrders)->where('order_status', '4')->count();
 
         $rawData = $this->purchase
-            ->whereYear('order_date', $year)
-            ->selectRaw("DATE_FORMAT(order_date, '%Y-%m') as month, COUNT(*) as count")
-            ->groupByRaw("DATE_FORMAT(order_date, '%Y-%m')")
-            ->orderByRaw("DATE_FORMAT(order_date, '%Y-%m')")
+            ->whereYear('created_at', $year)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
+            ->whereIn('order_status', [3, 4])
+            ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
+            ->orderByRaw("DATE_FORMAT(created_at, '%Y-%m')")
             ->get()
             ->keyBy('month');
         $fullMonthData = collect(range(1, 12))->map(function ($month) use ($rawData, $year) {
@@ -52,29 +53,41 @@ class ReportRepository extends BaseRepository
             ];
         });
 
-        $rawDataReceipt = $this->goodsReceipt
-            ->whereYear('receipt_date', $year)
-            ->selectRaw("DATE_FORMAT(receipt_date, '%Y-%m') as month, sum(total_amount) as total")
-            ->groupByRaw("DATE_FORMAT(receipt_date, '%Y-%m')")
-            ->orderByRaw("DATE_FORMAT(receipt_date, '%Y-%m')")
+        $purchaseOrdersByMonth = $this->purchase
+            ->whereYear('created_at', $year)
+            ->whereIn('order_status', [2, 3])
+            ->selectRaw("id, DATE_FORMAT(created_at, '%Y-%m') as month")
             ->get()
-            ->keyBy('month');
+            ->groupBy('month');
+
+        // Tạo ra cấu trúc giống hệt $rawDataReceipt nhưng theo logic mới
+        $rawDataReceipt = collect();
+        foreach ($purchaseOrdersByMonth as $month => $orders) {
+            $orderIds = $orders->pluck('id')->toArray();
+            if (!empty($orderIds)) {
+                $total = $this->goodsReceipt
+                    ->whereIn('purchase_order_id', $orderIds)
+                    ->sum('total_amount');
+                $rawDataReceipt->put($month, (object)[
+                    'month' => $month,
+                    'total' => $total
+                ]);
+            }
+        }
+        
+        $fullMonthDataReceipt = collect(range(1, 12))->map(function ($month) use ($rawDataReceipt, $year) {
+            $key = sprintf('%d-%02d', $year, $month);
+            return [
+                'month' => $key,
+                'total' => $rawDataReceipt->get($key)->total ?? 0
+            ];
+        });
         $pluckYear = $this->goodsReceipt
             ->selectRaw('YEAR(receipt_date) as year')
             ->distinct()
             ->orderBy('year', 'desc') // hoặc 'asc' nếu muốn ngược lại
             ->pluck('year')
             ->toArray();
-
-        $fullMonthDataReceipt = collect(range(1, 12))->map(function ($month) use ($rawDataReceipt, $year) {
-            $key = sprintf('%d-%02d', $year, $month);
-
-            return [
-                'month' => $key,
-                'total' => $rawDataReceipt->get($key)->total ?? 0
-            ];
-        });
-
         $top5Suppliers = $this->goodsReceipt::with('purchaseOrder.supplier')->whereBetween('receipt_date', [$startDate, $endDate])
             ->get()
             ->groupBy(function ($receipt) {
@@ -113,6 +126,16 @@ class ReportRepository extends BaseRepository
                 ];
             });
 
+        $totalPurchaseInMonth = $this->purchase::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw("COUNT(*) as total_purchase, SUM(total_amount) as total_amount")
+            ->get();
+        $ListIdPurchaseInMonth = $this->purchase::whereBetween('created_at', [$startDate, $endDate])
+            ->pluck('id')
+            ->toArray();
+        $totalGoodReceiptInMonth = $this->goodsReceipt::whereIn("purchase_order_id", $ListIdPurchaseInMonth)
+            ->distinct("purchase_order_id")
+            ->selectRaw("COUNT(*) as total_receipt, SUM(total_amount) as total_amount")
+            ->get();
         $data = [
             'purchase_orders' => [
                 'count_pending_purchase' => $countPendingPurchase,
@@ -133,6 +156,8 @@ class ReportRepository extends BaseRepository
             'pluck_year' => $pluckYear,
             'top_5_suppliers' => $top5Suppliers->take(5),
             'top_10_product' => $top10Product,
+            'total_purchase_in_month' => $totalPurchaseInMonth->first(),
+            'total_good_receipt_in_month' => $totalGoodReceiptInMonth->first(),
         ];
         return $data;
     }

@@ -184,10 +184,23 @@ class InventoryController extends Controller
             $openingValue = $openingQty * $unitPrice;
             $closingValue = $closingQty * $unitPrice;
 
+            $variantName = $variant->name ?? '';
+            $variantCode = $variant->code ?? '';
+            // Lấy chuỗi thuộc tính của biến thể (giống history)
+            $attributeString = '';
+            if ($variant->attributes && $variant->attributes->count()) {
+                $attributeString = $variant->attributes->map(function($attrVal) {
+                    return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
+                })->implode(', ');
+            }
+
             return [
                 'months' => $months,
                 'item_code' => $variant->code,
                 'item_name' => $variant->product->name,
+                'variant_name' => $variantName,
+                'variant_code' => $variantCode,
+                'attributes' => $attributeString,
                 'unit' => $variant->product->defaultUnit->name ?? '',
                 'opening_qty' => $openingQty,
                 'opening_value' => $openingValue,
@@ -225,13 +238,12 @@ class InventoryController extends Controller
         $history = collect();
 
         foreach ($variants as $variant) {
-            // Kiểm tra có phát sinh nhập/xuất/điều chỉnh chưa
             $hasReceipt = GoodReceiptItem::where('product_variant_id', $variant->id)
                 ->whereHas('goodReceipt', fn($q) => $q->whereBetween('receipt_date', [$start, $end]))
                 ->exists();
 
             $hasShipment = SaleOrderItem::where('product_variant_id', $variant->id)
-                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end]))
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '==', 'shipped'))
                 ->exists();
 
             $hasAudit = InventoryAuditItem::where('product_variant_id', $variant->id)
@@ -245,21 +257,6 @@ class InventoryController extends Controller
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
-
-            // Nếu chưa có bất kỳ phát sinh nào, tạo dòng nhập kho ban đầu 50 cái
-            // if (!$hasReceipt && !$hasShipment && !$hasAudit) {
-            //     $history->push([
-            //         'id' => null,
-            //         'type' => 'Nhập kho',
-            //         'date' => $variant->created_at ? $variant->created_at->format('Y-m-d') : null,
-            //         // 'code' => 'KHỞI TẠO',
-            //         'product' => $variant->product->name ?? '',
-            //         'variant' => $variant->name ?? '',
-            //         'attributes' => $attributeString,
-            //         'qty' => 50,
-            //         'note' => 'Nhập kho ban đầu',
-            //     ]);
-            // }
 
             // Lấy lịch sử nhập kho
             $receipts = GoodReceiptItem::with(['goodReceipt', 'productVariant.product', 'productVariant.attributes.attribute'])
@@ -290,7 +287,7 @@ class InventoryController extends Controller
             // Lấy lịch sử xuất kho
             $shipments = SaleOrderItem::with(['salesOrder', 'productVariant.product', 'productVariant.attributes.attribute'])
                 ->where('product_variant_id', $variant->id)
-                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end]))
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'shipped'))
                 ->get()
                 ->map(function($item) use ($variant) {
                     $attributeString = '';
@@ -351,26 +348,4 @@ class InventoryController extends Controller
         ]);
     }
 
-    public function historyDetail(Request $request, $type, $id)
-    {
-        if ($type === 'Nhập kho') {
-            $receipt = GoodReceipt::with(['items.productVariant.product'])
-                ->where('id', $id)
-                ->first();
-            return response()->json(['data' => $receipt]);
-        }
-        if ($type === 'Xuất kho') {
-            $order = SaleOrder::with(['items.productVariant.product'])
-                ->where('id', $id)
-                ->first();
-            return response()->json(['data' => $order]);
-        }
-        if ($type === 'Điều chỉnh') {
-            $audit = InventoryAudit::with(['items.productVariant.product'])
-                ->where('id', $id)
-                ->first();
-            return response()->json(['data' => $audit]);
-        }
-        return response()->json(['data' => null], 404);
-    }
 }

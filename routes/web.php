@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -183,7 +184,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
         Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
-    
     });
     Route::group(['prefix' => 'supplier-transaction', 'as' => 'supplier-transaction.'], function () {
         Route::get('{id}/show', [SupplierTransactionController::class, 'show'])->name('show')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_SHOW);
@@ -244,7 +244,12 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
         Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
+        Route::get('/find-page', [SaleOrderController::class, 'findPage'])->name('find-page');
     });
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::get('/notifications/show-all', [NotificationController::class, 'showAll'])->name('notifications.show-all');
     Route::prefix('reports')->as('reports.')->group(function () {
         Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
         Route::get('revenue', [SuggestController::class, 'revenue'])->name('revenue');

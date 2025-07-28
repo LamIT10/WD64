@@ -53,10 +53,28 @@
                 <span class="px-2 py-1 text-xs font-semibold rounded-full"
                   :class="{
                     'bg-green-100 text-green-800': customer.status === 'active',
-                    'bg-red-100 text-red-800': customer.status === 'inactive',
-                    'bg-yellow-100 text-yellow-800': customer.status === 'debt_exceeded'
+                    'bg-red-100 text-red-800': customer.status === 'inactive'
                   }">
                   {{ statusLabel(customer.status) }}
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <i class="fas fa-star text-indigo-500"></i>
+                <label class="text-sm font-medium text-gray-700">Hạng khách hàng</label>
+              </div>
+              <div class="mt-1 border-b border-indigo-200 pb-1">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                  :class="{
+                    'bg-gray-200 text-gray-800': customer.rank?.name === 'Sắt',
+                    'bg-amber-200 text-amber-800': customer.rank?.name === 'Đồng',
+                    'bg-slate-200 text-slate-800': customer.rank?.name === 'Bạc',
+                    'bg-yellow-200 text-yellow-800': customer.rank?.name === 'Vàng',
+                    'bg-blue-200 text-blue-800': customer.rank?.name === 'Bạch Kim',
+                    'bg-gray-100 text-gray-700': !customer.rank
+                  }">
+                  {{ customer.rank ? customer.rank.name : 'Chưa cập nhật' }}
                 </span>
               </div>
             </div>
@@ -88,51 +106,6 @@
             </div>
           </div>
 
-          <!-- Financial Information -->
-          <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin tài chính</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div>
-              <div class="flex items-center space-x-2">
-                <i class="fas fa-star text-indigo-500"></i>
-                <label class="text-sm font-medium text-gray-700">Hạng khách hàng</label>
-              </div>
-              <div class="mt-1 border-b border-indigo-200 pb-1">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                  :class="{
-                    'bg-gray-200 text-gray-800': customer.rank?.name === 'Sắt',
-                    'bg-amber-200 text-amber-800': customer.rank?.name === 'Đồng',
-                    'bg-slate-200 text-slate-200': customer.rank?.name === 'Bạc',
-                    'bg-yellow-200 text-yellow-800': customer.rank?.name === 'Vàng',
-                    'bg-blue-200 text-blue-800': customer.rank?.name === 'Bạch Kim',
-                    'bg-gray-100 text-gray-700': !customer.rank
-                  }">
-                  {{ customer.rank ? customer.rank.name : 'Chưa cập nhật' }}
-                </span>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center space-x-2">
-                <i class="fas fa-money-bill-wave text-indigo-500"></i>
-                <label class="text-sm font-medium text-gray-700">Công nợ</label>
-              </div>
-              <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatNumber(customer.current_debt) }}</div>
-            </div>
-            <div>
-              <div class="flex items-center space-x-2">
-                <i class="fas fa-shopping-cart text-indigo-500"></i>
-                <label class="text-sm font-medium text-gray-700">Tổng chi tiêu</label>
-              </div>
-              <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatNumber(customer.total_spent) }}</div>
-            </div>
-            <div>
-              <div class="flex items-center space-x-2">
-                <i class="fas fa-credit-card text-indigo-500"></i>
-                <label class="text-sm font-medium text-gray-700">Giới hạn công nợ</label>
-              </div>
-              <div class="mt-1 text-gray-600 border-b border-indigo-200 pb-1">{{ formatNumber(customer.max_debt_limit) }}</div>
-            </div>
-          </div>
-
           <!-- Timestamps -->
           <h3 class="text-lg font-semibold text-indigo-600 pb-2 mb-4">Thông tin hệ thống</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -159,7 +132,6 @@
 
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
-import { Link } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
 import { route } from 'ziggy-js';
 
@@ -167,23 +139,13 @@ defineProps({
   customer: Object,
 });
 
-// Hàm định dạng số
-const formatNumber = (value) => {
-  if (value === null || value === undefined || isNaN(Number(value))) {
-    return '0';
-  }
-  return Number(value).toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-};
-
 // Hàm dịch trạng thái
 const statusLabel = (status) => {
   switch (status) {
     case 'active':
-      return 'Hoạt động';
+      return 'Hợp tác';
     case 'inactive':
-      return 'Không hoạt động';
-    case 'debt_exceeded':
-      return 'Vượt công nợ';
+      return 'Ngừng hợp tác';
     default:
       return 'Chưa cập nhật';
   }

@@ -67,7 +67,7 @@
                                     :key="product.variant_id"
                                     :value="product"
                                     v-slot="{ active }"
-                                    @click="selectProduct(product)"
+                                    @pointerdown="selectProduct(product)"
                                 >
                                     <span
                                         :class="[
@@ -589,7 +589,7 @@
                                         :key="customer.id"
                                         :value="customer"
                                         v-slot="{ active }"
-                                        @click="selectCustomer(customer)"
+                                        @pointerdown="selectCustomer(customer)"
                                     >
                                         <span
                                             :class="[
@@ -1363,7 +1363,7 @@ const selectProduct = async (product) => {
     const quantityOnHand = await fetchInventoryQuantity(product.variant_id);
     const quantityRequested = 1;
     if (quantityOnHand === 0) {
-        productError.value = `Sản phẩm ${product.product_name} không tồn tại trong kho.`;
+        productError.value = `Sản phẩm ${product.product_name} đã hết hàng`;
         return;
     }
     if (quantityRequested > quantityOnHand) {

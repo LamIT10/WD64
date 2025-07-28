@@ -20,6 +20,8 @@ class Customer extends Model
         'province',
         'district',
         'ward',
+        'avatar',
+        'status',
         'total_spent'
     ];
 
