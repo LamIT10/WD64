@@ -34,62 +34,7 @@
 
             <div v-else>
                 <div class="mb-6">
-                    <div class="bg-white rounded p-3">
-                        <nav
-                            class="flex gap-3 justify-start items-center"
-                            aria-label="Tabs"
-                        >
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{}"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-600 shadow-sm hover:shadow-md hover:bg-indigo-100 hover:text-indigo-900 transition-all duration-200 ease-in-out animate-fade-in cursor-pointer'"
-                                @click="setActiveTab('all')"
-                            >
-                                <i class="fa-solid fa-border-all text-xl"></i>
-                                Tất cả đơn xuất
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'pending' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 font-semibold border border-yellow-500 shadow-sm hover:shadow-md hover:bg-yellow-100 hover:text-yellow-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('pending')"
-                            >
-                                <i
-                                    class="fa-solid fa-hourglass-start text-xl"
-                                ></i>
-                                Chờ duyệt
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'shipped' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:bg-blue-100 hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('shipped')"
-                            >
-                                <i class="fa-solid fa-truck text-xl"></i>
-                                Đang giao hàng
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'completed' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:bg-purple-100 hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('completed')"
-                            >
-                                <i
-                                    class="fa-solid fa-file-circle-check text-xl"
-                                ></i>
-                                Hoàn thành
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'cancelled' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('cancelled')"
-                            >
-                                <i class="fa-solid fa-ban text-xl"></i>
-                                Từ chối
-                            </Waiting>
-                        </nav>
-                    </div>
+                    <div class="bg-white rounded p-3"></div>
                 </div>
 
                 <!-- Filters -->
