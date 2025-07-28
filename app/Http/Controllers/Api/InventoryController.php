@@ -287,7 +287,7 @@ class InventoryController extends Controller
             // Lấy lịch sử xuất kho
             $shipments = SaleOrderItem::with(['salesOrder', 'productVariant.product', 'productVariant.attributes.attribute'])
                 ->where('product_variant_id', $variant->id)
-                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end]))
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'shipped'))
                 ->get()
                 ->map(function($item) use ($variant) {
                     $attributeString = '';
