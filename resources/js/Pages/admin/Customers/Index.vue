@@ -129,46 +129,28 @@
                                         {{ statusLabel(customer.status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
-                                    <button @click="deleteCustomer(customer.id)" class="text-red-600 hover:text-red-800" title="Xóa khách hàng">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
                                     <div class="relative inline-block text-left">
-                                        <button @click="toggleActionDropdownSingle(customer.id)"
-                                            class="text-gray-400 hover:text-gray-600 focus:outline-none">
-                                         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                            viewBox="0 0 4 15">
-                                            <path
-                                                d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                                        <button @click="toggleActionDropdownSingle(customer.id)" data-customer-id="customer.id" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
+                                                <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
                                             </svg>
                                         </button>
-                                        <div v-if="activeDropdown === customer.id"
-                                            class="absolute right-0 z-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                        <div v-if="activeDropdown === customer.id" class="absolute right-0 z-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                                             <div class="py-1">
-                                                <Link :href="route('admin.customers.show', customer.id)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                                                <i class="fas fa-eye mr-2 text-blue-600"></i> Chi tiết
+                                                <Link :href="route('admin.customers.show', customer.id)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                                                    <i class="fas fa-eye mr-2 text-blue-600"></i> Chi tiết
                                                 </Link>
-                                                <Link :href="route('admin.customers.edit', customer.id)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                                                <i class="fas fa-edit mr-2 text-indigo-600"></i> Sửa
+                                                <Link :href="route('admin.customers.edit', customer.id)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                                                    <i class="fas fa-edit mr-2 text-indigo-600"></i> Sửa
                                                 </Link>
-                                                <Link :href="route('admin.customers.debt-orders', customer.id)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                                                      <i class="fa fa-credit-card-alt text-indigo-600 mr-2"  aria-hidden="true"></i> Công nợ
+                                                <Link :href="route('admin.customers.debt-orders', customer.id)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+                                                    <i class="fa fa-credit-card-alt text-indigo-600 mr-2" aria-hidden="true"></i> Công nợ
                                                 </Link>
-                                                <ConfirmModal :route-name="'admin.customers.destroy'" :route-params="{
-                                                    id: customer.id,
-                                                }" title="Xác nhận xóa khách hàng"
-                                                    :message="`Bạn có chắc chắn muốn xóa khách hàng ${customer.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xóa`">
-                                                    <template #trigger="{
-                                                        openModal,
-                                                    }">
+                                                <ConfirmModal :route-name="'admin.customers.destroy'" :route-params="{ id: customer.id }" title="Xác nhận xóa khách hàng" :message="`Bạn có chắc chắn muốn xóa khách hàng ${customer.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xóa`">
+                                                    <template #trigger="{ openModal }">
                                                         <button @click="openModal" class="text-sm px-3 py-2 bg-white text-red-600">
-                                                            <i class="fas fa-trash-alt mr-1"></i>
-                                                            Xóa
+                                                            <i class="fas fa-trash-alt mr-1"></i> Xóa
                                                         </button>
                                                     </template>
                                                 </ConfirmModal>
@@ -226,6 +208,7 @@ const props = defineProps({
 });
 
 const activeTab = ref(props.status || 'active');
+const activeDropdown = ref(null); // Thêm biến cho dropdown hành động
 
 const columnOptions = [
     'name', 'phone', 'email', 'rank', 'status'
@@ -246,7 +229,6 @@ const visibleColumns = ref(
 );
 
 const search = ref(props.search || '');
-
 const showColumnDropdown = ref(false);
 const dropdownRef = ref(null);
 const showActionDropdown = ref(false);
@@ -277,12 +259,19 @@ const toggleActionDropdown = () => {
     showActionDropdown.value = !showActionDropdown.value;
 };
 
+const toggleActionDropdownSingle = (customerId) => {
+    activeDropdown.value = activeDropdown.value === customerId ? null : customerId;
+};
+
 const handleClickOutside = (event) => {
     if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
         showColumnDropdown.value = false;
     }
     if (actionDropdownRef.value && !actionDropdownRef.value.contains(event.target)) {
         showActionDropdown.value = false;
+    }
+    if (activeDropdown.value && !event.target.closest(`[data-customer-id="${activeDropdown.value}"]`)) {
+        activeDropdown.value = null;
     }
 };
 
