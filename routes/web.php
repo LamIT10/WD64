@@ -252,6 +252,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::get('/notifications/show-all', [NotificationController::class, 'showAll'])->name('notifications.show-all');
     Route::prefix('reports')->as('reports.')->group(function () {
         Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
+        Route::get('revenue', [SuggestController::class, 'revenue'])->name('revenue');
     });
 });
 

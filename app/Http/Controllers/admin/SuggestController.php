@@ -24,4 +24,23 @@ class SuggestController extends Controller
         $data = $this->reportRepository->getSuggestOrder($weeks, $reserveDays, $search);
         return Inertia::render('admin/Reports/SuggestOrder', ['suggestions' => $data]);
     }
+    public function revenue(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $search = $request->input('product_search', '');
+        $page = $request->input('page', 1);
+
+        $result = $this->reportRepository->getRevenueReport($startDate, $endDate, $search, 5);
+
+        return Inertia::render('admin/Reports/Revenue', [
+            'revenues' => $result['data'],
+            'meta' => $result['meta'],
+            'filters' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'product_search' => $search,
+            ],
+        ]);
+    }
 }
