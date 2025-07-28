@@ -98,6 +98,7 @@ class SupplierRepository extends BaseRepository
             $newSupplier['address'] = $data['address'] ?? null;
             $newSupplier['email'] = $data['email'] ?? null;
             $newSupplier['contact_person'] = $data['contact_person'] ?? null;
+            $newSupplier['tax'] = $data['tax'] ?? null;
 
             $supplier = $this->handleModel->create($newSupplier);
             DB::commit();

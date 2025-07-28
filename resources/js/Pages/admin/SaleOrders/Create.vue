@@ -67,7 +67,7 @@
                                     :key="product.variant_id"
                                     :value="product"
                                     v-slot="{ active }"
-                                    @click="selectProduct(product)"
+                                    @pointerdown="selectProduct(product)"
                                 >
                                     <span
                                         :class="[
@@ -589,7 +589,7 @@
                                         :key="customer.id"
                                         :value="customer"
                                         v-slot="{ active }"
-                                        @click="selectCustomer(customer)"
+                                        @pointerdown="selectCustomer(customer)"
                                     >
                                         <span
                                             :class="[

@@ -206,7 +206,7 @@
                                 scope="row"
                                 class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
                             >
-                                {{ order.id }}
+                                {{ order.code }}
                             </th>
                             <td class="px-4 py-2 text-indigo-700 font-semibold">
                                 {{ order.supplier.name }}
@@ -474,6 +474,18 @@
                                                             selectedOrder.created_at
                                                         )
                                                     }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr v-if="selectedOrder.order_status == 4">
+                                                <td
+                                                    class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                >
+                                                    Lý do từ chối
+                                                </td>
+                                                <td>
+                                                    <span class="ml-4 font-bold text-red-600">
+                                                        {{selectedOrder.reason}}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         </tbody>

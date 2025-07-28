@@ -27,7 +27,7 @@ class GoodReceiptRepository extends BaseRepository
     {
         $query = $this->handleModel->with([
             'purchaseOrder' => function ($query) {
-                $query->select(['id', 'supplier_id', 'user_id', 'order_status']);
+                $query->select(['id', 'supplier_id', 'user_id', 'order_status', 'code']);
             },
             'purchaseOrder.supplier' => function ($query) {
                 $query->select(['id', 'name']);
