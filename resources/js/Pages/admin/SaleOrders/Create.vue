@@ -1363,7 +1363,7 @@ const selectProduct = async (product) => {
     const quantityOnHand = await fetchInventoryQuantity(product.variant_id);
     const quantityRequested = 1;
     if (quantityOnHand === 0) {
-        productError.value = `Sản phẩm ${product.product_name} không tồn tại trong kho.`;
+        productError.value = `Sản phẩm ${product.product_name} đã hết hàng`;
         return;
     }
     if (quantityRequested > quantityOnHand) {
