@@ -82,9 +82,9 @@
                   </template>
                 </td>
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.unit }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_reserved }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_in_transit }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_on_hand ?? 0 }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_reserved ?? 0 }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.quantity_in_transit ?? 0 }}</td>
               </tr>
             </tbody>
           </table>
@@ -167,9 +167,9 @@ const exportSampleExcel = () => {
       product.code,
       product.name_product,
       product.unit,
-      product.quantity_on_hand,
-      product.quantity_reserved,
-      product.quantity_in_transit,
+      product.quantity_on_hand ?? 0,
+      product.quantity_reserved ?? 0,
+      product.quantity_in_transit ?? 0,
     ])
   ];
   const ws = XLSX.utils.aoa_to_sheet(sampleData);

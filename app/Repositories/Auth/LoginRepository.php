@@ -36,6 +36,12 @@ class LoginRepository extends BaseRepository
             }
 
             $user = User::find(Auth::check() ? Auth::user()->id : null);
+
+            // xử lí tk đã nghỉ
+             if ($user->status === 'inactive') {
+                Auth::logout(); 
+            throw new Exception('Thông tin đăng nhập không chính xác.');
+             }
             // xử lý các quyên hạng trùng nhau
             $permissions = $user->getPermissionsViaRoles()->pluck("name")->unique()->values();
             $roles = $user->getRoleNames()->toArray();

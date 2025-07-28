@@ -14,6 +14,7 @@ use App\Models\SaleOrderItem;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 
@@ -307,7 +308,7 @@ class SaleOrdersRepository extends BaseRepository
                 ]);
 
                 $inventory->update([
-                    'quantity_on_hand' => $inventory->quantity_on_hand - $quantityRequested
+                    'quantity_reserved' => $inventory->quantity_reserved + $quantityRequested
                 ]);
             }
 
@@ -343,9 +344,9 @@ class SaleOrdersRepository extends BaseRepository
     {
         $inventory = Inventory::where('product_variant_id', $productVariantId)
             ->first();
-        return $inventory ? $inventory->quantity_on_hand : 0;
+        return $inventory ? ($inventory->quantity_on_hand - $inventory->quantity_reserved) : 0;
     }
-    public function rejectOrder($orderId)
+    public function rejectOrder($orderId, $rejectReason = null)
     {
         try {
             DB::beginTransaction();
@@ -383,16 +384,15 @@ class SaleOrdersRepository extends BaseRepository
                     $quantityToRestore = $item->quantity_ordered * $conversionFactor;
 
                     $inventory->update([
-                        'quantity_on_hand' => $inventory->quantity_on_hand + $quantityToRestore
+                        'quantity_reserved' => $inventory->quantity_reserved - $quantityToRestore
                     ]);
                     Log::info("Khôi phục tồn kho cho sản phẩm {$fullName}: +{$quantityToRestore}");
                 } else {
                     Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
                 }
             }
-            $this->saleOrderItem->where('sales_order_id', $orderId)->delete();
+            $saleOrder->update(['status' => 'cancelled', 'note' => $rejectReason]);
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
-            $saleOrder->delete();
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
@@ -418,6 +418,41 @@ class SaleOrdersRepository extends BaseRepository
 
             if ($pay_before > $saleOrder->total_amount) {
                 throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
+            }
+            // Lấy danh sách sale_order_items
+            $items = $this->saleOrderItem->where('sales_order_id', $orderId)->get();
+
+            // Khôi phục inventory
+            foreach ($items as $item) {
+                $inventory = Inventory::where('product_variant_id', $item->product_variant_id)
+                    ->first();
+
+                if ($inventory) {
+                    // Tính số lượng khôi phục dựa trên quantity_ordered và conversion_factor
+                    $productVariant = ProductVariant::where('id', $item->product_variant_id)
+                        ->with(['product', 'attributes'])
+                        ->first();
+                    $productName = $productVariant ? $productVariant->product->name : 'Unknown';
+                    $variantNames = $productVariant ? $productVariant->attributes->pluck('name')->join(' - ') : '';
+                    $fullName = $variantNames ? "{$productName} - {$variantNames}" : $productName;
+                    $conversionFactor = 1;
+                    $unitConversion = ProductUnitConversion::where('product_id', $productVariant->product_id)
+                        ->where('to_unit_id', $item->unit_id)
+                        ->first();
+                    if ($unitConversion) {
+                        $conversionFactor = $unitConversion->conversion_factor;
+                    }
+
+                    $quantityToRestore = $item->quantity_ordered * $conversionFactor;
+
+                    $inventory->update([
+                        'quantity_on_hand' => $inventory->quantity_on_hand - $inventory->quantity_reserved,
+                        'quantity_reserved' => $inventory->quantity_reserved - $quantityToRestore
+                    ]);
+                    Log::info("Khôi phục tồn kho cho sản phẩm {$fullName}: +{$quantityToRestore}");
+                } else {
+                    Log::warning("Không tìm thấy inventory cho product_variant_id {$item->product_variant_id}");
+                }
             }
 
             $saleOrder->update([
@@ -515,5 +550,35 @@ class SaleOrdersRepository extends BaseRepository
             Log::error('Lỗi khi xác nhận hoàn thành đơn hàng: ' . $th->getMessage());
             return ['error' => "Lỗi khi xác nhận hoàn thành đơn hàng: {$th->getMessage()}"];
         }
+    }
+    public function generateQR($id, Request $request)
+    {
+        $order = $this->handleModel->findOrFail($id);
+        $amount = $order->total_amount;
+        $body = [
+            'accountNo' => env('VIETQR_ACCOUNT_NO'),
+            'accountName' => env('VIETQR_ACCOUNT_NAME'),
+            'acqId' => env('VIETQR_ACQ_ID'),
+            'amount' => $amount,
+            'addInfo' => "Thanh toan don hang {$order->id}",
+            'format' => 'text',
+            'template' => env('VIETQR_TEMPLATE', 'compact'),
+        ];
+        $response = Http::withHeaders([
+            'x-client-id' => env('VIETQR_CLIENT_ID'),
+            'x-api-key' => env('VIETQR_API_KEY'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.vietqr.io/v2/generate', $body);
+        if ($response->failed()) {
+            Log::error('VietQR HTTP failed', ['status' => $response->status(), 'body' => $response->body()]);
+            return response()->json(['error' => 'Lỗi tạo QR: ' . $response->body()], 500);
+        }
+
+        $data = $response->json();
+        Log::info('VietQR Response Data', ['data' => $data]);  // Log mảng $data để xem có key 'data' không
+        return [
+            'qrDataURL' => $data['data']['qrDataURL'],
+            'qrCode' => $data['data']['qrCode'],
+        ];
     }
 }

@@ -1,5 +1,6 @@
 <template>
     <AppLayout>
+        <ToastClient ref="toastRef" class="z-100" />
         <div class="px-4 py-6">
             <div
                 class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center"
@@ -80,9 +81,9 @@
                             </Waiting>
                             <Waiting
                                 route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'rejected' }"
+                                :route-params="{ status: 'cancelled' }"
                                 :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('rejected')"
+                                @click="setActiveTab('cancelled')"
                             >
                                 <i class="fa-solid fa-ban text-xl"></i>
                                 Từ chối
@@ -143,7 +144,7 @@
                                 <option value="pending">Chờ duyệt</option>
                                 <option value="shipped">Đang giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
-                                <option value="rejected">Từ chối</option>
+                                <option value="cancelled">Từ chối</option>
                             </select>
                         </div>
                     </div>
@@ -254,7 +255,7 @@
                                             'text-purple-600 bg-purple-100 px-2 py-1 rounded-xl':
                                                 order.status === 'completed',
                                             'text-red-600 bg-red-100 px-2 py-1 rounded-xl':
-                                                order.status === 'rejected',
+                                                order.status === 'cancelled',
                                         }"
                                     >
                                         {{ getStatusText(order.status) }}
@@ -330,6 +331,7 @@
                 <div
                     v-if="isModalOpen"
                     class="fixed inset-0 overflow-y-auto z-50"
+                    @click="clearErrorMessage"
                 >
                     <div
                         class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
@@ -468,7 +470,7 @@
                                                                     'completed',
                                                                 'text-red-700 bg-red-100 border border-red-300':
                                                                     selectedOrder.status ===
-                                                                    'rejected',
+                                                                    'cancelled',
                                                             }"
                                                         >
                                                             {{
@@ -738,12 +740,103 @@
                                 </button>
                                 <button
                                     v-if="selectedOrder.status === 'pending'"
-                                    @click="rejectOrder(selectedOrder.id)"
+                                    @click="openRejectModal(selectedOrder.id)"
                                     class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     <i class="fa-solid fa-ban"></i>
                                     Từ chối
                                 </button>
+                                <!-- Modal nhập lý do từ chối -->
+                                <div
+                                    v-if="showRejectModal"
+                                    class="fixed inset-0 overflow-y-auto z-50"
+                                >
+                                    <div
+                                        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+                                    >
+                                        <div
+                                            class="fixed inset-0 z-40 transition-opacity"
+                                            aria-hidden="true"
+                                        >
+                                            <div
+                                                class="absolute inset-0 bg-gray-500 opacity-50"
+                                                @click="closeRejectModal"
+                                            ></div>
+                                        </div>
+                                        <div
+                                            class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                                        >
+                                            <div
+                                                class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
+                                            >
+                                                <div
+                                                    class="sm:flex sm:items-start"
+                                                >
+                                                    <div
+                                                        class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+                                                    >
+                                                        <i
+                                                            class="fa-solid fa-ban text-red-600 text-lg"
+                                                        ></i>
+                                                    </div>
+                                                    <div
+                                                        class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                                                    >
+                                                        <h3
+                                                            class="text-lg leading-6 font-medium text-gray-900 mb-4"
+                                                        >
+                                                            Từ chối đơn hàng
+                                                        </h3>
+                                                        <div class="mt-2">
+                                                            <p
+                                                                class="text-sm text-gray-500 mb-4"
+                                                            >
+                                                                Vui lòng nhập lý
+                                                                do từ chối đơn
+                                                                hàng này. Thông
+                                                                tin này sẽ được
+                                                                gửi đến khách
+                                                                hàng.
+                                                            </p>
+                                                            <textarea
+                                                                v-model="
+                                                                    rejectReason
+                                                                "
+                                                                rows="4"
+                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 shadow-sm text-sm resize-none"
+                                                                placeholder="Nhập lý do từ chối đơn hàng..."
+                                                            ></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                                            >
+                                                <button
+                                                    @click="submitRejectReason"
+                                                    type="button"
+                                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                                    :disabled="
+                                                        !rejectReason.trim()
+                                                    "
+                                                >
+                                                    <i
+                                                        class="fa-solid fa-ban mr-2"
+                                                    ></i>
+                                                    Xác nhận từ chối
+                                                </button>
+                                                <button
+                                                    @click="closeRejectModal"
+                                                    type="button"
+                                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                                >
+                                                    Hủy
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <button
                                     v-if="selectedOrder.status === 'shipped'"
                                     @click="completeOrder(selectedOrder.id)"
@@ -752,6 +845,14 @@
                                 >
                                     <i class="fa-solid fa-check-double"></i>
                                     Xác nhận hoàn thành
+                                </button>
+                                <button
+                                    @click="generateQR(selectedOrder.id)"
+                                    type="button"
+                                    class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    <i class="fa-solid fa-qrcode"></i>
+                                    Thanh toán OR Code
                                 </button>
                                 <button
                                     @click="closeModal"
@@ -779,6 +880,51 @@
                         </div>
                     </div>
                 </div>
+                <div
+                    v-if="qrData"
+                    class="fixed inset-0 overflow-y-auto z-60"
+                    @click="closeQRModal"
+                >
+                    <div
+                        class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20"
+                    >
+                        <div
+                            class="fixed inset-0 z-50 transition-opacity"
+                            aria-hidden="true"
+                        >
+                            <div
+                                class="absolute inset-0 bg-gray-900 opacity-75"
+                            ></div>
+                        </div>
+                        <div
+                            class="inline-block relative z-60 pb-[20px] bg-white rounded-lg overflow-hidden shadow-xl transform transition-all"
+                            @click.stop
+                        >
+                            <div
+                                class="p-6 text-center flex flex-wrap justify-center items-center w-[500px] h-[700px] gap-[5px]"
+                            >
+                                <img
+                                    :src="qrData"
+                                    alt="QR Code"
+                                    class="w-full h-[85%] mx-auto mb-4"
+                                />
+                                <button
+                                    @click="closeQRModal"
+                                    type="button"
+                                    class="w-full text-center h-[8%] inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-6 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                                >
+                                    Đóng
+                                </button>
+                                <button
+                                    @click="copyQR()"
+                                    class="w-full mb-[20px] text-center h-[8%] inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-6 py-2 bg-blue-600 text-base font-medium text-[#fff] hover:bg-blue-700"
+                                >
+                                    Copy QR code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AppLayout>
@@ -788,8 +934,10 @@
 import { ref, computed } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
+import ToastClient from "../../components/ToastClient.vue";
 import { useForm, router } from "@inertiajs/vue3";
-
+import { clearCanvas } from "chart.js/helpers";
+import axios from "axios";
 const { listOrders } = defineProps({
     listOrders: {
         default: () => ({
@@ -806,7 +954,10 @@ const { listOrders } = defineProps({
 });
 
 console.log("listOrders:", listOrders);
-
+const showQRModal = ref(false);
+const showRejectModal = ref(false);
+const rejectReason = ref("");
+const selectedOrderId = ref(null);
 const pay_before = ref(0);
 const pay_after = ref(0);
 const isModalOpen = ref(false);
@@ -941,6 +1092,11 @@ function validatePayAfter() {
     }
     errorMessage.value = "";
 }
+function clearErrorMessage() {
+    if (errorMessage.value) {
+        errorMessage.value = "";
+    }
+}
 
 function changePage(page) {
     if (page < 1 || page > listOrders.meta.last_page) return;
@@ -960,7 +1116,11 @@ function changePage(page) {
 }
 
 function exportExcel() {
-    window.location.href = route("admin.sale-orders.export");
+    window.location.href = route("admin.sale-orders.export", {
+        status: filters.value.status,
+        customer: filters.value.customer,
+        order_date: filters.value.order_date,
+    });
 }
 
 const filteredOrders = computed(() => {
@@ -1104,7 +1264,39 @@ const completeOrder = (id) => {
     });
 };
 
-const reject = useForm({});
+const reject = useForm({ reject_reason: "" });
+const closeRejectModal = () => {
+    showRejectModal.value = false;
+    rejectReason.value = "";
+};
+const openRejectModal = (orderId) => {
+    selectedOrderId.value = orderId;
+    showRejectModal.value = true;
+};
+const submitRejectReason = () => {
+    if (!rejectReason.value.trim()) {
+        alert("Vui lòng nhập lý do từ chối.");
+        return;
+    }
+
+    reject.reject_reason = rejectReason.value;
+
+    reject.post(route("admin.sale-orders.reject", selectedOrderId.value), {
+        reject_reason: rejectReason.value,
+        onSuccess: () => {
+            alert("Đơn hàng đã được từ chối.");
+            closeRejectModal();
+            closeModal();
+        },
+        onError: (errors) => {
+            console.error("Error rejecting order:", errors);
+            alert("Có lỗi xảy ra khi từ chối đơn hàng.");
+        },
+        onFinish: () => {
+            console.log("Reject request finished");
+        },
+    });
+};
 const rejectOrder = (id) => {
     console.log("Attempting to reject order:", { id });
     reject.post(route("admin.sale-orders.reject", id), {
@@ -1133,12 +1325,78 @@ const getStatusText = (status) => {
             return "Đang giao hàng";
         case "completed":
             return "Hoàn thành";
-        case "rejected":
+        case "cancelled":
             return "Từ chối";
         default:
             return "Không xác định";
     }
 };
+const qrData = ref(null);
+const isLoadingQR = ref(false);
+const qrError = ref(null);
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+};
+
+const generateQR = async (orderId) => {
+    isLoadingQR.value = true;
+    qrError.value = null;
+    try {
+        const response = await axios.post(
+            route("admin.sale-orders.generate-qr", orderId),
+            {},
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN"),
+                },
+            }
+        );
+        qrData.value = response.data.qrDataURL;
+        console.log("QR created:", response.data);
+    } catch (error) {
+        qrError.value = error.response?.data?.error || "Lỗi không xác định";
+        console.error("Lỗi tạo QR:", qrError.value);
+    } finally {
+        isLoadingQR.value = false;
+    }
+};
+const toastRef = ref();
+
+function toastSuccess(message) {
+    toastRef.value?.triggerToast(message, "success");
+}
+function toastError(message) {
+    toastRef.value?.triggerToast(message, "error");
+}
+const copyQR = async () => {
+    if (!qrData.value) {
+        console.error("Không có QR để copy");
+        qrError.value = "Không có QR để copy";
+        return;
+    }
+
+    try {
+        const response = await fetch(qrData.value);
+        const blob = await response.blob();
+
+        await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob }),
+        ]);
+        console.log("toastRef:", toastRef.value);
+        toastSuccess("Copy QR thành công");
+        console.log("QR copied to clipboard successfully");
+    } catch (error) {
+        console.error("Lỗi copy QR:", error);
+        qrError.value =
+            "Copy không hỗ trợ trên browser này. Vui lòng screenshot QR.";
+    }
+};
+function closeQRModal() {
+    qrData.value = null;
+}
 </script>
 
 <style scoped>

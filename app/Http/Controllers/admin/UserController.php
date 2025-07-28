@@ -89,23 +89,29 @@ class UserController extends Controller
         return $this->returnInertia($user, 'Cập nhật nhân viên thành công', 'admin.users.index');
     }
 
-
     public function bulkUpdateStatus(Request $request)
-    {
-        $request->validate([
-            'user_ids' => 'required|array|min:1',
-            'user_ids.*' => 'integer|exists:users,id',
-            'status' => 'required|in:active,inactive',
-        ]);
+{
+    $request->validate([
+        'user_ids' => 'required|array|min:1',
+        'user_ids.*' => 'integer|exists:users,id',
+        'status' => 'required|in:active,inactive',
+    ]);
 
-        $userIds = $request->input('user_ids');
-        $newStatus = $request->input('status');
+    $result = $this->userRepo->bulkUpdateStatus(
+        $request->input('user_ids'),
+        $request->input('status')
+    );
 
-        $this->userRepo->bulkUpdateStatus($userIds, $newStatus);
-        return $this->returnInertia(null, 'Cập nhật trạng thái nhân viên thành công', 'admin.users.index', [
-            'status' => $request->query('status', 'inactive')
-        ]);
-    }
+    return $this->returnInertia(
+        $result,
+        'Cập nhật trạng thái nhân viên thành công',
+        'admin.users.index',
+        ['status' => $request->query('status', 'inactive')]
+    );
+}
+
+
+
     public function bulkDelete(Request $request)
     {
         $request->validate([

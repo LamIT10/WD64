@@ -6,23 +6,25 @@
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl font-bold text-indigo-900 mb-2">
-                            Công nợ khách hàng: {{ debt.customer.name }}
+                            Công nợ của đơn hàng : DH-{{ debt.id.toString().padStart(4, '0') }}
                         </h1>
-                        <p class="text-indigo-800 font-medium">
-                            Mã đơn hàng: DH{{ debt.id.toString().padStart(4, '0') }}
-                        </p>
+
                     </div>
                     <div class="flex items-center space-x-2">
                         <span :class="{
-                            'bg-green-100 text-green-700': debt.status === 'Đã thanh toán',
-                            'bg-yellow-100 text-yellow-700': debt.status === 'Chưa thanh toán',
-                            'bg-red-100 text-red-700': debt.status === 'Đã quá hạn',
-                        }" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold">
+                            'bg-green-100 text-green-800': debt.status === 'Đã thanh toán',
+                            'bg-blue-100 text-blue-800': debt.status === 'Chưa thanh toán',
+                            'bg-orange-100 text-orange-800': debt.status === 'Sắp quá hạn',
+                            'bg-red-100 text-red-800': debt.status === 'Đã quá hạn',
+                        }" class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold font-sans">
                             {{ debt.status }}
                         </span>
-                        <Waiting route-name="admin.customer-transaction.index">
-                            <i class="fas fa-arrow-left"></i> Quay lại
-                        </Waiting>
+                        <Waiting v-if="customerId" 
+                        :route-name="'admin.customers.debt-orders'" 
+                        :route-params="{ customer: customerId }"
+                >
+                    <i class="fas fa-arrow-left mr-2"></i> Quay lại
+                </Waiting>
                     </div>
                 </div>
 
@@ -65,60 +67,65 @@
                     </p>
                 </div>
             </div>
-          <div class="bg-white rounded-lg shadow overflow-hidden mb-7">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-indigo-800">Lịch sử điều chỉnh & thanh toán</h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-indigo-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                        Loại giao dịch
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                        Ngày thực hiện
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                        Giá trị
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
-                        Ghi chú
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                <tr
-                    v-for="item in [...debt.payment_history, ...debt.adjustment_history]"
-                    :key="item.id"
-                    class="hover:bg-gray-50"
-                >
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {{ item.type === 'adjustment' ? 'Điều chỉnh hạn' : 'Thanh toán' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {{ formatDate(item.transaction_date) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                        <span v-if="item.type === 'adjustment'">
-                            {{ formatDate(item.credit_due_date) }}
-                        </span>
-                        <span v-else>
-                            {{ formatNumber(item.paid_amount) + ' VNĐ' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                        {{ item.note || 'Không có ghi chú' }}
-                    </td>
-                </tr>
+         <div class="bg-white rounded-lg shadow overflow-hidden mb-7">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h2 class="text-lg font-semibold text-indigo-800">Lịch sử điều chỉnh & thanh toán</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-indigo-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+            Loại giao dịch
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+            Ngày thực hiện
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+            Giá trị
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+            Ghi chú
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr
+          v-for="(item, index) in sortedHistory"
+          :key="index"
+          class="hover:bg-gray-50"
+        >
+          <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+            {{ item.type === 'adjustment' ? 'Điều chỉnh hạn' : 'Thanh toán' }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            {{ formatDateTime(item.transaction_date ?? item.created_at) }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+            <span v-if="item.type === 'adjustment'">
+              {{ formatDate(item.credit_due_date) }}
+            </span>
+            <span v-else>
+              {{ formatNumber(item.paid_amount) + ' VNĐ' }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+            {{ item.note || 'Không có ghi chú' }}
+          </td>
+        </tr>
 
-                <tr v-if="!debt.payment_history.length && !debt.adjustment_history.length">
-                    <td colspan="4" class="text-center py-4 text-gray-500">Không có lịch sử thanh toán hoặc điều chỉnh</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <tr
+          v-if="sortedHistory.length === 0"
+        >
+          <td colspan="4" class="text-center py-4 text-gray-500">
+            Không có lịch sử thanh toán hoặc điều chỉnh
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
+
 
             <!-- Chi tiết đơn hàng -->
             <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -140,6 +147,9 @@
                                     Số lượng</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
+                                    Đơn vị</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
                                     Đơn giá</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-indigo-700 uppercase tracking-wider">
@@ -151,6 +161,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ item.product_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ item.quantity_ordered }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ item.unit_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ formatNumber(item.unit_price) }} VNĐ</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ formatNumber(item.subtotal) }} VNĐ</td>
                             </tr>
@@ -163,28 +174,46 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import Waiting from '../../../components/Waiting.vue';
 import AppLayout from '../../Layouts/AppLayout.vue';
 
-
-const { customerTransaction } = defineProps({
+const { debt, customerId } = defineProps({
     debt: Object,
-})
+    customerId: [String, Number],
+});
 
 const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('vi-VN')
-}
+    return new Date(dateStr).toLocaleDateString('vi-VN');
+};
+
+const formatDateTime = (dateStr) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+};
 
 const formatNumber = (rawNumber) => {
     try {
-        const number = parseFloat(rawNumber)
-        if (isNaN(number)) return rawNumber
+        const number = parseFloat(rawNumber);
+        if (isNaN(number)) return rawNumber;
         return number.toLocaleString('vi-VN', {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
-        }).replace(/,/g, '.')
+        }).replace(/,/g, '.');
     } catch (error) {
-        return rawNumber
+        return rawNumber;
     }
-}
+};
+
+const sortedHistory = computed(() => {
+    return (debt.history || []).sort((a, b) => {
+        const dateA = new Date(a.transaction_date || a.created_at);
+        const dateB = new Date(b.transaction_date || b.created_at);
+        return dateB - dateA;
+    });
+});
 </script>

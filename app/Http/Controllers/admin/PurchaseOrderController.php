@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PurchaseOrderRequest;
 use App\Repositories\PurchaseOrderRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,7 +36,7 @@ class PurchaseOrderController extends Controller
         $data = $this->handleRepository->getSupplierAndUnit($idVariant);
         return response()->json($data);
     }
-    public function store(Request $request)
+    public function store(PurchaseOrderRequest $request)
     {
         $dataCreate = $request->all();
         $success = $this->handleRepository->store($dataCreate);
@@ -46,13 +47,25 @@ class PurchaseOrderController extends Controller
         $success = $this->handleRepository->approve($id);
         return $this->returnInertia($success, 'Phê duyệt đơn hàng thành công', 'admin.purchases.index');
     }
+    public function cancel(Request $request, $id)
+    {
+        $data = $request->all();
+        $success = $this->handleRepository->cancel($data, $id);
+        return $this->returnInertia($success, 'Từ chối đơn hàng thành công', 'admin.purchases.index');
+    }
     public function edit($id)
     {
         $data = $this->handleRepository->getPurchaseDetail($id);
-        // return response()->json($data);
         return Inertia::render('admin/PurchaseOrders/FormUpdate',  [
             'purchase' => $data['purchase'],
-            'users' => $data['user']
+            'users' => $data['user'],
+            'products'=> $data['product']
         ]);
+    }
+    public function update(Request $request, $id)
+    {
+        $data = $request->all();
+        $success = $this->handleRepository->update($data, $id);
+        return $this->returnInertia($success, 'Cập nhật đơn hàng thành công', 'admin.purchases.index');
     }
 }
