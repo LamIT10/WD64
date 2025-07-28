@@ -36,7 +36,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phần trăm chiết khấu *</label>
-                                <input v-model.number="form.discount_percent" type="number" min="1" max="100" required
+                                <input v-model.number="form.discount_percent" type="number" min="0" max="100" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                     placeholder="Nhập % chiết khấu..." />
                                 <p v-if="form.errors.discount_percent" class="text-red-500 text-sm mt-1">{{ form.errors.discount_percent }}</p>
@@ -56,7 +56,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Phần trăm tín dụng *</label>
-                                <input v-model.number="form.credit_percent" type="number" min="1" max="100" required
+                                <input v-model.number="form.credit_percent" type="number" min="0" max="100" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                     placeholder="Nhập % tín dụng..." />
                                 <p v-if="form.errors.credit_percent" class="text-red-500 text-sm mt-1">{{ form.errors.credit_percent }}</p>

@@ -24,7 +24,6 @@ class RankRepository extends BaseRepository
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('note', 'like', "%{$search}%");
             });
-            // Loại bỏ 'search' để không áp dụng likeTextFilter trong filterData
             unset($filters['search']['search']);
         }
 
@@ -41,6 +40,22 @@ class RankRepository extends BaseRepository
         try {
             DB::beginTransaction();
             Log::info('Dữ liệu đầu vào createRank:', $data);
+
+            // Kiểm tra discount_percent và credit_percent
+            if ($data['discount_percent'] < 0 || $data['discount_percent'] > 100) {
+                throw new \Exception('Phần trăm chiết khấu phải nằm trong khoảng từ 0 đến 100');
+            }
+            if ($data['credit_percent'] < 0 || $data['credit_percent'] > 100) {
+                throw new \Exception('Phần trăm tín dụng phải nằm trong khoảng từ 0 đến 100');
+            }
+
+            // Kiểm tra min_total_spent
+            $higherRanks = $this->handleModel::where('id', '>', 0)->orderBy('id', 'asc')->get();
+            foreach ($higherRanks as $higherRank) {
+                if ($data['min_total_spent'] >= $higherRank->min_total_spent) {
+                    throw new \Exception('Tổng chi tiêu tối thiểu không thể lớn hơn hoặc bằng hạn mức của hạng có ID lớn hơn (' . $higherRank->name . ')');
+                }
+            }
 
             $newRank = [
                 'name' => $data['name'],
@@ -72,6 +87,22 @@ class RankRepository extends BaseRepository
             DB::beginTransaction();
             Log::info('Dữ liệu đầu vào updateRank:', ['data' => $data, 'current_rank' => $rank->toArray()]);
 
+            // Kiểm tra discount_percent và credit_percent
+            if ($data['discount_percent'] < 0 || $data['discount_percent'] > 100) {
+                throw new \Exception('Phần trăm chiết khấu phải nằm trong khoảng từ 0 đến 100');
+            }
+            if ($data['credit_percent'] < 0 || $data['credit_percent'] > 100) {
+                throw new \Exception('Phần trăm tín dụng phải nằm trong khoảng từ 0 đến 100');
+            }
+
+            // Kiểm tra min_total_spent
+            $higherRanks = $this->handleModel::where('id', '>', $rank->id)->orderBy('id', 'asc')->get();
+            foreach ($higherRanks as $higherRank) {
+                if ($data['min_total_spent'] >= $higherRank->min_total_spent) {
+                    throw new \Exception('Tổng chi tiêu tối thiểu không thể lớn hơn hoặc bằng hạn mức của hạng có ID lớn hơn (' . $higherRank->name . ')');
+                }
+            }
+
             $updatedRank = [
                 'name' => $data['name'],
                 'min_total_spent' => $data['min_total_spent'],
@@ -98,16 +129,39 @@ class RankRepository extends BaseRepository
         }
     }
 
-    public function deleteRank(Rank $rank)
+    public function hideRank(Rank $rank)
     {
         try {
-            if (!$rank->delete()) {
-                throw new \Exception('Không thể xóa hạng');
+            DB::beginTransaction();
+            Log::info('Toggle trạng thái hạng:', ['rank_id' => $rank->id, 'current_status' => $rank->status]);
+
+            if (strtolower($rank->name) === 'sắt') {
+                throw new \Exception('Không thể thay đổi trạng thái hạng mặc định "Sắt"');
             }
+
+            // Toggle trạng thái
+            $newStatus = $rank->status === 'active' ? 'inactive' : 'active';
+            $updated = $rank->update(['status' => $newStatus]);
+            if (!$updated) {
+                throw new \Exception('Không thể cập nhật trạng thái hạng');
+            }
+
+            // Nếu chuyển sang inactive, chuyển khách hàng sang hạng "Sắt"
+            if ($newStatus === 'inactive' && $rank->customers()->exists()) {
+                $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
+                if (!$defaultRank) {
+                    throw new \Exception('Không tìm thấy hạng mặc định "Sắt"');
+                }
+                $rank->customers()->update(['rank_id' => $defaultRank->id]);
+            }
+
+            Log::info('Cập nhật trạng thái hạng thành công:', ['rank_id' => $rank->id, 'new_status' => $newStatus]);
+            DB::commit();
             return $rank;
         } catch (\Throwable $th) {
-            Log::error('Lỗi xóa hạng: ' . $th->getMessage());
-            return $this->returnError('Lỗi xóa hạng: ' . $th->getMessage());
+            DB::rollBack();
+            Log::error('Lỗi cập nhật trạng thái hạng: ' . $th->getMessage(), ['trace' => $th->getTraceAsString()]);
+            return $this->returnError('Lỗi cập nhật trạng thái hạng: ' . $th->getMessage());
         }
     }
 }

@@ -17,6 +17,11 @@
         </div>
       </div>
 
+      <!-- Notification -->
+      <div v-if="notification" :class="`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`">
+        {{ notification.message }}
+      </div>
+
       <!-- Ranks Table -->
       <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
         <div class="overflow-x-auto">
@@ -59,7 +64,8 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
               <tr v-for="(rank, index) in ranks.data || []" :key="rank.id"
-                class="hover:bg-gray-50 transition-colors duration-200">
+                class="hover:bg-gray-50 transition-colors duration-200"
+                :class="{ 'opacity-50': rank.status === 'inactive' }">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                   {{ index + 1 + ((ranks.current_page || 1) - 1) * (ranks.per_page || 10) }}
                 </td>
@@ -101,10 +107,10 @@
                           <i class="fas fa-edit mr-2 text-indigo-600"></i>
                           Sửa
                         </Link>
-                        <button @click="handleDelete(rank.id)"
+                        <button @click="handleToggleStatus(rank)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                          <i class="fas fa-trash mr-2 text-red-600"></i>
-                          Xóa
+                          <i :class="rank.status === 'active' ? 'fas fa-eye-slash mr-2 text-red-600' : 'fas fa-eye mr-2 text-green-600'"></i>
+                          {{ rank.status === 'active' ? 'Ẩn' : 'Bật' }}
                         </button>
                       </div>
                     </div>
@@ -155,6 +161,7 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import { debounce } from 'lodash';
 import { route } from 'ziggy-js';
+import { usePage } from '@inertiajs/vue3';
 
 defineProps({
   ranks: Object,
@@ -163,6 +170,8 @@ defineProps({
 const activeDropdown = ref(null);
 const searchQuery = ref('');
 const notification = ref(null);
+
+const { flash, errors } = usePage();
 
 const toggleDropdown = (id) => {
   activeDropdown.value = activeDropdown.value === id ? null : id;
@@ -190,16 +199,23 @@ const addSearchToUrl = (url) => {
   return urlObj.toString();
 };
 
-const handleDelete = (rankId) => {
-  if (confirm('Xóa hạng này sẽ chuyển các khách hàng liên quan sang hạng mặc định "Sắt". Bạn có chắc muốn tiếp tục?')) {
-    router.delete(route('admin.ranks.destroy', rankId), {
+const handleToggleStatus = (rank) => {
+  const action = rank.status === 'active' ? 'ẩn' : 'bật';
+  const confirmMessage = rank.status === 'active'
+    ? 'Ẩn hạng này sẽ chuyển các khách hàng liên quan sang hạng mặc định "Sắt". Bạn có chắc muốn tiếp tục?'
+    : 'Bật hạng này sẽ chuyển trạng thái sang hoạt động. Bạn có chắc muốn tiếp tục?';
+
+  if (confirm(confirmMessage)) {
+    router.patch(route('admin.ranks.destroy', rank.id), {}, {
       onSuccess: () => {
         activeDropdown.value = null;
-        notification.value = { type: 'success', message: 'Hạng đã được xóa thành công!' };
+        notification.value = { type: 'success', message: `Hạng đã được ${action} thành công!` };
+        setTimeout(() => { notification.value = null; }, 3000);
       },
-      onError: (errors) => {
-        console.error('Lỗi xóa:', errors);
-        notification.value = { type: 'error', message: 'Có lỗi xảy ra khi xóa hạng!' };
+      onError: (err) => {
+        console.error('Lỗi:', err);
+        notification.value = { type: 'error', message: err.message || `Có lỗi xảy ra khi ${action} hạng!` };
+        setTimeout(() => { notification.value = null; }, 3000);
       },
     });
   }

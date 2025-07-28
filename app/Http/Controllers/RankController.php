@@ -82,30 +82,10 @@ class RankController extends Controller
 
     public function destroy(Rank $rank)
     {
-        if (strtolower($rank->name) === 'sắt') {
-            return $this->returnInertia(
-                ['status' => false, 'message' => 'Không thể xóa hạng mặc định "Sắt"'],
-                '',
-                'admin.ranks.index'
-            );
-        }
-
-        if ($rank->customers()->exists()) {
-            $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
-            if (!$defaultRank) {
-                return $this->returnInertia(
-                    ['status' => false, 'message' => 'Không tìm thấy hạng mặc định "Sắt"'],
-                    '',
-                    'admin.ranks.index'
-                );
-            }
-            $rank->customers()->update(['rank_id' => $defaultRank->id]);
-        }
-
-        $result = $this->rankRepo->deleteRank($rank);
+        $result = $this->rankRepo->hideRank($rank);
         if (is_array($result) && isset($result['status']) && !$result['status']) {
             return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
         }
-        return $this->returnInertia($result, 'Xóa hạng thành công', 'admin.ranks.index');
+        return $this->returnInertia($result, 'Ẩn hạng thành công', 'admin.ranks.index');
     }
 }
