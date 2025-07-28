@@ -414,29 +414,39 @@ watch(() => page.props.flash, (flash) => {
   }
 });
 
-const exportToExcel = () => {
-  // Lấy dữ liệu hiện tại (props.audits.data)
-  const data = (props.audits?.data || []).map(item => ({
-    'ID': item.code,
-    'Khu vực': (item.audited_zones || []).join(', '),
-    'Ngày kiểm': item.audit_date,
-    'Ngày lưu': item.created_at,
-    'Người tạo': item.user?.name,
-    'Trạng thái': item.status === 'completed' ? 'Ko chênh lệch' : 'Có chênh lệch',
-    'Đồng bộ': item.status === 'completed' ? '--' : (item.is_adjusted ? 'Đã đồng bộ' : 'Chưa đồng bộ'),
-  }));
+const exportToExcel = async () => {
+  try {
+    // Gọi API để lấy dữ liệu Excel
+    const response = await fetch(`/api/inventory-audit/export-excel?status=${activeTab.value}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
 
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'KiemKe');
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-  // Lấy ngày hiện tại theo định dạng yyyy-mm-dd
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  const dateStr = `${yyyy}-${mm}-${dd}`;
-  saveAs(new Blob([wbout], { type: 'application/octet-stream' }), `kiemkho-${dateStr}.xlsx`);
+    if (!response.ok) {
+      throw new Error('Lỗi khi xuất Excel');
+    }
+
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      // Tạo file Excel từ dữ liệu nhận được
+      const ws = XLSX.utils.json_to_sheet(result.data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'KiemKe');
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      
+      // Download file
+      saveAs(new Blob([wbout], { type: 'application/octet-stream' }), result.filename);
+    } else {
+      alert('Lỗi khi xuất Excel');
+    }
+  } catch (error) {
+    console.error('Export error:', error);
+    alert('Lỗi khi xuất Excel: ' + error.message);
+  }
 };
 
 

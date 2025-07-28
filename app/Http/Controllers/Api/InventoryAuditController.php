@@ -9,6 +9,7 @@ use App\Models\WarehouseZone;
 use App\Repositories\InventoryAuditRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Symfony\Component\CssSelector\XPath\Extension\FunctionExtension;
 
 use function Laravel\Prompts\error;
@@ -203,6 +204,51 @@ class InventoryAuditController extends BaseApiController
         return response()->json([
             'audit' => $audit,
             'zones' => $zones,
+        ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $status = $request->input('status');
+        
+        // Lấy dữ liệu dựa trên status
+        $query = InventoryAudit::with(['items.productVariant.product', 'user'])
+            ->latest('id');
+
+        if ($status && $status !== 'all') {
+            if ($status === 'difference') {
+                $query->where('status', '!=', 'completed');
+            } elseif ($status === 'no_difference') {
+                $query->where('status', 'completed');
+            }
+        }
+
+        $audits = $query->get();
+
+        // Chuẩn bị dữ liệu cho Excel
+        $data = [];
+        foreach ($audits as $audit) {
+            $variantIds = $audit->items->pluck('product_variant_id');
+            $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
+                ->whereNotNull('custom_location_name')
+                ->distinct()
+                ->pluck('custom_location_name');
+
+            $data[] = [
+                'ID' => $audit->code,
+                'Khu vực' => $locations->join(', '),
+                'Ngày kiểm' => $audit->audit_date ? $audit->audit_date : '',
+                'Ngày lưu' => $audit->created_at ? $audit->created_at : '',
+                'Người tạo' => $audit->user->name ?? '',
+                'Trạng thái' => $audit->status === 'completed' ? 'Không chênh lệch' : 'Có chênh lệch',
+                'Đồng bộ' => $audit->status === 'completed' ? '' : ($audit->is_adjusted == 1 ? 'Đã đồng bộ' : ($audit->is_adjusted == 2 ? 'Đã từ chối' : 'Chưa đồng bộ')),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'filename' => 'kiemkho-' . date('Y-m-d') . '.xlsx'
         ]);
     }
 }
