@@ -60,12 +60,9 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Hạng khách hàng</label>
                   <select v-model="form.rank_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
-                    <option value="" disabled>Chọn hạng...</option>
                     <option v-for="rank in rankTemplates" :key="rank.id" :value="rank.id">{{ rank.name }}</option>
                   </select>
-                  <p class="text-sm text-gray-500 mt-1">Hạng sẽ tự động cập nhật dựa trên tổng chi tiêu.</p>
                   <p v-if="form.errors.rank_id" class="text-red-500 text-sm mt-1">{{ form.errors.rank_id }}</p>
-                  <p v-if="!rankTemplates.length" class="text-yellow-600 text-sm mt-1">Không có hạng khách hàng khả dụng.</p>
                 </div>
               </div>
 
@@ -87,7 +84,7 @@
               <div v-if="showAdditionalInfo">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4 mt-6">Thông tin bổ sung</h3>
                 <div class="space-y-6">
-                  <!-- Row 4: Address + Current Debt -->
+                  <!-- Row 4: Address + Status -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
@@ -95,39 +92,12 @@
                       <p v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Công nợ</label>
-                      <input v-model.number="form.current_debt" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập công nợ..." />
-                      <p v-if="form.errors.current_debt" class="text-red-500 text-sm mt-1">{{ form.errors.current_debt }}</p>
-                      <p v-if="form.current_debt > computedMaxDebtLimit" class="text-yellow-600 text-sm mt-1">
-                        Trạng thái sẽ được đặt thành "Vượt công nợ" do công nợ vượt giới hạn {{ formatNumber(computedMaxDebtLimit) }}.
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- Row 5: Total Spent + Status -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Tổng chi tiêu</label>
-                      <input v-model.number="form.total_spent" type="number" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập tổng chi tiêu..." />
-                      <p v-if="form.errors.total_spent" class="text-red-500 text-sm mt-1">{{ form.errors.total_spent }}</p>
-                    </div>
-                    <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                      <select v-model="form.status" :disabled="form.current_debt > computedMaxDebtLimit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
-                        <option value="debt_exceeded" v-if="form.current_debt > computedMaxDebtLimit">Vượt công nợ</option>
-                        <option value="active" v-else>Hoạt động</option>
-                        <option value="inactive" v-else>Không hoạt động</option>
-                    </select>
-
+                      <select v-model="form.status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <option value="active">Hợp tác</option>
+                        <option value="inactive">Ngừng hợp tác</option>
+                      </select>
                       <p v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Row 6: Max Debt Limit -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Giới hạn công nợ</label>
-                      <input :value="formatNumber(computedMaxDebtLimit)" type="text" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-0" />
                     </div>
                   </div>
                 </div>
@@ -146,16 +116,16 @@
 
         <!-- Footer Actions -->
         <div class="flex justify-end space-x-3 p-6 bg-gray-50 border-t border-gray-200">
-          <button type="reset" @click="resetForm" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+          <Link :href="route('admin.customers.index')" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
             Bỏ qua
-          </button>
-          <button type="button" @click="confirmSubmit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md" :disabled="form.processing">
+          </Link>
+          <button type="button" @click="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md" :disabled="form.processing">
             <i class="fas fa-save mr-2"></i> Lưu
           </button>
         </div>
       </div>
+      <Toast />
     </div>
-    <Toast />
   </AppLayout>
 </template>
 
@@ -165,18 +135,17 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import Toast from '../../components/Toast.vue';
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
-const props = defineProps({
+const { rankTemplates } = defineProps({
   rankTemplates: {
     type: Array,
     default: () => [],
   },
 });
 
-const rankTemplates = props.rankTemplates;
-const showAdditionalInfo = ref(true);
+const showAdditionalInfo = ref(false);
 const avatarInput = ref(null);
 const previewUrl = ref(null);
 
@@ -187,92 +156,9 @@ const form = useForm({
   password: '',
   password_confirmation: '',
   address: null,
-  current_debt: 0,
-  total_spent: 0,
   rank_id: '',
   avatar: null,
   status: 'active',
-});
-
-const computedRankId = computed(() => {
-  if (!rankTemplates.length) {
-    console.warn('Không có rankTemplates khả dụng');
-    return null;
-  }
-  if (!form.total_spent || form.total_spent < 0) {
-    const defaultRank = rankTemplates.find((r) => r.name === 'Sắt' && r.status === 'active');
-    console.log('Gán hạng mặc định:', defaultRank);
-    return defaultRank ? defaultRank.id : null;
-  }
-  const sortedRanks = [...rankTemplates]
-    .filter((r) => r.status === 'active')
-    .sort((a, b) => b.min_total_spent - a.min_total_spent);
-  const rank = sortedRanks.find((r) => r.min_total_spent <= form.total_spent);
-  if (!rank) {
-    console.warn('Không tìm thấy hạng phù hợp cho total_spent:', form.total_spent);
-  }
-  return rank ? rank.id : null;
-});
-
-const computedMaxDebtLimit = computed(() => {
-  if (!rankTemplates.length || !form.rank_id || form.total_spent < 0) {
-    console.warn('Không thể tính max_debt_limit', {
-      rank_id: form.rank_id,
-      total_spent: form.total_spent,
-      rankTemplates: rankTemplates.length,
-    });
-    return 0;
-  }
-  const rank = rankTemplates.find((r) => r.id === Number(form.rank_id));
-  if (!rank) {
-    console.warn('Rank không tồn tại:', form.rank_id);
-    return 0;
-  }
-  return Number(form.total_spent) * (rank.credit_percent / 100);
-});
-
-watch(() => form.total_spent, (newTotalSpent) => {
-  form.rank_id = computedRankId.value;
-});
-
-watch([() => form.current_debt, () => computedMaxDebtLimit.value], ([newDebt, newMaxDebtLimit]) => {
-  if (newDebt > newMaxDebtLimit) {
-    form.status = 'debt_exceeded';
-    const toast = document.querySelector('toast');
-    if (toast && toast.showLocalToast) {
-      toast.showLocalToast('Trạng thái đã được đặt thành "Vượt công nợ" vì công nợ vượt giới hạn.', 'warning');
-    }
-  } else if (form.status === 'debt_exceeded') {
-    form.status = 'active';
-    const toast = document.querySelector('toast');
-    if (toast && toast.showLocalToast) {
-      toast.showLocalToast('Công nợ trong giới hạn, trạng thái được đặt lại thành "Hoạt động".', 'success');
-    }
-  }
-});
-
-watch(() => form.rank_id, () => {
-  if (form.current_debt === 0) {
-    form.status = 'inactive';
-    const toast = document.querySelector('toast');
-    if (toast && toast.showLocalToast) {
-      toast.showLocalToast('Công nợ bằng 0, trạng thái được đặt thành "Không hoạt động".', 'info');
-    }
-  }
-  else if (form.current_debt > computedMaxDebtLimit.value) {
-    form.status = 'debt_exceeded';
-    const toast = document.querySelector('toast');
-    if (toast && toast.showLocalToast) {
-      toast.showLocalToast('Trạng thái đã được đặt thành "Vượt công nợ" vì công nợ vượt giới hạn.', 'warning');
-    }
-  }
-  else if (form.status === 'debt_exceeded') {
-    form.status = 'active';
-    const toast = document.querySelector('toast');
-    if (toast && toast.showLocalToast) {
-      toast.showLocalToast('Công nợ trong giới hạn, trạng thái được đặt lại thành "Hoạt động".', 'success');
-    }
-  }
 });
 
 function toggleAdditionalInfo() {
@@ -285,6 +171,7 @@ const triggerInput = () => {
 
 const handleFileChange = (event) => {
   const file = event.target.files[0];
+  form.errors.avatar = null;
   if (file) {
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
       form.errors.avatar = 'Chỉ hỗ trợ định dạng JPEG hoặc PNG';
@@ -310,34 +197,9 @@ const handleFileChange = (event) => {
 
 function resetForm() {
   form.reset();
-  form.name = '';
-  form.phone = '';
-  form.email = null;
-  form.password = '';
-  form.password_confirmation = '';
-  form.address = null;
-  form.current_debt = 0;
-  form.total_spent = 0;
-  form.rank_id = '';
-  form.avatar = null;
-  form.status = 'active';
   previewUrl.value = null;
   form.errors = {};
 }
-
-function confirmSubmit() {
-  if (form.current_debt > computedMaxDebtLimit.value) {
-    form.status = 'debt_exceeded'; // Ép buộc trạng thái thành "vượt công nợ" trước khi gửi
-  }
-  submit();
-}
-
-const formatNumber = (value) => {
-  if (value === null || value === undefined || isNaN(Number(value))) {
-    return '0.00';
-  }
-  return Number(value).toFixed(2);
-};
 
 const submit = () => {
   form.post(route('admin.customers.store'), {
@@ -352,10 +214,11 @@ const submit = () => {
     },
     onError: (errors) => {
       console.error('Lỗi từ backend:', errors);
-      form.errors = errors; // Gán lỗi từ backend vào form
+      form.errors = errors;
       const toast = document.querySelector('toast');
       if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lỗi khi tạo khách hàng: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
+        const errorMessage = errors.avatar || errors.message || 'Vui lòng kiểm tra lại dữ liệu!';
+        toast.showLocalToast('Lỗi khi tạo khách hàng: ' + errorMessage, 'error');
       }
     },
   });
