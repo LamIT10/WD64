@@ -232,7 +232,7 @@
                                     scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
                                 >
-                                    {{ order.id }}
+                                    {{ order.code }}
                                 </th>
                                 <td
                                     class="px-4 py-2 text-indigo-700 font-semibold"

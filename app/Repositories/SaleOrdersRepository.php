@@ -69,6 +69,7 @@ class SaleOrdersRepository extends BaseRepository
                 ])
                 ->select(
                     'id',
+                    'code',
                     'customer_id',
                     'order_date',
                     'status',
@@ -269,6 +270,7 @@ class SaleOrdersRepository extends BaseRepository
                 'total_amount' => $data['total_amount'],
                 'credit_due_date' => $creditDueDate,
                 'address_delivery' => $addressDelivery,
+                'code' => $this->autoAddSaleOrderCode(),
             ];
 
             $saleOrder = $this->handleModel->create($newSaleOrder);
@@ -621,5 +623,22 @@ class SaleOrdersRepository extends BaseRepository
         if ($index === false) return 1; // Không tìm thấy, mặc định trang 1
 
         return intval(floor($index / $perPage)) + 1;
+    }
+    public function autoAddSaleOrderCode()
+    {
+        $lastExportCode = $this->handleModel
+            ->where('code', 'LIKE', 'DX-%')
+            ->orderByDesc('id')
+            ->value('code');
+
+        if ($lastExportCode) {
+            $lastExportNumber = (int) str_replace('DX-', '', $lastExportCode);
+        } else {
+            $lastExportNumber = 0;
+        }
+
+        $autoExportCode = 'DX-' . str_pad($lastExportNumber + 1, 6, '0', STR_PAD_LEFT);
+
+        return $autoExportCode;
     }
 }
