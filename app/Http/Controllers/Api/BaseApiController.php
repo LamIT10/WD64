@@ -6,5 +6,4 @@ use App\Http\Controllers\Controller;
 
 class BaseApiController extends Controller
 {
-    // You can add common API response helpers here
 }

@@ -9,10 +9,6 @@ use App\Models\WarehouseZone;
 use App\Repositories\InventoryAuditRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
-use Symfony\Component\CssSelector\XPath\Extension\FunctionExtension;
-
-use function Laravel\Prompts\error;
 
 class InventoryAuditController extends BaseApiController
 {
