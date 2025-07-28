@@ -74,8 +74,8 @@
                                     Mã sản phẩm (SKU)
                                 </label>
                                 <input v-model="form.code" type="text" id="product-code" name="code"
-                                    placeholder="Nhập mã sản phẩm"
-                                    class="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200" />
+                                    placeholder="Nhập mã sản phẩm" disabled
+                                    class="w-full px-4 py-3 text-gray-700 border border-gray-300 rounded bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent transition-all duration-200" />
                                 <p v-if="form.errors.code" class="text-red-500 text-sm mt-1">
                                     {{ form.errors.code }}
                                 </p>
@@ -93,7 +93,7 @@
                                     track-by="id" :searchFields="['name']" @search-change="handleSearch">
                                     <template v-slot:option="{ option }">
                                         <span :style="{ color: getLevelColor(option.level) }">{{ option.formattedName
-                                        }}</span>
+                                            }}</span>
                                     </template>
                                 </Multiselect>
                                 <p v-if="form.errors.category_id" class="text-red-500 text-sm mt-1">
@@ -114,7 +114,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-span-3">
+                        <!-- <div class="col-span-3">
                             <div class="grid grid-cols-1 grid-rows-1 gap-4">
                                 <div class="col-span-2">
                                     <div class="space-y-1">
@@ -129,7 +129,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <!-- <div class="col-span-2">
+                                <div class="col-span-2">
                                     <div class="space-y-2">
                                         <label for="expiration-date" class="block text-sm font-medium text-indigo-700">
                                             Ngày hết hạn
@@ -141,9 +141,9 @@
                                             {{ form.errors.expiration_date }}
                                         </p>
                                     </div>
-                                </div> -->
+                                </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- Mô tả sản phẩm -->
@@ -336,12 +336,21 @@
                                     class="mb-4 space-y-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="space-y-1">
                                         <div class="flex gap-3 items-start">
-                                            <button type="button" @click="openAttributeModal(index, attrIndex)"
-                                                class="mt-1 px-3 py-1 text-sm text-indigo-600 bg-indigo-50 rounded hover:bg-indigo-100">
+                                            <button type="button" @click="() => {
+                                                if (!attribute.attribute_id) openAttributeModal(index, attrIndex);
+                                            }" :disabled="!!attribute.attribute_id"
+                                                class="mt-1 px-3 py-1 text-sm rounded transition-all duration-150"
+                                                :class="[
+                                                    attribute.attribute_id
+                                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                                                ]">
                                                 <i class="fas fa-plus"></i>
                                             </button>
                                             <Multiselect v-model="attribute.attribute_id"
                                                 :options="getAvailableAttributes(variant, attribute.attribute_id)"
+                                                @update:modelValue="() => 
+                                                cleanUpEmptyAttributes()"
                                                 label="name" value-prop="id" placeholder="Chọn thuộc tính"
                                                 :searchable="true" :can-clear="true" />
                                             <p v-if="form.errors[`variants.${index}.attributes.${attrIndex}.attribute_id`]"
@@ -396,9 +405,10 @@
                             <div class="text-sm font-medium text-indigo-700">{{ item.label }}</div>
                             <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                                 <div>
-                                    <input v-model="item.data.code" type="text" placeholder="Mã biến thể (SKU)" :class="[
-                                        'w-full px-2 py-1 border rounded text-sm border-gray-300'
-                                    ]" />
+                                    <input v-model="item.data.code" type="text" disabled placeholder="Mã biến thể (SKU)"
+                                        :class="[
+                                            'w-full px-2 py-1 border rounded text-sm bg-gray-100 border-gray-300'
+                                        ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.code`]"
                                         class="text-red-500 text-sm mt-1">
                                         {{ form.errors[`variants.0.combinationData.${item.key}.code`] }}
@@ -507,6 +517,7 @@ import AttributeCreateModal from '../../components/AttributeCreateModal.vue';
 import AttributeValueCreateModal from '../../components/AttributeValueCreateModal.vue';
 import UnitCreateModal from '../../components/UnitCreateModal.vue';
 import ConfirmModal from '../../components/ConfirmModal.vue';
+import axios from 'axios';
 
 const props = defineProps({
     categories: Array,
@@ -535,6 +546,7 @@ const form = useForm({
     supplier_ids: [],
     warehouse_zone_id: null,
     custom_location_name: null,
+    deleted_combination_keys: [],
 });
 
 // Image Handling
@@ -579,7 +591,7 @@ const removeImage = (index) => {
 
 // Variant Handling
 const hasVariant = ref(false);
-watch(hasVariant, (newVal) => {
+watch(hasVariant, async (newVal) => {
     if (newVal) {
         form.simple_sale_price = '';
         form.simple_quantity = '';
@@ -588,6 +600,7 @@ watch(hasVariant, (newVal) => {
         form.warehouse_zone_id = null;
         form.custom_location_name = null;
         if (!form.variants.length) {
+            const newCode = await fetchGeneratedCode(true);
             form.variants = [{
                 code: '',
                 barcode: '',
@@ -598,6 +611,8 @@ watch(hasVariant, (newVal) => {
             }];
         }
     } else {
+        const newCode = await fetchGeneratedCode(false);
+        form.code = newCode;
         form.variants = [];
         form.simple_sale_price = '';
         form.simple_quantity = '';
@@ -679,75 +694,127 @@ const variantCombinations = computed(() => {
 
 const deletedCombinationKeys = ref([]);
 const removeCombinationItem = (key) => {
-    form.variants.forEach((variant) => {
-        if (variant.combinationData && variant.combinationData[key]) {
-            delete variant.combinationData[key];
-        }
-    });
+    if (form.variants[0].combinationData && form.variants[0].combinationData[key]) {
+        delete form.variants[0].combinationData[key];
+    }
     if (!deletedCombinationKeys.value.includes(key)) {
         deletedCombinationKeys.value.push(key);
+        // Thêm vào form để lưu lại khi submit
+        if (!form.deleted_combination_keys.includes(key)) {
+            form.deleted_combination_keys.push(key);
+        }
     }
 };
 
 // Form Submission and Validation
 const transformFormBeforeSubmit = () => {
     form.transform((data) => {
-        const formData = JSON.parse(JSON.stringify(data));
+        const formData = new FormData();
 
+        // ---- 1. Trường cơ bản ----
+        formData.append('name', data.name || '');
+        formData.append('code', data.code || '');
+        formData.append('min_stock', data.min_stock || 0);
+        formData.append('description', data.description || '');
+        formData.append('category_id', data.category_id || '');
+        formData.append('expiration_date', data.expiration_date || '');
+        formData.append('production_date', data.production_date || '');
+        formData.append('base_unit_id', data.base_unit_id || '');
+
+        // ---- 2. Ảnh ----
+        if (Array.isArray(form.images)) {
+            form.images.forEach((file, index) => {
+                formData.append(`images[${index}]`, file);
+            });
+        }
+
+        // ---- 3. Đơn vị quy đổi ----
+        data.unit_conversions
+            .filter((uc) => uc.to_unit_id && uc.conversion_factor)
+            .forEach((uc, index) => {
+                formData.append(`unit_conversions[${index}][to_unit_id]`, uc.to_unit_id);
+                formData.append(`unit_conversions[${index}][conversion_factor]`, uc.conversion_factor);
+            });
+
+        // ---- 4. Nếu sản phẩm có biến thể ----
         if (hasVariant.value) {
-            formData.variants.forEach((variant) => {
+            data.variants.forEach((variant, vIndex) => {
                 const combinations = [];
                 const validKeys = generateCombinations(variant.attributes)
                     .map((ids) => ids.join('-'))
                     .filter((key) => !deletedCombinationKeys.value.includes(key));
 
                 validKeys.forEach((key) => {
-                    const valueIds = key.split('-').map((id) => parseInt(id));
                     const comboData = variant.combinationData?.[key];
                     if (!comboData) return;
 
+                    const valueIds = key.split('-').map((id) => parseInt(id));
                     combinations.push({
                         attribute_value_ids: valueIds,
                         code: comboData.code || '',
                         barcode: comboData.barcode || '',
                         sale_price: Number(comboData.sale_price) || 0,
                         quantity_on_hand: Number(comboData.quantity_on_hand) || 0,
-                        supplier_ids: Array.isArray(comboData.supplier_ids) ? comboData.supplier_ids : [],
+                        supplier_ids: comboData.supplier_ids || [],
                         warehouse_zone_id: comboData.warehouse_zone_id || null,
                         custom_location_name: comboData.custom_location_name || null,
                     });
                 });
 
-                variant.combinations = combinations;
+                // Append attributes
+                variant.attributes.forEach((attr, aIndex) => {
+                    formData.append(`variants[${vIndex}][attributes][${aIndex}][attribute_id]`, attr.attribute_id);
+                    attr.attribute_value_ids.forEach((valId) => {
+                        formData.append(`variants[${vIndex}][attributes][${aIndex}][attribute_value_ids][]`, valId);
+                    });
+                });
+
+                // Append combinations
+                combinations.forEach((combo, cIndex) => {
+                    combo.attribute_value_ids.forEach((valId) => {
+                        formData.append(`variants[${vIndex}][combinations][${cIndex}][attribute_value_ids][]`, valId);
+                    });
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][code]`, combo.code);
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][barcode]`, combo.barcode);
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][sale_price]`, combo.sale_price);
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][quantity_on_hand]`, combo.quantity_on_hand);
+
+                    (combo.supplier_ids || []).forEach((id) => {
+                        formData.append(`variants[${vIndex}][combinations][${cIndex}][supplier_ids][]`, id);
+                    });
+
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][warehouse_zone_id]`, combo.warehouse_zone_id || '');
+                    formData.append(`variants[${vIndex}][combinations][${cIndex}][custom_location_name]`, combo.custom_location_name || '');
+                });
             });
 
-            formData.simple_sale_price = null;
-            formData.simple_quantity = null;
-            formData.simple_barcode = null;
-            formData.supplier_ids = [];
-            formData.warehouse_zone_id = null;
-            formData.custom_location_name = null;
+            // Clear trường của sản phẩm đơn giản
+            formData.append('simple_sale_price', '');
+            formData.append('simple_quantity', '');
+            formData.append('simple_barcode', '');
+            formData.append('supplier_ids[]', '');
+            formData.append('warehouse_zone_id', '');
+            formData.append('custom_location_name', '');
         } else {
-            formData.variants = [];
-            formData.unit_conversions = formData.unit_conversions.filter(
-                (uc) => uc.to_unit_id && uc.conversion_factor
-            );
-            formData.simple_sale_price = formData.simple_sale_price
-                ? Number(formData.simple_sale_price)
-                : null;
-            formData.simple_quantity = formData.simple_quantity
-                ? Number(formData.simple_quantity)
-                : null;
-            formData.supplier_ids = Array.isArray(formData.supplier_ids)
-                ? formData.supplier_ids
-                : [];
-            formData.simple_barcode = formData.simple_barcode || null;
-            formData.custom_location_name = formData.custom_location_name || null;
+            // ---- 5. Nếu sản phẩm đơn giản ----
+            formData.append('simple_sale_price', Number(data.simple_sale_price) || 0);
+            formData.append('simple_quantity', Number(data.simple_quantity) || 0);
+            formData.append('simple_barcode', data.simple_barcode || '');
+
+            (data.supplier_ids || []).forEach((id) => {
+                formData.append('supplier_ids[]', id);
+            });
+
+            formData.append('warehouse_zone_id', data.warehouse_zone_id || '');
+            formData.append('custom_location_name', data.custom_location_name || '');
+
+            formData.append('variants', '[]');
         }
 
         return formData;
     });
 };
+
 
 const handleSubmitForm = () => {
     const originalVariants = JSON.parse(JSON.stringify(form.variants));
@@ -802,6 +869,7 @@ const resetForm = () => {
     form.variants = [];
     imagePreviews.value = [];
     deletedCombinationKeys.value = [];
+    form.deleted_combination_keys = [];
 };
 
 // Category Handling
@@ -860,8 +928,12 @@ const removeConversion = (index) => {
 
 // Attribute Handling
 const attributeValues = ref({});
-onMounted(() => {
+onMounted(async () => {
     attributeValues.value = props.attributeValues || {};
+    if (!hasVariant.value && !form.code) {
+        const newCode = await fetchGeneratedCode(false);
+        form.code = newCode;
+    }
 });
 const showAttributeModal = ref(false);
 const showAttributeValueModal = ref(false);
@@ -870,6 +942,9 @@ const currentVariantIndex = ref(null);
 const currentAttrIndex = ref(null);
 
 const openAttributeModal = (variantIndex, attrIndex) => {
+    const currentAttr = form.variants[variantIndex].attributes[attrIndex];
+    if (currentAttr.attribute_id) return; 
+
     currentVariantIndex.value = variantIndex;
     currentAttrIndex.value = attrIndex;
     showAttributeModal.value = true;
@@ -933,6 +1008,42 @@ const handleUnitCreated = (unit) => {
     //   props.units.push(unit);
     form.base_unit_id = unit.id;
     closeUnitModal();
+};
+
+//API code sản phẩm
+const fetchGeneratedCode = async (isVariant = false) => {
+    const url = isVariant
+        ? 'http://127.0.0.1:8000/api/generate-variant-code'
+        : 'http://127.0.0.1:8000/api/generate-code';
+
+    try {
+        const response = await axios.get(url);
+        if (isVariant) {
+            const rand = Math.floor(100 + Math.random() * 900);
+            return `${response.data.code}-${rand}`;
+        }
+        return response.data.code || `SKU-${Date.now()}`;
+    } catch (err) {
+        console.error('Lỗi gọi API generate code:', err);
+        return '';
+    }
+};
+watch(variantCombinations, async (newVal) => {
+    for (const item of newVal) {
+        if (!item.data.code) {
+            const autoCode = await fetchGeneratedCode(true);
+            item.data.code = autoCode;
+        }
+    }
+});
+const cleanUpEmptyAttributes = () => {
+    form.variants.forEach((variant) => {
+        variant.attributes.forEach((attr) => {
+            if (!attr.attribute_id) {
+                attr.attribute_value_ids = [];
+            }
+        });
+    });
 };
 </script>
 

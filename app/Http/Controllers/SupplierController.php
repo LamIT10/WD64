@@ -28,7 +28,7 @@ class SupplierController extends Controller
     }
     public function getList(Request $request)
     {
-        $suppliers = $this->supplierRepository->getList($request);
+        $suppliers = $this->supplierRepository->getList($request->all());
         return inertia('admin/Supplier/List', [
             'suppliers' => $suppliers
         ]);

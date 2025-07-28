@@ -18,7 +18,7 @@ class StoreProductRequest extends FormRequest
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['nullable', 'string', 'max:100', Rule::unique('products', 'code')],
+            'code' => ['required', 'string', 'max:100', Rule::unique('products', 'code')],
             'min_stock' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'category_id' => ['required', 'exists:categories,id'],

@@ -57,6 +57,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     // Routes cho Products (Sản phẩm)
     Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
+        Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -98,6 +100,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('customers.bulk-delete');
         Route::get('customers/import', [CustomerController::class, 'import'])->name('customers.import');
         Route::get('customers/export', [CustomerController::class, 'export'])->name('customers.export');
+        Route::get('/{customer}/debt-orders', [CustomerTransactionController::class, 'debtOrdersByCustomer'])
+            ->name('debt-orders');
     });
 
 
@@ -162,7 +166,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
 
     Route::group(['prefix' => 'customer-transaction', 'as' => 'customer-transaction.'], function () {
-        Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
+        // Route::get('/', [CustomerTransactionController::class, 'index'])->name('index');
         Route::post('/{order}/add', [CustomerTransactionController::class, 'addTransaction'])->name('add');
         Route::post('/{order}/update-due-date', [CustomerTransactionController::class, 'updateDueDate'])->name('updateDueDate');
         Route::get('/{order}/show', [CustomerTransactionController::class, 'show'])->name('show');
@@ -181,6 +185,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->name('edit');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->name('index');
@@ -220,6 +225,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{id}/approve', [SaleOrderController::class, 'approve'])->name('approve');
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('export', [SaleOrderController::class, 'export'])->name('export');
+        Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
     });
 });
 

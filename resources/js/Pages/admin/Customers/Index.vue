@@ -174,6 +174,7 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import Toast from '../../components/Toast.vue';
+import ConfirmModal from '../../components/ConfirmModal.vue';
 import { route } from 'ziggy-js';
 
 const props = defineProps({

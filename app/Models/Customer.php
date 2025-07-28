@@ -22,6 +22,7 @@ class Customer extends Model
         'ward',
         'avatar',
         'status',
+        'total_spent'
     ];
 
     protected $hidden = ['password'];

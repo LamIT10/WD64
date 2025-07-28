@@ -172,15 +172,26 @@
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 </td>
                                 <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center ">
-                                        <img :src="user.avatar ? `/storage/${user.avatar}` : '/images/default-ava.png'"
-                                            alt="Avatar" class="h-10 w-10 object-cover shadow-sm rounded-md">
+                                    <div class="flex items-center">
+                                        <!-- Nếu có avatar -->
+                                        <img v-if="user.avatar" :src="`/storage/${user.avatar}`" alt="Avatar"
+                                            class="h-10 w-10 object-cover shadow-sm rounded-md" />
+
+                                        <!-- Nếu không có avatar: render avatar mặc định -->
+                                        <div v-else :class="[
+                                            'h-10 w-10 rounded-md flex items-center justify-center font-bold text-white text-xs shadow-sm',
+                                            getBgColor(user.name)
+                                        ]">
+                                            {{ getInitial(user.name) }}
+                                        </div>
+
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">
                                                 {{ user.name }}
                                             </div>
                                         </div>
                                     </div>
+
                                 </td>
 
                                 <td v-if="visibleColumns.includes('employee_code')"
@@ -206,8 +217,14 @@
                                     {{ user.address || '-' }}
                                 </td>
                                 <td v-if="visibleColumns.includes('position')"
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <p class="rounded-2xl font-medium p-1 bg-gray-100 text-center  m-0.5">
+                                    class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <p :class="{
+                                        'rounded-2xl font-medium p-1 m-0.5 text-center': true,
+                                        'bg-blue-100 text-blue-800': user.position === 'Nhân viên',
+                                        'bg-orange-100 text-orange-800': user.position === 'Quản lý',
+                                        'bg-red-100 text-red-800': user.position === 'Giám đốc',
+                                        'bg-gray-100 text-gray-900': !user.position || user.position === '-'
+                                    }">
                                         {{ user.position || '-' }}
                                     </p>
                                 </td>
@@ -509,6 +526,29 @@ onMounted(() => {
         window.location.replace(cleanUrl); // ← chuyển URL, reload lại ngay
     }
 });
+//ava mac dinh
+const getInitial = (name) => {
+    if (!name) return '?'
+    const words = name.trim().split(' ')
+    const first = words[0]?.charAt(0).toUpperCase() || ''
+    const last = words.length > 1 ? words[words.length - 1]?.charAt(0).toUpperCase() : ''
+    return first + last
+}
+
+const getBgColor = (name) => {
+    const colors = [
+        'bg-green-500',
+        'bg-orange-400',
+        'bg-yellow-500',
+        'bg-blue-500',
+        'bg-purple-500',
+        'bg-pink-500',
+        'bg-red-400',
+    ]
+    if (!name) return 'bg-gray-400'
+    const index = name.charCodeAt(0) % colors.length
+    return colors[index]
+}
 
 </script>
 

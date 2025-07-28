@@ -2,41 +2,109 @@
     <AppLayout>
         <div class="p-6">
             <!-- Header với các bộ lọc -->
-            <div class="p-3 bg-white mb-4 flex justify-between items-center rounded-lg shadow-sm">
-                <h5 class="text-lg text-indigo-700 font-semibold">
+            <div
+                class="p-3 bg-white mb-4 flex justify-between items-center rounded-lg shadow-sm border border-gray-200">
+                <h5 class="text-lg text-indigo-700 font-semibold" v-if="$page.url === '/admin/products/get-inactive'">
+                    Danh sách Sản phẩm đã ẩn
+                </h5>
+                <h5 class="text-lg text-indigo-700 font-semibold" v-else>
                     Danh sách Sản phẩm
                 </h5>
                 <div class="flex items-center space-x-3">
-                    <!-- Filter Dropdown -->
-                    <select
-                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <option value="">Tất cả danh mục</option>
-                        <option value="1">Điện thoại</option>
-                        <option value="2">Laptop</option>
-                        <option value="3">Phụ kiện</option>
-                    </select>
-
-                    <!-- Stock Status Filter -->
-                    <select
-                        class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="low_stock">Sắp hết hàng</option>
-                        <option value="out_of_stock">Hết hàng</option>
-                        <option value="expiring">Sắp hết hạn</option>
-                    </select>
-
-                    <!-- Search bar -->
-                    <div class="relative">
-                        <input type="text" placeholder="Tìm kiếm theo tên, mã..."
-                            class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                    </div>
-
-                    <Waiting route-name="admin.products.create" :route-params="{}"
+                    <Waiting v-if="$page.url.startsWith('/admin/products') && !isInactivePage"
+                        route-name="admin.products.get_inactive" :route-params="{}"
+                        :color="'bg-red-500 hover:bg-red-700 text-white'">
+                        <span>Danh Sách Đã Ẩn</span>
+                    </Waiting>
+                    <!-- Search Toggle Button -->
+                    <button @click="toggleSearchForm"
+                        class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
+                        <i class="fas fa-search"></i>
+                        <span>Tìm kiếm</span>
+                    </button>
+                    <!-- Add Product Button -->
+                    <Waiting v-if="$page.url.includes('/admin/products/get-inactive')" route-name="admin.products.index"
+                        :route-params="{}" :color="'bg-gray-200 hover:bg-gray-300 text-gray-800'">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        <span>Quay lại</span>
+                    </Waiting>
+                    <Waiting v-else route-name="admin.products.create" :route-params="{}"
                         :color="'bg-indigo-600 hover:bg-indigo-700 text-white'">
-                        <i class="fas fa-plus mr-1"></i> Thêm mới
+                        <i class="fas fa-plus mr-1"></i>
+                        <span>Thêm mới</span>
                     </Waiting>
                 </div>
+            </div>
+            <!-- Search Form (Hidden by Default) -->
+            <div v-if="showSearchForm" class="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <form @submit.prevent="submitSearch" class="flex flex-col gap-4 w-full">
+                    <div class="grid grid-cols-2 gap-6 mb-6 w-full">
+                        <!-- Product Name -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-box mr-2 text-indigo-500"></i>
+                                Tên sản phẩm
+                            </label>
+                            <div class="relative">
+                                <input v-model="searchForm.name" type="text" placeholder="Nhập tên sản phẩm..."
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                <i
+                                    class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- Product Code -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-barcode mr-2 text-indigo-500"></i>
+                                Mã sản phẩm
+                            </label>
+                            <div class="relative">
+                                <input v-model="searchForm.code" type="text" placeholder="Nhập mã sản phẩm..."
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                                <i
+                                    class="fas fa-barcode absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- Stock Status -->
+                        <div class="space-y-2 col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-chart-line mr-2 text-indigo-500"></i>
+                                Trạng thái tồn kho
+                            </label>
+                            <div class="relative">
+                                <select v-model="searchForm.stock_status"
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none transition-all">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="low_stock">Sắp hết hàng</option>
+                                    <option value="out_of_stock">Hết hàng</option>
+                                    <option value="normal">Bình thường</option>
+                                </select>
+                                <i
+                                    class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                <i
+                                    class="fas fa-chart-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="justify-center text-center space-x-3 pt-4 border-t border-gray-200 w-full">
+                        <div class="flex justify-center">
+                            <button type="button" @click="resetSearch"
+                                class="flex items-center me-10 gap-2 px-5 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-undo-alt"></i>
+                                Đặt lại
+                            </button>
+                            <button type="submit"
+                                class="flex items-center ms-5 gap-2 px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-search"></i>
+                                Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
 
             <!-- Container cho bảng với thanh cuộn ngang -->
@@ -65,6 +133,12 @@
                                 </th>
                                 <th scope="col" class="px-4 py-3 table-cell-nowrap">
                                     <div class="flex items-center space-x-1">
+                                        <i class="fas fa-list text-indigo-500"></i>
+                                        <span>Danh Mục</span>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-4 py-3 table-cell-nowrap">
+                                    <div class="flex items-center space-x-1">
                                         <i class="fas fa-dollar-sign text-green-500"></i>
                                         <span>Giá nhập/Giá bán</span>
                                     </div>
@@ -85,18 +159,6 @@
                                     <div class="flex items-center space-x-1">
                                         <i class="fas fa-sitemap text-purple-500"></i>
                                         <span>Biến thể</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-4 py-3 table-cell-nowrap">
-                                    <div class="flex items-center space-x-1">
-                                        <i class="fas fa-calendar text-red-500"></i>
-                                        <span>Ngày sản xuất</span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-4 py-3 table-cell-nowrap">
-                                    <div class="flex items-center space-x-1">
-                                        <i class="fas fa-calendar-times text-red-500"></i>
-                                        <span>Ngày hết hạn</span>
                                     </div>
                                 </th>
                                 <th scope="col" class="px-4 py-3 table-cell-nowrap">
@@ -151,6 +213,14 @@
                                     </span>
                                 </td>
 
+                                <!-- Mã sản phẩm -->
+                                <td class="px-4 py-3 table-cell-nowrap">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
+                                        {{ product.category?.name || 'Không Có Danh mục' }}
+                                    </span>
+                                </td>
+
                                 <!-- Giá nhập/Giá bán -->
                                 <!-- Giá nhập/Giá bán -->
                                 <td class="px-4 py-3 table-cell-nowrap">
@@ -172,10 +242,8 @@
                                     <div class="space-y-1">
                                         <div class="text-sm font-medium"
                                             :class="getStockStatusClass(product).textClass">
-                                            Số lượng: {{ getTotalStock(product) }} {{ getFormUnit(product).fromUnit }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">
-                                            ≈ {{ convertToBoxes(product) }} {{ getFormUnit(product).toUnit }}
+                                            Số lượng: {{ getTotalStock(product) }} {{ product.default_unit?.name ||
+                                                '...' }}
                                         </div>
                                         <div class="text-xs text-gray-400">
                                             SL tối thiểu: {{ product.min_stock }}
@@ -209,21 +277,21 @@
                                 </td>
 
                                 <!-- Ngày sản xuất -->
-                                <td class="px-4 py-3 table-cell-nowrap">
+                                <!-- <td class="px-4 py-3 table-cell-nowrap">
                                     <div class="text-sm text-gray-600">
                                         {{ formatDate(product.production_date) }}
                                     </div>
-                                </td>
+                                </td> -->
 
                                 <!-- Ngày hết hạn -->
-                                <td class="px-4 py-3 table-cell-nowrap">
+                                <!-- <td class="px-4 py-3 table-cell-nowrap">
                                     <div class="text-sm text-gray-600">
                                         {{ formatDate(product.expiration_date) }}
                                     </div>
                                     <div class="text-xs" :class="getExpirationStatus(product).textClass">
                                         {{ getExpirationStatus(product).text }}
                                     </div>
-                                </td>
+                                </td> -->
 
                                 <!-- Vị trí -->
                                 <td class="px-4 py-3 table-cell-nowrap">
@@ -240,23 +308,25 @@
                                             title="Xem chi tiết">
                                         <i class="fas fa-eye text-sm"></i>
                                         </Link>
-                                        <Link :href="route('admin.products.edit', product.id)"
+                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Chỉnh sửa">
-                                            <i class="fas fa-edit text-sm"></i>
+                                        <i class="fas fa-edit text-sm"></i>
 
                                         </Link>
-                                        <ConfirmModal :route-name="'admin.products.destroy'" :route-params="{
-                                            id: product.id,
-                                        }" title="Xác nhận xóa sản phẩm"
-                                            :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${product.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
-                                            <template #trigger="{
-                                                openModal,
-                                            }">
-                                                <button @click="
-                                                    openModal
-                                                "
-                                                    class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors">
+                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"
+                                            class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
+                                            title="Khôi phục">
+                                            <i class="fas fa-undo text-sm"></i>
+                                        </button>
+
+                                        <!-- Nếu là trang active, hiện nút ConfirmModal để ẩn -->
+                                        <ConfirmModal v-else :route-name="'admin.products.destroy'"
+                                            :route-params="{ id: product.id }" title="Xác nhận ẩn sản phẩm">
+                                            <template #trigger="{ openModal }">
+                                                <button @click="openModal"
+                                                    class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                                                    title="Ẩn sản phẩm">
                                                     <i class="fas fa-trash text-sm"></i>
                                                 </button>
                                             </template>
@@ -293,7 +363,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import ConfirmModal from '../../components/ConfirmModal.vue';
 import ModalProductVariant from '../../components/ModalProductVariant.vue';
 import Waiting from '../../components/Waiting.vue';
@@ -304,16 +374,47 @@ import ImageGalleryModal from '../../components/ImageGalleryModal.vue';
 const props = defineProps({
     products: Object
 });
+const showSearchForm = ref(false);
+const searchForm = useForm({
+    name: '',
+    code: '',
+    stock_status: ''
+});
+const toggleSearchForm = () => {
+    showSearchForm.value = !showSearchForm.value;
+};
+
+const page = usePage()
+
+const isInactivePage = page.url === '/admin/products/get-inactive'
+
+const submitSearch = () => {
+    const routeName = isInactivePage ? 'admin.products.get_inactive' : 'admin.products.index'
+    searchForm.get(route(routeName), {
+        preserveState: true,
+        replace: true
+    });
+};
+const resetSearch = () => {
+    searchForm.name = ''
+    searchForm.code = ''
+    searchForm.stock_status = ''
+    const routeName = isInactivePage ? 'admin.products.get_inactive' : 'admin.products.index'
+    searchForm.get(route(routeName), {
+        preserveState: true,
+        replace: true
+    });
+};
 const formatCurrency = (value) => {
     if (!value) return '0 ₫';
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
-};
+// const formatDate = (dateString) => {
+//     if (!dateString) return 'N/A';
+//     const date = new Date(dateString);
+//     return date.toLocaleDateString('vi-VN');
+// };
 
 const getTotalStock = (product) => {
     if (!product.product_variants) return 0;
@@ -321,31 +422,7 @@ const getTotalStock = (product) => {
         return total + (variant.inventory?.reduce((sum, inv) => sum + inv.quantity_on_hand, 0) || 0);
     }, 0);
 };
-const convertToBoxes = (product) => {
-    const totalSheets = getTotalStock(product);
 
-    if (!product.unit_conversions || product.unit_conversions.length === 0) return 'N/A';
-
-    const conversion = product.unit_conversions.find(unitConversion =>
-        unitConversion.conversion_factor)
-
-    if (!conversion) return 'N/A';
-
-    const boxes = totalSheets / parseFloat(conversion.conversion_factor);
-    return Math.round(boxes * 100) / 100;
-};
-const getFormUnit = (product) => {
-    if (!product.unit_conversions || product.unit_conversions.length === 0) return { fromUnit: null, toUnit: null };
-
-    const fromUnit = product.unit_conversions.find(conversion => conversion.from_unit_id);
-
-    if (!fromUnit) return { fromUnit: null, toUnit: null };
-
-    const textFormUnit = fromUnit.from_unit?.name ?? null;
-    const textToUnit = fromUnit.to_unit?.name ?? null;
-
-    return { fromUnit: textFormUnit, toUnit: textToUnit };
-}
 const getMinCostPrice = (product) => {
     if (!product.product_variants || product.product_variants.length === 0) return 'N/A';
 
@@ -392,6 +469,17 @@ const getMaxSalePrice = (product) => {
     return isNaN(maxSale) ? 'N/A' : maxSale;
 };
 
+const restoreForm = useForm({
+    id: null
+});
+
+const restoreProduct = (id) => {
+    restoreForm.id = id;
+    restoreForm.post(route('admin.products.restore', { id }), {
+        preserveScroll: true,
+        onFinish: () => restoreForm.reset('id')
+    });
+};
 
 const getStockStatusClass = (product) => {
     const totalStock = getTotalStock(product);
@@ -423,7 +511,7 @@ const getStockStatusText = (product) => {
     const minStock = product.min_stock || 0;
 
     if (totalStock === 0) return 'Hết hàng';
-    if (totalStock <= minStock) return 'Sắp hết hàng';
+    if (totalStock <= minStock) return 'Sắp hết hàng!';
     return 'Bình thường';
 };
 
@@ -457,22 +545,22 @@ const getLocation = (product) => {
     return Array.from(locations).join(', ') || 'N/A';
 };
 
-const getExpirationStatus = (product) => {
-    if (!product.expiration_date) return { text: 'N/A', textClass: 'text-gray-400' };
+// const getExpirationStatus = (product) => {
+//     if (!product.expiration_date) return { text: 'N/A', textClass: 'text-gray-400' };
 
-    const expirationDate = new Date(product.expiration_date);
-    const today = new Date();
-    const diffTime = expirationDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+//     const expirationDate = new Date(product.expiration_date);
+//     const today = new Date();
+//     const diffTime = expirationDate.getTime() - today.getTime();
+//     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays <= 0) {
-        return { text: 'Đã hết hạn', textClass: 'text-red-500 font-medium' };
-    } else if (diffDays <= 30) {
-        return { text: `Còn ${diffDays} ngày`, textClass: 'text-yellow-500 font-medium' };
-    } else {
-        return { text: 'Còn hạn', textClass: 'text-green-500' };
-    }
-};
+//     if (diffDays <= 0) {
+//         return { text: 'Đã hết hạn', textClass: 'text-red-500 font-medium' };
+//     } else if (diffDays <= 30) {
+//         return { text: `Còn ${diffDays} ngày`, textClass: 'text-yellow-500 font-medium' };
+//     } else {
+//         return { text: 'Còn hạn', textClass: 'text-green-500' };
+//     }
+// };
 
 const isModalOpen = ref(false);
 const selectedProduct = ref({});

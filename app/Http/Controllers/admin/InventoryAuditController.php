@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use App\Models\WarehouseZone;
 use App\Models\InventoryLocation;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class InventoryAuditController extends Controller
@@ -44,6 +45,7 @@ class InventoryAuditController extends Controller
             'items.productVariant.inventoryLocations',
             'items.productVariant.attributes.attribute',
             'user',
+            'approvedBy', 
         ])->findOrFail($id);
 
         $variantIds = $audit->items->pluck('product_variant_id');
@@ -52,10 +54,9 @@ class InventoryAuditController extends Controller
             ->whereNotNull('zone_id')
             ->distinct()
             ->pluck('zone_id');
-        $zones = \App\Models\WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+        $zones = WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
         $audit->audited_zones = $zones;
 
-        // Không còn grid từng cell, chỉ trả về danh sách zone
         $grid = $zones;
 
         foreach ($audit->items as $item) {
@@ -64,6 +65,7 @@ class InventoryAuditController extends Controller
                 ->whereNotNull('zone_id')
                 ->first();
             $item->zone = $location ? optional($location->zone)->name : null;
+            $item->custom_location_name = $location ? $location->custom_location_name : "" ;
 
             $unit = null;
             if ($item->productVariant && $item->productVariant->inventory && count($item->productVariant->inventory) > 0) {
@@ -86,6 +88,8 @@ class InventoryAuditController extends Controller
             }
             $item->attributes = $attributes;
         }
+
+        // dd(Auth::id());
 
         return Inertia::render('admin/InventoryAudit/Show', [
             'audit' => $audit,
@@ -146,7 +150,9 @@ class InventoryAuditController extends Controller
         // Trả về thông báo thành công
         // Bạn có thể sử dụng flash message để hiển thị thông báo thành công
 
-        return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
+        // Lấy id của bản ghi kiểm kho vừa tạo
+        $lastAudit = InventoryAudit::latest('id')->first();
+        return redirect()->route('admin.inventory-audit.show', $lastAudit->id)->with('success', 'Đã lưu kiểm kho thành công.');
     }
 
     

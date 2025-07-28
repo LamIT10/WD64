@@ -48,6 +48,7 @@
                 <tr>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">#</th>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">Khu vực</th>
+                  <th class="px-3 py-2 text-center font-semibold text-indigo-700">Chi tiết khu vực</th>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">Mã hàng</th>
                   <th class="px-3 py-2 text-left font-semibold text-indigo-700">Tên hàng</th>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">Đơn vị</th>
@@ -61,6 +62,7 @@
                 <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
                   <td class="px-3 py-2 text-center">{{ index + 1 }}</td>
                   <td class="px-3 py-2 text-center">{{ product.zone }}</td>
+                  <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
                   <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
                   <td class="px-3 py-2">
                     {{ product.name_product }}
@@ -111,6 +113,8 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import { usePage, router } from '@inertiajs/vue3';
 import * as XLSX from 'xlsx';
 
+const importInput = ref(null);
+const toastRef = ref(null);
 const page = usePage();
 const zones = page.props.zones || [];
 const products = reactive([]);
@@ -150,6 +154,8 @@ const fetchProductsByZones = async () => {
     selectedZones.value.forEach(z => params.append('zones[]', z));
     const response = await fetch(`/api/inventory-audit/information-create?${params.toString()}`);
     const data = await response.json();
+    console.log(data);
+    
     products.length = 0;
     products.push(...(data.data || []));
     auditData.value.items = products.map(product => ({
@@ -164,7 +170,7 @@ const fetchProductsByZones = async () => {
     auditData.value.items = [];
   }
 };
-const importInput = ref(null);
+
 
 const handleImportExcel = async (event) => {
   const file = event.target.files[0];
@@ -247,9 +253,10 @@ const filteredProducts = computed(() => products);
 
 const exportSampleExcel = () => {
   const sampleData = [
-    ['Khu vực', 'Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', 'Thực tế', 'Ghi chú chênh'],
+    ['Khu vực', 'Chi tiết khu vực','Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', 'Thực tế', 'Ghi chú chênh'],
     ...filteredProducts.value.map((product, idx) => [
       product.zone,
+      product.custom_location_name,
       product.code,
       product.name_product,
       product.unit,

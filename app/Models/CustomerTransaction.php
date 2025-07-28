@@ -14,7 +14,9 @@ class CustomerTransaction extends Model
         'paid_amount',
         'transaction_date',
         'credit_due_date',
-        'description'
+        'description',
+        'type',
+        
     ];
 
     protected $casts = [
