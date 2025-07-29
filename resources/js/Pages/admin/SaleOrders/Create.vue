@@ -1,171 +1,522 @@
 <template>
-    <div class="min-h-screen bg-gray-100">
-        <!-- Flash Messages -->
-        <div
-            v-if="$page.props.flash.success"
-            class="fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50"
-        >
-            {{ $page.props.flash.success }}
-        </div>
-        <div
-            v-if="$page.props.errors.error"
-            class="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50"
-        >
-            {{ $page.props.errors.error }}
-        </div>
+    <AppLayout>
+        <div class="min-h-screen bg-gray-100">
+            <!-- Flash Messages -->
+            <div
+                v-if="$page.props.flash.success"
+                class="fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50"
+            >
+                {{ $page.props.flash.success }}
+            </div>
+            <div
+                v-if="$page.props.errors.error"
+                class="fixed top-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50"
+            >
+                {{ $page.props.errors.error }}
+            </div>
 
-        <!-- Top Header -->
-        <div
-            class="bg-blue-600 text-white p-3 flex items-center justify-between relative"
-        >
-            <div class="flex items-center space-x-4 flex-1">
-                <div class="relative flex-1 max-w-md">
-                    <!-- Search Product Input -->
-                    <svg
-                        class="w-4 h-4 absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
-                    <Combobox v-model="selectedProduct">
-                        <div class="relative">
-                            <ComboboxInput
-                                id="searchProduct"
-                                class="w-full bg-white pl-10 pr-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                placeholder="Tìm kiếm sản phẩm"
-                                @input="
-                                    debouncedSearchProduct($event.target.value)
-                                "
+            <!-- Top Header -->
+            <div
+                class="bg-blue-600 text-white p-3 flex items-center justify-between relative"
+            >
+                <div class="flex items-center space-x-4 flex-1">
+                    <div class="relative flex-1 max-w-md">
+                        <!-- Search Product Input -->
+                        <svg
+                            class="w-4 h-4 absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                             />
-                            <ComboboxButton
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                            >
-                                <ChevronDownIcon
-                                    class="h-5 w-5 text-gray-400"
-                                    aria-hidden="true"
+                        </svg>
+                        <Combobox v-model="selectedProduct">
+                            <div class="relative">
+                                <ComboboxInput
+                                    id="searchProduct"
+                                    class="w-full bg-white pl-10 pr-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    placeholder="Tìm kiếm sản phẩm"
+                                    @input="
+                                        debouncedSearchProduct(
+                                            $event.target.value
+                                        )
+                                    "
                                 />
-                            </ComboboxButton>
-                        </div>
-                        <transition
-                            leave-active-class="transition ease-in duration-100"
-                            leave-from-class="opacity-100"
-                            leave-to-class="opacity-0"
-                        >
-                            <ComboboxOptions
-                                v-if="filteredProducts.length > 0"
-                                class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none left-0 top-full"
-                            >
-                                <ComboboxOption
-                                    v-for="product in filteredProducts"
-                                    :key="product.variant_id"
-                                    :value="product"
-                                    v-slot="{ active }"
-                                    @pointerdown="selectProduct(product)"
+                                <ComboboxButton
+                                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
                                 >
-                                    <span
-                                        :class="[
-                                            active
-                                                ? 'bg-gray-100 text-gray-900'
-                                                : 'text-gray-700',
-                                            'block px-4 py-2 text-sm',
-                                        ]"
+                                    <ChevronDownIcon
+                                        class="h-5 w-5 text-gray-400"
+                                        aria-hidden="true"
+                                    />
+                                </ComboboxButton>
+                            </div>
+                            <transition
+                                leave-active-class="transition ease-in duration-100"
+                                leave-from-class="opacity-100"
+                                leave-to-class="opacity-0"
+                            >
+                                <ComboboxOptions
+                                    v-if="filteredProducts.length > 0"
+                                    class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none left-0 top-full"
+                                >
+                                    <ComboboxOption
+                                        v-for="product in filteredProducts"
+                                        :key="product.variant_id"
+                                        :value="product"
+                                        v-slot="{ active }"
+                                        @pointerdown="selectProduct(product)"
                                     >
-                                        {{ product.product_name }} ({{
-                                            formatPrice(product.sale_price)
-                                        }})
-                                    </span>
-                                </ComboboxOption>
-                            </ComboboxOptions>
-                        </transition>
-                        <p
-                            v-if="isLoadingProduct"
-                            class="text-gray-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
+                                        <span
+                                            :class="[
+                                                active
+                                                    ? 'bg-gray-100 text-gray-900'
+                                                    : 'text-gray-700',
+                                                'block px-4 py-2 text-sm',
+                                            ]"
+                                        >
+                                            {{ product.product_name }} ({{
+                                                formatPrice(product.sale_price)
+                                            }})
+                                        </span>
+                                    </ComboboxOption>
+                                </ComboboxOptions>
+                            </transition>
+                            <p
+                                v-if="isLoadingProduct"
+                                class="text-gray-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
+                            >
+                                Đang tải...
+                            </p>
+                            <p
+                                v-else-if="productError"
+                                class="text-red-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
+                            >
+                                {{ productError }}
+                            </p>
+                            <p
+                                v-else-if="productMessage"
+                                class="text-gray-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
+                            >
+                                {{ productMessage }}
+                            </p>
+                        </Combobox>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 hover:bg-blue-700 rounded" title="Khóa">
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                         >
-                            Đang tải...
-                        </p>
-                        <p
-                            v-else-if="productError"
-                            class="text-red-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+                    </button>
+                    <span class="text-sm">0388997335</span>
+                    <button class="p-2 hover:bg-blue-700 rounded" title="Menu">
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                         >
-                            {{ productError }}
-                        </p>
-                        <p
-                            v-else-if="productMessage"
-                            class="text-gray-500 text-sm mt-1 absolute left-0 top-full bg-white px-2 py-1"
-                        >
-                            {{ productMessage }}
-                        </p>
-                    </Combobox>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"
+                            />
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <button class="p-2 hover:bg-blue-700 rounded" title="Khóa">
-                    <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                    </svg>
-                </button>
-                <span class="text-sm">0388997335</span>
-                <button class="p-2 hover:bg-blue-700 rounded" title="Menu">
-                    <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"
-                        />
-                    </svg>
-                </button>
-            </div>
-        </div>
 
-        <div class="flex h-screen">
-            <!-- Left Panel - Product Information -->
-            <div class="w-1/2 p-4 space-y-4">
-                <!-- Product Cards -->
-                <div
-                    v-for="(productGroup, index) in groupedProducts"
-                    :key="index"
-                    class="bg-white rounded-lg border-2 border-blue-200 p-4 relative"
-                    :ref="`productCard-${index}`"
-                >
+            <div class="flex h-screen">
+                <!-- Left Panel - Product Information -->
+                <div class="w-1/2 p-4 space-y-4">
+                    <!-- Product Cards -->
                     <div
-                        v-for="(product, productIndex) in productGroup"
-                        :key="productIndex"
+                        v-for="(productGroup, index) in groupedProducts"
+                        :key="index"
+                        class="bg-white rounded-lg border-2 border-blue-200 p-4 relative"
+                        :ref="`productCard-${index}`"
                     >
                         <div
-                            v-if="productIndex > 0"
-                            class="border-t border-dashed border-gray-300 my-3"
-                        ></div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-gray-600 font-medium">{{
-                                    product.id
+                            v-for="(product, productIndex) in productGroup"
+                            :key="productIndex"
+                        >
+                            <div
+                                v-if="productIndex > 0"
+                                class="border-t border-dashed border-gray-300 my-3"
+                            ></div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-gray-600 font-medium">{{
+                                        product.id
+                                    }}</span>
+                                    <span class="text-gray-800">{{
+                                        product.name
+                                    }}</span>
+                                    <svg
+                                        class="w-4 h-4 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button
+                                        class="p-1 hover:bg-gray-100 rounded"
+                                        title="Thêm"
+                                        @click="selectProduct(product)"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        @click="toggleProductMenu(product.id)"
+                                        class="p-1 hover:bg-gray-100 rounded"
+                                        title="Tùy chọn"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Product Menu -->
+                            <div
+                                v-if="showProductMenu === product.id"
+                                class="absolute right-4 top-16 bg-white border rounded-lg shadow-lg py-2 z-10 w-[220px]"
+                            >
+                                <button
+                                    @click="removeProduct(product)"
+                                    class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
+                                    <span>Xóa sản phẩm</span>
+                                </button>
+                                <button
+                                    class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                    <span>Ghi chú</span>
+                                </button>
+                                <button
+                                    class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                    </svg>
+                                    <span>Xem chi tiết</span>
+                                </button>
+                                <button
+                                    @click="selectAllVariants(product)"
+                                    class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
+                                >
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span>Chọn tất cả biến thể</span>
+                                </button>
+                                <button
+                                    v-if="product.hasOtherUnits"
+                                    @click="toggleUnitConverter(product)"
+                                    class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                        />
+                                    </svg>
+                                    <span>{{
+                                        product.useCustomUnit
+                                            ? "Tắt chuyển đổi đơn vị"
+                                            : "Bật chuyển đổi đơn vị khác"
+                                    }}</span>
+                                </button>
+                            </div>
+
+                            <!-- Quantity and Price -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <button
+                                        @click="decreaseQuantity(product)"
+                                        class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-50"
+                                        :disabled="product.quantity <= 1"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M20 12H4"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <input
+                                        v-model.number="product.quantity"
+                                        class="w-12 text-center border-b border-red-300 focus:outline-none focus:border-red-500"
+                                        type="number"
+                                        min="1"
+                                        @input="validateQuantity(product)"
+                                    />
+                                    <button
+                                        @click="increaseQuantity(product)"
+                                        class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-50"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div
+                                    v-if="product.useCustomUnit"
+                                    class="converter"
+                                >
+                                    <div class="input-section">
+                                        <select
+                                            v-model="product.selectedUnitId"
+                                            class="select"
+                                            @change="updateUnit(product)"
+                                        >
+                                            <option
+                                                v-for="unit in product.availableUnits"
+                                                :key="unit.unit_id"
+                                                :value="unit.unit_id"
+                                            >
+                                                {{ unit.unit_name }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="output-section">
+                                        <span class="output"
+                                            >{{
+                                                product.conversionFactor || 1
+                                            }}
+                                            {{ product.defaultUnitName }}</span
+                                        >
+                                    </div>
+                                </div>
+                                <div class="text-right flex space-x-4">
+                                    <span class="text-gray-600">{{
+                                        formatPrice(product.price)
+                                    }}</span>
+                                    <span class="text-lg font-semibold">
+                                        {{
+                                            formatPrice(
+                                                product.price *
+                                                    product.quantity *
+                                                    (product.conversionFactor ||
+                                                        1)
+                                            )
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Lỗi số lượng vượt kho -->
+                            <p
+                                v-if="product.quantityError"
+                                class="text-red-500 text-sm mt-1"
+                            >
+                                {{ product.quantityError }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="bg-white rounded-lg p-4 space-y-3">
+                        <div class="flex items-center space-x-2 text-gray-600">
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                            <span>Ghi chú</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Tạm tính</span>
+                                <div class="flex items-center space-x-4">
+                                    <span>{{ formatPrice(totalAmount) }}</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Giảm giá</span>
+                                <span>{{ customer_discount }} %</span>
+                            </div>
+                            <div
+                                class="flex justify-between font-semibold text-lg"
+                            >
+                                <span>Tổng cộng</span>
+                                <span class="text-blue-600">{{
+                                    formatPrice(
+                                        totalAmount *
+                                            (1 - customer_discount / 100)
+                                    )
                                 }}</span>
-                                <span class="text-gray-800">{{
-                                    product.name
-                                }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Customer Information -->
+                <div class="w-1/2 p-4 space-y-4">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <svg
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                                />
+                            </svg>
+                            <svg
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">
+                                {{ currentDateTime }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Form -->
+                    <div class="bg-white rounded-lg p-4 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span>Đối tác giao hàng</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-gray-500">Chọn đối tác</span>
                                 <svg
                                     class="w-4 h-4 text-gray-400"
                                     fill="none"
@@ -176,15 +527,12 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        d="M19 9l-7 7-7-7"
                                     />
                                 </svg>
-                            </div>
-                            <div class="flex items-center space-x-2">
                                 <button
                                     class="p-1 hover:bg-gray-100 rounded"
-                                    title="Thêm"
-                                    @click="selectProduct(product)"
+                                    title="Thêm đối tác"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -200,10 +548,389 @@
                                         />
                                     </svg>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Customer Search -->
+                        <div class="relative">
+                            <svg
+                                class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                            <Combobox v-model="form.customer">
+                                <div class="relative">
+                                    <ComboboxInput
+                                        id="customer"
+                                        class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                        placeholder="Khách hàng"
+                                        @input="
+                                            debouncedSearchCustomer(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <ComboboxButton
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                    >
+                                        <ChevronDownIcon
+                                            class="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                        />
+                                    </ComboboxButton>
+                                </div>
+                                <transition
+                                    leave-active-class="transition ease-in duration-100"
+                                    leave-from-class="opacity-100"
+                                    leave-to-class="opacity-0"
+                                >
+                                    <ComboboxOptions
+                                        v-if="filteredCustomers.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                    >
+                                        <ComboboxOption
+                                            v-for="customer in filteredCustomers"
+                                            :key="customer.id"
+                                            :value="customer"
+                                            v-slot="{ active }"
+                                            @pointerdown="
+                                                selectCustomer(customer)
+                                            "
+                                        >
+                                            <span
+                                                :class="[
+                                                    active
+                                                        ? 'bg-gray-100 text-gray-900'
+                                                        : 'text-gray-700',
+                                                    'block px-4 py-2 text-sm',
+                                                ]"
+                                            >
+                                                {{ customer.name }}
+                                            </span>
+                                        </ComboboxOption>
+                                    </ComboboxOptions>
+                                </transition>
+                            </Combobox>
+                        </div>
+                        <p
+                            v-if="isLoadingCustomer"
+                            class="text-gray-500 text-sm mt-1"
+                        >
+                            Đang tải...
+                        </p>
+                        <p
+                            v-else-if="customerError"
+                            class="text-red-500 text-sm mt-1"
+                        >
+                            {{ customerError }}
+                        </p>
+                        <p
+                            v-else-if="customerMessage"
+                            class="text-gray-500 text-sm mt-1"
+                        >
+                            {{ customerMessage }}
+                        </p>
+
+                        <!-- Phone Number -->
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-blue-600">{{
+                                form.phone || "Chưa chọn khách hàng"
+                            }}</span>
+                            <svg
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
+
+                        <!-- Customer Details -->
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-3 h-3 bg-green-500 rounded-full"
+                                ></div>
+                                <input
+                                    v-model="form.recipientName"
+                                    type="text"
+                                    placeholder="Tên người nhận"
+                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                />
+                                <input
+                                    v-model="form.phone"
+                                    type="text"
+                                    placeholder="Số điện thoại"
+                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                />
+                            </div>
+                            <input
+                                v-model="form.address_detail"
+                                type="text"
+                                placeholder="Địa chỉ chi tiết (Số nhà, ngõ, đường)"
+                                class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                :disabled="!form.ward"
+                            />
+                            <!-- Province -->
+                            <Combobox v-model="form.province">
+                                <div class="relative">
+                                    <ComboboxInput
+                                        id="province"
+                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                        placeholder="Tỉnh/Thành phố"
+                                        @input="
+                                            debouncedSearchProvince(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <ComboboxButton
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                    >
+                                        <ChevronDownIcon
+                                            class="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                        />
+                                    </ComboboxButton>
+                                </div>
+                                <transition
+                                    leave-active-class="transition ease-in duration-100"
+                                    leave-from-class="opacity-100"
+                                    leave-to-class="opacity-0"
+                                >
+                                    <ComboboxOptions
+                                        v-if="filteredProvinces.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                    >
+                                        <ComboboxOption
+                                            v-for="province in filteredProvinces"
+                                            :key="province.id"
+                                            :value="province.name"
+                                            v-slot="{ active }"
+                                            @click="selectProvince(province)"
+                                        >
+                                            <span
+                                                :class="[
+                                                    active
+                                                        ? 'bg-gray-100 text-gray-900'
+                                                        : 'text-gray-700',
+                                                    'block px-4 py-2 text-sm',
+                                                ]"
+                                            >
+                                                {{ province.name }}
+                                            </span>
+                                        </ComboboxOption>
+                                    </ComboboxOptions>
+                                </transition>
+                                <p
+                                    v-if="isLoadingProvince"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    Đang tải...
+                                </p>
+                                <p
+                                    v-else-if="provinceError"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ provinceError }}
+                                </p>
+                                <p
+                                    v-else-if="provinceMessage"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    {{ provinceMessage }}
+                                </p>
+                            </Combobox>
+                            <!-- District -->
+                            <Combobox v-model="form.district">
+                                <div class="relative">
+                                    <ComboboxInput
+                                        id="district"
+                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                        placeholder="Quận/Huyện"
+                                        :disabled="!form.province"
+                                        @input="
+                                            debouncedSearchDistrict(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <ComboboxButton
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                    >
+                                        <ChevronDownIcon
+                                            class="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                        />
+                                    </ComboboxButton>
+                                </div>
+                                <transition
+                                    leave-active-class="transition ease-in duration-100"
+                                    leave-from-class="opacity-100"
+                                    leave-to-class="opacity-0"
+                                >
+                                    <ComboboxOptions
+                                        v-if="filteredDistricts.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                    >
+                                        <ComboboxOption
+                                            v-for="district in filteredDistricts"
+                                            :key="district.id"
+                                            :value="district.name"
+                                            v-slot="{ active }"
+                                            @click="selectDistrict(district)"
+                                        >
+                                            <span
+                                                :class="[
+                                                    active
+                                                        ? 'bg-gray-100 text-gray-900'
+                                                        : 'text-gray-700',
+                                                    'block px-4 py-2 text-sm',
+                                                ]"
+                                            >
+                                                {{ district.name }}
+                                            </span>
+                                        </ComboboxOption>
+                                    </ComboboxOptions>
+                                </transition>
+                                <p
+                                    v-if="isLoadingDistrict"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    Đang tải...
+                                </p>
+                                <p
+                                    v-else-if="districtError"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ districtError }}
+                                </p>
+                                <p
+                                    v-else-if="districtMessage"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    {{ districtMessage }}
+                                </p>
+                            </Combobox>
+                            <!-- Ward -->
+                            <Combobox v-model="form.ward">
+                                <div class="relative">
+                                    <ComboboxInput
+                                        id="ward"
+                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                        placeholder="Phường/Xã"
+                                        :disabled="!form.district"
+                                        @input="
+                                            debouncedSearchWard(
+                                                $event.target.value
+                                            )
+                                        "
+                                    />
+                                    <ComboboxButton
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                    >
+                                        <ChevronDownIcon
+                                            class="h-5 w-5 text-gray-400"
+                                            aria-hidden="true"
+                                        />
+                                    </ComboboxButton>
+                                </div>
+                                <transition
+                                    leave-active-class="transition ease-in duration-100"
+                                    leave-from-class="opacity-100"
+                                    leave-to-class="opacity-0"
+                                >
+                                    <ComboboxOptions
+                                        v-if="filteredWards.length > 0"
+                                        class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                    >
+                                        <ComboboxOption
+                                            v-for="ward in filteredWards"
+                                            :key="ward.id"
+                                            :value="ward.name"
+                                            v-slot="{ active }"
+                                            @click="selectWard(ward)"
+                                        >
+                                            <span
+                                                :class="[
+                                                    active
+                                                        ? 'bg-gray-100 text-gray-900'
+                                                        : 'text-gray-700',
+                                                    'block px-4 py-2 text-sm',
+                                                ]"
+                                            >
+                                                {{ ward.name }}
+                                            </span>
+                                        </ComboboxOption>
+                                    </ComboboxOptions>
+                                </transition>
+                                <p
+                                    v-if="isLoadingWard"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    Đang tải...
+                                </p>
+                                <p
+                                    v-else-if="wardError"
+                                    class="text-red-500 text-sm mt-1"
+                                >
+                                    {{ wardError }}
+                                </p>
+                                <p
+                                    v-else-if="wardMessage"
+                                    class="text-gray-500 text-sm mt-1"
+                                >
+                                    {{ wardMessage }}
+                                </p>
+                            </Combobox>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="flex items-center space-x-2">
+                            <svg
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-join="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Ghi chú cho bưu tá"
+                                class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Payment Section -->
+                    <div class="bg-white rounded-lg p-4 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <span>Customer pay</span>
                                 <button
-                                    @click="toggleProductMenu(product.id)"
                                     class="p-1 hover:bg-gray-100 rounded"
-                                    title="Tùy chọn"
+                                    title="Tùy chọn thanh toán"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -220,754 +947,44 @@
                                     </svg>
                                 </button>
                             </div>
+                            <span class="text-2xl font-bold">0</span>
                         </div>
-
-                        <!-- Product Menu -->
-                        <div
-                            v-if="showProductMenu === product.id"
-                            class="absolute right-4 top-16 bg-white border rounded-lg shadow-lg py-2 z-10 w-[220px]"
-                        >
-                            <button
-                                @click="removeProduct(product)"
-                                class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                                <span>Xóa sản phẩm</span>
-                            </button>
-                            <button
-                                class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                </svg>
-                                <span>Ghi chú</span>
-                            </button>
-                            <button
-                                class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                </svg>
-                                <span>Xem chi tiết</span>
-                            </button>
-                            <button
-                                @click="selectAllVariants(product)"
-                                class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                                <i class="fa-solid fa-check-double"></i>
-                                <span>Chọn tất cả biến thể</span>
-                            </button>
-                            <button
-                                v-if="product.hasOtherUnits"
-                                @click="toggleUnitConverter(product)"
-                                class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-2"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                                    />
-                                </svg>
-                                <span>{{
-                                    product.useCustomUnit
-                                        ? "Tắt chuyển đổi đơn vị"
-                                        : "Bật chuyển đổi đơn vị khác"
-                                }}</span>
-                            </button>
-                        </div>
-
-                        <!-- Quantity and Price -->
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <button
-                                    @click="decreaseQuantity(product)"
-                                    class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-50"
-                                    :disabled="product.quantity <= 1"
+                            <div class="flex items-center space-x-2">
+                                <span>COD</span>
+                                <label
+                                    class="relative inline-flex items-center cursor-pointer"
                                 >
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M20 12H4"
-                                        />
-                                    </svg>
-                                </button>
-                                <input
-                                    v-model.number="product.quantity"
-                                    class="w-12 text-center border-b border-red-300 focus:outline-none focus:border-red-500"
-                                    type="number"
-                                    min="1"
-                                    @input="validateQuantity(product)"
-                                />
-                                <button
-                                    @click="increaseQuantity(product)"
-                                    class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-50"
-                                >
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                        />
-                                    </svg>
-                                </button>
+                                    <input
+                                        v-model="codEnabled"
+                                        type="checkbox"
+                                        class="sr-only peer"
+                                    />
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                                    ></div>
+                                </label>
                             </div>
-                            <div v-if="product.useCustomUnit" class="converter">
-                                <div class="input-section">
-                                    <select
-                                        v-model="product.selectedUnitId"
-                                        class="select"
-                                        @change="updateUnit(product)"
-                                    >
-                                        <option
-                                            v-for="unit in product.availableUnits"
-                                            :key="unit.unit_id"
-                                            :value="unit.unit_id"
-                                        >
-                                            {{ unit.unit_name }}
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="output-section">
-                                    <span class="output"
-                                        >{{ product.conversionFactor || 1 }}
-                                        {{ product.defaultUnitName }}</span
-                                    >
-                                </div>
-                            </div>
-                            <div class="text-right flex space-x-4">
-                                <span class="text-gray-600">{{
-                                    formatPrice(product.price)
-                                }}</span>
-                                <span class="text-lg font-semibold">
-                                    {{
-                                        formatPrice(
-                                            product.price *
-                                                product.quantity *
-                                                (product.conversionFactor || 1)
-                                        )
-                                    }}
-                                </span>
-                            </div>
-                        </div>
-                        <!-- Lỗi số lượng vượt kho -->
-                        <p
-                            v-if="product.quantityError"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ product.quantityError }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Order Summary -->
-                <div class="bg-white rounded-lg p-4 space-y-3">
-                    <div class="flex items-center space-x-2 text-gray-600">
-                        <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                        </svg>
-                        <span>Ghi chú</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span>Tạm tính</span>
-                            <div class="flex items-center space-x-4">
-                                <span>{{ formatPrice(totalAmount) }}</span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Giảm giá</span>
-                            <span>{{ customer_discount }} %</span>
-                        </div>
-                        <div class="flex justify-between font-semibold text-lg">
-                            <span>Tổng cộng</span>
-                            <span class="text-blue-600">{{
+                            <span class="text-2xl font-bold">{{
                                 formatPrice(
                                     totalAmount * (1 - customer_discount / 100)
                                 )
                             }}</span>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Right Panel - Customer Information -->
-            <div class="w-1/2 p-4 space-y-4">
-                <!-- Header -->
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <svg
-                            class="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                            />
-                        </svg>
-                        <svg
-                            class="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                        </svg>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm text-gray-500">
-                            {{ currentDateTime }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Customer Form -->
-                <div class="bg-white rounded-lg p-4 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span>Đối tác giao hàng</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-gray-500">Chọn đối tác</span>
-                            <svg
-                                class="w-4 h-4 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M19 9l-7 7-7-7"
-                                />
-                            </svg>
-                            <button
-                                class="p-1 hover:bg-gray-100 rounded"
-                                title="Thêm đối tác"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Customer Search -->
-                    <div class="relative">
-                        <svg
-                            class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
-                        <Combobox v-model="form.customer">
-                            <div class="relative">
-                                <ComboboxInput
-                                    id="customer"
-                                    class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    placeholder="Khách hàng"
-                                    @input="
-                                        debouncedSearchCustomer(
-                                            $event.target.value
-                                        )
-                                    "
-                                />
-                                <ComboboxButton
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                                >
-                                    <ChevronDownIcon
-                                        class="h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                    />
-                                </ComboboxButton>
-                            </div>
-                            <transition
-                                leave-active-class="transition ease-in duration-100"
-                                leave-from-class="opacity-100"
-                                leave-to-class="opacity-0"
-                            >
-                                <ComboboxOptions
-                                    v-if="filteredCustomers.length > 0"
-                                    class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                >
-                                    <ComboboxOption
-                                        v-for="customer in filteredCustomers"
-                                        :key="customer.id"
-                                        :value="customer"
-                                        v-slot="{ active }"
-                                        @pointerdown="selectCustomer(customer)"
-                                    >
-                                        <span
-                                            :class="[
-                                                active
-                                                    ? 'bg-gray-100 text-gray-900'
-                                                    : 'text-gray-700',
-                                                'block px-4 py-2 text-sm',
-                                            ]"
-                                        >
-                                            {{ customer.name }}
-                                        </span>
-                                    </ComboboxOption>
-                                </ComboboxOptions>
-                            </transition>
-                        </Combobox>
-                    </div>
-                    <p
-                        v-if="isLoadingCustomer"
-                        class="text-gray-500 text-sm mt-1"
+                    <!-- Complete Button -->
+                    <button
+                        class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+                        @click="handleComplete"
+                        :disabled="form.processing || hasQuantityError"
                     >
-                        Đang tải...
-                    </p>
-                    <p
-                        v-else-if="customerError"
-                        class="text-red-500 text-sm mt-1"
-                    >
-                        {{ customerError }}
-                    </p>
-                    <p
-                        v-else-if="customerMessage"
-                        class="text-gray-500 text-sm mt-1"
-                    >
-                        {{ customerMessage }}
-                    </p>
-
-                    <!-- Phone Number -->
-                    <div class="flex items-center space-x-3">
-                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span class="text-blue-600">{{
-                            form.phone || "Chưa chọn khách hàng"
-                        }}</span>
-                        <svg
-                            class="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 9l-7 7-7-7"
-                            />
-                        </svg>
-                    </div>
-
-                    <!-- Customer Details -->
-                    <div class="space-y-3">
-                        <div class="flex items-center space-x-3">
-                            <div
-                                class="w-3 h-3 bg-green-500 rounded-full"
-                            ></div>
-                            <input
-                                v-model="form.recipientName"
-                                type="text"
-                                placeholder="Tên người nhận"
-                                class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                            />
-                            <input
-                                v-model="form.phone"
-                                type="text"
-                                placeholder="Số điện thoại"
-                                class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                            />
-                        </div>
-                        <input
-                            v-model="form.address_detail"
-                            type="text"
-                            placeholder="Địa chỉ chi tiết (Số nhà, ngõ, đường)"
-                            class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                            :disabled="!form.ward"
-                        />
-                        <!-- Province -->
-                        <Combobox v-model="form.province">
-                            <div class="relative">
-                                <ComboboxInput
-                                    id="province"
-                                    class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                                    placeholder="Tỉnh/Thành phố"
-                                    @input="
-                                        debouncedSearchProvince(
-                                            $event.target.value
-                                        )
-                                    "
-                                />
-                                <ComboboxButton
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                                >
-                                    <ChevronDownIcon
-                                        class="h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                    />
-                                </ComboboxButton>
-                            </div>
-                            <transition
-                                leave-active-class="transition ease-in duration-100"
-                                leave-from-class="opacity-100"
-                                leave-to-class="opacity-0"
-                            >
-                                <ComboboxOptions
-                                    v-if="filteredProvinces.length > 0"
-                                    class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                >
-                                    <ComboboxOption
-                                        v-for="province in filteredProvinces"
-                                        :key="province.id"
-                                        :value="province.name"
-                                        v-slot="{ active }"
-                                        @click="selectProvince(province)"
-                                    >
-                                        <span
-                                            :class="[
-                                                active
-                                                    ? 'bg-gray-100 text-gray-900'
-                                                    : 'text-gray-700',
-                                                'block px-4 py-2 text-sm',
-                                            ]"
-                                        >
-                                            {{ province.name }}
-                                        </span>
-                                    </ComboboxOption>
-                                </ComboboxOptions>
-                            </transition>
-                            <p
-                                v-if="isLoadingProvince"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                Đang tải...
-                            </p>
-                            <p
-                                v-else-if="provinceError"
-                                class="text-red-500 text-sm mt-1"
-                            >
-                                {{ provinceError }}
-                            </p>
-                            <p
-                                v-else-if="provinceMessage"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                {{ provinceMessage }}
-                            </p>
-                        </Combobox>
-                        <!-- District -->
-                        <Combobox v-model="form.district">
-                            <div class="relative">
-                                <ComboboxInput
-                                    id="district"
-                                    class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                                    placeholder="Quận/Huyện"
-                                    :disabled="!form.province"
-                                    @input="
-                                        debouncedSearchDistrict(
-                                            $event.target.value
-                                        )
-                                    "
-                                />
-                                <ComboboxButton
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                                >
-                                    <ChevronDownIcon
-                                        class="h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                    />
-                                </ComboboxButton>
-                            </div>
-                            <transition
-                                leave-active-class="transition ease-in duration-100"
-                                leave-from-class="opacity-100"
-                                leave-to-class="opacity-0"
-                            >
-                                <ComboboxOptions
-                                    v-if="filteredDistricts.length > 0"
-                                    class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                >
-                                    <ComboboxOption
-                                        v-for="district in filteredDistricts"
-                                        :key="district.id"
-                                        :value="district.name"
-                                        v-slot="{ active }"
-                                        @click="selectDistrict(district)"
-                                    >
-                                        <span
-                                            :class="[
-                                                active
-                                                    ? 'bg-gray-100 text-gray-900'
-                                                    : 'text-gray-700',
-                                                'block px-4 py-2 text-sm',
-                                            ]"
-                                        >
-                                            {{ district.name }}
-                                        </span>
-                                    </ComboboxOption>
-                                </ComboboxOptions>
-                            </transition>
-                            <p
-                                v-if="isLoadingDistrict"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                Đang tải...
-                            </p>
-                            <p
-                                v-else-if="districtError"
-                                class="text-red-500 text-sm mt-1"
-                            >
-                                {{ districtError }}
-                            </p>
-                            <p
-                                v-else-if="districtMessage"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                {{ districtMessage }}
-                            </p>
-                        </Combobox>
-                        <!-- Ward -->
-                        <Combobox v-model="form.ward">
-                            <div class="relative">
-                                <ComboboxInput
-                                    id="ward"
-                                    class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                                    placeholder="Phường/Xã"
-                                    :disabled="!form.district"
-                                    @input="
-                                        debouncedSearchWard($event.target.value)
-                                    "
-                                />
-                                <ComboboxButton
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                                >
-                                    <ChevronDownIcon
-                                        class="h-5 w-5 text-gray-400"
-                                        aria-hidden="true"
-                                    />
-                                </ComboboxButton>
-                            </div>
-                            <transition
-                                leave-active-class="transition ease-in duration-100"
-                                leave-from-class="opacity-100"
-                                leave-to-class="opacity-0"
-                            >
-                                <ComboboxOptions
-                                    v-if="filteredWards.length > 0"
-                                    class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                >
-                                    <ComboboxOption
-                                        v-for="ward in filteredWards"
-                                        :key="ward.id"
-                                        :value="ward.name"
-                                        v-slot="{ active }"
-                                        @click="selectWard(ward)"
-                                    >
-                                        <span
-                                            :class="[
-                                                active
-                                                    ? 'bg-gray-100 text-gray-900'
-                                                    : 'text-gray-700',
-                                                'block px-4 py-2 text-sm',
-                                            ]"
-                                        >
-                                            {{ ward.name }}
-                                        </span>
-                                    </ComboboxOption>
-                                </ComboboxOptions>
-                            </transition>
-                            <p
-                                v-if="isLoadingWard"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                Đang tải...
-                            </p>
-                            <p
-                                v-else-if="wardError"
-                                class="text-red-500 text-sm mt-1"
-                            >
-                                {{ wardError }}
-                            </p>
-                            <p
-                                v-else-if="wardMessage"
-                                class="text-gray-500 text-sm mt-1"
-                            >
-                                {{ wardMessage }}
-                            </p>
-                        </Combobox>
-                    </div>
-
-                    <!-- Note -->
-                    <div class="flex items-center space-x-2">
-                        <svg
-                            class="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-join="round"
-                                stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                        </svg>
-                        <input
-                            type="text"
-                            placeholder="Ghi chú cho bưu tá"
-                            class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                        />
-                    </div>
+                        {{ form.processing ? "Đang xử lý..." : "COMPLETE" }}
+                    </button>
                 </div>
-
-                <!-- Payment Section -->
-                <div class="bg-white rounded-lg p-4 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span>Customer pay</span>
-                            <button
-                                class="p-1 hover:bg-gray-100 rounded"
-                                title="Tùy chọn thanh toán"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                        <span class="text-2xl font-bold">0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span>COD</span>
-                            <label
-                                class="relative inline-flex items-center cursor-pointer"
-                            >
-                                <input
-                                    v-model="codEnabled"
-                                    type="checkbox"
-                                    class="sr-only peer"
-                                />
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                                ></div>
-                            </label>
-                        </div>
-                        <span class="text-2xl font-bold">{{
-                            formatPrice(
-                                totalAmount * (1 - customer_discount / 100)
-                            )
-                        }}</span>
-                    </div>
-                </div>
-
-                <!-- Complete Button -->
-                <button
-                    class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
-                    @click="handleComplete"
-                    :disabled="form.processing || hasQuantityError"
-                >
-                    {{ form.processing ? "Đang xử lý..." : "COMPLETE" }}
-                </button>
             </div>
         </div>
-    </div>
+    </AppLayout>
 </template>
 
 <script setup>
@@ -982,7 +999,7 @@ import {
     ComboboxOptions,
     ComboboxOption,
 } from "@headlessui/vue";
-
+import AppLayout from "../Layouts/AppLayout.vue";
 // Debounce function to optimize API calls
 const debounce = (func, delay) => {
     let timeoutId;
