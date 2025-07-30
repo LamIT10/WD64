@@ -581,7 +581,7 @@ class SaleOrdersRepository extends BaseRepository
     public function generateQR($id, Request $request)
     {
         $order = $this->handleModel->findOrFail($id);
-        $amount = $order->total_amount;
+        $amount = max(0, $order->total_amount - ($order->pay_before ?? 0) - ($order->pay_after ?? 0));
         $body = [
             'accountNo' => env('VIETQR_ACCOUNT_NO'),
             'accountName' => env('VIETQR_ACCOUNT_NAME'),

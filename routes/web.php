@@ -126,7 +126,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{rank}', [RankController::class, 'show'])->name('show');     // Chi tiết rank
         Route::get('/{rank}/edit', [RankController::class, 'edit'])->name('edit'); // Form sửa
         Route::patch('/{rank}', [RankController::class, 'update'])->name('update');  // Cập nhật rank
-        Route::delete('/{rank}', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
+        Route::patch('/{rank}/destroy', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
     });
 
     Route::prefix('permission')->as('permission.')->group(function () {
@@ -252,6 +252,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::get('/notifications/show-all', [NotificationController::class, 'showAll'])->name('notifications.show-all');
     Route::prefix('reports')->as('reports.')->group(function () {
         Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
+        Route::get('revenue', [SuggestController::class, 'revenue'])->name('revenue');
     });
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\GoodReceiptItem;
 use App\Models\Inventory;
 use App\Models\ProductVariant;
 use App\Models\SaleOrderItem;
@@ -71,5 +72,96 @@ class SuggestRepository extends BaseRepository
         });
 
         return $result;
+    }
+
+    public function getRevenueReport($startDate, $endDate, $search = '', $perPage = 5)
+    {
+        $query = ProductVariant::with(['product', 'attributes.attribute', 'unit'])
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('product', function ($q2) use ($search) {
+                    $q2->where('name', 'like', "%$search%")
+                        ->orWhere('code', 'like', "%$search%");
+                });
+            });
+
+        // Lấy toàn bộ để tính tổng
+        $allVariants = $query->get();
+
+        $allResult = [];
+        $totalRevenue = 0;
+        $totalCost = 0;
+        $totalProfit = 0;
+
+        foreach ($allVariants as $variant) {
+            $cost = GoodReceiptItem::where('product_variant_id', $variant->id)
+                ->whereHas('goodReceipt', function ($q) use ($startDate, $endDate) {
+                    if ($startDate && $endDate) {
+                        $q->whereBetween('receipt_date', [$startDate, $endDate]);
+                    }
+                })
+                ->sum('subtotal');
+
+            $revenue = SaleOrderItem::where('product_variant_id', $variant->id)
+                ->whereHas('salesOrder', function ($q) use ($startDate, $endDate) {
+                    $q->where('status', 'completed');
+                    if ($startDate && $endDate) {
+                        $q->whereBetween('order_date', [$startDate, $endDate]);
+                    }
+                })
+                ->sum('subtotal');
+
+            $variantName = $variant->product->name;
+            if ($variant->attributes && $variant->attributes->count() > 0) {
+                $attrNames = $variant->attributes->map(function ($attrVal) {
+                    return $attrVal->name;
+                })->implode(' – ');
+                $variantName .= ' – ' . $attrNames;
+            }
+
+            $profit = $revenue - $cost;
+
+            $allResult[] = [
+                'variant_id' => $variant->id,
+                'product_code' => $variant->product->code,
+                'variant_name' => $variantName,
+                'unit' => $variant->unit ? $variant->unit->name : ($variant->product->defaultUnit->name ?? ''),
+                'revenue' => $revenue,
+                'cost' => $cost,
+                'profit' => $profit,
+            ];
+
+            $totalRevenue += $revenue;
+            $totalCost += $cost;
+            $totalProfit += $profit;
+        }
+
+        // Sắp xếp theo lãi gộp giảm dần
+        usort($allResult, function ($a, $b) {
+            return $b['profit'] <=> $a['profit'];
+        });
+
+        // Phân trang thủ công trên mảng
+        $page = request('page', 1);
+        $perPage = $perPage;
+        $offset = ($page - 1) * $perPage;
+        $pagedData = array_slice($allResult, $offset, $perPage);
+
+        // Chuẩn bị meta phân trang
+        $lastPage = ceil(count($allResult) / $perPage);
+
+        return [
+            'data' => $pagedData,
+            'meta' => [
+                'total_revenue' => $totalRevenue,
+                'total_cost' => $totalCost,
+                'total_profit' => $totalProfit,
+                'pagination' => [
+                    'current_page' => (int)$page,
+                    'last_page' => (int)$lastPage,
+                    'per_page' => (int)$perPage,
+                    'total' => count($allResult),
+                ],
+            ],
+        ];
     }
 }

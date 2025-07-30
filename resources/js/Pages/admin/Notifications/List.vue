@@ -44,7 +44,7 @@
             <!-- Notifications List -->
             <div class="divide-y divide-gray-200">
                 <div
-                    v-for="notification in notifications.data"
+                    v-for="notification in filteredNotifications"
                     :key="notification.id"
                     @click="goToSaleOrder(notification)"
                     class="px-6 py-4 hover:bg-gray-50"
@@ -73,11 +73,13 @@
                                         notification.time
                                     }}</span>
                                     <button
-                                        @click="markAsRead(notification.id)"
+                                        @click.stop="
+                                            markAsRead(notification.id)
+                                        "
                                         v-if="!notification.isRead"
                                         class="text-blue-600 hover:text-blue-800 text-sm font-medium"
                                     >
-                                        Mark as Read
+                                        Đánh dấu đã đọc
                                     </button>
                                 </div>
                             </div>
@@ -134,7 +136,8 @@ import { ref, computed } from "vue";
 import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import axios from "axios";
-// Reactive data
+import emitter from "../../../eventBus.js";
+
 const showUnreadOnly = ref(false);
 const entriesPerPage = ref(20);
 
@@ -144,28 +147,32 @@ const { notifications } = defineProps({
         required: true,
     },
 });
-
+const markAsRead = async (id) => {
+    try {
+        await axios.post(`/admin/notifications/${id}/read`);
+        // Cập nhật trạng thái local
+        const notification = notifications.data.find((n) => n.id === id);
+        if (notification) {
+            notification.isRead = true;
+        }
+        // Emit sự kiện để Header cập nhật số lượng chưa đọc
+        emitter.emit("notification-updated");
+    } catch (error) {
+        console.error("Mark as read failed", error);
+    }
+};
 // Computed properties
 const filteredNotifications = computed(() => {
-    let filtered = notifications.value;
-
+    let data = notifications.data;
     if (showUnreadOnly.value) {
-        filtered = filtered.filter((n) => !n.read);
+        data = data.filter((n) => !n.isRead); // Lọc chưa đọc
     }
-
-    return filtered.slice(0, entriesPerPage.value);
+    return data;
 });
 
 // Methods
 const toggleUnreadOnly = () => {
     showUnreadOnly.value = !showUnreadOnly.value;
-};
-
-const markAsRead = (id) => {
-    const notification = notifications.value.find((n) => n.id === id);
-    if (notification) {
-        notification.read = true;
-    }
 };
 
 const markAllAsRead = () => {

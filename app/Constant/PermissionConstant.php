@@ -4,32 +4,49 @@ namespace App\Constant;
 
 class PermissionConstant
 {
-    // ==== USERS ====
-    public const USER_INDEX = 'admin.user.index';
-    public const USER_CREATE = 'admin.user.create';
-    public const USER_EDIT = 'admin.user.edit';
-    public const USER_DELETE = 'admin.user.delete';
-    public const USER_SHOW = 'admin.user.show';
-
-    // ==== ROLES ====
-    public const ROLE_INDEX = 'admin.role.index';
-    public const ROLE_EDIT = 'admin.role.edit';
-
-    // ==== CUSTOMERS ====
+    // Dashboard 
+    public const DASHBOARD_INDEX = 'admin.dashboard.index';
+    // ==== CUSTOMERS ==== Quản lý khách hàng
     public const CUSTOMER_INDEX = 'admin.customers.index';
     public const CUSTOMER_CREATE = 'admin.customers.create';
     public const CUSTOMER_EDIT = 'admin.customers.edit';
     public const CUSTOMER_DELETE = 'admin.customers.destroy';
     public const CUSTOMER_SHOW = 'admin.customers.show';
     public const CUSTOMER_RANK_STORE = 'admin.customers.ranks.store';
+    // ====USER===== Quản lý nhân viên
+    public const USER_INDEX = 'admin.user.index';
+    public const USER_CREATE = 'admin.user.create';
+    public const USER_EDIT = 'admin.user.edit';
+    public const USER_DELETE = 'admin.user.delete';
+    public const USER_SHOW = 'admin.user.show';
+    // ==== RANKS===== Quản lý hạng khách hàng
+    // ==== INVENTORY ==== Quản lý kho
+    // ==== INVENTORY LOCATION ==== Quản lý vị trí kho
+    // ==== PRODUCTS ==== Quản lý sản phẩm
+    // ==== PURCHASE ==== Quản lý đơn nhập 
+    // ==== SALES ORDER ==== Quản lý đơn xuất
+    // ==== CATEGORIES ==== Quản lý danh mục sản phẩm
+    // ==== UNITS ==== Quản lý đơn vị 
+    // ==== ATTRIBUTES ==== Quản lý đơn vị
 
-//  Supplier transaction
+
+
+
+
+
+    // ==== ROLES ====
+    public const ROLE_INDEX = 'admin.role.index';
+    public const ROLE_EDIT = 'admin.role.edit';
+
+
+
+    //  Supplier transaction
     public const SUPPLIER_TRANSACTION_INDEX = 'admin.supplier_transaction.index';
     public const SUPPLIER_TRANSACTION_SHOW = 'admin.supplier_transaction.show';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE = 'admin.supplier_transaction.update_credit_due_date';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier_transaction.update_paid_amount';
 
-//  Supplier transaction
+    //  Supplier transaction
     public const SUPPLIER_INDEX = 'admin.supplier.index';
     public const SUPPLIER_SHOW = 'admin.supplier.show';
     public const SUPPLIER_UPDATE_CREDIT_DUE_DATE = 'admin.supplier.update_credit_due_date';
@@ -95,15 +112,15 @@ class PermissionConstant
                         "description" => "Danh sách vai trò",
                         "name" => self::ROLE_INDEX,
                     ],
-                  
+
                     [
                         "description" => "Sửa vai trò",
                         "name" => self::ROLE_EDIT,
                     ],
                 ]
             ],
-            
-          
+
+
             [
                 "group_permission" => "PERMISSION_CUSTOMER",
                 "group_description" => "Quyền khách hàng",
