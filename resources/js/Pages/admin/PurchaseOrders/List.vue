@@ -654,7 +654,7 @@
                                 v-if="selectedOrder.order_status == 0"
                                 @click="approveOrder(selectedOrder.id)"
                                 style="height: max-content"
-                                class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
                                 Duyệt đơn
@@ -663,7 +663,7 @@
                                 v-if="selectedOrder.order_status == 0"
                                 style="height: max-content"
                                 @click="editOrder(selectedOrder.id)"
-                                class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
                                 Chỉnh sửa
