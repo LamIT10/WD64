@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 
 class CustomerTransactionRepository extends BaseRepository
 {
@@ -54,6 +55,7 @@ class CustomerTransactionRepository extends BaseRepository
 
             return [
                 'id' => $order->id,
+                'code' => $order->code,
                 'total_amount' => round($total),
                 'paid_amount' => round($paid),
                 'remaining_amount' => round($remaining),
@@ -137,147 +139,153 @@ class CustomerTransactionRepository extends BaseRepository
         })->filter()->sortByDesc('remaining_amount')->values();
     }
 
-  public function getDebtDetailByOrderId($orderId)
-{
-    $order = SaleOrder::with([
-        'customer',
-        'transactions',
-        'items' => function ($query) {
-            $query->with([
-                'productVariant' => function ($q) {
-                    $q->with([
-                        'product:id,name',
-                        'attributes:id,name'
-                    ]);
-                },
-                'unit:id,name'
-            ]);
-        }
-    ])->findOrFail($orderId);
+    public function getDebtDetailByOrderId($orderId)
+    {
+        $order = SaleOrder::with([
+            'customer',
+            'transactions',
+            'items' => function ($query) {
+                $query->with([
+                    'productVariant' => function ($q) {
+                        $q->with([
+                            'product:id,name',
+                            'attributes:id,name'
+                        ]);
+                    },
+                    'unit:id,name'
+                ]);
+            }
+        ])->findOrFail($orderId);
 
-    $total = $order->total_amount;
+        $total = $order->total_amount;
 
-    $paid = ($order->pay_before ?? 0) + ($order->pay_after ?? 0)
-        + $order->transactions->where('type', 'payment')->sum('paid_amount');
+        $paid = ($order->pay_before ?? 0) + ($order->pay_after ?? 0)
+            + $order->transactions->where('type', 'payment')->sum('paid_amount');
 
-    $remaining = $total - $paid;
+        $remaining = $total - $paid;
 
-    $dueDate = $order->credit_due_date
-        ? Carbon::parse($order->credit_due_date)
-        : Carbon::parse($order->created_at)->addDays(30);
+        $dueDate = $order->credit_due_date
+            ? Carbon::parse($order->credit_due_date)
+            : Carbon::parse($order->created_at)->addDays(30);
 
-    $daysUntilDue = $dueDate->diffInDays(now(), false);
+        $daysUntilDue = $dueDate->diffInDays(now(), false);
 
-    $status = match (true) {
-        $remaining <= 0 => 'Đã thanh toán',
-        $daysUntilDue > 0 => 'Đã quá hạn',
-        $daysUntilDue >= -7 => 'Sắp quá hạn',
-        default => 'Chưa thanh toán',
-    };
+        $status = match (true) {
+            $remaining <= 0 => 'Đã thanh toán',
+            $daysUntilDue > 0 => 'Đã quá hạn',
+            $daysUntilDue >= -7 => 'Sắp quá hạn',
+            default => 'Chưa thanh toán',
+        };
 
-    return [
-        'id' => $order->id,
-        'order_code' => 'DH' . str_pad($order->id, 4, '0', STR_PAD_LEFT),
-        'total_amount' => $total,
-        'paid_amount' => $paid,
-        'remaining_amount' => $remaining,
-        'status' => $status,
-        'credit_due_date' => $dueDate,
-        'transaction_date' => optional($order->transactions->last())->transaction_date,
-        'customer' => [
-            'name' => $order->customer->name ?? null,
-            'phone' => $order->customer->phone ?? null,
-            'email' => $order->customer->email ?? null,
-        ],
-        'items' => $order->items->map(function ($item) {
-            $productName = optional($item->productVariant?->product)->name ?? 'Không xác định';
-            $variantAttributes = $item->productVariant?->attributes->pluck('name')->toArray() ?? [];
-            $variantName = implode(' - ', $variantAttributes);
-            $fullName = trim($productName . ' - ' . $variantName);
-
-            return [
-                'product_variant_id' => $item->product_variant_id,
-                'product_name' => $fullName,
-                'quantity_ordered' => $item->quantity_ordered,
-                'quantity_shipped' => $item->quantity_shipped,
-                'unit_price' => $item->unit_price,
-                'subtotal' => $item->subtotal,
-                'unit_name' => optional($item->unit)->name ?? '-',
-            ];
-        }),
-     'history' => $order->transactions
-    ->filter(fn ($t) => in_array($t->type, ['payment', 'adjustment']))
-    ->sortByDesc(fn ($t) => $t->transaction_date ?? $t->created_at)
-    ->values()
-    ->map(function ($t) {
         return [
-            'id' => $t->id,
-            'type' => $t->type, // 'payment' hoặc 'adjustment'
-            'paid_amount' => $t->type === 'payment' ? $t->paid_amount : null,
-            'credit_due_date' => $t->type === 'adjustment' ? $t->credit_due_date : null,
-            'transaction_date' => $t->transaction_date,
-            'created_at' => $t->created_at,
-            'note' => $t->description,
+            'id' => $order->id,
+            'order_code' => $order->code,
+            'paid_amount' => $paid,
+            'remaining_amount' => $remaining,
+            'status' => $status,
+            'credit_due_date' => $dueDate,
+            'transaction_date' => optional($order->transactions->last())->transaction_date,
+            'customer' => [
+                'name' => $order->customer->name ?? null,
+                'phone' => $order->customer->phone ?? null,
+                'email' => $order->customer->email ?? null,
+            ],
+            'items' => $order->items->map(function ($item) {
+                $productName = optional($item->productVariant?->product)->name ?? 'Không xác định';
+                $variantAttributes = $item->productVariant?->attributes->pluck('name')->toArray() ?? [];
+                $variantName = implode(' - ', $variantAttributes);
+                $fullName = trim($productName . ' - ' . $variantName);
+
+                return [
+                    'product_variant_id' => $item->product_variant_id,
+                    'product_name' => $fullName,
+                    'quantity_ordered' => $item->quantity_ordered,
+                    'quantity_shipped' => $item->quantity_shipped,
+                    'unit_price' => $item->unit_price,
+                    'subtotal' => $item->subtotal,
+                    'unit_name' => optional($item->unit)->name ?? '-',
+                ];
+            }),
+            'history' => $order->transactions
+                ->filter(fn($t) => in_array($t->type, ['payment', 'adjustment']))
+                ->sortByDesc(fn($t) => $t->transaction_date ?? $t->created_at)
+                ->values()
+                ->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'type' => $t->type,
+                        'paid_amount' => $t->type === 'payment' ? $t->paid_amount : null,
+                        'credit_due_date' => $t->type === 'adjustment' && $t->credit_due_date
+                            ? Carbon::parse($t->credit_due_date)->format('Y-m-d')
+                            : null,
+                        'transaction_date' => $t->transaction_date
+                            ? Carbon::parse($t->transaction_date)->format('Y-m-d')
+                            : null,
+                        'created_at' => $t->created_at
+                            ? Carbon::parse($t->created_at)->format('Y-m-d')
+                            : null,
+                        'note' => $t->description,
+                    ];
+                }),
+
         ];
-    }),
-
-    ];
-}
-
-
+    }
     public function updateTransaction($orderId, array $data)
     {
-        try {
-            DB::beginTransaction();
+        $order = SaleOrder::findOrFail($orderId);
+        $newPaid = $data['paid_amount'];
 
-            $order = SaleOrder::findOrFail($orderId);
-            $newPaid = $data['paid_amount'];
+        if ($newPaid <= 0) {
+            throw ValidationException::withMessages([
+                'paid_amount' => 'Số tiền thanh toán phải lớn hơn 0.'
+            ]);
+        }
 
-            if ($newPaid <= 0) {
-                throw new \Exception('Số tiền thanh toán phải lớn hơn 0.');
-            }
+        if (empty($data['transaction_date']) || !strtotime($data['transaction_date'])) {
+            throw ValidationException::withMessages([
+                'transaction_date' => 'Ngày thanh toán không hợp lệ.'
+            ]);
+        }
+        $total = $order->total_amount;
 
-            if (empty($data['transaction_date']) || !strtotime($data['transaction_date'])) {
-                throw new \Exception('Ngày thanh toán không hợp lệ.');
-            }
+        $paidSoFar = ($order->pay_before ?? 0)
+            + ($order->pay_after ?? 0)
+            + $order->transactions()->where('type', 'payment')->sum('paid_amount');
 
-            $total = $order->total_amount;
-            $paidSoFar = ($order->pay_before ?? 0)
-                + $order->transactions()->where('type', 'payment')->sum('paid_amount');
+        $remaining = $total - $paidSoFar;
 
-            if (($paidSoFar + $newPaid) > $total) {
-                throw new \Exception('Tổng thanh toán (' . ($paidSoFar + $newPaid) . ') vượt quá giá trị công nợ (' . $total . ').');
-            }
-
-            $transaction = $order->transactions()->create([
+        if ($newPaid > $remaining) {
+            throw ValidationException::withMessages([
+                'paid_amount' => 'Số tiền thanh toán vượt quá số tiền còn nợ .'
+            ]);
+        }
+        return DB::transaction(function () use ($order, $data) {
+            return $order->transactions()->create([
                 'type' => 'payment',
-                'paid_amount' => $newPaid,
+                'paid_amount' => $data['paid_amount'],
                 'transaction_date' => $data['transaction_date'],
                 'description' => $data['description'] ?? null,
             ]);
-
-            DB::commit();
-            return $transaction;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return $this->returnError($e->getMessage());
-        }
+        });
     }
 
     public function updateDueDate($orderId, string $newDueDate)
     {
-        try {
-            DB::beginTransaction();
+        $order = SaleOrder::findOrFail($orderId);
 
-            $order = SaleOrder::findOrFail($orderId);
+        if (!strtotime($newDueDate)) {
+            throw ValidationException::withMessages([
+                'credit_due_date' => 'Ngày hết hạn không hợp lệ.'
+            ]);
+        }
 
-            if (!strtotime($newDueDate)) {
-                throw new \Exception('Ngày hết hạn không hợp lệ.');
-            }
-            if (Carbon::parse($newDueDate)->lt(Carbon::now())) {
-                throw new \Exception('Ngày hết hạn không thể là quá khứ.');
-            }
+        if (Carbon::parse($newDueDate)->lt(Carbon::now())) {
+            throw ValidationException::withMessages([
+                'credit_due_date' => 'Ngày hết hạn không thể là quá khứ.'
+            ]);
+        }
 
+        return DB::transaction(function () use ($order, $newDueDate) {
             $order->credit_due_date = $newDueDate;
             $order->save();
 
@@ -289,11 +297,7 @@ class CustomerTransactionRepository extends BaseRepository
                 'description' => 'Điều chỉnh hạn thanh toán',
             ]);
 
-            DB::commit();
             return $order;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return $this->returnError($e->getMessage());
-        }
+        });
     }
 }
