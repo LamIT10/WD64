@@ -25,12 +25,11 @@ class StoreRankRequest extends FormRequest
                 'min:3',
                 'max:' . self::NAME_MAX_LENGTH,
                 Rule::unique('ranks', 'name')->ignore($this->route('rank')?->id),
-                'regex:/^[A-Za-z0-9\s+\-]+$/',
             ],
             'min_total_spent' => [
                 'required',
                 'numeric',
-                'min:1', // Yêu cầu lớn hơn 0
+                'min:1',
             ],
             'discount_percent' => [
                 'required',
@@ -56,7 +55,6 @@ class StoreRankRequest extends FormRequest
             'name.min' => 'Tên hạng phải có ít nhất 3 ký tự.',
             'name.max' => 'Tên hạng không được vượt quá ' . self::NAME_MAX_LENGTH . ' ký tự.',
             'name.unique' => 'Tên hạng đã tồn tại.',
-            'name.regex' => 'Tên hạng chỉ được chứa chữ cái, số, khoảng trắng hoặc dấu gạch ngang.',
             'min_total_spent.required' => 'Tổng chi tiêu tối thiểu là bắt buộc.',
             'min_total_spent.min' => 'Tổng chi tiêu tối thiểu phải lớn hơn 0.',
             'discount_percent.required' => 'Phần trăm chiết khấu là bắt buộc.',
