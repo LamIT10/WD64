@@ -11,10 +11,17 @@
               class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
-          <Waiting route-name="admin.ranks.create" :route-params="{}" :color="'bg-indigo-600 text-white hover:bg-indigo-700'">
+          <Waiting route-name="admin.ranks.create" :route-params="{}"
+            :color="'bg-indigo-600 text-white hover:bg-indigo-700'">
             <i class="fas fa-plus mr-1"></i> Thêm hạng
           </Waiting>
         </div>
+      </div>
+
+      <!-- Notification -->
+      <div v-if="notification"
+        :class="`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`">
+        {{ notification.message }}
       </div>
 
       <!-- Ranks Table -->
@@ -26,6 +33,10 @@
                 <th scope="col"
                   class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   #
+                </th>
+                <th scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Bậc
                 </th>
                 <th scope="col"
                   class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -59,16 +70,22 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-100">
               <tr v-for="(rank, index) in ranks.data || []" :key="rank.id"
-                class="hover:bg-gray-50 transition-colors duration-200">
+                class="hover:bg-gray-50 transition-colors duration-200"
+                :class="{ 'opacity-50': rank.status === 'inactive' }">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                   {{ index + 1 + ((ranks.current_page || 1) - 1) * (ranks.per_page || 10) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                  Bậc {{ rank.id }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                   {{ rank.name }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {{ rank.min_total_spent ? rank.min_total_spent.toLocaleString('vi-VN') : '0' }}
+                  {{ rank.min_total_spent ? Number(rank.min_total_spent).toLocaleString('vi-VN') + ' đ' : '0 đ' }}
+
                 </td>
+
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {{ rank.discount_percent || 0 }}%
                 </td>
@@ -79,11 +96,10 @@
                   {{ rank.note || 'Chưa cập nhật' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="px-2.5 py-0.5 text-xs font-medium rounded-full"
-                    :class="{
-                      'bg-green-100 text-green-800': rank.status === 'active',
-                      'bg-red-100 text-red-800': rank.status === 'inactive',
-                    }">
+                  <span class="px-2.5 py-0.5 text-xs font-medium rounded-full" :class="{
+                    'bg-green-100 text-green-800': rank.status === 'active',
+                    'bg-red-100 text-red-800': rank.status === 'inactive',
+                  }">
                     {{ rank.status === 'active' ? 'Hoạt động' : 'Không hoạt động' }}
                   </span>
                 </td>
@@ -96,15 +112,17 @@
                     <div v-if="activeDropdown === rank.id"
                       class="absolute right-0 z-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                       <div class="py-1">
-                        <Link :href="route('admin.ranks.edit', rank.id)"
+                        <Link :href="route('admin.ranks.edit', { rank: rank.id })"
+                          @click.prevent="logAndNavigate(rank.id)"
                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                          <i class="fas fa-edit mr-2 text-indigo-600"></i>
-                          Sửa
+                        <i class="fas fa-edit mr-2 text-indigo-600"></i>
+                        Sửa
                         </Link>
-                        <button @click="handleDelete(rank.id)"
+                        <button @click="handleToggleStatus(rank)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-                          <i class="fas fa-trash mr-2 text-red-600"></i>
-                          Xóa
+                          <i
+                            :class="rank.status === 'active' ? 'fas fa-eye-slash mr-2 text-red-600' : 'fas fa-eye mr-2 text-green-600'"></i>
+                          {{ rank.status === 'active' ? 'Ẩn' : 'Bật' }}
                         </button>
                       </div>
                     </div>
@@ -126,7 +144,7 @@
           <div class="flex items-center space-x-2">
             <Link v-if="ranks.prev_page_url" :href="addSearchToUrl(ranks.prev_page_url)"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
-              <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-left"></i>
             </Link>
             <span v-else class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
               <i class="fas fa-chevron-left"></i>
@@ -136,7 +154,7 @@
             </span>
             <Link v-if="ranks.next_page_url" :href="addSearchToUrl(ranks.next_page_url)"
               class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200">
-              <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-chevron-right"></i>
             </Link>
             <span v-else class="px-4 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
               <i class="fas fa-chevron-right"></i>
@@ -155,6 +173,7 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
 import { debounce } from 'lodash';
 import { route } from 'ziggy-js';
+import { usePage } from '@inertiajs/vue3';
 
 defineProps({
   ranks: Object,
@@ -163,6 +182,8 @@ defineProps({
 const activeDropdown = ref(null);
 const searchQuery = ref('');
 const notification = ref(null);
+
+const { flash, errors } = usePage();
 
 const toggleDropdown = (id) => {
   activeDropdown.value = activeDropdown.value === id ? null : id;
@@ -190,19 +211,32 @@ const addSearchToUrl = (url) => {
   return urlObj.toString();
 };
 
-const handleDelete = (rankId) => {
-  if (confirm('Xóa hạng này sẽ chuyển các khách hàng liên quan sang hạng mặc định "Sắt". Bạn có chắc muốn tiếp tục?')) {
-    router.delete(route('admin.ranks.destroy', rankId), {
+const handleToggleStatus = (rank) => {
+  const action = rank.status === 'active' ? 'ẩn' : 'bật';
+  const confirmMessage = rank.status === 'active'
+    ? 'Ẩn hạng này sẽ chuyển các khách hàng liên quan sang hạng mặc định "Sắt". Bạn có chắc muốn tiếp tục?'
+    : 'Bật hạng này sẽ chuyển trạng thái sang hoạt động. Bạn có chắc muốn tiếp tục?';
+
+  if (confirm(confirmMessage)) {
+    router.patch(route('admin.ranks.destroy', rank.id), {}, {
       onSuccess: () => {
         activeDropdown.value = null;
-        notification.value = { type: 'success', message: 'Hạng đã được xóa thành công!' };
+        notification.value = { type: 'success', message: `Hạng đã được ${action} thành công!` };
+        setTimeout(() => { notification.value = null; }, 3000);
       },
-      onError: (errors) => {
-        console.error('Lỗi xóa:', errors);
-        notification.value = { type: 'error', message: 'Có lỗi xảy ra khi xóa hạng!' };
+      onError: (err) => {
+        console.error('Lỗi:', err);
+        notification.value = { type: 'error', message: err.message || `Có lỗi xảy ra khi ${action} hạng!` };
+        setTimeout(() => { notification.value = null; }, 3000);
       },
     });
   }
+};
+
+const logAndNavigate = (rankId) => {
+  console.log('Navigating to edit with rankId:', rankId);
+  console.log('Generated route:', route('admin.ranks.edit', { rank: rankId }));
+  router.visit(route('admin.ranks.edit', { rank: rankId }));
 };
 
 onMounted(() => {
@@ -219,24 +253,30 @@ onBeforeUnmount(() => {
   height: 6px;
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #c4c4c4;
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
 }
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

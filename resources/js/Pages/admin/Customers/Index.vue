@@ -82,9 +82,12 @@
                                 </th>
                                 <th v-if="visibleColumns.includes('email')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Email
-                                </th>
+                                </th>                    
                                 <th v-if="visibleColumns.includes('rank')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Hạng
+                                </th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                    Tổng tiền nợ
                                 </th>
                                 <th v-if="visibleColumns.includes('status')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Trạng thái
@@ -120,6 +123,9 @@
                                     }">
                                         {{ customer.rank ? customer.rank.name : '-' }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold font-sans">
+                                    {{ formatCurrency(customer.remaining_amount) }}
                                 </td>
                                 <td v-if="visibleColumns.includes('status')" class="px-6 py-4 whitespace-nowrap text-center">
                                     <span class="px-2.5 py-0.5 rounded-full text-xs font-medium" :class="{
@@ -397,6 +403,11 @@ const deleteCustomer = (customerId) => {
             }
         },
     });
+};
+
+const formatCurrency = (value) => {
+  if (!value) return '0 đ';
+  return Number(value).toLocaleString('vi-VN') + ' đ';
 };
 </script>
 
