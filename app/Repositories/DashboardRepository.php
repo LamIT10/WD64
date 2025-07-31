@@ -151,6 +151,8 @@ class DashboardRepository extends BaseRepository
                 '30days' => $this->getInventoryByPaperType('30days'),
                 '90days' => $this->getInventoryByPaperType('90days'),
             ],
+         
+
             'low_stock_items' => $this->getLowStockItems(10),
 
         ];
@@ -362,6 +364,41 @@ public function getLowStockItems($threshold = 10, $limit = 5)
         ->orderBy('inventory.quantity_on_hand', 'asc')
         ->limit($limit)
         ->get();
+}
+public function getMonthlyExportStatsByYear($year)
+{
+    return DB::table('sale_orders')
+        ->selectRaw('MONTH(order_date) as month, COUNT(*) as total_orders, SUM(total_amount) as total_amount')
+        ->whereYear('order_date', $year)
+        ->where('status', 'completed') 
+        ->groupBy(DB::raw('MONTH(order_date)'))
+        ->orderBy('month')
+        ->get();
+}
+public function getExportStatusSummaryByMonth($month)
+{
+    $query = DB::table('sale_orders')
+        ->select('status', DB::raw('COUNT(*) as total'))
+        ->whereMonth('order_date', $month);
+
+    // Nếu là tháng hiện tại thì lấy đủ 4 trạng thái
+    if ((int) $month === (int) now()->month) {
+        $query->whereIn('status', ['pending', 'shipped', 'completed', 'cancelled']);
+    } else {
+        $query->whereIn('status', ['completed', 'cancelled']);
+    }
+
+    $results = $query->groupBy('status')->pluck('total', 'status');
+
+    return [
+        'month' => (int) $month,
+        'data' => [
+            'pending'   => $results['pending'] ?? 0,
+            'shipped'   => $results['shipped'] ?? 0,
+            'completed' => $results['completed'] ?? 0,
+            'cancelled' => $results['cancelled'] ?? 0,
+        ]
+    ];
 }
 
 }

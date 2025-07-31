@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportExportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -211,7 +212,10 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
+          Route::get('export', [ReportExportController::class, 'export'])->name('export');
     });
+
+  
 
 
 
@@ -253,6 +257,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::prefix('reports')->as('reports.')->group(function () {
         Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
         Route::get('revenue', [SuggestController::class, 'revenue'])->name('revenue');
+      
+
     });
 });
 
