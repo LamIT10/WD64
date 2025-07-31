@@ -4,15 +4,15 @@
         class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30"
     >
         <div
-            class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5"
+            class="flex items-center px-3 py-1.5"
         >
-            <div class="text-purple-600">
+            <!-- <div class="text-purple-600">
                 <i class="fas fa-layer-group"></i>
             </div>
             <div class="text-sm hidden sm:block">
                 <span>Đang xử lý</span>
                 <span class="font-medium ml-1">5 mục</span>
-            </div>
+            </div> -->
         </div>
         <!-- Right side - User controls -->
         <div class="flex items-center space-x-3">
