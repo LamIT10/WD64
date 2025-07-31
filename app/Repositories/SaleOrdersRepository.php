@@ -77,7 +77,8 @@ class SaleOrdersRepository extends BaseRepository
                     'address_delivery',
                     'created_at',
                     'pay_before',
-                    'pay_after'
+                    'pay_after',
+                    'note'
                 );
 
             if ($request->has('status') && !empty($request->status)) {

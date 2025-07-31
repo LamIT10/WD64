@@ -403,6 +403,10 @@
                                                     <td class="px-4 py-2">
                                                         <span
                                                             class="inline-block px-3 py-1 rounded-xl text-sm font-medium"
+                                                            Lý
+                                                            do
+                                                            từ
+                                                            chối
                                                             :class="{
                                                                 'text-yellow-700 bg-yellow-100 border border-yellow-300':
                                                                     selectedOrder.status ===
@@ -424,6 +428,24 @@
                                                                 )
                                                             }}
                                                         </span>
+                                                    </td>
+                                                </tr>
+                                                <tr
+                                                    v-if="
+                                                        selectedOrder.status ===
+                                                            'cancelled' &&
+                                                        selectedOrder.note
+                                                    "
+                                                >
+                                                    <td
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
+                                                    >
+                                                        📝 Lý do từ chối
+                                                    </td>
+                                                    <td
+                                                        class="px-4 py-2 text-red-700"
+                                                    >
+                                                        {{ selectedOrder.note }}
                                                     </td>
                                                 </tr>
                                                 <!-- Input pay_before khi trạng thái là pending -->
@@ -811,21 +833,6 @@
                                 >
                                     Đóng
                                 </button>
-                                <Waiting
-                                    v-if="
-                                        ['shipped'].includes(
-                                            selectedOrder.status
-                                        )
-                                    "
-                                    route-name="admin.shipping.create"
-                                    :route-params="{ id: selectedOrder.id }"
-                                    :color="'mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'"
-                                >
-                                    <i
-                                        class="fa-solid fa-truck text-xl mr-1"
-                                    ></i>
-                                    Tạo phiếu giao hàng
-                                </Waiting>
                             </div>
                         </div>
                     </div>
