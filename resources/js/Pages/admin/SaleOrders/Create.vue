@@ -749,77 +749,7 @@
                                     {{ provinceMessage }}
                                 </p>
                             </Combobox>
-                            <!-- District -->
-                            <Combobox v-model="form.district">
-                                <div class="relative">
-                                    <ComboboxInput
-                                        id="district"
-                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                                        placeholder="Quận/Huyện"
-                                        :disabled="!form.province"
-                                        @input="
-                                            debouncedSearchDistrict(
-                                                $event.target.value
-                                            )
-                                        "
-                                    />
-                                    <ComboboxButton
-                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
-                                    >
-                                        <ChevronDownIcon
-                                            class="h-5 w-5 text-gray-400"
-                                            aria-hidden="true"
-                                        />
-                                    </ComboboxButton>
-                                </div>
-                                <transition
-                                    leave-active-class="transition ease-in duration-100"
-                                    leave-from-class="opacity-100"
-                                    leave-to-class="opacity-0"
-                                >
-                                    <ComboboxOptions
-                                        v-if="filteredDistricts.length > 0"
-                                        class="absolute z-10 mt-1 max-h-60 w-[300px] overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                    >
-                                        <ComboboxOption
-                                            v-for="district in filteredDistricts"
-                                            :key="district.id"
-                                            :value="district.name"
-                                            v-slot="{ active }"
-                                            @click="selectDistrict(district)"
-                                        >
-                                            <span
-                                                :class="[
-                                                    active
-                                                        ? 'bg-gray-100 text-gray-900'
-                                                        : 'text-gray-700',
-                                                    'block px-4 py-2 text-sm',
-                                                ]"
-                                            >
-                                                {{ district.name }}
-                                            </span>
-                                        </ComboboxOption>
-                                    </ComboboxOptions>
-                                </transition>
-                                <p
-                                    v-if="isLoadingDistrict"
-                                    class="text-gray-500 text-sm mt-1"
-                                >
-                                    Đang tải...
-                                </p>
-                                <p
-                                    v-else-if="districtError"
-                                    class="text-red-500 text-sm mt-1"
-                                >
-                                    {{ districtError }}
-                                </p>
-                                <p
-                                    v-else-if="districtMessage"
-                                    class="text-gray-500 text-sm mt-1"
-                                >
-                                    {{ districtMessage }}
-                                </p>
-                            </Combobox>
+
                             <!-- Ward -->
                             <Combobox v-model="form.ward">
                                 <div class="relative">
@@ -827,7 +757,7 @@
                                         id="ward"
                                         class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
                                         placeholder="Phường/Xã"
-                                        :disabled="!form.district"
+                                        :disabled="!form.province"
                                         @input="
                                             debouncedSearchWard(
                                                 $event.target.value
@@ -835,7 +765,7 @@
                                         "
                                     />
                                     <ComboboxButton
-                                        class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                        class="absolute right-2 top-1/2 transform -translate-x-1/2"
                                     >
                                         <ChevronDownIcon
                                             class="h-5 w-5 text-gray-400"
@@ -1026,27 +956,22 @@ const localProducts = ref([]);
 const filteredProducts = ref([]);
 const filteredCustomers = ref([]);
 const filteredProvinces = ref([]);
-const filteredDistricts = ref([]);
 const filteredWards = ref([]);
 const isLoadingCustomer = ref(false);
 const isLoadingProduct = ref(false);
 const isLoadingProvince = ref(false);
-const isLoadingDistrict = ref(false);
 const isLoadingWard = ref(false);
 const customerMessage = ref("");
 const productMessage = ref("");
 const provinceMessage = ref("");
-const districtMessage = ref("");
 const wardMessage = ref("");
 const selectedProduct = ref(null);
 const selectedProvince = ref(null);
-const selectedDistrict = ref(null);
 
 // Validation errors
 const customerError = ref("");
 const productError = ref("");
 const provinceError = ref("");
-const districtError = ref("");
 const wardError = ref("");
 
 // Form state
@@ -1056,7 +981,6 @@ const form = useForm({
     customer_id: null,
     phone: "",
     province: "",
-    district: "",
     ward: "",
     address_detail: "",
     items: [],
@@ -1253,11 +1177,8 @@ const selectCustomer = async (customer) => {
     customer_discount.value = customer.rank.discount_percent || 0;
     // Reset address fields
     form.province = "";
-    form.district = "";
     form.ward = "";
     selectedProvince.value = null;
-    selectedDistrict.value = null;
-    filteredDistricts.value = [];
     filteredWards.value = [];
 
     // Fill province, district, ward if available
@@ -1270,38 +1191,6 @@ const selectCustomer = async (customer) => {
             if (matchedProvince) {
                 selectProvince(matchedProvince);
                 form.province = matchedProvince.name;
-
-                if (customer.district) {
-                    await fetchDistricts(customer.district);
-                    const matchedDistrict = filteredDistricts.value.find(
-                        (d) =>
-                            d.name.toLowerCase() ===
-                            customer.district.toLowerCase()
-                    );
-                    if (matchedDistrict) {
-                        selectDistrict(matchedDistrict);
-                        form.district = matchedDistrict.name;
-
-                        if (customer.ward) {
-                            await fetchWards(customer.ward);
-                            const matchedWard = filteredWards.value.find(
-                                (w) =>
-                                    w.name.toLowerCase() ===
-                                    customer.ward.toLowerCase()
-                            );
-                            if (matchedWard) {
-                                selectWard(matchedWard);
-                                form.ward = matchedWard.name;
-                            } else {
-                                wardMessage.value =
-                                    "Không tìm thấy phường/xã phù hợp.";
-                            }
-                        }
-                    } else {
-                        districtMessage.value =
-                            "Không tìm thấy quận/huyện phù hợp.";
-                    }
-                }
             } else {
                 provinceMessage.value =
                     "Không tìm thấy tỉnh/thành phố phù hợp.";
@@ -1522,38 +1411,14 @@ const fetchProvinces = async (query) => {
         isLoadingProvince.value = true;
         provinceError.value = "";
         provinceMessage.value = "";
-        const size = 30;
-        let page = 0;
-        let allProvinces = [];
-
-        while (true) {
-            const url = `/proxy/provinces?page=${page}&size=${size}&query=${query}`;
-            const response = await fetchData(url);
-            console.log(`Page ${page} response:`, response);
-
-            const provinces = Array.isArray(response)
-                ? response
-                : response.data || [];
-            if (!provinces.length) {
-                break;
-            }
-            allProvinces = [...allProvinces, ...provinces];
-
-            if (provinces.length < size) {
-                break;
-            }
-            page++;
-        }
-
-        if (!allProvinces.length) {
+        const url = `/provinces?query=${query}`;
+        const response = await fetchData(url);
+        filteredProvinces.value = Array.isArray(response) ? response : [];
+        if (!filteredProvinces.value.length) {
             provinceMessage.value =
                 "Không tìm thấy tỉnh/thành phố nào phù hợp.";
-            filteredProvinces.value = [];
-            return;
         }
-        filteredProvinces.value = allProvinces;
     } catch (error) {
-        console.error("Lỗi fetchProvinces:", error.message);
         provinceError.value = `Có lỗi xảy ra khi tìm kiếm tỉnh/thành phố: ${error.message}. Vui lòng thử lại.`;
         filteredProvinces.value = [];
     } finally {
@@ -1564,47 +1429,10 @@ const fetchProvinces = async (query) => {
 const debouncedSearchProvince = debounce(fetchProvinces, 500);
 
 // Fetch districts
-const fetchDistricts = async (query) => {
-    if (!selectedProvince.value) {
-        filteredDistricts.value = [];
-        return;
-    }
-    try {
-        isLoadingDistrict.value = true;
-        districtError.value = "";
-        districtMessage.value = "";
-        const size = 30;
-        let page = 0;
-        let allDistricts = [];
-        while (true) {
-            const url = `/proxy/districts/${selectedProvince.value.id}?page=${page}&size=${size}`;
-            const districts = await fetchData(url);
-            allDistricts = [...allDistricts, ...districts];
-            if (districts.length < size) break;
-            page++;
-        }
-        filteredDistricts.value = query
-            ? allDistricts.filter((district) =>
-                  district.name.toLowerCase().includes(query.toLowerCase())
-              )
-            : allDistricts;
-        if (!filteredDistricts.value.length) {
-            districtMessage.value = "Không tìm thấy quận/huyện nào phù hợp.";
-        }
-    } catch (error) {
-        districtError.value =
-            "Có lỗi xảy ra khi tìm kiếm quận/huyện. Vui lòng thử lại.";
-        filteredDistricts.value = [];
-    } finally {
-        isLoadingDistrict.value = false;
-    }
-};
-
-const debouncedSearchDistrict = debounce(fetchDistricts, 500);
 
 // Fetch wards
 const fetchWards = async (query) => {
-    if (!selectedDistrict.value) {
+    if (!selectedProvince.value) {
         filteredWards.value = [];
         return;
     }
@@ -1612,21 +1440,9 @@ const fetchWards = async (query) => {
         isLoadingWard.value = true;
         wardError.value = "";
         wardMessage.value = "";
-        const size = 30;
-        let page = 0;
-        let allWards = [];
-        while (true) {
-            const url = `/proxy/wards/${selectedDistrict.value.id}?page=${page}&size=${size}`;
-            const wards = await fetchData(url);
-            allWards = [...allWards, ...wards];
-            if (wards.length < size) break;
-            page++;
-        }
-        filteredWards.value = query
-            ? allWards.filter((ward) =>
-                  ward.name.toLowerCase().includes(query.toLowerCase())
-              )
-            : allWards;
+        const url = `/wards/${selectedProvince.value.province_code}?query=${query}`;
+        const response = await fetchData(url);
+        filteredWards.value = Array.isArray(response) ? response : [];
         if (!filteredWards.value.length) {
             wardMessage.value = "Không tìm thấy phường/xã nào phù hợp.";
         }
@@ -1638,30 +1454,19 @@ const fetchWards = async (query) => {
         isLoadingWard.value = false;
     }
 };
-
 const debouncedSearchWard = debounce(fetchWards, 500);
 
 // Select province
 const selectProvince = (province) => {
     selectedProvince.value = province;
     form.province = province.name;
-    form.district = "";
     form.ward = "";
-    filteredDistricts.value = [];
     filteredWards.value = [];
     provinceError.value = "";
-    debouncedSearchDistrict("");
+    debouncedSearchWard(""); // Sau khi chọn tỉnh, load danh sách phường/xã
 };
 
 // Select district
-const selectDistrict = (district) => {
-    selectedDistrict.value = district;
-    form.district = district.name;
-    form.ward = "";
-    filteredWards.value = [];
-    districtError.value = "";
-    debouncedSearchWard("");
-};
 
 // Select ward
 const selectWard = (ward) => {
@@ -1754,7 +1559,6 @@ const handleComplete = () => {
     customerError.value = "";
     productError.value = "";
     provinceError.value = "";
-    districtError.value = "";
     wardError.value = "";
     localProducts.value.forEach((product) => (product.quantityError = ""));
 
@@ -1769,12 +1573,10 @@ const handleComplete = () => {
     }
 
     // Validate address fields
-    const hasAddress =
-        form.address_detail || form.ward || form.district || form.province;
+    const hasAddress = form.address_detail || form.ward || form.province;
     if (!hasAddress) {
         if (!form.province)
             provinceError.value = "Vui lòng chọn tỉnh/thành phố!";
-        if (!form.district) districtError.value = "Vui lòng chọn quận/huyện!";
         if (!form.ward) wardError.value = "Vui lòng chọn phường/xã!";
     }
 
@@ -1819,7 +1621,6 @@ const handleComplete = () => {
         total_amount: form.total_amount,
         address_detail: form.address_detail,
         ward: form.ward,
-        district: form.district,
         province: form.province,
         items: form.items,
     });

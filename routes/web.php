@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportExportController;
 use Illuminate\Support\Facades\Route;
@@ -268,6 +269,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
 Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);
 Route::get('/proxy/wards/{districtId}', [ProxyController::class, 'getWards']);
+Route::get('/provinces', [LocationController::class, 'getProvinces']);
+Route::get('/wards/{province_code}', [LocationController::class, 'getWardsByProvince']);
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth'])->name('dashboard');
