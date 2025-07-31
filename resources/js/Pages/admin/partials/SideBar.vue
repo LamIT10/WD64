@@ -118,6 +118,14 @@
                     </div>
                     <span class="text-xs">Báo cáo nhập kho</span>
                     </Link>
+                    <Link :href="route('admin.reports.export')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                    <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                    </div>
+                    <span class="text-xs">Báo cáo xuất kho</span>
+                    </Link>
                     <Link
                         :href="route('admin.reports.suggest')"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
