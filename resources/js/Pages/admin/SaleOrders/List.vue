@@ -674,7 +674,7 @@
                             <div
                                 class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                             >
-                                <button
+                                <button v-can="'admin.sales-order.approve'"
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="approveOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
@@ -683,7 +683,7 @@
                                     <i class="fa-regular fa-circle-check"></i>
                                     Duyệt đơn
                                 </button>
-                                <button
+                                <button v-can="'admin.sales-order.reject'"
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="openRejectModal(selectedOrder.id)"
                                     class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
@@ -693,7 +693,7 @@
                                 </button>
                                 <!-- Modal nhập lý do từ chối -->
                                 <div
-                                    v-if="showRejectModal"
+                                    v-if="showRejectModal" 
                                     class="fixed inset-0 overflow-y-auto z-50"
                                 >
                                     <div
@@ -782,7 +782,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button
+                                <button v-can="'admin.sales-order.complete'"
                                     v-if="selectedOrder.status === 'shipped'"
                                     @click="completeOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
