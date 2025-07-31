@@ -74,13 +74,13 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/{id}/approve', [SaleOrderController::class, 'approve'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_APPROVE)->name('approve');
         Route::get('export', [SaleOrderController::class, 'export'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_EXPORT)->name('export');
         Route::post('/{id}/reject', [SaleOrderController::class, 'rejectSaleOrder'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_REJECT)->name('reject');
+        Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_COMPLETE)->name('complete');
         
         Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('customer.search');
         Route::get('/inventory/{productVariantId}', [SaleOrderController::class, 'getInventoryQuantity'])->name('inventory');
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
         Route::get('/find-page', [SaleOrderController::class, 'findPage'])->name('find-page');
         
-        Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->name('complete');
         Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('variants.all');
         Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('unit.all');
 

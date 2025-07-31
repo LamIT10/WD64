@@ -21,6 +21,7 @@ class PermissionConstant
     public const SALES_ORDER_APPROVE    = 'admin.sales-order.approve';
     public const SALES_ORDER_REJECT = 'admin.sales-order.reject';
     public const SALES_ORDER_EXPORT  = 'admin.sales-order.export';
+    public const SALES_ORDER_COMPLETE  = 'admin.sales-order.complete';
 
 
 
@@ -170,7 +171,37 @@ class PermissionConstant
                     ],
                 ],
             ],
-
+            // ==== SALES ORDER ==== Quản lý đơn xuất
+            [
+                'group_permission' => 'PERMISSION_SALES_ORDER',
+                'group_description' => 'Quyền quản lý đơn xuất',
+                'permissions' => [
+                    [
+                        "description" => "Danh sách đơn xuất",
+                        "name" => self::SALES_ORDER_INDEX,
+                    ],
+                    [
+                        "description" => "Thêm đơn xuất",
+                        "name" => self::SALES_ORDER_CREATE,
+                    ],
+                    [
+                        "description" => "Duyệt đơn xuất",
+                        "name" => self::SALES_ORDER_APPROVE,
+                    ],
+                    [
+                        "description" => "Từ chối đơn xuất",
+                        "name" => self::SALES_ORDER_REJECT,
+                    ],
+                    [
+                        "description" => "Xuất excel đơn xuất",
+                        "name" => self::SALES_ORDER_EXPORT,
+                    ],
+                    [
+                        "description" => "Xác nhận hoàn thành",
+                        "name" => self::SALES_ORDER_COMPLETE,
+                    ],
+                ],
+            ],
 
 
 
@@ -366,33 +397,7 @@ class PermissionConstant
 
 
 
-            // ==== SALES ORDER ==== Quản lý đơn xuất
-            [
-                'group_permission' => 'PERMISSION_SALES_ORDER',
-                'group_description' => 'Quyền quản lý đơn xuất',
-                'permissions' => [
-                    [
-                        "description" => "Danh sách đơn xuất",
-                        "name" => self::SALES_ORDER_INDEX,
-                    ],
-                    [
-                        "description" => "Thêm đơn xuất",
-                        "name" => self::SALES_ORDER_CREATE,
-                    ],
-                    [
-                        "description" => "Duyệt đơn xuất",
-                        "name" => self::SALES_ORDER_APPROVE,
-                    ],
-                    [
-                        "description" => "Từ chối đơn xuất",
-                        "name" => self::SALES_ORDER_REJECT,
-                    ],
-                    [
-                        "description" => "Xuất excel đơn xuất",
-                        "name" => self::SALES_ORDER_EXPORT,
-                    ],
-                ],
-            ],
+
 
             // ==== CATEGORIES ==== Quản lý danh mục sản phẩm
             [
