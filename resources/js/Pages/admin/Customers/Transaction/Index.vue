@@ -11,7 +11,6 @@
           </h5>
         </div>
 
-        <!-- Bên phải: Search + Quay lại -->
         <div class="flex items-center space-x-3">
           <!-- Search bar -->
           <div class="relative">
@@ -20,7 +19,7 @@
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
 
-          <!-- Bọc nút quay lại để ép height và align -->
+          
           <div class="h-10 flex items-center">
             <Waiting route-name="admin.customers.index" :route-params="{}"
               :color="'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'"
@@ -63,7 +62,7 @@
               <tr v-for="(debt, index) in props.customerTransaction.data" :key="debt.id" @click="handleClick(debt.id)"
                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
                 <td class="px-6 py-4 whitespace-nowrap text-left text-sm text-gray-500 font-medium font-sans">
-                  {{ 'DH-' + debt.id.toString().padStart(4, '0') }}
+                  {{ debt.code }}
                 </td>
 
                 <td class="px-6 py-4 whitespace-nowrap">

@@ -29,7 +29,9 @@ use App\Http\Controllers\Admin\SupplierTransactionController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\WarehouseZoneController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportExportController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -126,7 +128,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('/{rank}', [RankController::class, 'show'])->name('show');     // Chi tiết rank
         Route::get('/{rank}/edit', [RankController::class, 'edit'])->name('edit'); // Form sửa
         Route::patch('/{rank}', [RankController::class, 'update'])->name('update');  // Cập nhật rank
-        Route::delete('/{rank}', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
+        Route::patch('/{rank}/destroy', [RankController::class, 'destroy'])->name('destroy'); // Xóa rank
     });
 
     Route::prefix('permission')->as('permission.')->group(function () {
@@ -211,7 +213,10 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
+          Route::get('export', [ReportExportController::class, 'export'])->name('export');
     });
+
+  
 
 
 
@@ -253,15 +258,16 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     Route::prefix('reports')->as('reports.')->group(function () {
         Route::get('suggest', [SuggestController::class, 'suggest'])->name('suggest');
         Route::get('revenue', [SuggestController::class, 'revenue'])->name('revenue');
+      
+
     });
 });
 
 
 
 // API địa chỉ
-Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
-Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);
-Route::get('/proxy/wards/{districtId}', [ProxyController::class, 'getWards']);
+Route::get('/provinces', [LocationController::class, 'getProvinces']);
+Route::get('/wards/{province_code}', [LocationController::class, 'getWardsByProvince']);
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth'])->name('dashboard');

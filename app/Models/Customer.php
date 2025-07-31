@@ -18,7 +18,6 @@ class Customer extends Model
         'current_debt',
         'rank_id',
         'province',
-        'district',
         'ward',
         'avatar',
         'status',

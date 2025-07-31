@@ -53,8 +53,6 @@ class CustomerController extends Controller
 
             return $customer;
         });
-        // dd($customers->toArray());
-
         return $this->renderView(['customers' => $customers], 'admin/Customers/Index');
     }
 

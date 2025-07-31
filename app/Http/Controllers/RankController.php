@@ -55,9 +55,9 @@ class RankController extends Controller
         Log::info('Dữ liệu đầu vào store:', $request->all());
         Log::info('Dữ liệu validated trong store:', $request->validated());
         $result = $this->rankRepo->createRank($request->validated());
-        if (is_array($result) && isset($result['status']) && !$result['status']) {
-            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
-        }
+        // if (is_array($result) && isset($result['status']) && !$result['status']) {
+        //     return $this->returnInertia([], $result['message'], 'admin.ranks.create', ['errors' => ['message' => $result['message']]]);
+        // }
         return $this->returnInertia($result, 'Thêm hạng mới thành công', 'admin.ranks.index');
     }
 
@@ -74,38 +74,19 @@ class RankController extends Controller
         Log::info('Dữ liệu đầu vào update:', $request->all());
         Log::info('Dữ liệu validated trong update:', $request->validated());
         $result = $this->rankRepo->updateRank($rank, $request->validated());
-        if (is_array($result) && isset($result['status']) && !$result['status']) {
-            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
-        }
+        // if (is_array($result) && isset($result['status']) && !$result['status']) {
+        //     return $this->returnInertia([], $result['message'], 'admin.ranks.edit', ['rank' => $rank]);
+        // }
         return $this->returnInertia($result, 'Cập nhật hạng thành công', 'admin.ranks.index');
     }
 
     public function destroy(Rank $rank)
     {
-        if (strtolower($rank->name) === 'sắt') {
-            return $this->returnInertia(
-                ['status' => false, 'message' => 'Không thể xóa hạng mặc định "Sắt"'],
-                '',
-                'admin.ranks.index'
-            );
-        }
-
-        if ($rank->customers()->exists()) {
-            $defaultRank = Rank::where('name', 'Sắt')->where('status', 'active')->first();
-            if (!$defaultRank) {
-                return $this->returnInertia(
-                    ['status' => false, 'message' => 'Không tìm thấy hạng mặc định "Sắt"'],
-                    '',
-                    'admin.ranks.index'
-                );
-            }
-            $rank->customers()->update(['rank_id' => $defaultRank->id]);
-        }
-
-        $result = $this->rankRepo->deleteRank($rank);
+        $result = $this->rankRepo->hideRank($rank);
         if (is_array($result) && isset($result['status']) && !$result['status']) {
-            return $this->returnInertia($result, $result['message'], 'admin.ranks.index');
+            return $this->returnInertia([], $result['message'], 'admin.ranks.index', ['flash' => ['type' => 'error', 'message' => $result['message']]]);
         }
-        return $this->returnInertia($result, 'Xóa hạng thành công', 'admin.ranks.index');
+        $action = $rank->status === 'active' ? 'ẩn' : 'bật';
+        return $this->returnInertia($result, "Hạng đã được ${action} thành công", 'admin.ranks.index', ['flash' => ['type' => 'success', 'message' => "Hạng đã được ${action} thành công"]]);
     }
 }

@@ -19,4 +19,6 @@ class ReportController extends Controller
         $data = $this->handleRepository->getDataForReportImport($query);
         return Inertia::render("admin/Reports/Index", ['data' => $data]);
     }
+
+
 }

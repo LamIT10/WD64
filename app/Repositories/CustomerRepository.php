@@ -17,9 +17,9 @@ class CustomerRepository extends BaseRepository
         $this->handleModel = $customer;
     }
 
-    public function getAll($perPage = 10, array $filters = [])
+   public function getAll($perPage = 10, array $filters = [])
     {
-        $query = $this->handleModel::with('rank');
+        $query = $this->handleModel::with(['rank', 'salesOrders.transactions']);
 
         if (!empty($filters['search']['search'])) {
             $search = $filters['search']['search'];
@@ -33,7 +33,28 @@ class CustomerRepository extends BaseRepository
 
         $query = $this->filterData($query, $filters);
 
-        return $query->paginate($perPage);
+        $customers = $query->paginate($perPage);
+
+        // 👉 Tính và gán remaining_amount duy nhất
+        $customers->getCollection()->transform(function ($customer) {
+            $remaining = 0;
+
+            foreach ($customer->salesOrders as $order) {
+                if ($order->status !== 'completed') continue;
+
+                $paid = ($order->pay_before ?? 0)
+                    + ($order->pay_after ?? 0)
+                    + $order->transactions->where('type', 'payment')->sum('paid_amount');
+
+                $remaining += max(0, ($order->total_amount ?? 0) - $paid);
+            }
+
+            $customer->remaining_amount = round($remaining);
+
+            return $customer;
+        });
+
+        return $customers;
     }
 
     public function createCustomer(array $data)

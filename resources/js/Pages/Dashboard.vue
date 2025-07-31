@@ -2,8 +2,7 @@
   <AppLayout>
     <div class="min-h-screen bg-gray-50 p-6">
 
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
-        <!-- Header section -->
+      <!-- <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn xuất</h4>
@@ -11,9 +10,7 @@
           </div>
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
 
-            <!-- Phần chọn ngày bắt đầu và kết thúc -->
             <div class="flex items-center bg-white p-3 rounded-xl border border-gray-200 shadow-xs w-full max-w-3xl">
-              <!-- Ngày bắt đầu -->
               <div class="flex items-center flex-1">
                 <label for="start-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Từ ngày</label>
                 <div class="relative flex-1">
@@ -29,10 +26,8 @@
                 </div>
               </div>
 
-              <!-- Dấu phân cách -->
               <span class="mx-2 text-gray-400">-</span>
 
-              <!-- Ngày kết thúc -->
               <div class="flex items-center flex-1">
                 <label for="end-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Đến ngày</label>
                 <div class="relative flex-1">
@@ -48,7 +43,6 @@
                 </div>
               </div>
 
-              <!-- Nút reset -->
               <button @click="resetDateFilterSaleOrder"
                 class="ml-4 px-3 py-2 flex items-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 title="Đặt lại">
@@ -63,10 +57,7 @@
           </div>
         </div>
 
-        <!-- Stats cards grid -->
-        <!-- Hàng trên: 3 ô trạng thái -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-5">
-          <!-- Đang chuẩn bị -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div class="flex items-center justify-between">
               <div>
@@ -86,7 +77,6 @@
             </div>
           </div>
 
-          <!-- Hoàn thành -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
             <div class="flex items-center justify-between">
               <div>
@@ -105,7 +95,6 @@
             </div>
           </div>
 
-          <!-- Đơn huỷ -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
             <div class="flex items-center justify-between">
               <div>
@@ -125,9 +114,7 @@
           </div>
         </div>
 
-        <!-- Hàng dưới: 2 ô -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <!-- Tổng đơn hàng -->
           <Link :href="route('admin.sale-orders.index')"
             class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
           <div class="flex items-center justify-between">
@@ -149,7 +136,6 @@
           </div>
           </Link>
 
-          <!-- Tổng giá trị -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
             <div class="flex items-center justify-between">
               <div>
@@ -163,9 +149,8 @@
           </div>
         </div>
 
-      </div>
-      <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
-        <!-- Header section -->
+      </div> -->
+      <!-- <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
           <div>
             <h4 class="text-xl font-bold text-gray-800">Thống kê đơn nhập kho hàng</h4>
@@ -173,9 +158,7 @@
           </div>
           <div class="flex items-center justify-between p-2  rounded-lg shadow">
 
-            <!-- Phần chọn ngày bắt đầu và kết thúc -->
             <div class="flex items-center bg-white p-3 rounded-xl border border-gray-200 shadow-xs w-full max-w-3xl">
-              <!-- Ngày bắt đầu -->
               <div class="flex items-center flex-1">
                 <label for="start-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Từ ngày</label>
                 <div class="relative flex-1">
@@ -191,10 +174,8 @@
                 </div>
               </div>
 
-              <!-- Dấu phân cách -->
               <span class="mx-2 text-gray-400">-</span>
 
-              <!-- Ngày kết thúc -->
               <div class="flex items-center flex-1">
                 <label for="end-date" class="text-sm font-medium text-gray-600 mr-2 min-w-[70px]">Đến ngày</label>
                 <div class="relative flex-1">
@@ -210,7 +191,6 @@
                 </div>
               </div>
 
-              <!-- Nút reset -->
               <button @click="resetDateFilterPurchase"
                 class="ml-4 px-3 py-2 flex items-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 title="Đặt lại">
@@ -225,10 +205,7 @@
           </div>
         </div>
 
-        <!-- Stats cards grid -->
-        <!-- Hàng 1: 5 ô trạng thái -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-5">
-          <!-- Chờ duyệt -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Chờ duyệt</p>
@@ -239,7 +216,6 @@
             </div>
           </div>
 
-          <!-- Đã duyệt -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Đã duyệt</p>
@@ -250,7 +226,6 @@
             </div>
           </div>
 
-          <!-- Từ chối -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Từ chối</p>
@@ -261,7 +236,6 @@
             </div>
           </div>
 
-          <!-- Nhập một phần -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-purple-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nhập một phần</p>
@@ -272,7 +246,6 @@
             </div>
           </div>
 
-          <!-- Đã hoàn thành -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-green-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hoàn thành</p>
@@ -284,9 +257,7 @@
           </div>
         </div>
 
-        <!-- Hàng 2: 2 ô dài -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <!-- Tổng đơn nhập -->
           <Link :href="route('admin.purchases.index')"
             class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-blue-500">
           <div>
@@ -298,7 +269,6 @@
           </div>
           </Link>
 
-          <!-- Tổng giá trị -->
           <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-indigo-500">
             <div>
               <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng giá trị nhập</p>
@@ -310,7 +280,7 @@
           </div>
         </div>
 
-      </div>
+      </div> -->
       <div class="flex">
         <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_purchases.purchase_change_in_seven_day"
           :chartTitle="'Đơn nhập hàng trong 7 ngày'" />

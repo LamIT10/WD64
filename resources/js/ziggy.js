@@ -295,8 +295,8 @@ const Ziggy = {
             bindings: { rank: "id" },
         },
         "admin.ranks.destroy": {
-            uri: "admin/ranks/{rank}",
-            methods: ["DELETE"],
+            uri: "admin/ranks/{rank}/destroy",
+            methods: ["PATCH"],
             parameters: ["rank"],
             bindings: { rank: "id" },
         },
@@ -505,7 +505,7 @@ const Ziggy = {
             uri: "admin/receiving/store",
             methods: ["POST"],
         },
-        "admin.reports.index": {
+        "admin.reports.export": {
             uri: "admin/reports",
             methods: ["GET", "HEAD"],
         },
@@ -601,6 +601,35 @@ const Ziggy = {
             uri: "admin/sale-orders/{id}/generate-qr",
             methods: ["POST"],
             parameters: ["id"],
+        },
+        "admin.sale-orders.find-page": {
+            uri: "admin/sale-orders/find-page",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.notifications.index": {
+            uri: "admin/notifications",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.notifications.read": {
+            uri: "admin/notifications/{id}/read",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
+        "admin.notifications.read-all": {
+            uri: "admin/notifications/read-all",
+            methods: ["POST"],
+        },
+        "admin.notifications.show-all": {
+            uri: "admin/notifications/show-all",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.reports.suggest": {
+            uri: "admin/reports/suggest",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.reports.revenue": {
+            uri: "admin/reports/revenue",
+            methods: ["GET", "HEAD"],
         },
         dashboard: { uri: "dashboard", methods: ["GET", "HEAD"] },
         login: { uri: "login", methods: ["GET", "HEAD"] },
