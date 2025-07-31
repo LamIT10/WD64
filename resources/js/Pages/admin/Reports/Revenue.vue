@@ -10,48 +10,24 @@
             <form @submit.prevent="fetchRevenue">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4">
                     <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
-                            >Từ ngày</label
-                        >
-                        <input
-                            type="date"
-                            v-model="form.start_date"
-                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
+                        <input type="date" v-model="form.start_date"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
                     </div>
                     <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
-                            >Đến ngày</label
-                        >
-                        <input
-                            type="date"
-                            v-model="form.end_date"
-                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
+                        <input type="date" v-model="form.end_date"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
                     </div>
                     <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
-                            >Tìm kiếm sản phẩm</label
-                        >
-                        <input
-                            type="text"
-                            v-model="form.product_search"
-                            placeholder="Nhập tên hoặc mã sản phẩm"
-                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        />
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm sản phẩm</label>
+                        <input type="text" v-model="form.product_search" placeholder="Nhập tên hoặc mã sản phẩm"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
                     </div>
                     <div class="mt-6 text-right">
-                        <button
-                            type="submit"
-                            :disabled="form.processing"
-                            class="inline-flex items-center px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700"
-                        >
-                            <i
-                                class="fa-solid fa-magnifying-glass-plus text-xl mr-2"
-                            ></i>
+                        <button type="submit" :disabled="form.processing"
+                            class="inline-flex items-center px-6 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700">
+                            <i class="fa-solid fa-magnifying-glass-plus text-xl mr-2"></i>
                             <span v-if="!form.processing">Xem báo cáo</span>
                             <span v-else>Đang xử lý...</span>
                         </button>
@@ -93,29 +69,25 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-indigo-100">
-                        <tr
-                            v-for="(item, idx) in revenues"
-                            :key="item.variant_id"
-                            class="transition-all"
-                            :class="{
-                                'hover:bg-green-50': item.profit > 0,
-                                'hover:bg-red-50': item.profit < 0,
-                                'hover:bg-gray-100': item.profit === 0,
-                            }"
-                        >
-                            <td class="px-6 py-3">{{ idx + 1 + ((meta.pagination.current_page - 1) * meta.pagination.per_page) }}</td>
+                        <tr v-for="(item, idx) in revenues" :key="item.variant_id" class="transition-all" :class="{
+                            'hover:bg-green-50': item.profit > 0,
+                            'hover:bg-red-50': item.profit < 0,
+                            'hover:bg-gray-100': item.profit === 0,
+                        }">
+                            <td class="px-6 py-3">{{ idx + 1 + ((meta.pagination.current_page - 1) *
+                                meta.pagination.per_page) }}</td>
                             <td class="px-6 py-3">{{ item.product_code }}</td>
                             <td class="px-6 py-3">{{ item.variant_name }}</td>
                             <td class="px-6 py-3">{{ item.unit }}</td>
-                            <td class="px-6 py-3 font-semibold text-indigo-700 text-end">{{ formatCurrency(item.revenue) }}</td>
-                            <td class="px-6 py-3 font-semibold text-amber-700 text-end">{{ formatCurrency(item.cost) }}</td>
-                            <td class="px-6 py-3 font-semibold text-end"
-                                :class="{
-                                    'text-green-700 bg-green-50': item.profit > 0,
-                                    'text-red-700 bg-red-50': item.profit < 0,
-                                    'text-gray-700 bg-gray-100': item.profit === 0,
-                                }"
-                            >
+                            <td class="px-6 py-3 font-semibold text-indigo-700 text-end">{{ formatCurrency(item.revenue)
+                                }}</td>
+                            <td class="px-6 py-3 font-semibold text-amber-700 text-end">{{ formatCurrency(item.cost) }}
+                            </td>
+                            <td class="px-6 py-3 font-semibold text-end" :class="{
+                                'text-green-700 bg-green-50': item.profit > 0,
+                                'text-red-700 bg-red-50': item.profit < 0,
+                                'text-gray-700 bg-gray-100': item.profit === 0,
+                            }">
                                 {{ formatCurrency(item.profit) }}
                             </td>
                         </tr>
@@ -125,15 +97,24 @@
                     </tbody>
                 </table>
                 <!-- Phân trang -->
-                <div class="mt-6 flex justify-end">
+                <div class="mt-6 flex justify-end gap-1 items-center">
+                    <button class="px-3 py-1 border rounded" :disabled="meta.pagination.current_page === 1"
+                        @click="goToPage(meta.pagination.current_page - 1)">
+                        «
+                    </button>
                     <button
-                        v-for="pageNum in meta.pagination.last_page"
-                        :key="pageNum"
-                        class="mx-1 px-3 py-1 rounded border"
-                        :class="pageNum === meta.pagination.current_page ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700 border-indigo-200'"
-                        @click="goToPage(pageNum)"
-                    >
+                        v-for="(pageNum, i) in getPaginationPages(meta.pagination.current_page, meta.pagination.last_page)"
+                        :key="i" class="px-3 py-1 border rounded" :class="{
+                            'bg-indigo-600 text-white': pageNum === meta.pagination.current_page,
+                            'bg-white text-indigo-700 border-indigo-200': pageNum !== meta.pagination.current_page,
+                            'cursor-default': pageNum === '...',
+                        }" @click="typeof pageNum === 'number' && goToPage(pageNum)" :disabled="pageNum === '...'">
                         {{ pageNum }}
+                    </button>
+                    <button class="px-3 py-1 border rounded"
+                        :disabled="meta.pagination.current_page === meta.pagination.last_page"
+                        @click="goToPage(meta.pagination.current_page + 1)">
+                        »
                     </button>
                 </div>
             </div>
@@ -192,6 +173,20 @@ function formatCurrency(value) {
         currency: "VND",
         minimumFractionDigits: 0,
     }).format(value);
+}
+
+function getPaginationPages(current, last) {
+    const range = [];
+    const delta = 2; // số trang hai bên
+
+    const start = Math.max(1, current - delta);
+    const end = Math.min(last, current + delta);
+
+    for (let i = start; i <= end; i++) {
+        range.push(i);
+    }
+
+    return range;
 }
 </script>
 
