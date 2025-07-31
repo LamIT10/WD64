@@ -236,7 +236,6 @@ class SaleOrdersRepository extends BaseRepository
                 'name',
                 'phone',
                 'province',
-                'district',
                 'ward',
                 'rank_id',
             ]);
@@ -255,7 +254,6 @@ class SaleOrdersRepository extends BaseRepository
             $addressComponents = [
                 $data['address_detail'] ?? '',
                 $data['ward'] ?? '',
-                $data['district'] ?? '',
                 $data['province'] ?? '',
             ];
             $addressDelivery = implode(', ', array_filter($addressComponents, fn($value) => !is_null($value) && $value !== '')) ?: null;
@@ -320,9 +318,6 @@ class SaleOrdersRepository extends BaseRepository
                 $updateData = [];
                 if (!empty($data['province']) && $customer->province !== $data['province']) {
                     $updateData['province'] = $data['province'];
-                }
-                if (!empty($data['district']) && $customer->district !== $data['district']) {
-                    $updateData['district'] = $data['district'];
                 }
                 if (!empty($data['ward']) && $customer->ward !== $data['ward']) {
                     $updateData['ward'] = $data['ward'];

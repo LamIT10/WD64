@@ -266,9 +266,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
 
 // API địa chỉ
-Route::get('/proxy/provinces', [ProxyController::class, 'getProvinces']);
-Route::get('/proxy/districts/{provinceId}', [ProxyController::class, 'getDistricts']);
-Route::get('/proxy/wards/{districtId}', [ProxyController::class, 'getWards']);
 Route::get('/provinces', [LocationController::class, 'getProvinces']);
 Route::get('/wards/{province_code}', [LocationController::class, 'getWardsByProvince']);
 Route::get('/dashboard', function () {

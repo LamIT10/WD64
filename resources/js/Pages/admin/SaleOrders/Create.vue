@@ -1191,6 +1191,21 @@ const selectCustomer = async (customer) => {
             if (matchedProvince) {
                 selectProvince(matchedProvince);
                 form.province = matchedProvince.name;
+
+                // Sau khi chọn province, điền lại ward nếu có
+                if (customer.ward) {
+                    await fetchWards(customer.ward);
+                    const matchedWard = filteredWards.value.find(
+                        (w) =>
+                            w.name.toLowerCase() === customer.ward.toLowerCase()
+                    );
+                    if (matchedWard) {
+                        selectWard(matchedWard);
+                        form.ward = matchedWard.name;
+                    } else {
+                        wardMessage.value = "Không tìm thấy phường/xã phù hợp.";
+                    }
+                }
             } else {
                 provinceMessage.value =
                     "Không tìm thấy tỉnh/thành phố phù hợp.";
