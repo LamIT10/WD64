@@ -34,62 +34,7 @@
 
             <div v-else>
                 <div class="mb-6">
-                    <div class="bg-white rounded p-3">
-                        <nav
-                            class="flex gap-3 justify-start items-center"
-                            aria-label="Tabs"
-                        >
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{}"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-600 shadow-sm hover:shadow-md hover:bg-indigo-100 hover:text-indigo-900 transition-all duration-200 ease-in-out animate-fade-in cursor-pointer'"
-                                @click="setActiveTab('all')"
-                            >
-                                <i class="fa-solid fa-border-all text-xl"></i>
-                                Tất cả đơn xuất
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'pending' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 font-semibold border border-yellow-500 shadow-sm hover:shadow-md hover:bg-yellow-100 hover:text-yellow-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('pending')"
-                            >
-                                <i
-                                    class="fa-solid fa-hourglass-start text-xl"
-                                ></i>
-                                Chờ duyệt
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'shipped' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:bg-blue-100 hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('shipped')"
-                            >
-                                <i class="fa-solid fa-truck text-xl"></i>
-                                Đang giao hàng
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'completed' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:bg-purple-100 hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('completed')"
-                            >
-                                <i
-                                    class="fa-solid fa-file-circle-check text-xl"
-                                ></i>
-                                Hoàn thành
-                            </Waiting>
-                            <Waiting
-                                route-name="admin.sale-orders.index"
-                                :route-params="{ status: 'cancelled' }"
-                                :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                                @click="setActiveTab('cancelled')"
-                            >
-                                <i class="fa-solid fa-ban text-xl"></i>
-                                Từ chối
-                            </Waiting>
-                        </nav>
-                    </div>
+                    <div class="bg-white rounded p-3"></div>
                 </div>
 
                 <!-- Filters -->
@@ -232,7 +177,7 @@
                                     scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
                                 >
-                                    {{ order.id }}
+                                    {{ order.code }}
                                 </th>
                                 <td
                                     class="px-4 py-2 text-indigo-700 font-semibold"
@@ -931,11 +876,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import emitter from "../../../eventBus.js";
+console.log("Emitter in List.vue:", emitter);
+import { ref, computed, onMounted, watch } from "vue";
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
 import ToastClient from "../../components/ToastClient.vue";
-import { useForm, router } from "@inertiajs/vue3";
+import { useForm, router, usePage } from "@inertiajs/vue3";
 import { clearCanvas } from "chart.js/helpers";
 import axios from "axios";
 const { listOrders } = defineProps({
@@ -1031,23 +978,21 @@ function formatCurrencyVND(value) {
 }
 
 function formatPageNumber(page) {
-    return page; // Trả về số trang không có dấu chấm
+    return page;
 }
 
 function validatePayBefore() {
-    if (
-        isNaN(pay_before.value) ||
-        pay_before.value === null ||
-        !/^\d+$/.test(pay_before.value.toString())
-    ) {
+    if (pay_before.value === "" || pay_before.value === null) {
+        errorMessage.value = "";
+        return;
+    }
+    if (isNaN(pay_before.value) || !/^\d+$/.test(pay_before.value.toString())) {
         errorMessage.value =
             "Số tiền thanh toán trước phải là một số nguyên dương hợp lệ.";
-        pay_before.value = 0;
         return;
     }
     if (pay_before.value < 0) {
         errorMessage.value = "Số tiền thanh toán trước không được nhỏ hơn 0.";
-        pay_before.value = 0;
         return;
     }
     if (pay_before.value > selectedOrder.value.total_amount) {
@@ -1056,26 +1001,23 @@ function validatePayBefore() {
         )}) không được vượt quá tổng tiền đơn hàng (${formatCurrencyVND(
             selectedOrder.value.total_amount
         )}).`;
-        pay_before.value = selectedOrder.value.total_amount;
         return;
     }
     errorMessage.value = "";
 }
 
 function validatePayAfter() {
-    if (
-        isNaN(pay_after.value) ||
-        pay_after.value === null ||
-        !/^\d+$/.test(pay_after.value.toString())
-    ) {
+    if (pay_after.value === "" || pay_after.value === null) {
+        errorMessage.value = "";
+        return;
+    }
+    if (isNaN(pay_after.value) || !/^\d+$/.test(pay_after.value.toString())) {
         errorMessage.value =
             "Số tiền thanh toán sau phải là một số nguyên dương hợp lệ.";
-        pay_after.value = 0;
         return;
     }
     if (pay_after.value < 0) {
         errorMessage.value = "Số tiền thanh toán sau không được nhỏ hơn 0.";
-        pay_after.value = 0;
         return;
     }
     const maxPayAfter =
@@ -1087,7 +1029,6 @@ function validatePayAfter() {
         )}) không được vượt quá số tiền còn lại (${formatCurrencyVND(
             maxPayAfter
         )}).`;
-        pay_after.value = maxPayAfter;
         return;
     }
     errorMessage.value = "";
@@ -1195,6 +1136,7 @@ const approveOrder = (id) => {
                 order.status = "shipped";
                 order.pay_before = approve.pay_before;
             }
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error approving order:", errors);
@@ -1252,6 +1194,7 @@ const completeOrder = (id) => {
                 order.status = "completed";
                 order.pay_after = complete.pay_after;
             }
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error completing order:", errors);
@@ -1287,6 +1230,7 @@ const submitRejectReason = () => {
             alert("Đơn hàng đã được từ chối.");
             closeRejectModal();
             closeModal();
+            emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error rejecting order:", errors);
@@ -1396,6 +1340,27 @@ const copyQR = async () => {
 };
 function closeQRModal() {
     qrData.value = null;
+}
+
+const page = usePage();
+onMounted(() => {
+    openOrderModalIfNeeded();
+});
+
+watch(
+    [() => page.props?.sale_order_id, () => listOrders.data],
+    () => {
+        openOrderModalIfNeeded();
+    },
+    { immediate: true }
+);
+
+function openOrderModalIfNeeded() {
+    const saleOrderId = page.props?.sale_order_id;
+    if (saleOrderId) {
+        const order = listOrders.data.find((o) => o.id == saleOrderId);
+        if (order) openModal(order);
+    }
 }
 </script>
 
