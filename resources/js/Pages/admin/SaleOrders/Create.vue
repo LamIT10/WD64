@@ -679,13 +679,6 @@
                                     class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
                                 />
                             </div>
-                            <input
-                                v-model="form.address_detail"
-                                type="text"
-                                placeholder="Địa chỉ chi tiết (Số nhà, ngõ, đường)"
-                                class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                                :disabled="!form.ward"
-                            />
                             <!-- Province -->
                             <Combobox v-model="form.province">
                                 <div class="relative">
@@ -898,6 +891,13 @@
                                     {{ wardMessage }}
                                 </p>
                             </Combobox>
+                            <input
+                                v-model="form.address_detail"
+                                type="text"
+                                placeholder="Địa chỉ chi tiết (Số nhà, ngõ, đường)"
+                                class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                :disabled="!form.ward"
+                            />
                         </div>
 
                         <!-- Note -->
@@ -1224,9 +1224,7 @@ const fetchCustomers = async (query) => {
     try {
         isLoadingCustomer.value = true;
         customerError.value = "";
-        const url = `/admin/sale-orders/search/customers?searchCustomer=${encodeURIComponent(
-            query
-        )}`;
+        const url = `/admin/sale-orders/search/customers?searchCustomer=${query}`;
         filteredCustomers.value = await fetchData(url);
         if (!filteredCustomers.value.length) {
             customerError.value = "Không tìm thấy khách hàng nào phù hợp.";
@@ -1322,9 +1320,7 @@ const fetchProducts = async (query) => {
     try {
         isLoadingProduct.value = true;
         productError.value = "";
-        const url = `/admin/sale-orders/search/products?searchProduct=${encodeURIComponent(
-            query
-        )}`;
+        const url = `/admin/sale-orders/search/products?searchProduct=${query}`;
         filteredProducts.value = await fetchData(url);
         if (!filteredProducts.value.length) {
             productError.value = "Không tìm thấy sản phẩm nào phù hợp.";
@@ -1531,9 +1527,7 @@ const fetchProvinces = async (query) => {
         let allProvinces = [];
 
         while (true) {
-            const url = `/proxy/provinces?page=${page}&size=${size}&query=${encodeURIComponent(
-                query
-            )}`;
+            const url = `/proxy/provinces?page=${page}&size=${size}&query=${query}`;
             const response = await fetchData(url);
             console.log(`Page ${page} response:`, response);
 

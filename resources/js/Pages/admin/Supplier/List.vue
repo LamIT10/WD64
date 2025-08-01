@@ -311,9 +311,6 @@
                                                                 Người tạo
                                                             </th>
                                                             <th class="px-6 py-3 font-semibold">
-                                                                Người duyệt
-                                                            </th>
-                                                            <th class="px-6 py-3 font-semibold">
                                                                 Đã thanh toán
                                                             </th>
                                                             <th class="px-6 py-3 font-semibold">
@@ -435,17 +432,7 @@
                                                                     )
                                                                     ">
                                                                     {{
-                                                                        receipt.created_by ||
-                                                                        "--"
-                                                                    }}
-                                                                </td>
-                                                                <td class="px-6 py-3" @click="
-                                                                    ShowDetail(
-                                                                        receipt.id
-                                                                    )
-                                                                    ">
-                                                                    {{
-                                                                        receipt.approved_by ||
+                                                                        receipt.create_by.name ||
                                                                         "--"
                                                                     }}
                                                                 </td>
@@ -827,7 +814,6 @@ const resetSearch = () => {
     searchForm.toPayment = 0;
 };
 const array = Object.entries(queryData)
-console.log(array);
 const newUrl = ref("");
 for (let index = 0; index < array.length; index++) {
     if (array.length - 1 == index) {

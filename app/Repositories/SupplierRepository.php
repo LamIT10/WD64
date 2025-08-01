@@ -24,11 +24,15 @@ class SupplierRepository extends BaseRepository
         $perpage = $data['perPage'] ?? 20;
         $query = $this->handleModel::with([
             'purchaseOrders' => function ($query) {
-                return $query->select(['id', 'supplier_id'])->whereHas('goodReceipts', function ($subQuery) {
-                    $subQuery->select('id')->whereHas('supplierTransaction', function ($subSubQuery) {
-                        $subSubQuery->select('id')->where('paid_amount', '>', 0);
-                    });
-                });
+                return $query->select(['id', 'supplier_id']);
+                // ->whereHas('goodReceipts', function ($subQuery) {
+                //     $subQuery->select('id')->whereHas('supplierTransaction', function ($subSubQuery) {
+                //         // $subSubQuery->select('id')->where('paid_amount', '>', 0);
+                //     });
+                // });
+            },
+            'purchaseOrders.goodReceipts.createBy' => function ($query) {
+                return $query->select(['id', "name"]);
             },
             'purchaseOrders.goodReceipts' => function ($query) {
                 return $query->select(['id', 'purchase_order_id', 'code', 'receipt_date', 'note', 'status', 'approved_by', 'created_by', 'total_amount']);
@@ -77,7 +81,7 @@ class SupplierRepository extends BaseRepository
             $query->having('debt', '<=', $data['toPayment']);
         }
 
-
+        // dd($query->get()->toArray());
         $filters = [
             'search' => [
                 'name' => $data->search ?? "",

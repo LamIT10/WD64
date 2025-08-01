@@ -35,37 +35,37 @@ class DashboardRepository extends BaseRepository
 
 
         // lấy ra thông kê đơn xuất theo tháng đơn nhập
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-        $totalPurchaseInMonth = PurchaseOrder::select(['id','created_at', 'total_amount']);
-        if (!empty($query['fromDatePurchase']) || !empty($query['toDatePurchase'])) {
-            if (!empty($query['fromDatePurchase'])) {
-                $totalPurchaseInMonth->where('created_at', ">=", $query['fromDatePurchase']);
-            }
-            if (!empty($query['toDatePurchase'])) {
-                $totalPurchaseInMonth->where('created_at', "<=", $query['toDatePurchase']);
-            }
-        } else {
-            $totalPurchaseInMonth->whereMonth('created_at', $currentMonth)
-                ->whereYear('created_at', $currentYear);
-        }
-        // Đếm tổng số đơn
-        $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
+        // $currentMonth = Carbon::now()->month;
+        // $currentYear = Carbon::now()->year;
+        // $totalPurchaseInMonth = PurchaseOrder::select(['id','created_at', 'total_amount']);
+        // if (!empty($query['fromDatePurchase']) || !empty($query['toDatePurchase'])) {
+        //     if (!empty($query['fromDatePurchase'])) {
+        //         $totalPurchaseInMonth->where('created_at', ">=", $query['fromDatePurchase']);
+        //     }
+        //     if (!empty($query['toDatePurchase'])) {
+        //         $totalPurchaseInMonth->where('created_at', "<=", $query['toDatePurchase']);
+        //     }
+        // } else {
+        //     $totalPurchaseInMonth->whereMonth('created_at', $currentMonth)
+        //         ->whereYear('created_at', $currentYear);
+        // }
+        // // Đếm tổng số đơn
+        // $countPurchaseInMonth = (clone $totalPurchaseInMonth)->count();
 
-        // Đếm theo từng trạng thái
-        $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('order_status', '0')->count();
-        $countPurchaseInMonthAccepted    = (clone $totalPurchaseInMonth)->where('order_status', '1')->count();
-        $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('order_status', '4')->count();
-        $countPurchaseInMonthImportPartial = (clone $totalPurchaseInMonth)->where('order_status', '2')->count();
-        $countPurchaseInMonthCompoleted = (clone $totalPurchaseInMonth)->where('order_status', '3')->count();
+        // // Đếm theo từng trạng thái
+        // $countPurchaseInMonthPending = (clone $totalPurchaseInMonth)->where('order_status', '0')->count();
+        // $countPurchaseInMonthAccepted    = (clone $totalPurchaseInMonth)->where('order_status', '1')->count();
+        // $countPurchaseInMonthClosed = (clone $totalPurchaseInMonth)->where('order_status', '4')->count();
+        // $countPurchaseInMonthImportPartial = (clone $totalPurchaseInMonth)->where('order_status', '2')->count();
+        // $countPurchaseInMonthCompoleted = (clone $totalPurchaseInMonth)->where('order_status', '3')->count();
 
-        $sumValueGoodReceiptInMonth = GoodReceipt::select(['purchase_order_id', 'total_amount'])
-        ->whereHas('purchaseOrder', function ($query) {
-            $query->whereIn('order_status', [2, 3]); // hoặc status bạn cần
-        })
-        ->whereIn('purchase_order_id', $totalPurchaseInMonth->pluck('id')->toArray())
-        ->get()
-        ->sum('total_amount');
+        // $sumValueGoodReceiptInMonth = GoodReceipt::select(['purchase_order_id', 'total_amount'])
+        // ->whereHas('purchaseOrder', function ($query) {
+        //     $query->whereIn('order_status', [2, 3]); // hoặc status bạn cần
+        // })
+        // ->whereIn('purchase_order_id', $totalPurchaseInMonth->pluck('id')->toArray())
+        // ->get()
+        // ->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         // dd($sevenDayAgo->startOfDay());
         $purchaseChangeInSevenDay = PurchaseOrder::select(DB::raw("Date(order_date) as date"),DB::raw('COUNT(*) as total_orders'))
@@ -75,29 +75,29 @@ class DashboardRepository extends BaseRepository
             ->get()->toArray();
 
         // lấy ra thông kê đơn xuất theo tháng đơn xuất
-        $totalSaleOrderInMonth = SaleOrder::select(['created_at', 'total_amount']);
-        if (!empty($query['fromDateSaleOrder']) || !empty($query['toDateSaleOrder'])) {
-            if (!empty($query['fromDateSaleOrder'])) {
-                $totalSaleOrderInMonth->where('created_at', ">=", $query['fromDateSaleOrder']);
-            }
-            if (!empty($query['toDateSaleOrder'])) {
-                $totalSaleOrderInMonth->where('created_at', "<=", $query['toDateSaleOrder']);
-            }
-        } else {
-            $totalSaleOrderInMonth->whereMonth('created_at', $currentMonth)
-                ->whereYear('created_at', $currentYear);
-        }
+        // $totalSaleOrderInMonth = SaleOrder::select(['created_at', 'total_amount']);
+        // if (!empty($query['fromDateSaleOrder']) || !empty($query['toDateSaleOrder'])) {
+        //     if (!empty($query['fromDateSaleOrder'])) {
+        //         $totalSaleOrderInMonth->where('created_at', ">=", $query['fromDateSaleOrder']);
+        //     }
+        //     if (!empty($query['toDateSaleOrder'])) {
+        //         $totalSaleOrderInMonth->where('created_at', "<=", $query['toDateSaleOrder']);
+        //     }
+        // } else {
+        //     $totalSaleOrderInMonth->whereMonth('created_at', $currentMonth)
+        //         ->whereYear('created_at', $currentYear);
+        // }
 
-        // Đếm tổng số đơn
-        $countSaleOrderInMonth = (clone $totalSaleOrderInMonth)->count();
+        // // Đếm tổng số đơn
+        // $countSaleOrderInMonth = (clone $totalSaleOrderInMonth)->count();
 
-        // Đếm theo từng trạng thái
-        $countSaleOrderInMonthPending = (clone $totalSaleOrderInMonth)->where('status', 'pending')->count();
-        $countSaleOrderInMonthShipped = (clone $totalSaleOrderInMonth)->where('status', 'shipped')->count();
-        $countSaleOrderInMonthClosed = (clone $totalSaleOrderInMonth)->where('status', 'closed')->count();
+        // // Đếm theo từng trạng thái
+        // $countSaleOrderInMonthPending = (clone $totalSaleOrderInMonth)->where('status', 'pending')->count();
+        // $countSaleOrderInMonthShipped = (clone $totalSaleOrderInMonth)->where('status', 'shipped')->count();
+        // $countSaleOrderInMonthClosed = (clone $totalSaleOrderInMonth)->where('status', 'closed')->count();
 
-        // Tổng giá trị
-        $sumValueSaleOrderInMonth = (clone $totalSaleOrderInMonth)->where('status', 'shipped')->sum('total_amount');
+        // // Tổng giá trị
+        // $sumValueSaleOrderInMonth = (clone $totalSaleOrderInMonth)->where('status', 'shipped')->sum('total_amount');
         // lấy ra thay các đơn hàng được tạo trong 7 ngày
         $saleOrderChangeInSevenDay = SaleOrder::select(DB::raw("Date(order_date) as date"), DB::raw('COUNT(*) as total_orders'))
             ->whereBetween('order_date', [$sevenDayAgo->startOfDay(), $current->endOfDay()])
@@ -112,21 +112,21 @@ class DashboardRepository extends BaseRepository
             'sum_product_inventory_value' => $this->sumProductInventoryValue,
             'product_is_out_of_stock' => $productIsOutOfStock,
             'statistical_purchases' => [
-                'count_purchase_in_month' => $countPurchaseInMonth,
-                'sum_value_good_receipt_in_month' => $this->formatNumberInt($sumValueGoodReceiptInMonth) . " ₫",
-                'count_purchase_in_month_pending' => $countPurchaseInMonthPending,
-                'count_purchase_in_month_accepted' => $countPurchaseInMonthAccepted,
-                'count_purchase_in_month_closed' => $countPurchaseInMonthClosed,
-                'count_purchase_in_month_import_partial' => $countPurchaseInMonthImportPartial,
-                'count_purchase_in_month_completed' => $countPurchaseInMonthCompoleted,
+                // 'count_purchase_in_month' => $countPurchaseInMonth,
+                // 'sum_value_good_receipt_in_month' => $this->formatNumberInt($sumValueGoodReceiptInMonth) . " ₫",
+                // 'count_purchase_in_month_pending' => $countPurchaseInMonthPending,
+                // 'count_purchase_in_month_accepted' => $countPurchaseInMonthAccepted,
+                // 'count_purchase_in_month_closed' => $countPurchaseInMonthClosed,
+                // 'count_purchase_in_month_import_partial' => $countPurchaseInMonthImportPartial,
+                // 'count_purchase_in_month_completed' => $countPurchaseInMonthCompoleted,
                 'purchase_change_in_seven_day' => $purchaseChangeInSevenDay,
             ],
             'statistical_sale_order' => [
-                'count_sale_order_in_month' => $countSaleOrderInMonth,
-                'count_sale_order_in_month_pending' => $countSaleOrderInMonthPending,
-                'count_sale_order_in_month_shipped' => $countSaleOrderInMonthShipped,
-                'count_sale_order_in_month_closed' => $countSaleOrderInMonthClosed,
-                'sum_value_sale_order_in_month' => $this->formatNumberInt($sumValueSaleOrderInMonth) . " ₫",
+                // 'count_sale_order_in_month' => $countSaleOrderInMonth,
+                // 'count_sale_order_in_month_pending' => $countSaleOrderInMonthPending,
+                // 'count_sale_order_in_month_shipped' => $countSaleOrderInMonthShipped,
+                // 'count_sale_order_in_month_closed' => $countSaleOrderInMonthClosed,
+                // 'sum_value_sale_order_in_month' => $this->formatNumberInt($sumValueSaleOrderInMonth) . " ₫",
                 'sale_order_change_in_seven_day' => $saleOrderChangeInSevenDay,
             ],
             'top_10_product_variants' => [
