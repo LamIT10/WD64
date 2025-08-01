@@ -500,7 +500,9 @@ class SaleOrdersRepository extends BaseRepository
             $saleOrder = $this->handleModel->find($orderId);
             $creditDiscount = $customer->rank ? $customer->rank->discount_percent : 0;
             $maxDebt = $saleOrder->total_amount * ($creditDiscount / 100);
-            $minPayAfter = $saleOrder->total_amount - $maxDebt;
+            $minPayTotal = $saleOrder->total_amount - $maxDebt;
+
+            $totalPaid = ($saleOrder->pay_before ?? 0) + $pay_after;
             $MaxMinTotalSpentRank = $this->rank->latest('min_total_spent')->first();
             $MinMinTotalSpentRank = $this->rank->oldest('min_total_spent')->first();
             $AllMinTotalSpentRanks = $this->rank->select('min_total_spent', 'id')->get();
@@ -513,8 +515,10 @@ class SaleOrdersRepository extends BaseRepository
             }
 
             $remainingAmount = $saleOrder->total_amount - ($saleOrder->pay_before ?? 0);
-            if ($pay_after < $minPayAfter) {
-                throw new \Exception("Bạn phải thanh toán tối thiểu " . number_format($minPayAfter, 0, ',', '.') . " VND. Hạn mức nợ tối đa của bạn là " . number_format($maxDebt, 0, ',', '.') . " VND.");
+            if ($totalPaid < $minPayTotal) {
+                throw new \Exception(
+                    "Bạn phải thanh toán tối thiểu " . number_format($minPayTotal, 0, ',', '.') . " VND. Hạn mức nợ tối đa của bạn là " . number_format($maxDebt, 0, ',', '.') . " VND."
+                );
             }
 
             if ($pay_after > $remainingAmount) {
