@@ -490,19 +490,6 @@
           </table>
         </div>
       </div> -->
-      <!-- Thống kê đơn theo giờ hôm nay -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-        <TodayOrderHourlyChart
-          title="Đơn nhập theo giờ (hôm nay)"
-          :data="data.purchase"
-          color="#3b82f6"
-        />
-        <TodayOrderHourlyChart
-          title="Đơn xuất theo giờ (hôm nay)"
-          :data="data.sale"
-          color="#10b981"
-        />
-      </div>
     </div>
   </AppLayout>
 </template>
@@ -517,7 +504,6 @@ import RevenueChart from './components/RevenueChart.vue';
 import { reactive } from 'vue';
 import InventoryByPaperChart from './components/InventoryByPaperChart.vue';
 import InventoryStatsCards from './components/InventoryStatsCards.vue';
-import TodayOrderHourlyChart from "./components/TodayOrderHourlyChart.vue";
 
 const { data } = defineProps({
   data: Object,

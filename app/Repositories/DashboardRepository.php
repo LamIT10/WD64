@@ -106,25 +106,6 @@ class DashboardRepository extends BaseRepository
             ->get()->toArray();
 
         
-        $todayPurchaseOrdersByHour = PurchaseOrder::select(
-            DB::raw("HOUR(order_date) as hour"),
-            DB::raw("COUNT(*) as total_orders")
-        )
-            ->whereDate('created_at', Carbon::today())
-            ->groupBy(DB::raw("HOUR(order_date)"))
-            ->orderBy('hour')
-            ->get()
-            ->toArray();
-
-        $todaySaleOrdersByHour = SaleOrder::select(
-            DB::raw("HOUR(order_date) as hour"),
-            DB::raw("COUNT(*) as total_orders")
-        )
-            ->whereDate('created_at', Carbon::today())
-            ->groupBy(DB::raw("HOUR(order_date)"))
-            ->orderBy('hour')
-            ->get()
-            ->toArray();
 
 
 
@@ -174,8 +155,6 @@ class DashboardRepository extends BaseRepository
             ],
             'low_stock_items' => $this->getLowStockItems(10),
 
-            'purchase' => $todayPurchaseOrdersByHour,
-            'sale' => $todaySaleOrdersByHour,
 
         ];
 
