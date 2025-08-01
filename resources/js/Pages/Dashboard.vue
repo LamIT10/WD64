@@ -279,7 +279,6 @@
             </div>
           </div>
         </div>
-
       </div> -->
       <div class="flex">
         <ChangePurchaseSevenDayAgo :purchaseChangeInSevenDay="data.statistical_purchases.purchase_change_in_seven_day"
@@ -403,7 +402,7 @@
       </div>
 
       <!-- Recent Activity -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <!-- <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-lg font-semibold text-gray-800">Các hoạt động gần đây</h3>
           <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Xem tất cả</button>
@@ -490,6 +489,19 @@
             </tbody>
           </table>
         </div>
+      </div> -->
+      <!-- Thống kê đơn theo giờ hôm nay -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+        <TodayOrderHourlyChart
+          title="Đơn nhập theo giờ (hôm nay)"
+          :data="data.purchase"
+          color="#3b82f6"
+        />
+        <TodayOrderHourlyChart
+          title="Đơn xuất theo giờ (hôm nay)"
+          :data="data.sale"
+          color="#10b981"
+        />
       </div>
     </div>
   </AppLayout>
@@ -505,6 +517,8 @@ import RevenueChart from './components/RevenueChart.vue';
 import { reactive } from 'vue';
 import InventoryByPaperChart from './components/InventoryByPaperChart.vue';
 import InventoryStatsCards from './components/InventoryStatsCards.vue';
+import TodayOrderHourlyChart from "./components/TodayOrderHourlyChart.vue";
+
 const { data } = defineProps({
   data: Object,
 });

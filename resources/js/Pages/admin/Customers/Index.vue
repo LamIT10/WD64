@@ -99,19 +99,6 @@
                                 <th v-if="visibleColumns.includes('email')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Email
-<<<<<<< HEAD
-                                </th>
-                                <th v-if="visibleColumns.includes('remaining_amount')"
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                    Công nợ
-                                </th>
-                                <th v-if="visibleColumns.includes('rank')"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                    Hạng
-                                </th>
-                                <th v-if="visibleColumns.includes('status')"
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-=======
                                 </th>                    
                                 <th v-if="visibleColumns.includes('rank')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Hạng
@@ -120,7 +107,6 @@
                                     Tổng tiền nợ
                                 </th>
                                 <th v-if="visibleColumns.includes('status')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
->>>>>>> dd83a101a89e7ff4c67e784fb7a57cf5add096a7
                                     Trạng thái
                                 </th>
                                 <th

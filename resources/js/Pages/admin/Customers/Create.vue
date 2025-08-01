@@ -67,7 +67,7 @@
               </div>
 
               <!-- Row 3: Password + Confirm Password -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
                   <input v-model="form.password" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập mật khẩu..." />
@@ -78,7 +78,7 @@
                   <input v-model="form.password_confirmation" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Nhập lại mật khẩu..." />
                   <p v-if="form.errors.password && form.errors.password.toLowerCase().includes('khớp')" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</p>
                 </div>
-              </div>
+              </div> -->
 
               <!-- Additional Information Section -->
               <div v-if="showAdditionalInfo">
