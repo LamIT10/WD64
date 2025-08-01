@@ -276,7 +276,6 @@
                 <div
                     v-if="isModalOpen"
                     class="fixed inset-0 overflow-y-auto z-50"
-                    @click="clearErrorMessage"
                 >
                     <div
                         class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
@@ -424,6 +423,24 @@
                                                                 )
                                                             }}
                                                         </span>
+                                                    </td>
+                                                </tr>
+                                                <tr
+                                                    v-if="
+                                                        selectedOrder.status ===
+                                                            'cancelled' &&
+                                                        selectedOrder.note
+                                                    "
+                                                >
+                                                    <td
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
+                                                    >
+                                                        📝 Lý do từ chối
+                                                    </td>
+                                                    <td
+                                                        class="px-4 py-2 text-red-700"
+                                                    >
+                                                        {{ selectedOrder.note }}
                                                     </td>
                                                 </tr>
                                                 <!-- Input pay_before khi trạng thái là pending -->
@@ -674,7 +691,8 @@
                             <div
                                 class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                             >
-                                <button v-can="'admin.sales-order.approve'"
+                                <button
+                                    v-can="'admin.sales-order.approve'"
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="approveOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
@@ -683,7 +701,8 @@
                                     <i class="fa-regular fa-circle-check"></i>
                                     Duyệt đơn
                                 </button>
-                                <button v-can="'admin.sales-order.reject'"
+                                <button
+                                    v-can="'admin.sales-order.reject'"
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="openRejectModal(selectedOrder.id)"
                                     class="w-full shadow-xl flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 sm:ml-3 sm:w-auto sm:text-sm"
@@ -693,7 +712,7 @@
                                 </button>
                                 <!-- Modal nhập lý do từ chối -->
                                 <div
-                                    v-if="showRejectModal" 
+                                    v-if="showRejectModal"
                                     class="fixed inset-0 overflow-y-auto z-50"
                                 >
                                     <div
@@ -782,11 +801,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button v-can="'admin.sales-order.complete'"
+                                <button
+                                    v-can="'admin.sales-order.complete'"
                                     v-if="selectedOrder.status === 'shipped'"
                                     @click="completeOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                    :disabled="errorMessage || complete.isDirty"
+                                    :disabled="complete.processing"
                                 >
                                     <i class="fa-solid fa-check-double"></i>
                                     Xác nhận hoàn thành
@@ -811,21 +831,6 @@
                                 >
                                     Đóng
                                 </button>
-                                <Waiting
-                                    v-if="
-                                        ['shipped'].includes(
-                                            selectedOrder.status
-                                        )
-                                    "
-                                    route-name="admin.shipping.create"
-                                    :route-params="{ id: selectedOrder.id }"
-                                    :color="'mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm'"
-                                >
-                                    <i
-                                        class="fa-solid fa-truck text-xl mr-1"
-                                    ></i>
-                                    Tạo phiếu giao hàng
-                                </Waiting>
                             </div>
                         </div>
                     </div>
@@ -1038,11 +1043,6 @@ function validatePayAfter() {
     }
     errorMessage.value = "";
 }
-function clearErrorMessage() {
-    if (errorMessage.value) {
-        errorMessage.value = "";
-    }
-}
 
 function changePage(page) {
     if (page < 1 || page > listOrders.meta.last_page) return;
@@ -1160,6 +1160,7 @@ const completeOrder = (id) => {
         id,
         pay_after: pay_after.value,
     });
+    errorMessage.value = "";
     if (
         isNaN(pay_after.value) ||
         pay_after.value === null ||
@@ -1202,9 +1203,18 @@ const completeOrder = (id) => {
             emitter.emit("notification-updated");
         },
         onError: (errors) => {
-            console.error("Error completing order:", errors);
+            console.error("Error completing order details:", {
+                errors,
+                errorType: typeof errors,
+                errorKeys: Object.keys(errors || {}),
+                errorString: JSON.stringify(errors),
+            });
+
             errorMessage.value =
-                errors.pay_after || "Lỗi khi xác nhận hoàn thành đơn hàng";
+                errors?.pay_after ||
+                errors?.error ||
+                errors?.message ||
+                "Lỗi khi xác nhận hoàn thành đơn hàng";
         },
         onFinish: () => {
             console.log("Complete request finished");
