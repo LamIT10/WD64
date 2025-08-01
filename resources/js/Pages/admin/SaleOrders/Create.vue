@@ -448,7 +448,7 @@
                             <div class="flex justify-between">
                                 <span>Tạm tính</span>
                                 <div class="flex items-center space-x-4">
-                                    <span>{{ formatPrice(totalAmount) }}</span>
+                                    <span>{{ formatPrice(subtotal) }}</span>
                                 </div>
                             </div>
                             <div class="flex justify-between">
@@ -460,10 +460,7 @@
                             >
                                 <span>Tổng cộng</span>
                                 <span class="text-blue-600">{{
-                                    formatPrice(
-                                        totalAmount *
-                                            (1 - customer_discount / 100)
-                                    )
+                                    formatPrice(totalAmount)
                                 }}</span>
                             </div>
                         </div>
@@ -896,9 +893,7 @@
                                 </label>
                             </div>
                             <span class="text-2xl font-bold">{{
-                                formatPrice(
-                                    totalAmount * (1 - customer_discount / 100)
-                                )
+                                formatPrice(totalAmount)
                             }}</span>
                         </div>
                     </div>
@@ -1071,17 +1066,20 @@ const totalQuantity = computed(() =>
     )
 );
 
-const totalAmount = computed(() => {
-    const subtotal = localProducts.value.reduce(
+const subtotal = computed(() =>
+    localProducts.value.reduce(
         (sum, product) =>
             sum +
             (Number(product.price) || 0) *
                 (product.quantity || 1) *
                 (product.conversionFactor || 1),
         0
-    );
-    return subtotal * (1 - customer_discount.value / 100);
-});
+    )
+);
+
+const totalAmount = computed(
+    () => subtotal.value * (1 - customer_discount.value / 100)
+);
 
 const hasQuantityError = computed(() =>
     localProducts.value.some((product) => product.quantityError)
