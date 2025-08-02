@@ -40,7 +40,8 @@ class ProductRepository extends BaseRepository
                     'attributes',
                     'inventory',
                     'inventoryLocations.zone',
-                    'supplierVariants'
+                    'supplierVariants',
+                    'supplierVariants.supplier'
                 ]);
             },
             'unitConversions.fromUnit',

@@ -3,7 +3,7 @@
         <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay">
 
             <Transition name="modal-content" appear>
-                <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-6xl max-h-[90vh] flex flex-col">
+                <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-7xl max-h-[90vh] flex flex-col">
                     <!-- Modal Header -->
                     <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-indigo-50">
                         <div>
@@ -54,7 +54,7 @@
                                                 <div class="space-y-1">
                                                     <div v-for="supplier in variant.supplier_variants"
                                                         :key="supplier.id" class="text-sm">
-                                                        NCC {{ supplier.supplier_id }}
+                                                        {{ supplier.supplier.name }}
                                                     </div>
                                                 </div>
                                             </td>
