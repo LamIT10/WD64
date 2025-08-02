@@ -124,7 +124,7 @@
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Giá bán</p>
                         <p class="mt-1 text-lg font-bold text-indigo-600">
-                            {{ product.product_variants[0]?.sale_price?.toLocaleString('vi-VN') }} ₫
+                            {{ formatCurrency(product.product_variants[0]?.sale_price) }}
                         </p>
                     </div>
                     <div>
@@ -230,6 +230,11 @@ const totalQuantity = computed(() =>
 const printBarcode = () => {
     const url = route('admin.products.print_barcode', { product_id: props.product.id });
     window.open(url, '_blank');
+};
+
+const formatCurrency = (value) => {
+    if (!value) return '0 ₫';
+    return Number(value).toLocaleString('vi-VN') + ' ₫';
 };
 </script>
 
