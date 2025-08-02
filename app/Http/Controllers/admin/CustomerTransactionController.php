@@ -21,12 +21,11 @@ class CustomerTransactionController extends Controller
     }
 
 
-    
+
     public function show($orderId)
     {
         $detail = $this->customerTransactionRepo->getDebtDetailByOrderId($orderId);
         $customerId = SaleOrder::findOrFail($orderId)->customer_id;
-        // dd($detail,  $customerId);
         return Inertia::render('admin/Customers/Transaction/ShowTransaction', [
             'debt' => $detail,
             'customerId' => $customerId,
@@ -41,8 +40,12 @@ class CustomerTransactionController extends Controller
             'description' => ['nullable', 'string', 'max:250'],
         ]);
 
-        $customer = $this->customerTransactionRepo->updateTransaction($orderId, $validated);
-        return redirect()->back()->with('success', 'Cập nhật thanh toán thành công');
+        try {
+            $this->customerTransactionRepo->updateTransaction($orderId, $validated);
+            return redirect()->back()->with('success', 'Cập nhật thanh toán thành công');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
     public function updateDueDate(Request $request, $orderId)
     {
@@ -50,14 +53,16 @@ class CustomerTransactionController extends Controller
             'credit_due_date' => ['required', 'date'],
         ]);
 
-        $customer = $this->customerTransactionRepo->updateDueDate($orderId, $request->credit_due_date);
-
-        return redirect()->back()->with('success', 'Cập nhật hạn công nợ thành công');
+        try {
+            $this->customerTransactionRepo->updateDueDate($orderId, $request->credit_due_date);
+            return redirect()->back()->with('success', 'Cập nhật hạn công nợ thành công');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
     public function debtOrdersByCustomer($customerId)
     {
         $orders = $this->customerTransactionRepo->getDebtSummaryByOrder([], 1000, $customerId);
-
         $customer = Customer::findOrFail($customerId);
 
         return Inertia::render('admin/Customers/Transaction/Index', [

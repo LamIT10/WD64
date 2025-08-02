@@ -7,9 +7,7 @@
         class="fixed inset-y-0 left-0 w-50 md:w-56 bg-white shadow border-r border-gray-200 sidebar lg:translate-x-0 sidebar-hidden">
         <!-- Logo & Close Button -->
         <div class="flex items-center justify-center gap-2 h-16 border-b border-gray-200 bg-white px-3">
-            <div
-                class="w-14 h-14 flex items-center justify-center"
-            >
+            <div class="w-14 h-14 flex items-center justify-center">
                 <img :src="`/images/logo.png`" alt="logo">
             </div>
             <div>
@@ -35,7 +33,13 @@
             </div>
 
             <!-- Warehouse Operations -->
-            <div class="mb-1">
+            <div class="mb-1" v-if="
+                hasPermission('admin.purchase.index') ||
+                hasPermission('admin.sales-order.index') ||
+                hasPermission('admin.inventory.index') ||
+                hasPermission('admin.inventory-audit.index') ||
+                hasPermission('admin.receiving.index')
+            ">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('warehouse-menu')">
@@ -50,7 +54,7 @@
 
                 <div id="warehouse-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <div
+                    <div v-can="'admin.purchase.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
@@ -58,7 +62,7 @@
                         </div>
                         <Link :href="route('admin.purchases.index')" class="text-xs">Đặt hàng nhập</Link>
                     </div>
-                    <div
+                    <div v-can="'admin.receiving.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
@@ -66,17 +70,15 @@
                         </div>
                         <Link :href="route('admin.receiving.index')" class="text-xs">Phiếu nhập kho</Link>
                     </div>
-                    <Link
-                        :href="route('admin.sale-orders.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
-                            <i class="fas fa-arrow-up text-xs"></i>
-                        </div>
-                        <span class="text-xs">Xuất kho</span>
+                    <Link v-can="'admin.sales-order.index'" :href="route('admin.sale-orders.index')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-arrow-up text-xs"></i>
+                    </div>
+                    <span class="text-xs">Xuất kho</span>
                     </Link>
-                    <a href="/admin/inventory-audit"
+                    <a href="/admin/inventory-audit" v-can="'admin.inventory-audit.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                         <div
                             class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
@@ -84,7 +86,7 @@
                         </div>
                         <span class="text-xs">Kiểm kho</span>
                     </a>
-                    <Link :href="route('admin.inventory.index')"
+                    <Link :href="route('admin.inventory.index')" v-can="'admin.inventory.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
@@ -95,7 +97,7 @@
                 </div>
             </div>
             <!-- Report Management -->
-            <div class="mb-1">
+            <div class="mb-1" v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('report-menu')">
@@ -108,15 +110,23 @@
                         id="report-icon"></i>
                 </button>
 
-                <div id="report-menu"
+                <div id="report-menu" 
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <Link :href="route('admin.reports.index')"
+                    <Link :href="route('admin.reports.index')" v-can="'admin.report.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                         <i class="fas fa-boxes text-xs"></i>
                     </div>
                     <span class="text-xs">Báo cáo nhập kho</span>
+                    </Link>
+                    <Link :href="route('admin.reports.export')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                    <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                    </div>
+                    <span class="text-xs">Báo cáo xuất kho</span>
                     </Link>
                     <Link
                         :href="route('admin.reports.suggest')"
@@ -129,10 +139,21 @@
                         </div>
                         <span class="text-xs">Gợi ý nhập hàng</span></Link
                     >
+                    <Link
+                        :href="route('admin.reports.revenue')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
+                    >
+                        <div
+                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
+                        >
+                            <i class="fa-solid fa-dollar-sign text-xs"></i>
+                        </div>
+                        <span class="text-xs">Doanh thu - Lợi nhuận</span></Link
+                    >
                 </div>
             </div>
             <!-- User Management -->
-            <div class="mb-1">
+            <div class="mb-1" v-can="'admin.user.index'">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('user-menu')">
@@ -158,7 +179,13 @@
                 </div>
             </div>
             <!-- Product Management -->
-            <div class="mb-1">
+            <div class="mb-1" v-if="
+                hasPermission('admin.product.index') ||
+                hasPermission('admin.attribute.index') ||
+                hasPermission('admin.unit.index') ||
+                hasPermission('admin.warehouse-zone.index') ||
+                hasPermission('admin.category.index')
+            ">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('product-menu')">
@@ -173,7 +200,7 @@
 
                 <div id="product-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <Link :href="route('admin.products.index')"
+                    <Link :href="route('admin.products.index')" v-can="'admin.product.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
@@ -181,54 +208,43 @@
                     </div>
                     <span class="text-xs">Danh sách sản phẩm</span>
                     </Link>
-                    <Link
-                        :href="route('admin.attributes.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
-                            <i class="fas fa-layer-group text-xs"></i>
-                        </div>
-                        <span class="text-xs">Thuộc tính sản phẩm</span>
+                    <Link :href="route('admin.attributes.index')" v-can="'admin.attribute.index'"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-layer-group text-xs"></i>
+                    </div>
+                    <span class="text-xs">Thuộc tính sản phẩm</span>
                     </Link>
-                    <Link
-                        :href="route('admin.units.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
-                        >
-                            <i class="fas fa-ruler text-xs"></i>
-                        </div>
-                        <span class="text-xs">Đơn vị sản phẩm</span>
+                    <Link :href="route('admin.units.index')" v-can="'admin.unit.index'"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-ruler text-xs"></i>
+                    </div>
+                    <span class="text-xs">Đơn vị sản phẩm</span>
                     </Link>
-                    <Link
-                        :href="route('admin.warehouse-zones.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
-                        >
-                            <i class="fas fa-map-marker-alt text-xs"></i>
-                        </div>
-                        <span class="text-xs">Vị trí kho</span>
+                    <Link :href="route('admin.warehouse-zones.index')" v-can="'admin.warehouse-zone.index'"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-map-marker-alt text-xs"></i>
+                    </div>
+                    <span class="text-xs">Vị trí kho</span>
                     </Link>
-                    <Link
-                        :href="route('admin.categories.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
-                        >
-                            <i class="fas fa-tags text-xs"></i>
-                        </div>
-                        <span class="text-xs">Danh mục</span>
+                    <Link :href="route('admin.categories.index')" v-can="'admin.category.index'"
+                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
+                        <i class="fas fa-tags text-xs"></i>
+                    </div>
+                    <span class="text-xs">Danh mục</span>
                     </Link>
                 </div>
             </div>
 
             <!-- Suppliers -->
-            <div class="mb-2">
+            <div class="mb-2" v-can="'admin.supplier.index'">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     onclick="toggleDropdown('supplier-menu')">
@@ -254,7 +270,7 @@
             </div>
 
             <!-- Customers -->
-            <div class="mb-1" v-can="'admin.customers.index'">
+            <div class="mb-1" v-if="hasPermission('admin.customers.index') || hasPermission('admin.rank.index')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('customer-menu')">
@@ -269,7 +285,7 @@
 
                 <div id="customer-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
-                    <Link :href="route('admin.customers.index')"
+                    <Link :href="route('admin.customers.index')" v-can="'admin.customers.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
@@ -277,7 +293,7 @@
                     </div>
                     <span class="text-xs">Quản lý khách hàng</span>
                     </Link>
-                    <Link :href="route('admin.ranks.index')"
+                    <Link :href="route('admin.ranks.index')" v-can="'admin.rank.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors">
@@ -369,6 +385,11 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const hasPermission = (permission) => {
+    return authStore.hasPermission(permission);
+};
 function toggleDropdown(menuId) {
     const menu = document.getElementById(menuId);
     const icon = document.getElementById(menuId.replace("-menu", "-icon"));

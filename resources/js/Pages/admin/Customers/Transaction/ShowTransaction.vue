@@ -6,7 +6,7 @@
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl font-bold text-indigo-900 mb-2">
-                            Công nợ của đơn hàng : DH-{{ debt.id.toString().padStart(4, '0') }}
+                            Công nợ của đơn hàng : {{ debt.order_code }}
                         </h1>
 
                     </div>
@@ -99,7 +99,7 @@
             {{ item.type === 'adjustment' ? 'Điều chỉnh hạn' : 'Thanh toán' }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            {{ formatDateTime(item.transaction_date ?? item.created_at) }}
+            {{ formatDate(item.transaction_date ?? item.created_at) }}
           </td>
           <td class="px-6 py-4 whitespace-nowrap text-gray-900">
             <span v-if="item.type === 'adjustment'">
@@ -187,14 +187,8 @@ const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('vi-VN');
 };
 
-const formatDateTime = (dateStr) => {
-    if (!dateStr) return '-';
-    const d = new Date(dateStr);
-    return d.toLocaleString('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
-};
+
+
 
 const formatNumber = (rawNumber) => {
     try {

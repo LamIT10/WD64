@@ -7,7 +7,7 @@
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Danh sách đơn hàng nhập
                 </h5>
-                <Waiting
+                <Waiting v-can="'admin.purchase.create'"
                     route-name="admin.purchases.create"
                     :route-params="{}"
                     class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -650,26 +650,26 @@
                         <div
                             class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                         >
-                            <button
+                            <button v-can="'admin.purchase.approve'"
                                 v-if="selectedOrder.order_status == 0"
                                 @click="approveOrder(selectedOrder.id)"
                                 style="height: max-content"
-                                class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
                                 Duyệt đơn
                             </button>
-                            <button
+                            <button v-can="'admin.purchase.edit'"
                                 v-if="selectedOrder.order_status == 0"
                                 style="height: max-content"
                                 @click="editOrder(selectedOrder.id)"
-                                class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                             >
                                 <i class="fa-regular fa-circle-check"></i>
                                 Chỉnh sửa
                             </button>
                             <!-- Nút Từ chối mở box lý do -->
-                            <button
+                            <button v-can="'admin.purchase.cancel'"
                                 v-if="
                                     selectedOrder.order_status == 0 &&
                                     !isRejecting
@@ -716,7 +716,7 @@
                                 </div>
                             </div>
 
-                            <Waiting
+                            <Waiting v-can="'admin.receiving.create'"
                                 v-if="
                                     selectedOrder.order_status == 1 ||
                                     selectedOrder.order_status == 2

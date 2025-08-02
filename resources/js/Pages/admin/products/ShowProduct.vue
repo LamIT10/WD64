@@ -39,7 +39,7 @@
                             </div>
                             <div>
                                 <p class="text-gray-500 font-medium">Tồn kho tối thiểu</p>
-                                <p class="font-semibold mt-1">{{ product.min_stock }}</p>
+                                <p class="font-semibold mt-1">{{ formatCurrency(product.min_stock) }}</p>
                             </div>
                             <div>
                                 <p class="text-gray-500 font-medium">Đơn vị cơ bản</p>
@@ -83,7 +83,7 @@
                         <h2 class="text-md font-semibold text-indigo-700 mb-4 border-b pb-2">Tình trạng tồn kho</h2>
                         <p class="text-sm text-gray-500">Tổng số lượng</p>
                         <p class="text-2xl font-bold text-indigo-600 mt-1">
-                            {{ totalQuantity }} {{ product.default_unit?.symbol || '' }}
+                            {{ formatCurrency(totalQuantity) }} {{ product.default_unit?.symbol || '' }}
                         </p>
                         <p class="mt-3 text-sm text-green-600 font-medium">
                             <i class="fas fa-check-circle mr-1"></i> Còn hàng
@@ -124,7 +124,7 @@
                     <div>
                         <p class="text-sm text-gray-500 font-medium">Giá bán</p>
                         <p class="mt-1 text-lg font-bold text-indigo-600">
-                            {{ product.product_variants[0]?.sale_price?.toLocaleString('vi-VN') }} ₫
+                            {{ formatCurrency(product.product_variants[0]?.sale_price) }}đ
                         </p>
                     </div>
                     <div>
@@ -190,8 +190,8 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm font-medium"
-                                    :class="{ 'text-green-600': variant.inventory?.[0]?.quantity_on_hand > 0, 'text-red-600': !variant.inventory?.[0]?.quantity_on_hand }">
-                                    {{ variant.inventory?.[0]?.quantity_on_hand ?? 0 }}
+                                    :class="{ 'text-green-600': variant.inventory?.[0]?.quantity_on_hand > 0, 'text-black-500': !variant.inventory?.[0]?.quantity_on_hand }">
+                                    {{ formatCurrency(variant.inventory.quantity_on_hand) ?? 0 }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-500">
                                     <span v-if="variant.inventory_locations?.length">
@@ -230,6 +230,11 @@ const totalQuantity = computed(() =>
 const printBarcode = () => {
     const url = route('admin.products.print_barcode', { product_id: props.product.id });
     window.open(url, '_blank');
+};
+
+const formatCurrency = (value) => {
+    if (!value) return '0 ₫';
+    return Number(value).toLocaleString('vi-VN');
 };
 </script>
 
