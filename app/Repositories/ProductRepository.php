@@ -88,7 +88,7 @@ class ProductRepository extends BaseRepository
                 }
             });
         }
-        if(isset($filters['get_count']) && $filters['get_count'] == true) {
+        if (isset($filters['get_count']) && $filters['get_count'] == true) {
             return $query->count();
         }
         return $query->paginate($perPage)->withQueryString();
@@ -250,6 +250,7 @@ class ProductRepository extends BaseRepository
                 $simpleVariant = $product->productVariants()->create([
                     'barcode' => $data['simple_barcode'] ?? null,
                     'sale_price' => $data['simple_sale_price'] ?? 0,
+                    'code' => $data['code'] ?? null,
                 ]);
 
                 $simpleVariant->inventory()->create([

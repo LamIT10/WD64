@@ -716,15 +716,16 @@ onMounted(() => {
 
 const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
+    const totalImages = form.images.length + existingImages.value.length;
 
     if (!files || files.length === 0) return;
 
-    for (const file of files) {
-        if (form.images.length + existingImages.value.length >= maxImages) {
-            form.errors.images = `Chỉ cho phép tối đa ${maxImages} ảnh.`;
-            break;
-        }
+    if (totalImages + files.length > maxImages) {
+        form.errors.images = `Chỉ được phép chọn tối đa ${maxImages} ảnh.`;
+        return;
+    }
 
+    for (const file of files) {
         if (!file.type.match('image.*')) {
             form.errors.images = 'Chỉ chấp nhận file ảnh.';
             continue;
