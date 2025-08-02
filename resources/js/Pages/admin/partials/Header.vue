@@ -247,9 +247,33 @@ const getNotificationIcon = (type) => {
             return "fas fa-check-double text-purple-500";
         case "order_pending":
             return "fas fa-clock text-yellow-500";
+        // ✅ REAL-TIME: Add more notification types
+        case "info":
+            return "fas fa-info-circle text-blue-500";
+        case "success":
+            return "fas fa-check-circle text-green-500";
+        case "warning":
+            return "fas fa-exclamation-triangle text-yellow-500";
+        case "error":
+            return "fas fa-times-circle text-red-500";
         default:
             return "fas fa-bell text-gray-500";
     }
+};
+
+// ✅ REAL-TIME: Helper function to format notification time
+const formatNotificationTime = (date) => {
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return 'Vừa xong';
+    if (minutes < 60) return `${minutes} phút trước`;
+    if (hours < 24) return `${hours} giờ trước`;
+    if (days < 7) return `${days} ngày trước`;
+    return date.toLocaleDateString('vi-VN');
 };
 
 // Click outside handler
@@ -268,10 +292,57 @@ const handleClickOutside = (event) => {
     }
 };
 let interval = null;
+let notificationChannel = null;
+
 // Lifecycle hooks
 onMounted(() => {
     fetchNotifications();
-    interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s
+    
+    // ✅ REAL-TIME: Replace polling with WebSocket
+    // interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s - DISABLED
+    
+    // ✅ REAL-TIME: Setup WebSocket notifications
+    if (window.Echo) {
+        console.log('🔔 Setting up real-time notifications in Header...');
+        
+        // Subscribe to user-specific notifications (assuming user ID = 1 for now)
+        // TODO: Replace with actual authenticated user ID
+        const currentUserId = 1; // Get from auth context
+        
+        notificationChannel = window.Echo.channel(`notifications.user.${currentUserId}`);
+        notificationChannel.listen('NotificationCreated', (e) => {
+            console.log('🔔 Real-time notification received in Header:', e);
+            
+            // Add new notification to the beginning of the list
+            const newNotification = {
+                id: e.notification.id,
+                type: e.notification.type,
+                title: e.notification.title,
+                message: e.notification.message,
+                data: e.notification.data,
+                isRead: false,
+                time: formatNotificationTime(new Date(e.notification.created_at))
+            };
+            
+            notifications.value.unshift(newNotification);
+            unreadCount.value++;
+            
+            // Show notification dropdown briefly
+            showNotifications.value = true;
+            setTimeout(() => {
+                showNotifications.value = false;
+            }, 3000);
+            
+            // Emit event for other components
+            emitter.emit("notification-updated");
+        });
+        
+        console.log(`🔔 Subscribed to notifications.user.${currentUserId}`);
+    } else {
+        console.warn('⚠️ Echo not available, falling back to polling');
+        interval = setInterval(fetchNotifications, 60000);
+    }
+    
     emitter.on("notification-updated", () => {
         console.log("Received notification-updated event");
         fetchNotifications();
@@ -281,7 +352,14 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    clearInterval(interval);
+    if (interval) clearInterval(interval);
+    
+    // ✅ REAL-TIME: Cleanup WebSocket subscription
+    if (notificationChannel) {
+        notificationChannel.stopListening('NotificationCreated');
+        console.log('🔌 Unsubscribed from notification channel');
+    }
+    
     document.removeEventListener("click", handleClickOutside);
     emitter.off("notification-updated");
 });
