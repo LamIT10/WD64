@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\NotificationCreated;
 use App\Models\Customer;
 use App\Models\CustomerTransaction;
 use App\Models\Inventory;
@@ -13,6 +14,7 @@ use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\Unit;
 use App\Services\NotificationService;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -330,12 +332,14 @@ class SaleOrdersRepository extends BaseRepository
             }
 
             DB::commit();
+            
             app(NotificationService::class)->create(
                 'order_created',
                 'Đơn hàng mới',
                 "Đơn hàng #{$saleOrder->id} đã được tạo thành công.",
                 ['order_id' => $saleOrder->id]
             );
+            
             return $saleOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -400,12 +404,30 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
+            
+            // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_rejected',
                 'Đơn hàng bị từ chối',
                 "Đơn hàng #{$orderId} đã bị từ chối. Lý do: {$rejectReason}",
                 ['order_id' => $orderId]
             );
+            
+            // ✅ NEW: Real-time notification broadcast
+            event(new NotificationCreated([
+                'user_id' => 1, // TODO: Replace with actual user ID
+                'type' => 'order_rejected',
+                'title' => 'Đơn hàng bị từ chối',
+                'message' => "Đơn hàng #{$orderId} đã bị từ chối. Lý do: {$rejectReason}",
+                'data' => [
+                    'order_id' => $orderId,
+                    'reject_reason' => $rejectReason,
+                    'action_url' => "/admin/sale-orders"
+                ],
+                'is_read' => false,
+                'created_at' => now()->toISOString(),
+            ]));
+            
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -473,12 +495,31 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
+            
+            // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_approved',
                 'Đơn hàng đã được duyệt',
                 "Đơn hàng #{$saleOrder->id} đã được duyệt thành công.",
                 ['order_id' => $saleOrder->id]
             );
+            
+            // ✅ NEW: Real-time notification broadcast
+            event(new NotificationCreated([
+                'user_id' => 1, // TODO: Replace with actual user ID
+                'type' => 'order_approved',
+                'title' => 'Đơn hàng đã được duyệt',
+                'message' => "Đơn hàng #{$saleOrder->code} đã được duyệt và chuyển sang trạng thái shipped",
+                'data' => [
+                    'order_id' => $saleOrder->id,
+                    'order_code' => $saleOrder->code,
+                    'pay_before' => $pay_before,
+                    'action_url' => "/admin/sale-orders?sale_order_id={$saleOrder->id}"
+                ],
+                'is_read' => false,
+                'created_at' => now()->toISOString(),
+            ]));
+            
             return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -572,12 +613,32 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
 
             DB::commit();
+            
+            // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_completed',
                 'Đơn hàng đã hoàn thành',
                 "Đơn hàng #{$saleOrder->id} đã được xác nhận hoàn thành.",
                 ['order_id' => $saleOrder->id]
             );
+            
+            // ✅ NEW: Real-time notification broadcast
+            event(new NotificationCreated([
+                'user_id' => 1, // TODO: Replace with actual user ID
+                'type' => 'order_completed',
+                'title' => 'Đơn hàng đã hoàn thành',
+                'message' => "Đơn hàng #{$saleOrder->code} đã được xác nhận hoàn thành với số tiền thanh toán sau: " . number_format($pay_after) . " VNĐ",
+                'data' => [
+                    'order_id' => $saleOrder->id,
+                    'order_code' => $saleOrder->code,
+                    'pay_after' => $pay_after,
+                    'total_amount' => $saleOrder->total_amount,
+                    'action_url' => "/admin/sale-orders?sale_order_id={$saleOrder->id}"
+                ],
+                'is_read' => false,
+                'created_at' => now()->toISOString(),
+            ]));
+            
             return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
