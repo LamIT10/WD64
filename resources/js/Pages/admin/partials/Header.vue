@@ -364,6 +364,73 @@ onUnmounted(() => {
     emitter.off("notification-updated");
 });
 
+// --- REALTIME: Subscribe notification channel giống form Index.vue ---
+const connected = ref(false);
+const addEvent = (msg) => {
+    console.log('[Header] Event:', msg);
+};
+
+onMounted(() => {
+    if (window.Echo) {
+        console.log('🔧 Header.vue initializing Echo...');
+        // Subscribe to notification channel
+        const channel = window.Echo.channel('notifications.all');
+        console.log('📢 Header.vue: Subscribed to notifications.all channel');
+
+        // Add both raw and Echo listeners for debugging
+        if (channel.pusher) {
+            channel.pusher.bind('NotificationCreated', function(data) {
+                console.log('🔥 Header RAW Pusher Event:', data);
+                addEvent(`📨 RAW: ${JSON.stringify(data)}`);
+            });
+        }
+        channel.listen('.NotificationCreated', (e) => {
+            console.log('🎯 Header Echo Event:', e);
+            addEvent(`📨 ECHO: ${JSON.stringify(e)}`);
+            // Khi nhận realtime, delay 300ms rồi fetchNotifications để tránh race condition
+            setTimeout(async () => {
+                console.log('[Header] Fetching notifications after realtime...');
+                await fetchNotifications();
+                console.log('[Header] Notifications after realtime:', notifications.value);
+            }, 300);
+            // Có thể show dropdown nếu muốn
+            showNotifications.value = true;
+            setTimeout(() => {
+                showNotifications.value = false;
+            }, 3000);
+            // Emit event cho các component khác nếu cần
+            emitter.emit("notification-updated");
+        });
+
+        // Monitor connection status
+        if (window.Echo.connector && window.Echo.connector.pusher) {
+            const pusher = window.Echo.connector.pusher;
+            pusher.connection.bind('connected', () => {
+                connected.value = true;
+                addEvent('✅ Connected to Reverb server');
+            });
+            pusher.connection.bind('disconnected', () => {
+                connected.value = false;
+                addEvent('❌ Disconnected from Reverb server');
+            });
+            pusher.connection.bind('error', (error) => {
+                connected.value = false;
+                addEvent(`🔥 Connection error: ${error.error || error}`);
+            });
+            connected.value = pusher.connection.state === 'connected';
+        }
+    } else {
+        console.error('Echo is not initialized');
+        addEvent('❌ Error: Echo is not initialized');
+    }
+});
+
+onUnmounted(() => {
+    if (window.Echo) {
+        window.Echo.leaveChannel('notifications.all');
+    }
+});
+
 const showDropdown = ref(false);
 </script>
 

@@ -27,8 +27,6 @@ class NotificationEvent implements ShouldBroadcastNow
             'title' => $notificationData['title'],
             'message' => $notificationData['message'],
             'data' => $notificationData['data'] ?? null,
-            'is_read' => $notificationData['is_read'] ?? false,
-            'created_at' => $notificationData['created_at'] ?? now()->toISOString(),
         ];
         
         Log::info('NotificationEvent created for user: ' . $notificationData['user_id']);

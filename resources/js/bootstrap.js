@@ -29,21 +29,21 @@ console.log('VITE_REVERB_PORT:', import.meta.env.VITE_REVERB_PORT);
 console.log('VITE_REVERB_SECURE:', import.meta.env.VITE_REVERB_SECURE);
 
 // Debug kết nối Pusher
-window.Echo.connector.pusher.connection.bind('state_change', function(states) {
-    console.log('🔄 Pusher connection state changed:', states.previous, '→', states.current);
-});
+// window.Echo.connector.pusher.connection.bind('state_change', function(states) {
+//     console.log('🔄 Pusher connection state changed:', states.previous, '→', states.current);
+// });
 
-window.Echo.connector.pusher.connection.bind('connected', function() {
-    console.log('✅ Pusher connected to Reverb');
-});
+// window.Echo.connector.pusher.connection.bind('connected', function() {
+//     console.log('✅ Pusher connected to Reverb');
+// });
 
-window.Echo.connector.pusher.connection.bind('disconnected', function() {
-    console.log('❌ Pusher disconnected from Reverb');
-});
+// window.Echo.connector.pusher.connection.bind('disconnected', function() {
+//     console.log('❌ Pusher disconnected from Reverb');
+// });
 
-window.Echo.connector.pusher.connection.bind('error', function(err) {
-    console.error('🔥 Pusher connection error:', err);
-});
+// window.Echo.connector.pusher.connection.bind('error', function(err) {
+//     console.error('🔥 Pusher connection error:', err);
+// });
 
 // Test subscribe to a channel
 setTimeout(() => {

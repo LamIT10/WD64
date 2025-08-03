@@ -21,7 +21,7 @@ class NotificationCreated implements ShouldBroadcastNow
     public function __construct(array $notificationData)
     {
         $this->notificationData = $notificationData;
-        Log::info('NotificationCreated event fired for user: ' . $notificationData['user_id']);
+        Log::info('NotificationCreated::__construct', $notificationData);
     }
 
     /**
@@ -29,10 +29,12 @@ class NotificationCreated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
+        Log::info('NotificationCreated::broadcastOn', [
+            'user_channel' => 'notifications.user.' . $this->notificationData['user_id'],
+            'all_channel' => 'notifications.all',
+        ]);
         return [
-            // Channel riêng cho user cụ thể
             new Channel('notifications.user.' . $this->notificationData['user_id']),
-            // Channel chung cho tất cả notifications
             new Channel('notifications.all'),
         ];
     }
@@ -50,6 +52,7 @@ class NotificationCreated implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
+        Log::info('NotificationCreated::broadcastWith', $this->notificationData);
         return [
             'notification' => $this->notificationData,
             'timestamp' => now()->toISOString(),
