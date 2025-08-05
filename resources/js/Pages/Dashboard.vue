@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="min-h-screen bg-gray-50 p-6">
+    <div class="min-h-screen bg-gray-50 p-6" v-can="'admin.dashboard.index'">
 
       <!-- <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
