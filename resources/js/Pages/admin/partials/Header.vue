@@ -2,7 +2,7 @@
     <!-- Header -->
     <header
         class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
-        <div class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5">
+        <div class="flex items-center space-x-2 bg-indigo-50 rounded-lg px-3 py-1.5">
 
 
         </div>
@@ -12,7 +12,7 @@
             <div class="flex items-center space-x-1 sm:space-x-2">
                 <!-- QR Code Scanner -->
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 relative group"
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 relative group"
                     title="Quét mã vạch">
                     <i class="fas fa-qrcode text-lg"></i>
                     <span
@@ -23,7 +23,7 @@
 
                 <!-- Dark Mode Toggle -->
                 <button
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     title="Chế độ tối">
                     <i class="fas fa-moon text-lg"></i>
                 </button>
@@ -32,7 +32,7 @@
             <!-- Notifications -->
             <div class="relative" ref="notificationRef">
                 <button @click="toggleNotifications"
-                    class="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200 group">
+                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 group">
                     <i class="fas fa-bell text-lg"></i>
                     <span v-if="unreadCount > 0"
                         class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-[24px] w-[24px] flex items-center justify-center animate-pulse">
@@ -56,7 +56,7 @@
                                 Thông báo
                             </h3>
                             <button v-if="unreadCount > 0" @click="markAllAsRead"
-                                class="text-xs text-purple-600 hover:text-purple-700 font-medium">
+                                class="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
                                 Đánh dấu tất cả đã đọc
                             </button>
                         </div>
@@ -106,7 +106,7 @@
                         <div v-if="notifications.length > 0"
                             class="p-3 border-t border-gray-100 w-full flex justify-center">
                             <Link :href="route('admin.notifications.show-all')"
-                                class="w-full text-center text-sm text-purple-600 hover:text-purple-700 font-medium">
+                                class="w-full text-center text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                             Xem tất cả thông báo
                             </Link>
                         </div>
@@ -131,7 +131,7 @@
                     <div @click.stop="showDropdown = !showDropdown"
                         class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 cursor-pointer select-none">
                         <div
-                            class="bg-gray-200 group-hover:bg-purple-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors">
+                            class="bg-gray-200 group-hover:bg-indigo-600 w-3 h-3 rounded-full flex items-center justify-center transition-colors">
                             <i class="fas fa-chevron-down text-[6px] text-gray-500 group-hover:text-white"></i>
                         </div>
                     </div>
@@ -236,7 +236,7 @@ const getNotificationIcon = (type) => {
         case "order_rejected":
             return "fas fa-times-circle text-red-500";
         case "order_completed":
-            return "fas fa-check-double text-purple-500";
+            return "fas fa-check-double text-indigo-500";
         case "order_pending":
             return "fas fa-clock text-yellow-500";
         default:
