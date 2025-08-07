@@ -232,7 +232,7 @@ class SaleOrdersRepository extends BaseRepository
         $customers = Customer::query()
             ->where('name', 'LIKE', "%{$searchTerm}%")
             ->with(['rank' => function ($query) {
-                $query->select('id', 'discount_percent');
+                $query->select('id', 'credit_percent');
             }])
             ->get([
                 'id',
@@ -332,14 +332,14 @@ class SaleOrdersRepository extends BaseRepository
             }
 
             DB::commit();
-            
+
             app(NotificationService::class)->create(
                 'order_created',
                 'Đơn hàng mới',
                 "Đơn hàng #{$saleOrder->id} đã được tạo thành công.",
                 ['order_id' => $saleOrder->id]
             );
-            
+
             return $saleOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -404,7 +404,7 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
-            
+
             // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_rejected',
@@ -412,7 +412,7 @@ class SaleOrdersRepository extends BaseRepository
                 "Đơn hàng #{$orderId} đã bị từ chối. Lý do: {$rejectReason}",
                 ['order_id' => $orderId]
             );
-            
+
             // ✅ NEW: Real-time notification broadcast
             event(new NotificationCreated([
                 'user_id' => 1, // TODO: Replace with actual user ID
@@ -427,7 +427,7 @@ class SaleOrdersRepository extends BaseRepository
                 'is_read' => false,
                 'created_at' => now()->toISOString(),
             ]));
-            
+
             return ['success' => true, 'message' => "Đã từ chối và xóa đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -495,7 +495,7 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
-            
+
             // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_approved',
@@ -503,7 +503,7 @@ class SaleOrdersRepository extends BaseRepository
                 "Đơn hàng #{$saleOrder->id} đã được duyệt thành công.",
                 ['order_id' => $saleOrder->id]
             );
-            
+
             // ✅ NEW: Real-time notification broadcast
             event(new NotificationCreated([
                 'user_id' => 1, // TODO: Replace with actual user ID
@@ -519,7 +519,7 @@ class SaleOrdersRepository extends BaseRepository
                 'is_read' => false,
                 'created_at' => now()->toISOString(),
             ]));
-            
+
             return ['success' => true, 'message' => "Đã duyệt đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -539,7 +539,7 @@ class SaleOrdersRepository extends BaseRepository
             DB::beginTransaction();
             $customer = Customer::findOrFail($customerId);
             $saleOrder = $this->handleModel->find($orderId);
-            $creditDiscount = $customer->rank ? $customer->rank->discount_percent : 0;
+            $creditDiscount = $customer->rank ? $customer->rank->credit_percent : 0;
             $maxDebt = $saleOrder->total_amount * ($creditDiscount / 100);
             $minPayTotal = $saleOrder->total_amount - $maxDebt;
 
@@ -613,7 +613,7 @@ class SaleOrdersRepository extends BaseRepository
             Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
 
             DB::commit();
-            
+
             // ✅ EXISTING: Create notification in database
             app(NotificationService::class)->create(
                 'order_completed',
@@ -621,7 +621,7 @@ class SaleOrdersRepository extends BaseRepository
                 "Đơn hàng #{$saleOrder->id} đã được xác nhận hoàn thành.",
                 ['order_id' => $saleOrder->id]
             );
-            
+
             // ✅ NEW: Real-time notification broadcast
             event(new NotificationCreated([
                 'user_id' => 1, // TODO: Replace with actual user ID
@@ -638,7 +638,7 @@ class SaleOrdersRepository extends BaseRepository
                 'is_read' => false,
                 'created_at' => now()->toISOString(),
             ]));
-            
+
             return ['success' => true, 'message' => "Đã xác nhận hoàn thành đơn hàng xuất {$orderId} thành công."];
         } catch (\Throwable $th) {
             DB::rollBack();

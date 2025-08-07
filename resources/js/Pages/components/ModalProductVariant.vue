@@ -29,7 +29,6 @@
                                             <th scope="col" class="px-6 py-3 z-10">Mã vạch</th>
                                             <th scope="col" class="px-2 py-3">Nhà cung cấp</th>
                                             <th scope="col" class="px-2 py-3">Thuộc tính</th>
-                                            <th scope="col" class="px-2 py-3 text-right">Giá nhập</th>
                                             <th scope="col" class="px-2 py-3 text-right">Giá bán</th>
                                             <th scope="col" class="px-2 py-3 text-right">Tồn kho</th>
                                             <th scope="col" class="px-2 py-3">Vị trí kho</th>
@@ -77,15 +76,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Cost Price -->
-                                            <td class="px-3 py-4 text-right">
-                                                <div class="space-y-1">
-                                                    <div v-for="supplier in variant.supplier_variants"
-                                                        :key="supplier.id" class="text-sm">
-                                                        {{ formatCurrency(supplier.cost_price) }}
-                                                    </div>
-                                                </div>
-                                            </td>
 
                                             <!-- Sale Price -->
                                             <td class="px-3 py-4 text-right">

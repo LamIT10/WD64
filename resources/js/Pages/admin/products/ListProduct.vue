@@ -140,19 +140,13 @@
                                 <th scope="col" class="px-4 py-3 table-cell-nowrap">
                                     <div class="flex items-center space-x-1">
                                         <i class="fas fa-dollar-sign text-green-500"></i>
-                                        <span>Giá nhập/Giá bán</span>
+                                        <span>Giá bán</span>
                                     </div>
                                 </th>
                                 <th scope="col" class="px-4 py-3 table-cell-nowrap">
                                     <div class="flex items-center space-x-1">
                                         <i class="fas fa-warehouse text-blue-500"></i>
                                         <span>Tồn kho </span>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-4 py-3 table-cell-nowrap">
-                                    <div class="flex items-center space-x-1">
-                                        <i class="fas fa-chart-line text-yellow-500"></i>
-                                        <span>Trạng thái</span>
                                     </div>
                                 </th>
                                 <th scope="col" class="px-4 py-3 table-cell-nowrap">
@@ -225,11 +219,7 @@
                                 <!-- Giá nhập/Giá bán -->
                                 <td class="px-4 py-3 table-cell-nowrap">
                                     <div class="space-y-1">
-                                        <div class="text-sm text-gray-600">
-                                            N: {{ formatCurrency(getMinCostPrice(product)) }} - {{
-                                                formatCurrency(getMaxCostPrice(product)) }}
-                                        </div>
-                                        <div class="text-sm font-medium text-green-600">
+                                        <div class="text-sm font-medium text-gray-600">
                                             B: {{ formatCurrency(getMinSalePrice(product)) }} - {{
                                                 formatCurrency(getMaxSalePrice(product)) }}
                                         </div>
@@ -249,16 +239,6 @@
                                             SL tối thiểu: {{ product.min_stock }}
                                         </div>
                                     </div>
-                                </td>
-                                <!-- Trạng thái -->
-                                <td class="px-4 py-3 table-cell-nowrap">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                        :class="getStockStatusClass(product).bgClass">
-                                        <span class="w-2 h-2 rounded-full mr-1.5"
-                                            :class="getStockStatusClass(product).dotClass"></span>
-                                        {{ getStockStatusText(product) }}
-                                    </span>
                                 </td>
 
                                 <!-- Biến thể -->

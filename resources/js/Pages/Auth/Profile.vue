@@ -1,17 +1,17 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-lg">
+    <header class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white shadow-lg">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <Link  :href="route('dashboard')" class="flex items-center text-white hover:text-purple-200 transition-colors">
+          <Link  :href="route('dashboard')" class="flex items-center text-white hover:text-indigo-200 transition-colors">
             <i class="fas fa-arrow-left text-lg mr-2"></i>
             <span class="font-medium">Trang chủ</span>
           </Link>
         </div>
         <div class="text-right">
           <h1 class="text-2xl font-bold">Quản lý tài khoản</h1>
-          <p class="text-purple-200 text-sm">Hồ sơ cá nhân của bạn</p>
+          <p class="text-indigo-200 text-sm">Hồ sơ cá nhân của bạn</p>
         </div>
       </div>
     </header>
@@ -22,7 +22,7 @@
         <!-- Sidebar Profile -->
         <aside class="w-full lg:w-1/4">
           <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-8">
-            <div class="bg-gradient-to-r from-purple-100 to-purple-50 p-6 text-center">
+            <div class="bg-gradient-to-r from-indigo-100 to-indigo-50 p-6 text-center">
               <div
                 class="relative mx-auto w-32 h-32 rounded-full border-4 border-white shadow-md mb-4 overflow-hidden"
               >
@@ -33,13 +33,13 @@
                   class="w-full h-full object-cover"
                 />
                 <button
-                  class="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
+                  class="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full hover:bg-indigo-700 transition-colors"
                 >
                   <i class="fas fa-camera text-sm"></i>
                 </button>
               </div>
               <h2 class="text-xl font-bold text-gray-800">{{ user.name }}</h2>
-              <p class="text-purple-600 font-medium">{{ user.role }}</p>
+              <p class="text-indigo-600 font-medium">{{ user.role }}</p>
               <p class="text-sm text-gray-500 mt-1">{{ user.department }}</p>
             </div>
 
@@ -48,7 +48,7 @@
                 <li v-for="nav in navItems" :key="nav.id">
                   <a
                     :href="`#${nav.id}`"
-                    class="nav-item flex items-center p-3 text-gray-700 rounded-lg hover:bg-purple-50 transition-colors"
+                    class="nav-item flex items-center p-3 text-gray-700 rounded-lg hover:bg-indigo-50 transition-colors"
                     :class="{ active: activeSection === nav.id }"
                   >
                     <i :class="nav.icon" class="mr-3 text-lg"></i>
@@ -68,17 +68,17 @@
             class="bg-white rounded-xl shadow-md overflow-hidden"
             ref="sections"
           >
-            <div class="bg-gradient-to-r from-purple-50 to-white p-6 border-b border-purple-100">
+            <div class="bg-gradient-to-r from-indigo-50 to-white p-6 border-b border-indigo-100">
               <div class="flex justify-between items-center">
                 <div>
-                  <h2 class="text-xl font-bold text-purple-800 flex items-center">
+                  <h2 class="text-xl font-bold text-indigo-800 flex items-center">
                     <i class="fas fa-user-circle mr-2"></i>
                     Thông tin cá nhân
                   </h2>
                   <p class="text-sm text-gray-500">Thông tin cơ bản về bạn</p>
                 </div>
                 <button
-                  class="px-4 py-2 bg-white border border-purple-200 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors"
+                  class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors"
                 >
                   <i class="fas fa-pen mr-2"></i>Chỉnh sửa
                 </button>
@@ -102,17 +102,17 @@
             class="bg-white rounded-xl shadow-md overflow-hidden"
             ref="sections"
           >
-            <div class="bg-gradient-to-r from-purple-50 to-white p-6 border-b border-purple-100">
+            <div class="bg-gradient-to-r from-indigo-50 to-white p-6 border-b border-indigo-100">
               <div class="flex justify-between items-center">
                 <div>
-                  <h2 class="text-xl font-bold text-purple-800 flex items-center">
+                  <h2 class="text-xl font-bold text-indigo-800 flex items-center">
                     <i class="fas fa-briefcase mr-2"></i>
                     Thông tin công việc
                   </h2>
                   <p class="text-sm text-gray-500">Thông tin về vị trí và nhiệm vụ của bạn</p>
                 </div>
                 <button
-                  class="px-4 py-2 bg-white border border-purple-200 text-gray-500 rounded-lg cursor-not-allowed"
+                  class="px-4 py-2 bg-white border border-indigo-200 text-gray-500 rounded-lg cursor-not-allowed"
                   disabled
                 >
                   <i class="fas fa-pen mr-2"></i>Chỉnh sửa
@@ -137,17 +137,17 @@
             class="bg-white rounded-xl shadow-md overflow-hidden"
             ref="sections"
           >
-            <div class="bg-gradient-to-r from-purple-50 to-white p-6 border-b border-purple-100">
+            <div class="bg-gradient-to-r from-indigo-50 to-white p-6 border-b border-indigo-100">
               <div class="flex justify-between items-center">
                 <div>
-                  <h2 class="text-xl font-bold text-purple-800 flex items-center">
+                  <h2 class="text-xl font-bold text-indigo-800 flex items-center">
                     <i class="fas fa-cog mr-2"></i>
                     Thông tin hệ thống
                   </h2>
                   <p class="text-sm text-gray-500">Hoạt động và phân quyền của bạn</p>
                 </div>
                 <button
-                  class="px-4 py-2 bg-white border border-purple-200 text-gray-500 rounded-lg cursor-not-allowed"
+                  class="px-4 py-2 bg-white border border-indigo-200 text-gray-500 rounded-lg cursor-not-allowed"
                   disabled
                 >
                   <i class="fas fa-pen mr-2"></i>Chỉnh sửa
@@ -179,7 +179,7 @@
                     class="flex items-start"
                   >
                     <div class="flex-shrink-0 mt-1">
-                      <div class="h-2 w-2 rounded-full bg-purple-500 mr-3"></div>
+                      <div class="h-2 w-2 rounded-full bg-indigo-500 mr-3"></div>
                     </div>
                     <div>
                       <p class="text-sm font-medium text-gray-800">{{ activity.action }}</p>
@@ -194,9 +194,9 @@
                   <div
                     v-for="permission in systemInfo.permissions"
                     :key="permission"
-                    class="flex items-center p-3 bg-purple-50 rounded-lg"
+                    class="flex items-center p-3 bg-indigo-50 rounded-lg"
                   >
-                    <div class="flex-shrink-0 h-5 w-5 text-purple-600">
+                    <div class="flex-shrink-0 h-5 w-5 text-indigo-600">
                       <i class="fas fa-check-circle"></i>
                     </div>
                     <label class="ml-2 block text-sm font-medium text-gray-700">{{
@@ -214,10 +214,10 @@
             class="bg-white rounded-xl shadow-md overflow-hidden"
             ref="sections"
           >
-            <div class="bg-gradient-to-r from-purple-50 to-white p-6 border-b border-purple-100">
+            <div class="bg-gradient-to-r from-indigo-50 to-white p-6 border-b border-indigo-100">
               <div class="flex justify-between items-center">
                 <div>
-                  <h2 class="text-xl font-bold text-purple-800 flex items-center">
+                  <h2 class="text-xl font-bold text-indigo-800 flex items-center">
                     <i class="fas fa-shield-alt mr-2"></i>
                     Tài khoản & bảo mật
                   </h2>
@@ -240,7 +240,7 @@
                   </div>
                   <button
                     @click="openPasswordModal"
-                    class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-colors shadow-md"
+                    class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-colors shadow-md"
                   >
                     <i class="fas fa-key mr-2"></i>Đổi mật khẩu
                   </button>
@@ -253,7 +253,7 @@
                     <p class="text-sm text-gray-500">Thêm lớp bảo mật cho tài khoản của bạn</p>
                   </div>
                   <button
-                    class="px-4 py-2 bg-white border border-purple-200 text-purple-700 rounded-lg hover:bg-purple-50 transition-colors"
+                    class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors"
                   >
                     <i class="fas fa-mobile-alt mr-2"></i>Thiết lập
                   </button>
@@ -281,7 +281,7 @@
                 v-model="passwordForm.current_password"
                 type="password"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 :class="{ 'border-red-500': passwordForm.errors.current_password }"
               />
               <p v-if="passwordForm.errors.current_password" class="text-red-500 text-sm">
@@ -294,7 +294,7 @@
                 v-model="passwordForm.new_password"
                 type="password"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 :class="{ 'border-red-500': passwordForm.errors.new_password }"
               />
               <p v-if="passwordForm.errors.new_password" class="text-red-500 text-sm">
@@ -307,7 +307,7 @@
                 v-model="passwordForm.new_password_confirmation"
                 type="password"
                 required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 :class="{ 'border-red-500': passwordForm.errors.new_password_confirmation }"
               />
               <p v-if="passwordForm.errors.new_password_confirmation" class="text-red-500 text-sm">
@@ -324,7 +324,7 @@
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800"
+                class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg hover:from-indigo-700 hover:to-indigo-800"
                 :disabled="passwordForm.processing"
               >
                 {{ passwordForm.processing ? 'Đang xử lý...' : 'Cập nhật' }}
