@@ -1,10 +1,18 @@
 <template>
     <!-- Header -->
     <header
-        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
-        <div class="flex items-center space-x-2 bg-purple-50 rounded-lg px-3 py-1.5">
-
-
+        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30"
+    >
+        <div
+            class="flex items-center px-3 py-1.5"
+        >
+            <!-- <div class="text-purple-600">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="text-sm hidden sm:block">
+                <span>Đang xử lý</span>
+                <span class="font-medium ml-1">5 mục</span>
+            </div> -->
         </div>
         <!-- Right side - User controls -->
         <div class="flex items-center space-x-3">
@@ -239,9 +247,33 @@ const getNotificationIcon = (type) => {
             return "fas fa-check-double text-purple-500";
         case "order_pending":
             return "fas fa-clock text-yellow-500";
+        // ✅ REAL-TIME: Add more notification types
+        case "info":
+            return "fas fa-info-circle text-blue-500";
+        case "success":
+            return "fas fa-check-circle text-green-500";
+        case "warning":
+            return "fas fa-exclamation-triangle text-yellow-500";
+        case "error":
+            return "fas fa-times-circle text-red-500";
         default:
             return "fas fa-bell text-gray-500";
     }
+};
+
+// ✅ REAL-TIME: Helper function to format notification time
+const formatNotificationTime = (date) => {
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return 'Vừa xong';
+    if (minutes < 60) return `${minutes} phút trước`;
+    if (hours < 24) return `${hours} giờ trước`;
+    if (days < 7) return `${days} ngày trước`;
+    return date.toLocaleDateString('vi-VN');
 };
 
 // Click outside handler
@@ -260,10 +292,57 @@ const handleClickOutside = (event) => {
     }
 };
 let interval = null;
+let notificationChannel = null;
+
 // Lifecycle hooks
 onMounted(() => {
     fetchNotifications();
-    interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s
+    
+    // ✅ REAL-TIME: Replace polling with WebSocket
+    // interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s - DISABLED
+    
+    // ✅ REAL-TIME: Setup WebSocket notifications
+    if (window.Echo) {
+        console.log('🔔 Setting up real-time notifications in Header...');
+        
+        // Subscribe to user-specific notifications (assuming user ID = 1 for now)
+        // TODO: Replace with actual authenticated user ID
+        const currentUserId = 1; // Get from auth context
+        
+        notificationChannel = window.Echo.channel(`notifications.user.${currentUserId}`);
+        notificationChannel.listen('NotificationCreated', (e) => {
+            console.log('🔔 Real-time notification received in Header:', e);
+            
+            // Add new notification to the beginning of the list
+            const newNotification = {
+                id: e.notification.id,
+                type: e.notification.type,
+                title: e.notification.title,
+                message: e.notification.message,
+                data: e.notification.data,
+                isRead: false,
+                time: formatNotificationTime(new Date(e.notification.created_at))
+            };
+            
+            notifications.value.unshift(newNotification);
+            unreadCount.value++;
+            
+            // Show notification dropdown briefly
+            showNotifications.value = true;
+            setTimeout(() => {
+                showNotifications.value = false;
+            }, 3000);
+            
+            // Emit event for other components
+            emitter.emit("notification-updated");
+        });
+        
+        console.log(`🔔 Subscribed to notifications.user.${currentUserId}`);
+    } else {
+        console.warn('⚠️ Echo not available, falling back to polling');
+        interval = setInterval(fetchNotifications, 60000);
+    }
+    
     emitter.on("notification-updated", () => {
         console.log("Received notification-updated event");
         fetchNotifications();
@@ -273,9 +352,83 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    clearInterval(interval);
+    if (interval) clearInterval(interval);
+    
+    // ✅ REAL-TIME: Cleanup WebSocket subscription
+    if (notificationChannel) {
+        notificationChannel.stopListening('NotificationCreated');
+        console.log('🔌 Unsubscribed from notification channel');
+    }
+    
     document.removeEventListener("click", handleClickOutside);
     emitter.off("notification-updated");
+});
+
+// --- REALTIME: Subscribe notification channel giống form Index.vue ---
+const connected = ref(false);
+const addEvent = (msg) => {
+    console.log('[Header] Event:', msg);
+};
+
+onMounted(() => {
+    if (window.Echo) {
+        console.log('🔧 Header.vue initializing Echo...');
+        // Subscribe to notification channel
+        const channel = window.Echo.channel('notifications.all');
+        console.log('📢 Header.vue: Subscribed to notifications.all channel');
+
+        // Add both raw and Echo listeners for debugging
+        if (channel.pusher) {
+            channel.pusher.bind('NotificationCreated', function(data) {
+                console.log('🔥 Header RAW Pusher Event:', data);
+                addEvent(`📨 RAW: ${JSON.stringify(data)}`);
+            });
+        }
+        channel.listen('.NotificationCreated', (e) => {
+            console.log('🎯 Header Echo Event:', e);
+            addEvent(`📨 ECHO: ${JSON.stringify(e)}`);
+            // Khi nhận realtime, delay 300ms rồi fetchNotifications để tránh race condition
+            setTimeout(async () => {
+                console.log('[Header] Fetching notifications after realtime...');
+                await fetchNotifications();
+                console.log('[Header] Notifications after realtime:', notifications.value);
+            }, 300);
+            // Có thể show dropdown nếu muốn
+            showNotifications.value = true;
+            setTimeout(() => {
+                showNotifications.value = false;
+            }, 3000);
+            // Emit event cho các component khác nếu cần
+            emitter.emit("notification-updated");
+        });
+
+        // Monitor connection status
+        if (window.Echo.connector && window.Echo.connector.pusher) {
+            const pusher = window.Echo.connector.pusher;
+            pusher.connection.bind('connected', () => {
+                connected.value = true;
+                addEvent('✅ Connected to Reverb server');
+            });
+            pusher.connection.bind('disconnected', () => {
+                connected.value = false;
+                addEvent('❌ Disconnected from Reverb server');
+            });
+            pusher.connection.bind('error', (error) => {
+                connected.value = false;
+                addEvent(`🔥 Connection error: ${error.error || error}`);
+            });
+            connected.value = pusher.connection.state === 'connected';
+        }
+    } else {
+        console.error('Echo is not initialized');
+        addEvent('❌ Error: Echo is not initialized');
+    }
+});
+
+onUnmounted(() => {
+    if (window.Echo) {
+        window.Echo.leaveChannel('notifications.all');
+    }
 });
 
 const showDropdown = ref(false);

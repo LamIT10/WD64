@@ -6,6 +6,7 @@ import { Ziggy } from "./ziggy";
 import { useAuthStore } from "./stores/auth"; // Thêm import authStore
 import flatpickr from 'flatpickr'; // Thêm import flatpickr
 import { Vietnamese } from 'flatpickr/dist/l10n/vn.js'; // Thêm import locale tiếng Việt
+import './bootstrap';
 
 createInertiaApp({
     resolve: (name) => {

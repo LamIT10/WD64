@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\admin\CustomerTransactionController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\Admin\NotificationRealtimeController;
 use App\Http\Controllers\Admin\SuggestController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Auth\RoleController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Admin\WarehouseZoneController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\TestEventController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Inertia\Inertia;
@@ -41,6 +43,8 @@ use App\Http\Controllers\SaleOrderController;
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
+    
+  
     Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
         Route::get('/', [PurchaseOrderController::class, 'getList'])->middleware('has_permission:' . PermissionConstant::PURCHASE_INDEX)->name('index');
         Route::get('create', [PurchaseOrderController::class, 'create'])->middleware('has_permission:' . PermissionConstant::PURCHASE_CREATE)->name('create');
@@ -238,12 +242,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::patch('{id}/update', [SupplierTransactionController::class, 'update'])->name('update')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE);
         Route::patch('{id}/update-payment', [SupplierTransactionController::class, 'updatePayment'])->name('updatePayment')->middleware('has_permission:' . PermissionConstant::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT);
     });
-   
-
-
-  
-
-
 
     Route::group([
         'prefix' => 'users',
@@ -305,3 +303,21 @@ Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallba
 Route::get('profile', function () {
     return Inertia::render('Auth/Profile');
 })->name('profile');
+
+// Test Event Routes
+Route::get('admin/test-event', [TestEventController::class, 'index'])->name('test-event');
+Route::post('admin/test-event/broadcast', [TestEventController::class, 'broadcast'])->name('test-event.broadcast');
+
+// Real-time Notification Routes
+Route::prefix('admin/notifications')->as('notifications.')->group(function () {
+    Route::get('/', [NotificationRealtimeController::class, 'index'])->name('index');
+    Route::post('/send-test', [NotificationRealtimeController::class, 'sendTest'])->name('send-test');
+    Route::get('/user-notifications', [NotificationRealtimeController::class, 'getUserNotifications'])->name('user-notifications');
+    Route::post('/{id}/mark-read', [NotificationRealtimeController::class, 'markAsRead'])->name('mark-read');
+});
+
+// Header notification routes (compatible with existing system)
+Route::get('/admin/notifications', [NotificationRealtimeController::class, 'getHeaderNotifications']);
+Route::post('/admin/notifications/{id}/read', [NotificationRealtimeController::class, 'markAsRead']);
+Route::post('/admin/notifications/read-all', [NotificationRealtimeController::class, 'markAllAsRead']);
+

@@ -209,7 +209,7 @@
                                 <td class="px-4 py-3 table-cell-nowrap">
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 font-mono">
-                                        {{ product.code || 'N/A' }}
+                                        {{ product.code || 'không có mã sp' }}
                                     </span>
                                 </td>
 
@@ -424,7 +424,7 @@ const getTotalStock = (product) => {
 };
 
 const getMinCostPrice = (product) => {
-    if (!product.product_variants || product.product_variants.length === 0) return 'N/A';
+    if (!product.product_variants || product.product_variants.length === 0) return 'Không có dữ liệu';
 
     let minCost = Infinity;
     product.product_variants.forEach(variant => {
@@ -436,11 +436,11 @@ const getMinCostPrice = (product) => {
         });
     });
 
-    return minCost === Infinity ? 'N/A' : minCost;
+    return minCost === Infinity ? 'Chưa cập nhật' : minCost;
 };
 
 const getMaxCostPrice = (product) => {
-    if (!product.product_variants || product.product_variants.length === 0) return 'N/A';
+    if (!product.product_variants || product.product_variants.length === 0) return 'Không có dữ liệu';
 
     let maxCost = -Infinity;
     product.product_variants.forEach(variant => {
@@ -452,21 +452,21 @@ const getMaxCostPrice = (product) => {
         });
     });
 
-    return maxCost === -Infinity ? 'N/A' : maxCost;
+    return maxCost === -Infinity ? 'Chưa cập nhật' : maxCost;
 };
 
 const getMinSalePrice = (product) => {
-    if (!product.product_variants || product.product_variants.length === 0) return 'N/A';
+    if (!product.product_variants || product.product_variants.length === 0) return 'Không có dữ liệu';
 
     const minSale = Math.min(...product.product_variants.map(variant => parseFloat(variant.sale_price)));
-    return isNaN(minSale) ? 'N/A' : minSale;
+    return isNaN(minSale) ? 'Chưa cập nhật' : minSale;
 };
 
 const getMaxSalePrice = (product) => {
-    if (!product.product_variants || product.product_variants.length === 0) return 'N/A';
+    if (!product.product_variants || product.product_variants.length === 0) return 'Không có dữ liệu';
 
     const maxSale = Math.max(...product.product_variants.map(variant => parseFloat(variant.sale_price)));
-    return isNaN(maxSale) ? 'N/A' : maxSale;
+    return isNaN(maxSale) ? 'Chưa cập nhật' : maxSale;
 };
 
 const restoreForm = useForm({
@@ -542,7 +542,7 @@ const getLocation = (product) => {
         });
     });
 
-    return Array.from(locations).join(', ') || 'N/A';
+    return Array.from(locations).join(', ') || 'Chưa có vị trí';
 };
 
 // const getExpirationStatus = (product) => {
