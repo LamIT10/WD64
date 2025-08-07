@@ -100,11 +100,11 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Email
                                 </th>                    
-                                <th v-if="visibleColumns.includes('rank')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                    Hạng
-                                </th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Tổng tiền nợ
+                                </th>
+                                  <th v-if="visibleColumns.includes('rank')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                    Hạng
                                 </th>
                                 <th v-if="visibleColumns.includes('status')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Trạng thái
@@ -139,7 +139,7 @@
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ customer.email || '-'
                                     }}</td>
                                 <td v-if="visibleColumns.includes('remaining_amount')"
-                                    class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-semibold text-right">
+                                    class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-semibold text-left">
                                     {{ formatCurrency(customer.remaining_amount) }}
                                 </td>
                                 <td v-if="visibleColumns.includes('rank')"
