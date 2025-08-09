@@ -245,7 +245,7 @@
                                 </td> -->
                                 <td class="px-6 py-3 text-center">
                                     <span v-if="
-                                       getStatus(supplierTransaction.credit_due_date) ==
+                                        getStatus(supplierTransaction.credit_due_date) ==
                                         0
                                     "
                                         class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-700 mt-1">
@@ -253,7 +253,7 @@
                                         toán
                                     </span>
                                     <span v-else-if="
-                                       getStatus(supplierTransaction.credit_due_date) ==
+                                        getStatus(supplierTransaction.credit_due_date) ==
                                         3
                                     "
                                         class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-700 mt-1">
@@ -261,14 +261,14 @@
                                         hạn
                                     </span>
                                     <span v-else-if="
-                                       getStatus(supplierTransaction.credit_due_date) ==
+                                        getStatus(supplierTransaction.credit_due_date) ==
                                         2
                                     "
                                         class="inline-flex items-center px-5 py-2  rounded text-xs font-semibold bg-green-100 text-green-700 mt-1">
                                         Còn hạn
                                     </span>
                                     <span v-else-if="
-                                       getStatus(supplierTransaction.credit_due_date) ==
+                                        getStatus(supplierTransaction.credit_due_date) ==
                                         1
                                     "
                                         class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-700 mt-1">
@@ -410,6 +410,10 @@ item, index
                                 </th>
                                 <th
                                     class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                    Ảnh minh chứng
+                                </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
                                     Ghi chú
                                 </th>
                                 <th
@@ -441,6 +445,14 @@ item, index
                                     </span>
                                     <span v-else> Cập nhật hạn công nợ </span>
                                 </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-center text-gray-900 flex items-center justify-center">
+                                    <a v-if="item.proof_image"  :href="'/storage/' +item.proof_image" target="_blank">
+                                        <img :src="'/storage/' + item.proof_image" alt="Chứng từ"
+                                            class="w-16 h-16 object-cover rounded-lg shadow-sm">
+                                    </a>
+                                    <span v-else>Không có ảnh minh chứng</span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-right">
                                     {{ item.note }}
                                 </td>
@@ -469,10 +481,10 @@ const formatDate = (dateStr) => {
 
 
 const getStatus = (date) => {
-    if(supplierTransaction.total_amount - supplierTransaction.paid_amount <= 0) {
+    if (supplierTransaction.total_amount - supplierTransaction.paid_amount <= 0) {
         return 0; // đã thanh toán
-    }       
-        
+    }
+
     const today = new Date();
     const d = new Date(date);
     const from = new Date(d);

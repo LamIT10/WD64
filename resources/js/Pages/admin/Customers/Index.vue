@@ -14,7 +14,7 @@
                             class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
-                    <Waiting route-name="admin.customers.create" :route-params="{}">
+                    <Waiting route-name="admin.customers.create" :route-params="{}" v-can="'admin.customers.create'">
                         <i class="fas fa-plus"></i> Khách hàng
                     </Waiting>
                     <div ref="dropdownRef" class="relative">
@@ -178,20 +178,20 @@
                                         <div v-if="activeDropdown === customer.id"
                                             class="absolute right-0 z-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                                             <div class="py-1">
-                                                <Link :href="route('admin.customers.show', customer.id)"
+                                                <Link :href="route('admin.customers.show', customer.id)" v-can="'admin.customers.show'"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                                 <i class="fas fa-eye mr-2 text-blue-600"></i> Chi tiết
                                                 </Link>
-                                                <Link :href="route('admin.customers.edit', customer.id)"
+                                                <Link :href="route('admin.customers.edit', customer.id)" v-can="'admin.customers.edit'"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                                 <i class="fas fa-edit mr-2 text-indigo-600"></i> Sửa
                                                 </Link>
-                                                <Link :href="route('admin.customers.debt-orders', customer.id)"
+                                                <Link :href="route('admin.customers.debt-orders', customer.id)" v-can="'admin.customers.debt-orders'"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                                                 <i class="fa fa-credit-card-alt text-indigo-600 mr-2"
                                                     aria-hidden="true"></i> Công nợ
                                                 </Link>
-                                                <ConfirmModal :route-name="'admin.customers.destroy'"
+                                                <ConfirmModal :route-name="'admin.customers.destroy'" v-can="'admin.customers.destroy'"
                                                     :route-params="{ id: customer.id }" title="Xác nhận xóa khách hàng"
                                                     :message="`Bạn có chắc chắn muốn xóa khách hàng ${customer.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xóa`">
                                                     <template #trigger="{ openModal }">

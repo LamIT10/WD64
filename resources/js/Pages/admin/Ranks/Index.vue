@@ -11,7 +11,7 @@
               class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
           </div>
-          <Waiting route-name="admin.ranks.create" :route-params="{}"
+          <Waiting route-name="admin.ranks.create" :route-params="{}" v-can="'admin.rank.create'"
             :color="'bg-indigo-600 text-white hover:bg-indigo-700'">
             <i class="fas fa-plus mr-1"></i> Thêm hạng
           </Waiting>
@@ -112,7 +112,7 @@
                     <div v-if="activeDropdown === rank.id"
                       class="absolute right-0 z-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                       <div class="py-1">
-                        <Link :href="route('admin.ranks.edit', { rank: rank.id })"
+                        <Link :href="route('admin.ranks.edit', { rank: rank.id })" v-can="'admin.rank.edit'"
                           @click.prevent="logAndNavigate(rank.id)"
                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900">
                         <i class="fas fa-edit mr-2 text-indigo-600"></i>

@@ -28,7 +28,7 @@
                         <i class="fas fa-arrow-left mr-1"></i>
                         <span>Quay lại</span>
                     </Waiting>
-                    <Waiting v-else route-name="admin.products.create" :route-params="{}"
+                    <Waiting v-else route-name="admin.products.create" :route-params="{}" v-can="'admin.product.create'"
                         :color="'bg-indigo-600 hover:bg-indigo-700 text-white'">
                         <i class="fas fa-plus mr-1"></i>
                         <span>Thêm mới</span>
@@ -303,25 +303,25 @@
                                 <!-- Hành động -->
                                 <td class="px-4 py-3 table-cell-nowrap">
                                     <div class="flex items-center space-x-2">
-                                        <Link :href="route('admin.products.show', product.id)"
+                                        <Link :href="route('admin.products.show', product.id)" v-can="'admin.product.show'"
                                             class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
                                             title="Xem chi tiết">
                                         <i class="fas fa-eye text-sm"></i>
                                         </Link>
-                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage"
+                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage" v-can="'admin.product.edit'"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Chỉnh sửa">
                                         <i class="fas fa-edit text-sm"></i>
 
                                         </Link>
-                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"
+                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"v-can="'admin.product.delete'"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Khôi phục">
                                             <i class="fas fa-undo text-sm"></i>
                                         </button>
 
                                         <!-- Nếu là trang active, hiện nút ConfirmModal để xóa -->
-                                        <ConfirmModal v-else :route-name="'admin.products.destroy'"
+                                        <ConfirmModal v-else :route-name="'admin.products.destroy'" v-can="'admin.product.delete'"
                                             :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm">
                                             <template #trigger="{ openModal }">
                                                 <button @click="openModal"
