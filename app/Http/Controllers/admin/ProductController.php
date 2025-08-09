@@ -129,7 +129,7 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $success = $this->productRepository->destroy($id);
-        return $this->returnInertia($success, 'Ẩn sản phẩm thành công', 'admin.products.index');
+        return $this->returnInertia($success, 'Xóa sản phẩm thành công', 'admin.products.index');
     }
 
     public function restore(string $id)
