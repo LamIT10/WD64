@@ -1,4 +1,32 @@
 <template>
+    <!-- Modal xem ảnh lớn -->
+    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div class="relative bg-white rounded shadow-lg p-2 max-w-lg w-full flex flex-col items-center">
+            <img :src="audit.images[modalIndex]?.url" class="max-h-[70vh] object-contain rounded" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" />
+            <button @click="closeModal" class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
+                <i class="fa fa-times"></i>
+            </button>
+            <div class="flex gap-2 mt-2">
+                <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-10 h-10 border rounded', idx === modalIndex ? 'border-indigo-500' : 'border-gray-200']">
+                    <img :src="img.url" class="object-cover w-full h-full rounded" />
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal xem ảnh lớn -->
+    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div class="relative bg-white rounded shadow-lg p-2 max-w-lg w-full flex flex-col items-center">
+            <img :src="audit.images[modalIndex]?.url" class="max-h-[70vh] object-contain rounded" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" />
+            <button @click="closeModal" class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
+                <i class="fa fa-times"></i>
+            </button>
+            <div class="flex gap-2 mt-2">
+                <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-10 h-10 border rounded', idx === modalIndex ? 'border-indigo-500' : 'border-gray-200']">
+                    <img :src="img.url" class="object-cover w-full h-full rounded" />
+                </button>
+            </div>
+        </div>
+    </div>
     <div class="no-print">
         <AppLayout>
 
@@ -32,6 +60,16 @@
 
                 <!-- Thông tin tổng quan phiếu kiểm kho -->
                 <div class="bg-white rounded-2xl shadow p-4 mb-4 border border-indigo-100 text-sm">
+                    <!-- Ảnh kiểm kho -->
+                    <div v-if="audit.images && audit.images.length" class="mb-4">
+                        <div class="font-semibold text-gray-700 mb-2">Ảnh kiểm kho đã đăng:</div>
+                        <div class="flex flex-wrap gap-3">
+                            <div v-for="(img, idx) in audit.images" :key="idx" class="relative w-28 h-28 border rounded overflow-hidden group cursor-pointer" @click="showImageModal(idx)">
+                                <img :src="img.url" class="object-cover w-full h-full" :alt="'Ảnh kiểm kho ' + (idx+1)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="mb-4 text-xs text-gray-400">Không có ảnh kiểm kho</div>
                     <div class="flex flex-wrap gap-2 mb-2 items-center">
                         <span class="font-semibold text-gray-700">Khu vực:</span>
                         <span v-for="zone in audit.audited_zones" :key="zone"
@@ -254,6 +292,7 @@
     <ToastClient ref="toastRef" />
 </template>
 <script setup>
+
 import { reactive, ref, computed } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link, usePage } from '@inertiajs/vue3';
@@ -265,6 +304,16 @@ import autoTable from 'jspdf-autotable';
 import { inject } from "vue";
 import axios from 'axios';
 
+// Modal xem ảnh lớn
+const showModal = ref(false);
+const modalIndex = ref(0);
+const showImageModal = (idx) => {
+  modalIndex.value = idx;
+  showModal.value = true;
+};
+const closeModal = () => {
+  showModal.value = false;
+};
 
 const page = usePage();
 const audit = page.props.audit;

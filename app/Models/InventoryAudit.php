@@ -30,4 +30,9 @@ class InventoryAudit extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 }
