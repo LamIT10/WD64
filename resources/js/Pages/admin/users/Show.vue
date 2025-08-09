@@ -5,7 +5,7 @@
             <div class="bg-white rounded-lg shadow p-6 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 class="text-xl font-semibold text-indigo-700">Chi tiết nhân viên</h1>
                 <div class="flex space-x-3">
-                    <Waiting route-name="admin.users.edit" :route-params="{ id: user.id }"
+                    <Waiting route-name="admin.users.edit" :route-params="{ id: user.id }" v-can="'admin.user.edit'"
                         class="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded flex items-center space-x-2 transition-colors duration-200">
                         <i class="fas fa-edit"></i>
                         <span>Chỉnh sửa</span>

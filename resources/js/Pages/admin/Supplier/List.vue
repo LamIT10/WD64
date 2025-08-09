@@ -30,7 +30,7 @@
                             <span>Tìm kiếm</span>
                         </button>
                     </div>
-                    <Waiting route-name="admin.suppliers.create" :route-params="{}"
+                    <Waiting route-name="admin.suppliers.create" :route-params="{}" v-can="'admin.supplier.create'"
                         class="bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors flex items-center shadow-sm">
                         <i class="fas fa-plus mr-2"></i> Thêm mới
                     </Waiting>
@@ -197,24 +197,24 @@
                         </thead>
                         <tbody>
                             <template v-for="supplier in suppliers.data" :key="supplier.id">
-                                <tr @click="toggleRow(supplier.id)"
+                                <tr 
                                     class="bg-white border-b border-gray-100 cursor-pointer transition-colors">
-                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap" @click="toggleRow(supplier.id)">
                                         {{ supplier.name }}
                                     </th>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4" @click="toggleRow(supplier.id)">
                                         {{ supplier.contact_person }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4" @click="toggleRow(supplier.id)">
                                         {{ supplier.phone }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4" @click="toggleRow(supplier.id)">
                                         {{ supplier.email }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4" @click="toggleRow(supplier.id)">
                                         {{ formatNumber(supplier.debt) + " ₫" }}
                                     </td>
-                                    <td class="px-6 py-4" style="
+                                    <td @click="toggleRow(supplier.id)" class="px-6 py-4" style=" 
                                             max-width: 200px;
                                             overflow: hidden;
                                             text-overflow: ellipsis;
@@ -237,7 +237,7 @@
                                         <div v-if="menuVisible[supplier.id]"
                                             class="z-[10000] absolute top-0 right-[100%] bg-white rounded-lg shadow-2xl border border-gray-200 w-52 transition-all duration-200">
                                             <ul class="py-2 text-sm font-medium text-gray-800">
-                                                <li>
+                                                <li  v-can="'admin.supplier.edit'">
                                                     <Waiting color="bg-white" route-name="admin.suppliers.edit"
                                                         :route-params="{
                                                             id: supplier.id,
@@ -247,7 +247,7 @@
                                                         Sửa
                                                     </Waiting>
                                                 </li>
-                                                <li>
+                                                <li v-can="'admin.supplier.delete'">
                                                     <ConfirmModal :route-name="'admin.suppliers.destroy'" :route-params="{
                                                         id: supplier.id,
                                                     }" title="Xác nhận xóa nhà cung cấp"
@@ -265,7 +265,7 @@
                                                         </template>
                                                     </ConfirmModal>
                                                 </li>
-                                                <li>
+                                                <li v-ca="'admin.supplier.product'">
                                                     <Waiting route-name="admin.suppliers.products" color="bg-white"
                                                         :route-params="{
                                                             id: supplier.id,

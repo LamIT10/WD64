@@ -12,7 +12,7 @@
                             @input="handleSearch" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
-                    <button @click="openUnitModal"
+                    <button @click="openUnitModal" v-can="'admin.unit.create'"
                         class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center space-x-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm mới</span>
@@ -35,7 +35,7 @@
                             <td class="px-6 py-4 text-sm text-gray-900">{{ unit.name }}</td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ unit.symbol }}</td>
                             <td class="px-6 py-4 text-right text-sm">
-                                <ConfirmModal :route-name="'admin.units.destroy'" :route-params="{ id: unit.id }"
+                                <ConfirmModal :route-name="'admin.units.destroy'" :route-params="{ id: unit.id }" v-can="'admin.unit.delete'"
                                     title="Xác nhận xóa đơn vị">
                                     <template #trigger="{ openModal }">
                                         <button @click.stop="openModal"
