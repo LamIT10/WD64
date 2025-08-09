@@ -19,7 +19,7 @@
 
           <!-- Create Button -->
           <Waiting route-name="admin.inventory-audit.create" :route-params="{}">
-            <button
+            <button v-can="'admin.inventory-audit.create'"
               class="flex items-center hover:bg-indigo-700 text-white rounded-lg shadow transition text-xs font-semibold focus:ring-2 focus:ring-indigo-300 focus:outline-none active:scale-95"
               title="Tạo phiếu kiểm kho mới">
               <i class="fas fa-plus text-sm"></i>
@@ -28,7 +28,7 @@
           </Waiting>
 
           <!-- Export Button -->
-          <button @click="exportToExcel"
+          <button @click="exportToExcel" v-can="'admin.inventory-audit.export'"
             class="flex items-center gap-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition text-xs font-semibold focus:ring-2 focus:ring-green-300 focus:outline-none active:scale-95"
             title="Xuất dữ liệu ra Excel">
             <i class="fa fa-file-export text-sm"></i>

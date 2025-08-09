@@ -31,7 +31,7 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                    <template v-for="(variant, vIndex) in props.variants.product_variants" :key="vIndex">
+                    <template v-for="(variant, vIndex) in props.variants" :key="vIndex">
                       <tr :id="'item-'+ variant.id">
                         <td class="px-6 py-3">
                           {{ vIndex + 1 }}

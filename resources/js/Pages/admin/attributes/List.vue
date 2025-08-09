@@ -15,7 +15,7 @@
                             @input="handleSearch" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
-                    <button @click="openAttributeModal"
+                    <button @click="openAttributeModal" v-can="'admin.attribute.create'"
                         class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center space-x-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm mới</span>
@@ -62,11 +62,11 @@
                                     </td>
                                     <td
                                         class="flex justify-end px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button @click.stop="openAttributeValueModal(attribute.id)"
+                                        <button @click.stop="openAttributeValueModal(attribute.id)" v-can="'admin.attribute.create'"
                                             class="inline-flex items-center p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md transition-colors mr-2">
                                             <i class="fas fa-plus text-sm"></i>
                                         </button>
-                                        <ConfirmModal :route-name="'admin.attributes.destroy'"
+                                        <ConfirmModal :route-name="'admin.attributes.destroy'" v-can="'admin.attribute.delete'"
                                             :route-params="{ id: attribute.id }" title="Xác nhận xóa thuộc tính">
                                             <template #trigger="{ openModal }">
                                                 <button @click.stop="openModal"

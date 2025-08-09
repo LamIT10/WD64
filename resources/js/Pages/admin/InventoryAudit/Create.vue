@@ -16,6 +16,19 @@
           <input v-model="auditData.notes" type="text" placeholder="Nhập ghi chú nếu có"
             class="border border-gray-200 rounded px-3 py-1 bg-gray-50 text-sm flex-1 min-w-[200px]" />
         </div>
+        <!-- Upload Ảnh Kiểm Kho -->
+        <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ảnh kiểm kho (có thể chọn nhiều)</label>
+          <input type="file" multiple accept="image/*" @change="handleImageChange" class="mb-2" />
+          <div v-if="imagePreviews.length" class="flex flex-wrap gap-3 mt-2">
+            <div v-for="(img, idx) in imagePreviews" :key="idx" class="relative w-24 h-24 border rounded overflow-hidden group">
+              <img :src="img" class="object-cover w-full h-full" />
+              <button type="button" @click="removeImage(idx)" class="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
+                <i class="fa fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
         <!-- Chọn khu vực -->
         <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100 flex flex-wrap gap-2 items-center">
           <span class="text-sm font-medium text-gray-700 mr-2">Khu vực:</span>
@@ -94,6 +107,7 @@
             </table>
           </div>
         </div>
+
         <!-- Submit Button -->
         <div class="flex justify-end mt-4">
           <button type="submit"
@@ -135,6 +149,30 @@ const canSubmit = computed(() =>
     Number(item.actual_quantity) >= 0
   )
 );
+
+// Ảnh upload
+const images = ref([]); // File[]
+const imagePreviews = ref([]); // string[]
+
+const handleImageChange = (e) => {
+  const files = Array.from(e.target.files);
+  images.value.push(...files);
+  // Tạo preview cho ảnh mới
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      imagePreviews.value.push(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+  // Reset input để chọn lại được cùng 1 file nếu cần
+  e.target.value = '';
+};
+
+const removeImage = (idx) => {
+  images.value.splice(idx, 1);
+  imagePreviews.value.splice(idx, 1);
+};
 const toggleZone = async (zone) => {
   if (selectedZones.value.includes(zone)) {
     selectedZones.value = selectedZones.value.filter(z => z !== zone);
@@ -219,17 +257,22 @@ const submitForm = () => {
   );
   const status = allMatched ? 'completed' : 'issues';
 
-  router.post(route('admin.inventory-audit.store'), {
-    notes: auditData.value.notes,
-    audit_date: auditData.value.audit_date,
-    status: status,
-    items: auditData.value.items.map(item => ({
-      product_variant_id: item.product_variant_id,
-      expected_quantity: item.expected_quantity,
-      actual_quantity: item.actual_quantity,
-      discrepancy_reason: item.discrepancy_reason
-    }))
-  }, {
+  // Chuẩn bị FormData để gửi kèm ảnh
+  const formData = new FormData();
+  formData.append('notes', auditData.value.notes);
+  formData.append('audit_date', auditData.value.audit_date);
+  formData.append('status', status);
+  auditData.value.items.forEach((item, idx) => {
+    formData.append(`items[${idx}][product_variant_id]`, item.product_variant_id);
+    formData.append(`items[${idx}][expected_quantity]`, item.expected_quantity);
+    formData.append(`items[${idx}][actual_quantity]`, item.actual_quantity);
+    formData.append(`items[${idx}][discrepancy_reason]`, item.discrepancy_reason);
+  });
+  images.value.forEach((file, idx) => {
+    formData.append('images[]', file);
+  });
+
+  router.post(route('admin.inventory-audit.store'), formData, {
     forceFormData: true,
     preserveState: true,
     onSuccess: () => {
@@ -237,7 +280,9 @@ const submitForm = () => {
       if (toast && toast.showLocalToast) {
         toast.showLocalToast('Lưu phiếu kiểm kho thành công!', 'success');
       }
-      // resetForm(); // Nếu bạn có hàm reset form thì gọi ở đây
+      // resetForm();
+      images.value = [];
+      imagePreviews.value = [];
     },
     onError: (errors) => {
       console.error('Lỗi từ backend:', errors);

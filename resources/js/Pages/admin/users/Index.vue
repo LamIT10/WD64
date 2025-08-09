@@ -16,7 +16,8 @@
                             class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all" />
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                     </div>
-                    <Waiting route-name="admin.users.create" :route-params="{}">
+                    <Waiting route-name="admin.users.create" v-can="'admin.user.create'"
+                     :route-params="{}">
                         <i class="fas fa-plus"></i> Nhân viên
                     </Waiting>
                     <!-- <Waiting route-name="#" :route-params="{}">

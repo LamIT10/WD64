@@ -9,7 +9,7 @@
                     Danh sách đơn hàng xuất
                 </h5>
                 <div class="flex gap-2">
-                    <Waiting
+                    <Waiting v-can="'admin.sales-order.create'"
                         route-name="admin.sale-orders.create"
                         :route-params="{}"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -17,7 +17,7 @@
                         <i class="fas fa-plus mr-1"></i> Tạo đơn hàng xuất
                     </Waiting>
                     <button
-                        @click="exportExcel"
+                        @click="exportExcel" v-can="'admin.sales-order.export'"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
                         <i class="fas fa-file-excel mr-1"></i> Xuất Excel

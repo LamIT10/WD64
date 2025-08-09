@@ -141,6 +141,7 @@ class SupplierTransactionRepository extends BaseRepository
                 'new_value' => $data['payment'],
                 'update_type' => "payment",
                 'note' => $data['note'] ?? "",
+                'proof_image' => $this->handleUploadOneFile($data['file'])
             ]);
             DB::commit();
             return $obj;

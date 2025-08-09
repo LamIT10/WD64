@@ -22,11 +22,11 @@ window.Echo = new Echo({
         headers: {}
     }
 });
-
-console.log('VITE_REVERB_APP_KEY:', import.meta.env.VITE_REVERB_APP_KEY);
-console.log('VITE_REVERB_HOST:', import.meta.env.VITE_REVERB_HOST);
-console.log('VITE_REVERB_PORT:', import.meta.env.VITE_REVERB_PORT);
-console.log('VITE_REVERB_SECURE:', import.meta.env.VITE_REVERB_SECURE);
+// Check biến môi trường
+// console.log('VITE_REVERB_APP_KEY:', import.meta.env.VITE_REVERB_APP_KEY);
+// console.log('VITE_REVERB_HOST:', import.meta.env.VITE_REVERB_HOST);
+// console.log('VITE_REVERB_PORT:', import.meta.env.VITE_REVERB_PORT);
+// console.log('VITE_REVERB_SECURE:', import.meta.env.VITE_REVERB_SECURE);
 
 // Debug kết nối Pusher
 // window.Echo.connector.pusher.connection.bind('state_change', function(states) {
@@ -45,12 +45,10 @@ console.log('VITE_REVERB_SECURE:', import.meta.env.VITE_REVERB_SECURE);
 //     console.error('🔥 Pusher connection error:', err);
 // });
 
-// Test subscribe to a channel
 setTimeout(() => {
     const testChannel = window.Echo.channel('testing');
     console.log('📢 Bootstrap subscribed to testing channel');
     
-    // Subscribe to global notifications for debugging
     const notificationChannel = window.Echo.channel('notifications.all');
     notificationChannel.listen('NotificationCreated', (e) => {
         console.log('🔔 Global notification received in bootstrap:', e);
