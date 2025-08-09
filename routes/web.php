@@ -304,10 +304,6 @@ Route::get('profile', function () {
     return Inertia::render('Auth/Profile');
 })->name('profile');
 
-// Test Event Routes
-Route::get('admin/test-event', [TestEventController::class, 'index'])->name('test-event');
-Route::post('admin/test-event/broadcast', [TestEventController::class, 'broadcast'])->name('test-event.broadcast');
-
 // Real-time Notification Routes
 Route::prefix('admin/notifications')->as('notifications.')->group(function () {
     Route::get('/', [NotificationRealtimeController::class, 'index'])->name('index');
