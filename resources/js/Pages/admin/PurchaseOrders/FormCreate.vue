@@ -40,6 +40,7 @@ const selectedVariantIds = computed(() =>
 
 // Fetch product variants
 async function onProductSelect(productId) {
+    if (!productId) return;
     try {
         const url = route("admin.purchases.getVariants", { id: productId });
         const { data } = await axios.get(url);
@@ -248,14 +249,14 @@ function openConfirmModal() {
 }
 
 // Submit confirmed orders
+const form = useForm({
+    orders: preparedOrders.value,
+});
 function submitConfirmedOrders() {
-    const form = useForm({
-        orders: preparedOrders.value,
-    });
-
+    form.orders = preparedOrders.value;
     form.post(route("admin.purchases.store"), {
         onError: () => {
-            console.error("Có lỗi !!!");
+            console.error(form.errors);
         },
     });
 }
@@ -287,23 +288,21 @@ function submitConfirmedOrders() {
                     <Multiselect
                         v-model="selectedProduct"
                         :options="selectOptions"
-                        placeholder="Tìm kiếm hoặc chọn sản phẩm"
                         label="label"
-                        track-by="value"
-                        :searchable="true"
-                        :close-on-select="true"
-                        :multiple="false"
-                        @select="onProductSelect"
-                        class="border border-gray-300 rounded-md shadow-sm text-sm p-2 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                        value-prop="value"
+                        searchable
+                        placeholder="Tìm kiếm hoặc chọn sản phẩm"
+                        @update:modelValue="onProductSelect"
                     />
                 </div>
 
                 <!-- Selected Variants -->
                 <div class="mb-8">
                     <h2 class="text-lg font-semibold text-indigo-800 mb-4">
-                        <i class="fa-solid fa-calendar-check text0xl mr-2"></i> Biến thể đã chọn
+                        <i class="fa-solid fa-calendar-check text0xl mr-2"></i>
+                        Biến thể đã chọn
                     </h2>
-                    <div class="overflow-x-auto border border-indigo-100">
+                    <div class="border border-indigo-100">
                         <table class="min-w-full">
                             <thead
                                 class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
@@ -360,20 +359,25 @@ function submitConfirmedOrders() {
                                         {{ variant.name }}
                                     </td>
 
-                                    <td class="px-4 py-3 align-top w-60">
-                                        <select
+                                    <td class="px-4 py-3 align-top w-100">
+                                        <Multiselect
                                             v-if="variant.vendors.length"
                                             v-model="variant.vendorSelected"
-                                            class="w-full bg-transparent border-b border-gray-300 text-sm px-1 py-1 focus:outline-none focus:border-indigo-500"
-                                        >
-                                            <option
-                                                v-for="vendor in variant.vendors"
-                                                :key="vendor.id"
-                                                :value="vendor.id"
-                                            >
-                                                {{ vendor.name }}
-                                            </option>
-                                        </select>
+                                            :options="
+                                                variant.vendors.map((v) => ({
+                                                    label: v.name,
+                                                    value: v.id,
+                                                }))
+                                            "
+                                            label="label"
+                                            value-prop="value"
+                                            placeholder="Chọn nhà cung cấp"
+                                            :searchable="true"
+                                            :z-index="3000"
+                                            :close-on-select="true"
+                                            :can-clear="false"
+                                            class="w-full"
+                                        ></Multiselect>
                                         <span
                                             v-else
                                             class="text-sm text-red-600 italic"
@@ -539,44 +543,39 @@ function submitConfirmedOrders() {
             <!-- Final Items List -->
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h2 class="text-lg font-semibold text-indigo-800 mb-4">
-                    <i class="fa-solid fa-check text-xl mr-2"></i> Danh sách sản phẩm đã chọn
+                    <i class="fa-solid fa-check text-xl mr-2"></i> Danh sách sản
+                    phẩm đã chọn
                 </h2>
-                <div
-                    class="overflow-x-auto border border-indigo-100"
-                >
+                <div class="overflow-x-auto border border-indigo-100">
                     <table class="min-w-full">
-                            <thead
-                                class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
-                            >
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 text-left">
-                                        Sản phẩm
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 text-left">
-                                        Nhà cung cấp
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 text-left">
-                                        Số lượng
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 text-left">
-                                        Đơn vị
-                                    </th>
-                                    <th scope="col" class="px-4 py-3 text-left">
-                                        Giá nhập
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-4 py-3 text-right"
-                                    >
-                                        Thành tiền
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        class="px-4 py-3 text-right"
-                                    >
-                                    </th>
-                                </tr>
-                            </thead>
+                        <thead
+                            class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
+                        >
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left">
+                                    Sản phẩm
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left">
+                                    Nhà cung cấp
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left">
+                                    Số lượng
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left">
+                                    Đơn vị
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left">
+                                    Giá nhập
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-right">
+                                    Thành tiền
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-4 py-3 text-right"
+                                ></th>
+                            </tr>
+                        </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
                             <tr v-if="!finalItems.length">
                                 <td colspan="7" class="p-2">
@@ -697,30 +696,53 @@ function submitConfirmedOrders() {
                             đơn)
                         </h2>
                         <div
-                            v-for="order in preparedOrders"
+                            v-for="(order, index) in preparedOrders"
                             :key="order.supplier_id"
                             class="mb-6 p-4 bg-gray-50 border border-indigo-200 rounded-lg"
                         >
                             <div class="flex justify-between items-center mb-4">
                                 <span
                                     class="text-sm font-semibold text-indigo-700 ml-2"
-                                    ><i class="fa-solid fa-truck text-xl mr-2"></i>
+                                    ><i
+                                        class="fa-solid fa-truck text-xl mr-2"
+                                    ></i>
                                     {{ order.supplier_name }}</span
                                 >
                                 <div class="flex items-center gap-4">
                                     <label class="text-sm text-orange-600"
                                         >Ngày dự kiến:</label
                                     >
-                                    <input
-                                        type="date"
-                                        v-model="order.expected_date"
-                                        class="border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                                    />
+                                    <div>
+                                        <input
+                                            type="date"
+                                            v-model="order.expected_date"
+                                            class="border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                                            :class="
+                                                form.errors[
+                                                    `orders.${index}.expected_date`
+                                                ]
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            "
+                                        />
+                                        <p
+                                            v-if="
+                                                form.errors[
+                                                    `orders.${index}.expected_date`
+                                                ]
+                                            "
+                                            class="text-red-500 text-xs mt-1"
+                                        >
+                                            {{
+                                                form.errors[
+                                                    `orders.${index}.expected_date`
+                                                ]
+                                            }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                            <div
-                                class="overflow-x-auto"
-                            >
+                            <div class="overflow-x-auto">
                                 <table class="min-w-full">
                                     <thead class="bg-indigo-50 text-gray-700">
                                         <tr>
@@ -789,8 +811,10 @@ function submitConfirmedOrders() {
                                                 }}đ
                                             </td>
                                         </tr>
-                                        <tr class="border-t-2 border-t-indigo-100">
-                                          <td colspan="3"></td>
+                                        <tr
+                                            class="border-t-2 border-t-indigo-100"
+                                        >
+                                            <td colspan="3"></td>
                                             <td
                                                 class="px-4 py-4 text-sm font-semibold bg-indigo-50 text-gray-700 text-right"
                                             >
@@ -819,7 +843,8 @@ function submitConfirmedOrders() {
                                 @click="submitConfirmedOrders"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                <i class="fa-solid fa-paper-plane mr-2"></i> Xác nhận & Gửi
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Xác
+                                nhận & Gửi
                             </button>
                         </div>
                     </div>
