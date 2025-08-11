@@ -30,7 +30,6 @@ class SupplierRequest extends FormRequest
                 ];
 
             case 'POST':
-            default:
                 return [
                     'name' => 'required|min:1|max:50',
                     'address' => 'nullable|string|max:255',
@@ -41,6 +40,8 @@ class SupplierRequest extends FormRequest
                     'type' => 'nullable|string|max:50',
                     'kind' => 'nullable|string|max:50',
                 ];
+            default:
+                return [];
         }
     }
 

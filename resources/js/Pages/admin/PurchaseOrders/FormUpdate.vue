@@ -46,6 +46,12 @@
                                     v-model="purchase.order_date"
                                     class="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                                 />
+                                <p
+                                    v-if="form.errors[`order_date`]"
+                                    class="text-red-500 text-xs mt-1"
+                                >
+                                    {{ form.errors[`order_date`] }}
+                                </p>
                             </td>
                         </tr>
                         <tr class="border-b border-gray-200">
@@ -102,6 +108,12 @@
                         <i class="fa-solid fa-check mr-2"></i> Danh sách sản
                         phẩm trong đơn
                     </h2>
+                    <p
+                        v-if="form.errors.items"
+                        class="text-red-500 text-xs mb-4"
+                    >
+                        {{ form.errors.items }}
+                    </p>
                     <table class="w-full border-collapse border-b text-sm">
                         <thead class="bg-indigo-600 text-white">
                             <tr>
@@ -138,6 +150,20 @@
                                         class="w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
                                         min="0"
                                     />
+                                    <p
+                                        v-if="
+                                            form.errors[
+                                                `items.${index}.quantity_ordered`
+                                            ]
+                                        "
+                                        class="text-red-500 text-xs mt-1"
+                                    >
+                                        {{
+                                            form.errors[
+                                                `items.${index}.quantity_ordered`
+                                            ]
+                                        }}
+                                    </p>
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <select
@@ -164,7 +190,7 @@
                                             type="number"
                                             v-model.number="item.unit_price"
                                             @input="updateOriginalPrice(index)"
-                                            class="w-24 text-right border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
+                                            class="w-40 text-right border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
                                             min="0"
                                             step="0.01"
                                         />
@@ -187,6 +213,20 @@
                                                 }}
                                             </span>
                                         </span>
+                                        <p
+                                            v-if="
+                                                form.errors[
+                                                    `items.${index}.unit_price`
+                                                ]
+                                            "
+                                            class="text-red-500 text-xs mt-1"
+                                        >
+                                            {{
+                                                form.errors[
+                                                    `items.${index}.unit_price`
+                                                ]
+                                            }}
+                                        </p>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-right font-medium">
@@ -243,18 +283,40 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import AppLayout from "../Layouts/AppLayout.vue";
 import { route } from "ziggy-js";
 import Waiting from "../../components/Waiting.vue";
 
-// Props
 const { purchase, users, products } = defineProps({
     purchase: { default: () => ({ supplier: {}, items: [] }) },
     users: { default: () => [] },
     products: { default: () => [] },
 });
+
+const calculateConvertedPrice = (item) => {
+    const product = item.product_variant.product;
+    const unitPrice = Number(item.unit_price) || 0;
+    if (item.unit_id === product.default_unit_id) {
+        return unitPrice;
+    }
+    const conversion = product.unit_conversions.find(
+        (conv) => conv.to_unit_id === item.unit_id
+    );
+    const factor = Number(conversion?.conversion_factor) || 1;
+    return conversion ? unitPrice * factor : unitPrice;
+};
+
+watch(
+    () => purchase.order_date,
+    (val) => {
+        if (val && val.includes("T")) {
+            purchase.order_date = val.split("T")[0];
+        }
+    },
+    { immediate: true }
+);
 
 onMounted(() => {
     if (purchase.order_date) {
@@ -263,33 +325,79 @@ onMounted(() => {
     purchase.items.forEach((item) => {
         const product = item.product_variant.product;
         const isDefaultUnit = item.unit_id === product.default_unit_id;
-
+        // Ensure unit_price is a number
+        item.unit_price = Number(item.unit_price) || 0;
         if (isDefaultUnit) {
-            item.original_unit_price = parseFloat(item.unit_price);
+            item.original_unit_price = item.unit_price;
         } else {
             const conversion = product.unit_conversions.find(
                 (conv) => conv.to_unit_id === item.unit_id
             );
-            const factor = parseFloat(conversion?.conversion_factor || 1);
-            item.original_unit_price = parseFloat(item.unit_price) / factor;
+            const factor = Number(conversion?.conversion_factor) || 1;
+            item.original_unit_price = item.unit_price / factor;
         }
-
-        item.unit_price = item.original_unit_price;
+        // Converted price is always a number
         item.converted_price = calculateConvertedPrice(item);
-        item.subtotal = item.quantity_ordered * item.converted_price;
+        item.subtotal =
+            (Number(item.quantity_ordered) || 0) *
+            (Number(item.converted_price) || 0);
+    });
+    // Update total amount on mount
+    nextTick(() => {
+        totalAmount.value = purchase.items.reduce(
+            (sum, item) =>
+                sum +
+                (Number(item.quantity_ordered) || 0) *
+                    (Number(item.converted_price) || 0),
+            0
+        );
     });
 });
 
-// Computed
-const totalAmount = computed(() =>
-    purchase.items.reduce(
-        (sum, item) => sum + item.quantity_ordered * item.converted_price,
-        0
-    )
+watch(
+    () => purchase.items,
+    (items) => {
+        items.forEach((item) => {
+            const product = item.product_variant.product;
+            const isDefaultUnit = item.unit_id === product.default_unit_id;
+            item.unit_price = Number(item.unit_price) || 0;
+            if (isDefaultUnit) {
+                item.original_unit_price = item.unit_price;
+            } else {
+                const conversion = product.unit_conversions.find(
+                    (conv) => conv.to_unit_id === item.unit_id
+                );
+                const factor = Number(conversion?.conversion_factor) || 1;
+                item.original_unit_price = item.unit_price / factor;
+            }
+            item.converted_price = calculateConvertedPrice(item);
+            item.subtotal =
+                (Number(item.quantity_ordered) || 0) *
+                (Number(item.converted_price) || 0);
+        });
+    },
+    { immediate: true, deep: true }
 );
 
-// Format currency
+const totalAmount = ref(0);
+
+// Tự động cập nhật tổng tiền khi items thay đổi
+watch(
+    () => purchase.items.map((i) => [i.quantity_ordered, i.converted_price]),
+    () => {
+        totalAmount.value = purchase.items.reduce(
+            (sum, item) =>
+                sum +
+                (Number(item.quantity_ordered) || 0) *
+                    (Number(item.converted_price) || 0),
+            0
+        );
+    },
+    { deep: true, immediate: true }
+);
+
 const formatCurrency = (value) => {
+    value = Number(value) || 0;
     return new Intl.NumberFormat("vi-VN", {
         style: "currency",
         currency: "VND",
@@ -297,7 +405,6 @@ const formatCurrency = (value) => {
     }).format(value);
 };
 
-// Format date
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, "0");
@@ -335,63 +442,109 @@ const getAvailableUnits = (item) => {
     ];
 };
 
-const calculateConvertedPrice = (item) => {
-    const product = item.product_variant.product;
-    if (item.unit_id === product.default_unit_id) {
-        return parseFloat(item.unit_price || 0).toFixed(2);
-    }
-    const conversion = product.unit_conversions.find(
-        (conv) => conv.to_unit_id === item.unit_id
-    );
-    if (conversion) {
-        return (
-            parseFloat(item.unit_price) *
-            parseFloat(conversion.conversion_factor)
-        ).toFixed(2);
-    }
-    return parseFloat(item.unit_price || 0).toFixed(2);
-};
-
 const updateItem = (index) => {
     const item = purchase.items[index];
+    item.unit_price = Number(item.unit_price) || 0;
     item.converted_price = calculateConvertedPrice(item);
-    item.subtotal = item.quantity_ordered * item.converted_price;
+    item.subtotal =
+        (Number(item.quantity_ordered) || 0) *
+        (Number(item.converted_price) || 0);
+    // Update total amount
+    nextTick(() => {
+        totalAmount.value = purchase.items.reduce(
+            (sum, item) =>
+                sum +
+                (Number(item.quantity_ordered) || 0) *
+                    (Number(item.converted_price) || 0),
+            0
+        );
+    });
 };
 
 const updateOriginalPrice = (index) => {
     const item = purchase.items[index];
+    item.unit_price = Number(item.unit_price) || 0;
     item.original_unit_price = item.unit_price;
     item.converted_price = calculateConvertedPrice(item);
-    item.subtotal = item.quantity_ordered * item.converted_price;
+    item.subtotal =
+        (Number(item.quantity_ordered) || 0) *
+        (Number(item.converted_price) || 0);
+    nextTick(() => {
+        totalAmount.value = purchase.items.reduce(
+            (sum, item) =>
+                sum +
+                (Number(item.quantity_ordered) || 0) *
+                    (Number(item.converted_price) || 0),
+            0
+        );
+    });
 };
 
 const updateUnitPrice = (index) => {
     const item = purchase.items[index];
+    item.unit_price = Number(item.unit_price) || 0;
     item.converted_price = calculateConvertedPrice(item);
-    item.subtotal = item.quantity_ordered * item.converted_price;
+    item.subtotal =
+        (Number(item.quantity_ordered) || 0) *
+        (Number(item.converted_price) || 0);
+    nextTick(() => {
+        totalAmount.value = purchase.items.reduce(
+            (sum, item) =>
+                sum +
+                (Number(item.quantity_ordered) || 0) *
+                    (Number(item.converted_price) || 0),
+            0
+        );
+    });
 };
 
-// Remove item
 const removeItem = (index) => {
     purchase.items.splice(index, 1);
 };
 
+const form = useForm({
+    order_date: purchase.order_date ?? null,
+    user_id: purchase.user_id ?? null,
+    total_amount: 0,
+    items: [],
+});
+
 const savePurchase = () => {
-    const form = useForm({
-        order_date: purchase.order_date,
-        user_id: purchase.user_id,
-        total_amount: parseFloat(totalAmount.value),
-        items: purchase.items.map((item) => ({
+    // Recalculate converted_price and subtotal for each item before saving
+    purchase.items.forEach((item) => {
+        item.unit_price = Number(item.unit_price) || 0;
+        item.converted_price = calculateConvertedPrice(item);
+        item.subtotal =
+            (Number(item.quantity_ordered) || 0) *
+            (Number(item.converted_price) || 0);
+    });
+    form.order_date = purchase.order_date || null;
+    form.user_id = purchase.user_id || null;
+    form.total_amount = purchase.items.reduce(
+        (sum, item) =>
+            sum +
+            (Number(item.quantity_ordered) || 0) *
+                (Number(item.converted_price) || 0),
+        0
+    );
+    form.items = purchase.items.map((item) => {
+        const qty = Number(item.quantity_ordered) || 0;
+        const price = Number(item.converted_price) || 0;
+        return {
             id: item.id,
             variant_id: item.product_variant.id,
-            quantity_ordered: item.quantity_ordered,
+            quantity_ordered: qty,
             unit_id: item.unit_id,
-            unit_price: parseFloat(item.converted_price),
-            subtotal: parseFloat(item.subtotal),
+            unit_price: price,
+            subtotal: qty * price,
             supplier_id: item.supplier_id,
-        })),
+        };
     });
 
-    form.post(route("admin.purchases.update", purchase.id), {});
+    form.put(route("admin.purchases.update", purchase.id), {
+        onError: () => {
+            console.log(form.errors);
+        },
+    });
 };
 </script>

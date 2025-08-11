@@ -54,7 +54,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
-        Route::post('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
+        Route::put('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
+        Route::post('{id}/end', [PurchaseOrderController::class, 'end'])->name('end');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->middleware('has_permission:' . PermissionConstant::RECEIVING_INDEX)->name('index');

@@ -17,7 +17,8 @@ class GoodReceiptController extends Controller
     {
         $listGoodReceipts = $this->handleRepository->getList($request);
         return Inertia::render('admin/PurchaseOrders/ListGoodReceipt', [
-            'listGoodReceipts' => $listGoodReceipts
+            'listGoodReceipts' => $listGoodReceipts,
+            'filters' => $request->only(['code', 'purchase_order_code', 'date_from', 'date_to']),
         ]);
     }
     public function createFromPurchaseOrder($id)

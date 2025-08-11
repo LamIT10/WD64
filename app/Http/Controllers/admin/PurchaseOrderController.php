@@ -18,7 +18,8 @@ class PurchaseOrderController extends Controller
     {
         $listOrders = $this->handleRepository->getList($request);
         return Inertia::render('admin/PurchaseOrders/List',  [
-            'listOrders' => $listOrders
+            'listOrders' => $listOrders,
+            'filters' => $request->only(['order_status','supplier','code','start','end']),
         ]);
     }
     public function create()
@@ -36,6 +37,7 @@ class PurchaseOrderController extends Controller
         $data = $this->handleRepository->getSupplierAndUnit($idVariant);
         return response()->json($data);
     }
+
     public function store(PurchaseOrderRequest $request)
     {
         $dataCreate = $request->all();
@@ -62,10 +64,15 @@ class PurchaseOrderController extends Controller
             'products'=> $data['product']
         ]);
     }
-    public function update(Request $request, $id)
+    public function update(PurchaseOrderRequest $request, $id)
     {
         $data = $request->all();
         $success = $this->handleRepository->update($data, $id);
-        return $this->returnInertia($success, 'Cập nhật đơn hàng thành công', 'admin.purchases.index');
+        return $this->returnInertia($success, 'Cập nhật đơn hàng thành công', 'admin.purchases.edit', [$id]);
+    }
+    public function end($id)
+    {
+        $success = $this->handleRepository->end($id);
+        return $this->returnInertia($success, 'Đã kết thúc đơn hàng', 'admin.purchases.index');
     }
 }
