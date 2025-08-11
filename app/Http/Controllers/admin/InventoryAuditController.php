@@ -11,26 +11,39 @@ use App\Models\WarehouseZone;
 use App\Models\InventoryLocation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InventoryAuditController extends Controller
 {
     public function index()
     {
-        $audits = InventoryAudit::with(['items.productVariant.product', 'user'])
-            ->latest('id')
+        $audits = InventoryAudit::with([
+            'items.productVariant.product',
+            'items.productVariant.inventory',
+            'items.productVariant.inventoryLocations',
+            'items.productVariant.attributes.attribute',
+            'user',
+            'approvedBy',
+            'images',
+        ])->latest('id')
             ->paginate(20);
 
         foreach ($audits as $audit) {
-            $variantIds = $audit->items->pluck('product_variant_id');
+        $variantIds = $audit->items->pluck('product_variant_id');
+        // Lấy danh sách zone (A, B, C...) mà các sản phẩm thuộc về
+        $zoneIds = InventoryLocation::whereIn('product_variant_id', $variantIds)
+            ->whereNotNull('zone_id')
+            ->distinct()
+            ->pluck('zone_id');
+        $zones = WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+        $audit->audited_zones = $zones;
 
-            // Lấy các inventory_locations tương ứng với các sản phẩm kiểm kê
-            $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
-                ->whereNotNull('custom_location_name')
-                ->distinct()
-                ->pluck('custom_location_name');
-
-            // Gắn vào audit
-            $audit->audited_locations = $locations;
+        // Lấy custom_location_name (học theo logic show)
+        $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
+            ->whereNotNull('custom_location_name')
+            ->distinct()
+            ->pluck('custom_location_name');
+        $audit->audited_locations = $locations;
         }
 
         return Inertia::render('admin/InventoryAudit/Index', [
@@ -131,54 +144,52 @@ class InventoryAuditController extends Controller
 
     public function store(Request $request)
     {
-        // Logic to store inventory audit data
-        // For example, you can validate and save the data here
-        // InventoryAudit::create($request->all());
-
-        // router.post(route('admin.inventory-audit.store'), {
-        // notes: auditData.value.notes,
-        // audit_date: auditData.value.audit_date,
-        // items: auditData.value.items.map(item => ({
-        // product_variant_id: item.product_variant_id,
-        // expected_quantity: item.expected_quantity,
-        // actual_quantity: item.actual_quantity,
-        // discrepancy_reason: item.discrepancy_reason
-        // }))
-        // dd($request->all());
-        // Trên là dữ liệu json gửi hãy nhaanjvaf thêm nó vào db
+        // Debug: Log dữ liệu nhận được
+        Log::info('Store request data:', $request->all());
+        
         $auditData = $request->validate([
             'notes' => 'nullable|string|max:255',
             'audit_date' => 'required|date',
-            'status' => 'required|string|in:completed,issues', // Thêm dòng này
+            'status' => 'required|string|in:completed,issues',
             'items' => 'required|array',
             'items.*.product_variant_id' => 'required|exists:product_variants,id',
             'items.*.expected_quantity' => 'required|numeric',
             'items.*.actual_quantity' => 'required|numeric',
             'items.*.discrepancy_reason' => 'nullable|string|max:255',
         ]);
-        DB::transaction(function () use ($auditData, $request) {
-            $audit = InventoryAudit::create([
-                'notes' => $auditData['notes'],
-                'audit_date' => $auditData['audit_date'],
-                'status' => $auditData['status'],
-                'user_id' => $request->user()->id
-            ]);
+        try {
+            DB::transaction(function () use ($auditData, $request) {
+                $audit = InventoryAudit::create([
+                    'notes' => $auditData['notes'],
+                    'audit_date' => $auditData['audit_date'],
+                    'status' => $auditData['status'],
+                    'user_id' => $request->user()->id
+                ]);
+                $audit->save();
+                
+                // Tạo mã code tự động (KK + id)
+                $audit->code = 'KK' . $audit->id;
+                $audit->save();
 
-            // Tạo nhiều bản ghi con thông qua quan hệ
-            $audit->items()->createMany($auditData['items']);
+                // Tạo nhiều bản ghi con thông qua quan hệ
+                $audit->items()->createMany($auditData['items']);
 
-            // Nhận và lưu nhiều ảnh upload
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $file) {
-                    $path = $file->store('inventory_audits', 'public');
-                    $audit->images()->create([
-                        'url' => '/storage/' . $path,
-                    ]);
+                // Nhận và lưu nhiều ảnh upload
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $file) {
+                        $path = $file->store('inventory_audits', 'public');
+                        $audit->images()->create([
+                            'url' => '/storage/' . $path,
+                        ]);
+                    }
                 }
-            }
-        });
+            });
 
-        return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
+            return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
+        } catch (\Exception $e) {
+            Log::error('Error saving inventory audit: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi lưu: ' . $e->getMessage()]);
+        }
     }
 
 }

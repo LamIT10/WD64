@@ -51,12 +51,28 @@ class GoodReceiptRepository extends BaseRepository
                 $query->select(['id', 'name']);
             },
         ]);
-        $query->orderBy('created_at', 'desc');
-        if (isset($request->code)) {
-            $query->where('code', $request->code);
+
+        // Lọc theo mã phiếu nhập
+        if ($request->filled('code')) {
+            $query->where('code', 'like', '%' . $request->code . '%');
         }
-        $list = $query->get();
-        return $list;
+        // Lọc theo mã đơn nhập
+        if ($request->filled('purchase_order_code')) {
+            $query->whereHas('purchaseOrder', function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->purchase_order_code . '%');
+            });
+        }
+        // Lọc theo ngày nhập
+        if ($request->filled('date_from')) {
+            $query->whereDate('receipt_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('receipt_date', '<=', $request->date_to);
+        }
+
+        $query->orderBy('created_at', 'desc');
+        // Phân trang 5 bản ghi/trang
+        return $query->paginate(5)->withQueryString();
     }
     public function getByPurchaseOrder($id)
     {
@@ -71,7 +87,7 @@ class GoodReceiptRepository extends BaseRepository
                 $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered', 'quantity_received', 'unit_price', 'unit_id', 'subtotal']);
             },
             'items.productVariant' => function ($query) {
-                $query->select(['id', 'product_id']);
+                $query->select(['id', 'product_id', 'code']);
             },
             'items.productVariant.product' => function ($query) {
                 $query->select(['id', 'name', 'default_unit_id']);

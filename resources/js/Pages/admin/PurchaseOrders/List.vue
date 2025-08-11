@@ -7,7 +7,8 @@
                 <h5 class="text-lg text-indigo-700 font-semibold">
                     Danh sách đơn hàng nhập
                 </h5>
-                <Waiting v-can="'admin.purchase.create'"
+                <Waiting
+                    v-can="'admin.purchase.create'"
                     route-name="admin.purchases.create"
                     :route-params="{}"
                     class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -18,129 +19,142 @@
 
             <div class="mb-6">
                 <div class="bg-white rounded p-3">
-                    <nav
-                        class="flex gap-3 justify-start items-center"
-                        aria-label="Tabs"
-                    >
-                        <!-- TẤT CẢ -->
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{}"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-600 shadow-sm hover:shadow-md hover:bg-indigo-100 hover:text-indigo-900 transition-all duration-200 ease-in-out animate-fade-in cursor-pointer'"
-                        >
-                            <i class="fa-solid fa-border-all text-xl"></i>
-                            Tất cả đơn nhập
-                        </Waiting>
-
-                        <!-- CHỜ DUYỆT -->
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 0 }"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-50 text-yellow-800 font-semibold border border-yellow-500 shadow-sm hover:shadow-md hover:bg-yellow-100 hover:text-yellow-900 transition-all duration-200 ease-in-out cursor-pointer'"
-                        >
-                            <i class="fa-solid fa-hourglass-start text-xl"></i>
-                            Chờ duyệt
-                        </Waiting>
-
-                        <!-- ĐÃ DUYỆT -->
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 1 }"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 font-semibold border border-green-500 shadow-sm hover:shadow-md hover:bg-green-100 hover:text-green-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                    <div class="flex gap-3">
+                        <button
+                            @click="filterByStatus('')"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-500 shadow-sm hover:shadow-md hover:text-indigo-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
                             <i
-                                class="fa-solid fa-file-circle-check text-xl"
+                                class="fa-solid fa-border-all text-xl"
+                            ></i>
+                            Tất cả
+                        </button>
+                        <button
+                            @click="filterByStatus(0)"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-500 shadow-sm hover:shadow-md hover:text-amber-900 transition-all duration-200 ease-in-out cursor-pointer"
+                        >
+                            <i
+                                class="fa-solid fa-hourglass-start text-xl"
+                            ></i>
+                            Chờ duyệt
+                        </button>
+                        <button
+                            @click="filterByStatus(1)"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 font-semibold border border-green-500 shadow-sm hover:shadow-md hover:text-green-900 transition-all duration-200 ease-in-out cursor-pointer"
+                        >
+                            <i
+                                class="fa-solid fa-circle-check text-xl"
                             ></i>
                             Đã duyệt
-                        </Waiting>
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 2 }"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:bg-blue-100 hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                        </button>
+                        <button
+                            @click="filterByStatus(2)"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
                             <i
-                                class="fa-solid fa-file-circle-check text-xl"
+                                class="fa-solid fa-bars-progress text-xl"
                             ></i>
                             Nhập một phần
-                        </Waiting>
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 3 }"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:bg-purple-100 hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                        </button>
+                        <button
+                            @click="filterByStatus(3)"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
                             <i
-                                class="fa-solid fa-file-circle-check text-xl"
+                                class="fa-solid fa-clipboard-check text-xl"
                             ></i>
                             Hoàn thành
-                        </Waiting>
-                        <Waiting
-                            route-name="admin.purchases.index"
-                            :route-params="{ order_status: 4 }"
-                            :color="'flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer'"
+                        </button>
+                        <button
+                            @click="filterByStatus(4)"
+                            class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i class="fa-solid fa-ban text-xl"></i>
+                            <i
+                                class="fa-solid fa-ban text-xl"
+                            ></i>
                             Từ chối
-                        </Waiting>
-                    </nav>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div class="mb-6 bg-white p-6 rounded-sm border border-gray-100">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <!-- Nhà cung cấp -->
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1"
-                        >
-                            Nhà cung cấp
-                        </label>
-                        <div class="relative">
-                            <input
-                                type="text"
-                                v-model="filters.supplier"
-                                class="peer w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm placeholder-gray-400 transition-all"
-                                placeholder="Nhập tên hoặc mã nhà cung cấp..."
-                            />
-                            <i
-                                class="fa-solid fa-building absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm peer-focus:text-indigo-500 transition"
-                            ></i>
-                        </div>
-                    </div>
-
-                    <!-- Ngày tạo đơn -->
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1"
-                        >
-                            Ngày tạo đơn
-                        </label>
-                        <input
-                            type="date"
-                            v-model="filters.created_at"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm transition-all"
-                        />
-                    </div>
-
-                    <!-- Trạng thái -->
-                    <div>
-                        <label
-                            class="block text-sm font-semibold text-gray-700 mb-1"
-                        >
-                            Trạng thái
-                        </label>
-                        <select
-                            v-model="filters.status"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm bg-white transition-all"
-                        >
-                            <option value="">Tất cả</option>
-                            <option value="0">Chờ duyệt</option>
-                            <option value="1">Đã duyệt</option>
-                            <option value="2">Nhập một phần</option>
-                            <option value="3">Đã hoàn thành</option>
-                        </select>
-                    </div>
+            <div
+                class="bg-white shadow rounded p-6 mb-6 flex flex-wrap gap-6 items-end"
+            >
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Nhà cung cấp</label
+                    >
+                    <input
+                        v-model="filterForm.supplier"
+                        type="text"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Nhập tên nhà cung cấp"
+                    />
                 </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Mã đơn hàng</label
+                    >
+                    <input
+                        v-model="filterForm.code"
+                        type="text"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Nhập mã đơn hàng"
+                    />
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Từ ngày</label
+                    >
+                    <input
+                        v-model="filterForm.start"
+                        type="date"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Nhập mã đơn hàng"
+                    />
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                        >Đến ngày</label
+                    >
+                    <input
+                        v-model="filterForm.end"
+                        type="date"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        placeholder="Nhập mã đơn hàng"
+                    />
+                </div>
+                <div class="flex gap-4">
+                    <button
+                        @click="submitFilter"
+                        class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition font-medium"
+                    >
+                        Lọc
+                    </button>
+                    <button
+                        type="button"
+                        @click="resetFilter"
+                        class="border border-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-100 transition font-medium"
+                    >
+                        Xóa lọc
+                    </button>
+                </div>
+                <!-- <div class="mt-4 flex gap-3">
+                    <button
+                        @click="submitFilter"
+                        class="px-5 py-2 bg-indigo-600 text-white rounded"
+                    >
+                        LỌC
+                    </button>
+                    <button
+                        @click="resetFilter"
+                        class="px-5 py-2 border rounded"
+                    >
+                        XÓA LỌC
+                    </button>
+                </div> -->
             </div>
 
             <!-- Table -->
@@ -150,72 +164,40 @@
                         class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300"
                     >
                         <tr>
-                            <th scope="col" class="p-4">
-                                <div class="flex items-center">
-                                    <input
-                                        id="checkbox-all-search"
-                                        type="checkbox"
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                    />
-                                    <label
-                                        for="checkbox-all-search"
-                                        class="sr-only"
-                                        >checkbox</label
-                                    >
-                                </div>
-                            </th>
-                            <th scope="col" class="px-4 py-2">Mã đơn nhập</th>
-                            <th scope="col" class="px-4 py-2">Nhà cung cấp</th>
-                            <th scope="col" class="px-4 py-2">Ngày tạo đơn</th>
-                            <th scope="col" class="px-4 py-2">Người tạo đơn</th>
-                            <th scope="col" class="px-4 py-2">Trạng thái</th>
-                            <th scope="col" class="px-4 py-2 text-center">
+                            <th scope="col" class="px-4 py-3">Mã đơn nhập</th>
+                            <th scope="col" class="px-4 py-3">Nhà cung cấp</th>
+                            <th scope="col" class="px-4 py-3">Ngày tạo đơn</th>
+                            <th scope="col" class="px-4 py-3">Người tạo đơn</th>
+                            <th scope="col" class="px-4 py-3">Trạng thái</th>
+                            <th scope="col" class="px-4 py-3 text-center">
                                 Ngày giao dự kiến
                             </th>
-                            <th scope="col" class="px-4 py-2 text-end">
+                            <th scope="col" class="px-4 py-3 text-end">
                                 Thành tiền
                             </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr
-                            v-for="order in filteredOrders"
+                            v-for="order in ordersToShow"
                             :key="order.id"
                             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                             @click="openModal(order)"
                         >
-                            <td class="w-4 p-4">
-                                <div class="flex items-center">
-                                    <input
-                                        :id="
-                                            'checkbox-table-search-' + order.id
-                                        "
-                                        type="checkbox"
-                                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                    />
-                                    <label
-                                        :for="
-                                            'checkbox-table-search-' + order.id
-                                        "
-                                        class="sr-only"
-                                        >checkbox</label
-                                    >
-                                </div>
-                            </td>
                             <th
                                 scope="row"
-                                class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
+                                class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap"
                             >
                                 {{ order.code }}
                             </th>
-                            <td class="px-4 py-2 text-indigo-700 font-semibold">
+                            <td class="px-4 py-3 text-indigo-700 font-semibold">
                                 {{ order.supplier.name }}
                             </td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-3">
                                 {{ formatDate(order.created_at) }}
                             </td>
-                            <td class="px-4 py-2">{{ order.user.name }}</td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-3">{{ order.user.name }}</td>
+                            <td class="px-4 py-3">
                                 <span
                                     :class="{
                                         'text-yellow-600 bg-yellow-100 px-2 py-1 rounded-xl':
@@ -235,13 +217,29 @@
                                     }}</span
                                 >
                             </td>
-                            <td
-                                class="px-4 py-2 text-orange-600 font-semibold text-center"
-                            >
-                                {{ formatDate(order.order_date) }}
+                            <td class="px-4 py-3 font-semibold text-center">
+                                <span>
+                                    {{
+                                        order.order_date
+                                            ? formatDate(order.order_date)
+                                            : "Chưa xác định"
+                                    }}
+                                    <span
+                                        v-if="
+                                            order.order_date &&
+                                            new Date(order.order_date) <
+                                                new Date()
+                                        "
+                                    >
+                                        <i
+                                            class="fas fa-exclamation-triangle text-red-500 ml-2"
+                                            title="Ngày giao đã quá hạn"
+                                        ></i>
+                                    </span>
+                                </span>
                             </td>
                             <td
-                                class="px-4 py-2 text-blue-800 font-semibold flex items-center justify-end"
+                                class="px-4 py-3 text-blue-800 font-semibold flex items-center justify-end"
                             >
                                 {{ formatCurrencyVND(order.total_amount) }}
                                 <i class="fa-solid fa-tag text-lg ml-2"></i>
@@ -250,13 +248,8 @@
                     </tbody>
                 </table>
                 <div
-                    class="px-4 py-2 border-t border-gray-200 flex items-center justify-between"
+                    class="px-4 py-2 border-t border-gray-200 flex items-center justify-end"
                 >
-                    <div class="text-sm text-gray-500">
-                        Hiển thị <span class="font-medium">1</span> đến
-                        <span class="font-medium">2</span> của
-                        <span class="font-medium">10</span> kết quả
-                    </div>
                     <div class="flex justify-end space-x-1 mt-4">
                         <button
                             v-for="link in listOrders.links"
@@ -476,15 +469,24 @@
                                                     }}</span>
                                                 </td>
                                             </tr>
-                                            <tr v-if="selectedOrder.order_status == 4">
+                                            <tr
+                                                v-if="
+                                                    selectedOrder.order_status ==
+                                                    4
+                                                "
+                                            >
                                                 <td
                                                     class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
                                                 >
                                                     Lý do từ chối
                                                 </td>
                                                 <td>
-                                                    <span class="ml-4 font-bold text-red-600">
-                                                        {{selectedOrder.reason}}
+                                                    <span
+                                                        class="ml-4 font-bold text-red-600"
+                                                    >
+                                                        {{
+                                                            selectedOrder.reason
+                                                        }}
                                                     </span>
                                                 </td>
                                             </tr>
@@ -650,7 +652,8 @@
                         <div
                             class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                         >
-                            <button v-can="'admin.purchase.approve'"
+                            <button
+                                v-can="'admin.purchase.approve'"
                                 v-if="selectedOrder.order_status == 0"
                                 @click="approveOrder(selectedOrder.id)"
                                 style="height: max-content"
@@ -659,7 +662,8 @@
                                 <i class="fa-regular fa-circle-check"></i>
                                 Duyệt đơn
                             </button>
-                            <button v-can="'admin.purchase.edit'"
+                            <button
+                                v-can="'admin.purchase.edit'"
                                 v-if="selectedOrder.order_status == 0"
                                 style="height: max-content"
                                 @click="editOrder(selectedOrder.id)"
@@ -669,7 +673,8 @@
                                 Chỉnh sửa
                             </button>
                             <!-- Nút Từ chối mở box lý do -->
-                            <button v-can="'admin.purchase.cancel'"
+                            <button
+                                v-can="'admin.purchase.cancel'"
                                 v-if="
                                     selectedOrder.order_status == 0 &&
                                     !isRejecting
@@ -715,8 +720,17 @@
                                     </button>
                                 </div>
                             </div>
-
-                            <Waiting v-can="'admin.receiving.create'"
+                            <button
+                                v-if="selectedOrder.order_status == 2"
+                                @click="endOrder(selectedOrder.id)"
+                                style="height: max-content"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-pink-600 text-base font-medium text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                <i class="fa-solid fa-xmark text-xl"></i> Kết
+                                thúc đơn
+                            </button>
+                            <Waiting
+                                v-can="'admin.receiving.create'"
                                 v-if="
                                     selectedOrder.order_status == 1 ||
                                     selectedOrder.order_status == 2
@@ -728,7 +742,21 @@
                                 <i
                                     class="fa-solid fa-file-lines text-xl mr-1"
                                 ></i>
-                                Tạo phiếu nhập
+                                <div>
+                                    Tạo phiếu nhập
+                                    <span
+                                        style="margin-right: 5px"
+                                        v-if="
+                                            selectedOrder.good_receipts.length >
+                                            0
+                                        "
+                                        >lần
+                                        {{
+                                            selectedOrder.good_receipts.length +
+                                            1
+                                        }}</span
+                                    >
+                                </div>
                             </Waiting>
                         </div>
                     </div>
@@ -744,10 +772,11 @@ import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 
-const { listOrders } = defineProps({
+const { listOrders, filters: initialFilters } = defineProps({
     listOrders: {
         default: () => ({}),
     },
+    filters: { type: Object, default: () => ({}) },
 });
 const isRejecting = ref(false);
 const rejectionReason = ref("");
@@ -764,67 +793,103 @@ function formatCurrencyVND(value) {
 const isModalOpen = ref(false);
 const selectedOrder = ref({ items: [] });
 const activeTab = ref("all");
-const filters = ref({
-    supplier: "",
-    created_at: "",
-    status: "",
+const filterForm = useForm({
+    order_status: initialFilters?.order_status ?? "",
+    supplier: initialFilters?.supplier ?? "",
+    code: initialFilters?.code ?? "",
+    start: initialFilters?.start ?? "",
+    end: initialFilters?.end ?? "",
 });
+const submitFilter = () => {
+    filterForm.get(route("admin.purchases.index"), {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
+const filterByStatus = (status) => {
+    filterForm.order_status = (status ?? "") === "" ? "" : Number(status);
+    submitFilter();
+};
+const resetFilter = () => {
+    filterForm.supplier = "";
+    filterForm.code = "";
+    filterForm.start = "";
+    filterForm.end = "";
 
+    filterForm.get(route("admin.purchases.index"), {
+        preserveState: false,
+        preserveScroll: true,
+        replace: true,
+    });
+};
 function openModal(order) {
     selectedOrder.value = order;
     isModalOpen.value = true;
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    if (!dateString) return "";
+    const iso = String(dateString);
+    const ymd = iso.slice(0, 10);
+    const [y, m, d] = ymd.split("-");
+    return `${d}/${m}/${y}`;
 }
 
 function closeModal() {
     isModalOpen.value = false;
 }
-
-const filteredOrders = computed(() => {
-    let orders = listOrders.data || [];
-
-    if (activeTab.value !== "all") {
-        orders = orders.filter(
-            (order) => order.status.toLowerCase() === activeTab.value
-        );
-    }
-
-    if (filters.value.supplier) {
-        orders = orders.filter((order) =>
-            order.supplier.name
-                .toLowerCase()
-                .includes(filters.value.supplier.toLowerCase())
-        );
-    }
-    if (filters.value.created_at) {
-        orders = orders.filter(
-            (order) =>
-                new Date(order.created_at).toDateString() ===
-                new Date(filters.value.created_at).toDateString()
-        );
-    }
-    if (filters.value.status) {
-        orders = orders.filter(
-            (order) => order.status === filters.value.status
-        );
-    }
-
-    return orders;
+const ordersToShow = computed(() => {
+    const arr = listOrders?.data;
+    return Array.isArray(arr) ? arr : [];
 });
+// const filteredOrders = computed(() => {
+//     let orders = listOrders.data || [];
+
+//     if (activeTab.value !== "all") {
+//         orders = orders.filter(
+//             (order) => order.status.toLowerCase() === activeTab.value
+//         );
+//     }
+//     if(initialFilters != undefined){
+//     if (initialFilters.supplier) {
+//         orders = orders.filter((order) =>
+//             order.supplier.name
+//                 .toLowerCase()
+//                 .includes(initialFilters.supplier.toLowerCase())
+//         );
+//     }
+//     if (initialFilters.created_at) {
+//         orders = orders.filter(
+//             (order) =>
+//                 new Date(order.created_at).toDateString() ===
+//                 new Date(initialFilters.created_at).toDateString()
+//         );
+//     }
+//     if (initialFilters.status) {
+//         orders = orders.filter(
+//             (order) => order.status === initialFilters.status
+//         );
+//     }
+// }
+
+//     return orders;
+// });
 const approve = useForm({});
+const end = useForm({});
 const cancel = useForm({
     reason: "",
 });
 const edit = useForm({});
 const approveOrder = (id) => {
     approve.post(route("admin.purchases.approve", id), {
+        onSuccess: () => {
+            closeModal();
+        },
+    });
+};
+const endOrder = (id) => {
+    end.post(route("admin.purchases.end", id), {
         onSuccess: () => {
             closeModal();
         },
@@ -867,6 +932,21 @@ const getStatusText = (status) => {
             return "Không xác định";
     }
 };
+const renderDate = function (dateString) {
+    const today = new Date();
+    const inputDate = new Date(dateString);
+
+    today.setHours(0, 0, 0, 0);
+    inputDate.setHours(0, 0, 0, 0);
+
+    if (inputDate < today) {
+        return `<span style="color:red;">
+                  <i class="fas fa-exclamation-triangle"></i> ${dateString}
+                </span>`;
+    } else {
+        return `<span>${dateString}</span>`;
+    }
+};
 </script>
 
 <style scoped>
@@ -899,4 +979,31 @@ select {
         top: 0;
     }
 }
+.btn-shiny{
+  position: relative;
+  overflow: hidden;
+}
+
+/* Vệt sáng */
+.btn-shiny::before{
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -130%;
+  width: 45%;
+  height: 200%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.7), transparent);
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+
+.btn-shiny:hover::before{
+  animation: shiny-sweep .9s ease;
+}
+
+@keyframes shiny-sweep{
+  0%   { left: -130%; }
+  100% { left: 130%; }
+}
+
 </style>

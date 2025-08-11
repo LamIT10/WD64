@@ -36,7 +36,7 @@ class InventoryController extends Controller
     }
 
     public function statistics(Request $request){
-        $month = $request->input('month'); // định dạng YYYY-MM
+        $month = $request->input('month');
 
         if (!$month) {
             $month = date('Y-m');
@@ -132,7 +132,6 @@ class InventoryController extends Controller
 
     public function history()
     {
-        // Trả về trang Inertia (Vue) cho lịch sử kho
         return Inertia::render('admin/Inventory/History');
     }
     

@@ -103,7 +103,7 @@ import { usePage, Link } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import Toast from '../components/Toast.vue';
 import AuthLayout from "./AuthLayout.vue";
-import ToastClient from '@/Pages/components/ToastClient.vue'
+import ToastClient from '@/Pages/components/ToastClient.vue';
 
 const showForgot = ref(false);
 const showPassword = ref(false);

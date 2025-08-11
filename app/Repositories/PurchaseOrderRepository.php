@@ -49,30 +49,23 @@ class PurchaseOrderRepository extends BaseRepository
                 $query->select(['id', 'code', 'purchase_order_id']);
             },
         ]);
-        if (isset($request->order_status)) {
-            switch ($request->order_status) {
-                case 0:
-                    $query->where('order_status', 0);
-                    break;
-                case 1:
-                    $query->where('order_status', 1);
-                    break;
-                case 2:
-                    $query->where('order_status', 2);
-                    break;
-                case 3:
-                    $query->where('order_status', 3);
-                    break;
-                case 4:
-                    $query->where('order_status', 4);
-                    break;
-                default:
-                    break;
-            }
+        if ($request->filled('order_status')) {
+            $query->where('order_status', $request->integer('order_status'));
+        }
+        if ($request->filled('supplier')) {
+            $query->whereHas('supplier', fn($s) => $s->where('name', 'like', '%' . $request->supplier . '%'));
+        }
+        if ($request->filled('code')) {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+        if ($request->filled('start') || $request->filled('end')) {
+            $start = $request->start ? Carbon::parse($request->start)->startOfDay() : Carbon::minValue();
+            $end   = $request->end   ? Carbon::parse($request->end)->endOfDay()   : Carbon::maxValue();
+            $query->whereBetween('created_at', [$start, $end]);
         }
         $query->orderByDesc('id');
 
-        $purchaseList = $query->paginate(10);
+        $purchaseList = $query->paginate(3)->withQueryString();
         return $purchaseList;
     }
     public function getDataForcreate()
@@ -160,6 +153,10 @@ class PurchaseOrderRepository extends BaseRepository
                     $item['purchase_order_id'] = $newPurchaseOrder->id;
                     $item['product_variant_id'] = $item['variant_id'] ?? null;
                     $item['quantity_ordered'] = $item['quantity'] ?? 0;
+                    if ($item['quantity_ordered'] <= 0) {
+                        DB::rollBack();
+                        return $this->returnError('Số lượng nhập phải lớn hơn không');
+                    }
                     $item['unit_id'] = $item['unit_id'] ?? null;
                     $item['unit_price'] = $item['price'] ?? 0;
                     $item['subtotal'] = $item['unit_price'] * $item['quantity_ordered'] ?? 0;
@@ -195,7 +192,6 @@ class PurchaseOrderRepository extends BaseRepository
             $orderApproved['order_status'] = 1;
             $orderApproved['approved_at'] = Carbon::now();
             $purchaseOrder->update($orderApproved);
-            // đổi thành mảng key value dạng số lượng => id variant để foreach rồi cập nhật số lượng transit
             $listItemVariant = PurchaseOrderItem::where('purchase_order_id', $id)->get(['product_variant_id', 'quantity_ordered', 'unit_id']);
             foreach ($listItemVariant as $itemVariant) {
                 $productVariantId = $itemVariant->product_variant_id;
@@ -391,5 +387,31 @@ class PurchaseOrderRepository extends BaseRepository
         $autoExportCode = 'DN-' . str_pad($lastExportNumber + 1, 6, '0', STR_PAD_LEFT);
 
         return $autoExportCode;
+    }
+    public function end($id)
+    {
+        try {
+            $purchaseOrder = $this->handleModel->find($id);
+            if (!$purchaseOrder) {
+                return $this->returnError('Đơn hàng không tồn tại');
+            }
+            if ($purchaseOrder->order_status == 0 && $purchaseOrder->order_status == 1) {
+                return $this->returnError('Đơn hàng chưa nhập, không thể kết thúc');
+            }
+            if ($purchaseOrder->order_status == 3) {
+                return $this->returnError('Đơn hàng đã hoàn thành');
+            }
+            if ($purchaseOrder->order_status == 4) {
+                return $this->returnError('Đơn hàng đã bị từ chối');
+            }
+            DB::beginTransaction();
+            $purchaseOrder->update(['order_status' => 3]);
+            DB::commit();
+            return $purchaseOrder;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Lỗi khi kết thúc đơn hàng: ' . $th->getMessage());
+            return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
+        }
     }
 }
