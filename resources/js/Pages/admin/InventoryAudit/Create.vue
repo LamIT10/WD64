@@ -257,6 +257,15 @@ const submitForm = () => {
   );
   const status = allMatched ? 'completed' : 'issues';
 
+  // Debug: Log dữ liệu trước khi gửi
+  console.log('Submitting audit data:', {
+    notes: auditData.value.notes,
+    audit_date: auditData.value.audit_date,
+    status: status,
+    items: auditData.value.items,
+    images: images.value
+  });
+
   // Chuẩn bị FormData để gửi kèm ảnh
   const formData = new FormData();
   formData.append('notes', auditData.value.notes);
@@ -275,7 +284,8 @@ const submitForm = () => {
   router.post(route('admin.inventory-audit.store'), formData, {
     forceFormData: true,
     preserveState: true,
-    onSuccess: () => {
+    onSuccess: (page) => {
+      console.log('Success response:', page);
       const toast = document.querySelector('toast');
       if (toast && toast.showLocalToast) {
         toast.showLocalToast('Lưu phiếu kiểm kho thành công!', 'success');
@@ -286,11 +296,15 @@ const submitForm = () => {
     },
     onError: (errors) => {
       console.error('Lỗi từ backend:', errors);
+      console.error('Full error object:', JSON.stringify(errors, null, 2));
       const toast = document.querySelector('toast');
       if (toast && toast.showLocalToast) {
         toast.showLocalToast('Lỗi khi lưu phiếu kiểm kho: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
       }
     },
+    onProgress: (progress) => {
+      console.log('Upload progress:', progress);
+    }
   });
 };
 
