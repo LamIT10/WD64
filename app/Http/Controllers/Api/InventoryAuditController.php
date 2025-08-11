@@ -25,18 +25,39 @@ class InventoryAuditController extends BaseApiController
             ->latest('id')
             ->paginate(20);
 
+
         foreach ($audits as $audit) {
             $variantIds = $audit->items->pluck('product_variant_id');
-
             // Lấy các inventory_locations tương ứng với các sản phẩm kiểm kê
-            $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
+            $audited_locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
                 ->whereNotNull('custom_location_name')
                 ->distinct()
                 ->pluck('custom_location_name');
+            $audit->audited_locations = $audited_locations;
 
-            // Gắn vào audit
-            $audit->audited_locations = $locations;
+            // Gán custom_location_name cho từng item
+            foreach ($audit->items as $item) {
+                $location = InventoryLocation::where('product_variant_id', $item->product_variant_id)
+                    ->whereNotNull('custom_location_name')
+                    ->first();
+                $item->custom_location_name = $location ? $location->custom_location_name : null;
+            }
         }
+
+        // Chuyển đổi dữ liệu audits để đảm bảo có code và audited_locations
+        $audits->getCollection()->transform(function ($audit) {
+            return [
+                'id' => $audit->id,
+                'code' => $audit->code,
+                'audited_locations' => $audit->audited_locations,
+                'audit_date' => $audit->audit_date,
+                'created_at' => $audit->created_at,
+                'user_name' => $audit->user ? $audit->user->name : '',
+                'status' => $audit->status,
+                'is_adjusted' => $audit->is_adjusted,
+                // ...các trường khác nếu cần...
+            ];
+        });
 
         return response()->json([
             'data' => $audits,

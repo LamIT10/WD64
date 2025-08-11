@@ -40,7 +40,7 @@ class LoginRepository extends BaseRepository
             // xử lí tk đã nghỉ
              if ($user->status === 'inactive') {
                 Auth::logout(); 
-            throw new Exception('Thông tin đăng nhập không chính xác.');
+                throw new Exception('Thông tin đăng nhập không chính xác.');
              }
             // xử lý các quyên hạng trùng nhau
             $permissions = $user->getPermissionsViaRoles()->pluck("name")->unique()->values();

@@ -126,10 +126,10 @@
                 class="px-2 py-2 text-center border-b border-indigo-50 align-middle"
                 :title="`Khu vực: ${(item.audited_zones || []).join(', ')}`">
                 <div class="flex flex-wrap justify-center gap-0.5">
-                  <span v-for="zone in item.audited_zones || []" :key="zone"
+                  <span v-for="location in item.audited_zones || []" :key="location"
                     class="inline-block bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full shadow-sm font-semibold"
-                    :title="`Khu vực: ${zone}`">
-                    {{ zone }}
+                    :title="`Khu vực: ${location}`">
+                    {{ location }}
                   </span>
                 </div>
               </td>
@@ -285,7 +285,22 @@ const props = defineProps({
   audits: Object,
   status: String,
 });
-console.log(props.audits?.data)
+console.log('DEBUG audits.data:', props.audits?.data);
+
+if (props.audits?.data && Array.isArray(props.audits.data)) {
+  props.audits.data.forEach((item, idx) => {
+    console.log(`Audit #${idx}:`, {
+      id: item.id,
+      code: item.code,
+      audited_locations: item.audited_locations,
+      audit_date: item.audit_date,
+      created_at: item.created_at,
+      user_name: item.user_name,
+      status: item.status,
+      is_adjusted: item.is_adjusted,
+    });
+  });
+}
 
 // Tab control
 const activeTab = ref(props.status || 'in_stock');
