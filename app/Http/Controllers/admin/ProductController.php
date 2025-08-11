@@ -89,9 +89,6 @@ class ProductController extends Controller
     {
         $product = $this->productRepository->show($id);
 
-        if (isset($product['status']) && $product['status'] == false) {
-            return abort(404);
-        }
         return Inertia::render('admin/products/ShowProduct', [
             'product' => $product
         ]);
@@ -103,10 +100,6 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $data = $this->productRepository->getEditData($id);
-
-        if (isset($data['status']) && $data['status'] == false) {
-            return abort(404);
-        }
 
         return Inertia::render('admin/products/EditProduct', $data);
     }
