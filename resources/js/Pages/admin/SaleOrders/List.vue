@@ -9,7 +9,7 @@
                     Danh sách đơn hàng xuất
                 </h5>
                 <div class="flex gap-2">
-                    <Waiting
+                    <Waiting v-can="'admin.sales-order.create'"
                         route-name="admin.sale-orders.create"
                         :route-params="{}"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -17,7 +17,7 @@
                         <i class="fas fa-plus mr-1"></i> Tạo đơn hàng xuất
                     </Waiting>
                     <button
-                        @click="exportExcel"
+                        @click="exportExcel" v-can="'admin.sales-order.export'"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
                         <i class="fas fa-file-excel mr-1"></i> Xuất Excel
@@ -457,20 +457,26 @@
                                                     </td>
                                                     <td class="px-4 py-2">
                                                         <input
-                                                            v-model.number="
-                                                                pay_before
+                                                            :value="
+                                                                formatInputCurrency(
+                                                                    pay_before
+                                                                )
                                                             "
-                                                            type="number"
+                                                            @input="
+                                                                onPayBeforeInput(
+                                                                    $event
+                                                                )
+                                                            "
+                                                            @blur="
+                                                                onPayBeforeBlur
+                                                            "
+                                                            type="text"
                                                             min="0"
                                                             :max="
                                                                 selectedOrder.total_amount
                                                             "
-                                                            step="1000"
                                                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm"
                                                             placeholder="Nhập số tiền thanh toán trước"
-                                                            @input="
-                                                                validatePayBefore
-                                                            "
                                                         />
                                                     </td>
                                                 </tr>
@@ -488,22 +494,28 @@
                                                     </td>
                                                     <td class="px-4 py-2">
                                                         <input
-                                                            v-model.number="
-                                                                pay_after
+                                                            :value="
+                                                                formatInputCurrency(
+                                                                    pay_after
+                                                                )
                                                             "
-                                                            type="number"
+                                                            @input="
+                                                                onPayAfterInput(
+                                                                    $event
+                                                                )
+                                                            "
+                                                            @blur="
+                                                                onPayAfterBlur
+                                                            "
+                                                            type="text"
                                                             min="0"
                                                             :max="
                                                                 selectedOrder.total_amount -
                                                                 (selectedOrder.pay_before ||
                                                                     0)
                                                             "
-                                                            step="1000"
                                                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm"
                                                             placeholder="Nhập số tiền thanh toán sau"
-                                                            @input="
-                                                                validatePayAfter
-                                                            "
                                                         />
                                                     </td>
                                                 </tr>
@@ -696,7 +708,7 @@
                                     v-if="selectedOrder.status === 'pending'"
                                     @click="approveOrder(selectedOrder.id)"
                                     class="w-full inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                    :disabled="errorMessage || approve.isDirty"
+                                    :disabled="approve.processing"
                                 >
                                     <i class="fa-regular fa-circle-check"></i>
                                     Duyệt đơn
@@ -1107,6 +1119,7 @@ const approveOrder = (id) => {
         id,
         pay_before: pay_before.value,
     });
+    errorMessage.value = "";
     if (
         isNaN(pay_before.value) ||
         pay_before.value === null ||
@@ -1376,6 +1389,32 @@ function openOrderModalIfNeeded() {
         const order = listOrders.data.find((o) => o.id == saleOrderId);
         if (order) openModal(order);
     }
+}
+function formatInputCurrency(value) {
+    if (value === null || value === undefined) return "";
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parseCurrencyInput(str) {
+    return Number(str.replace(/,/g, ""));
+}
+
+function onPayBeforeInput(e) {
+    const val = parseCurrencyInput(e.target.value);
+    pay_before.value = isNaN(val) ? 0 : val;
+}
+
+function onPayBeforeBlur(e) {
+    e.target.value = formatInputCurrency(pay_before.value);
+}
+
+function onPayAfterInput(e) {
+    const val = parseCurrencyInput(e.target.value);
+    pay_after.value = isNaN(val) ? 0 : val;
+}
+
+function onPayAfterBlur(e) {
+    e.target.value = formatInputCurrency(pay_after.value);
 }
 </script>
 

@@ -23,47 +23,43 @@ class PermissionConstant
     public const SALES_ORDER_EXPORT  = 'admin.sales-order.export';
     public const SALES_ORDER_COMPLETE  = 'admin.sales-order.complete';
 
-
-
-
-    // ==== CUSTOMERS ==== Quản lý khách hàng
-    public const CUSTOMER_INDEX = 'admin.customers.index';
-    public const CUSTOMER_CREATE = 'admin.customers.create';
-    public const CUSTOMER_EDIT = 'admin.customers.edit';
-    public const CUSTOMER_DELETE = 'admin.customers.destroy';
-    public const CUSTOMER_SHOW = 'admin.customers.show';
-    public const CUSTOMER_RANK_STORE = 'admin.customers.ranks.store';
-    // ====USER===== Quản lý nhân viên
-    public const USER_INDEX = 'admin.user.index';
-    public const USER_CREATE = 'admin.user.create';
-    public const USER_EDIT = 'admin.user.edit';
-    public const USER_DELETE = 'admin.user.delete';
-    public const USER_SHOW = 'admin.user.show';
-    // ==== RANKS ===== Quản lý hạng khách hàng
-    public const RANK_INDEX   = 'admin.rank.index';
-    public const RANK_CREATE  = 'admin.rank.create';
-    public const RANK_EDIT    = 'admin.rank.edit';
-    public const RANK_DELETE  = 'admin.rank.delete';
-
-    // ==== INVENTORY ==== Quản lý kho
-    public const INVENTORY_INDEX   = 'admin.inventory.index';
-    public const INVENTORY_CREATE  = 'admin.inventory.create';
-    public const INVENTORY_EDIT    = 'admin.inventory.edit';
-    public const INVENTORY_DELETE  = 'admin.inventory.delete';
-
     // ==== INVENTORY AUDIT ==== Quản lý vị trí kho
     public const INVENTORY_AUDIT_INDEX   = 'admin.inventory-audit.index';
     public const INVENTORY_AUDIT_CREATE  = 'admin.inventory-audit.create';
-    public const INVENTORY_AUDIT_EDIT    = 'admin.inventory-audit.edit';
-    public const INVENTORY_AUDIT_DELETE  = 'admin.inventory-audit.delete';
+    public const INVENTORY_AUDIT_SHOW    = 'admin.inventory-audit.show';
+    public const INVENTORY_AUDIT_EXPORT  = 'admin.inventory-audit.export';
+    // ==== INVENTORY ==== Quản lý kho
+    public const INVENTORY_INDEX   = 'admin.inventory.index';
 
     // ==== PRODUCTS ==== Quản lý sản phẩm
     public const PRODUCT_INDEX   = 'admin.product.index';
     public const PRODUCT_CREATE  = 'admin.product.create';
     public const PRODUCT_EDIT    = 'admin.product.edit';
     public const PRODUCT_DELETE  = 'admin.product.delete';
+    public const PRODUCT_SHOW  = 'admin.product.show';
 
 
+
+    // ==== ATTRIBUTES ==== Quản lý thuộc tính
+    public const ATTRIBUTE_INDEX   = 'admin.attribute.index';
+    public const ATTRIBUTE_CREATE  = 'admin.attribute.create';
+    public const ATTRIBUTE_DELETE  = 'admin.attribute.delete';
+
+
+
+
+
+
+    // ==== UNITS ==== Quản lý đơn vị
+    public const UNIT_INDEX   = 'admin.unit.index';
+    public const UNIT_CREATE  = 'admin.unit.create';
+    public const UNIT_DELETE  = 'admin.unit.delete';
+
+    //  Warehouse Zone
+    public const WAREHOUSE_ZONE_INDEX  = 'admin.warehouse-zone.index';
+    public const WAREHOUSE_ZONE_CREATE = 'admin.warehouse-zone.create';
+    public const WAREHOUSE_ZONE_EDIT   = 'admin.warehouse-zone.edit';
+    public const WAREHOUSE_ZONE_DELETE = 'admin.warehouse-zone.delete';
 
 
 
@@ -72,18 +68,32 @@ class PermissionConstant
     public const CATEGORY_CREATE  = 'admin.category.create';
     public const CATEGORY_EDIT    = 'admin.category.edit';
     public const CATEGORY_DELETE  = 'admin.category.delete';
+    public const CATEGORY_SHOW  = 'admin.category.show';
 
-    // ==== UNITS ==== Quản lý đơn vị
-    public const UNIT_INDEX   = 'admin.unit.index';
-    public const UNIT_CREATE  = 'admin.unit.create';
-    public const UNIT_EDIT    = 'admin.unit.edit';
-    public const UNIT_DELETE  = 'admin.unit.delete';
 
-    // ==== ATTRIBUTES ==== Quản lý thuộc tính
-    public const ATTRIBUTE_INDEX   = 'admin.attribute.index';
-    public const ATTRIBUTE_CREATE  = 'admin.attribute.create';
-    public const ATTRIBUTE_EDIT    = 'admin.attribute.edit';
-    public const ATTRIBUTE_DELETE  = 'admin.attribute.delete';
+    // ==== CUSTOMERS ==== Quản lý khách hàng
+    public const CUSTOMER_INDEX = 'admin.customers.index';
+    public const CUSTOMER_CREATE = 'admin.customers.create';
+    public const CUSTOMER_EDIT = 'admin.customers.edit';
+    public const CUSTOMER_DELETE = 'admin.customers.destroy';
+    public const CUSTOMER_SHOW = 'admin.customers.show';
+    public const CUSTOMER_DEBT_ORDERS = 'admin.customers.debt-orders';
+
+    public const CUSTOMER_RANK_STORE = 'admin.customers.ranks.store';
+    // ==== RANKS ===== Quản lý hạng khách hàng
+    public const RANK_INDEX   = 'admin.rank.index';
+    public const RANK_CREATE  = 'admin.rank.create';
+    public const RANK_EDIT    = 'admin.rank.edit';
+    public const RANK_DELETE  = 'admin.rank.delete';
+
+    // ====USER===== Quản lý nhân viên
+    public const USER_INDEX = 'admin.user.index';
+    public const USER_CREATE = 'admin.user.create';
+    public const USER_EDIT = 'admin.user.edit';
+    public const USER_DELETE = 'admin.user.delete';
+    public const USER_SHOW = 'admin.user.show';
+
+
 
     // ==== REPORT ==== Quản lý báo cáo
     public const REPORT_INDEX   = 'admin.report.index';
@@ -100,22 +110,19 @@ class PermissionConstant
 
 
     //  Supplier transaction
-    public const SUPPLIER_TRANSACTION_INDEX = 'admin.supplier_transaction.index';
     public const SUPPLIER_TRANSACTION_SHOW = 'admin.supplier_transaction.show';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE = 'admin.supplier_transaction.update_credit_due_date';
     public const SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier_transaction.update_paid_amount';
 
     //  Supplier transaction
     public const SUPPLIER_INDEX = 'admin.supplier.index';
-    public const SUPPLIER_SHOW = 'admin.supplier.show';
-    public const SUPPLIER_UPDATE_CREDIT_DUE_DATE = 'admin.supplier.update_credit_due_date';
-    public const SUPPLIER_UPDATE_CREDIT_PAID_AMOUNT = 'admin.supplier.update_paid_amount';
-    //  Warehouse Zone
+    public const SUPPLIER_PRODUCT = 'admin.supplier.product';
+    public const SUPPLIER_CREATE = 'admin.supplier.create';
+    public const SUPPLIER_EDIT = 'admin.supplier.edit';
+    public const SUPPLIER_DELETE = 'admin.supplier.delete';
 
-    public const WAREHOUSE_ZONE_INDEX  = 'admin.warehouse-zone.index';
-    public const WAREHOUSE_ZONE_CREATE = 'admin.warehouse-zone.create';
-    public const WAREHOUSE_ZONE_EDIT   = 'admin.warehouse-zone.edit';
-    public const WAREHOUSE_ZONE_DELETE = 'admin.warehouse-zone.delete';
+
+
     public static function all(): array
     {
         return [
@@ -202,31 +209,68 @@ class PermissionConstant
                     ],
                 ],
             ],
-
-
-
+            // ==== INVENTORY AUDIT ==== Quản lý kiểm kê kho
             [
-                'group_permission' => 'PERMISSION_SUPPLIER_TRANSACTION',
-                'group_description' => 'Quyền công nợ nhà cung cấp',
+                'group_permission' => 'PERMISSION_INVENTORY_AUDIT',
+                'group_description' => 'Quyền quản lý kiểm kê kho',
                 'permissions' => [
                     [
-                        "description" => "Danh sách công nợ",
-                        "name" => self::SUPPLIER_TRANSACTION_INDEX,
+                        "description" => "Danh sách kiểm kê kho",
+                        "name" => self::INVENTORY_AUDIT_INDEX,
                     ],
                     [
-                        "description" => "Chi tiết công nợ",
-                        "name" => self::SUPPLIER_TRANSACTION_SHOW,
+                        "description" => "Thêm kiểm kê kho",
+                        "name" => self::INVENTORY_AUDIT_CREATE,
                     ],
                     [
-                        "description" => "Cập nhật hạn công nợ",
-                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE,
+                        "description" => "Chi tiết kiểm kê kho",
+                        "name" => self::INVENTORY_AUDIT_SHOW,
                     ],
                     [
-                        "description" => "Cập nhật thành toán công nợ",
-                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT,
+                        "description" => "Xuất excel kiểm kê kho",
+                        "name" => self::INVENTORY_AUDIT_EXPORT,
                     ],
-                ]
+                ],
             ],
+            // ==== INVENTORY ==== Quản lý kho
+            [
+                'group_permission' => 'PERMISSION_INVENTORY',
+                'group_description' => 'Quyền quản lý kho',
+                'permissions' => [
+                    [
+                        "description" => "Danh sách kho",
+                        "name" => self::INVENTORY_INDEX,
+                    ],
+                ],
+            ],
+            // ==== PRODUCTS ==== Quản lý sản phẩm
+            [
+                'group_permission' => 'PERMISSION_PRODUCT',
+                'group_description' => 'Quyền quản lý sản phẩm',
+                'permissions' => [
+                    [
+                        "description" => "Danh sách sản phẩm",
+                        "name" => self::PRODUCT_INDEX,
+                    ],
+                    [
+                        "description" => "Thêm sản phẩm",
+                        "name" => self::PRODUCT_CREATE,
+                    ],
+                    [
+                        "description" => "Cập nhật sản phẩm",
+                        "name" => self::PRODUCT_EDIT,
+                    ],
+                    [
+                        "description" => "Xóa sản phẩm",
+                        "name" => self::PRODUCT_DELETE,
+                    ],
+                    [
+                        "description" => "Chi tiết sản phẩm sản phẩm",
+                        "name" => self::PRODUCT_SHOW,
+                    ],
+                ],
+            ],
+     
             // Users
             [
                 "group_permission" => "PERMISSION_USER",
@@ -296,6 +340,10 @@ class PermissionConstant
                         "description" => "Xem khách hàng",
                         "name" => self::CUSTOMER_SHOW,
                     ],
+                    [
+                        "description" => "Xem công nợ khách hàng",
+                        "name" => self::CUSTOMER_DEBT_ORDERS,
+                    ],
                 ]
             ],
             [
@@ -315,85 +363,19 @@ class PermissionConstant
                         "name" => self::RANK_EDIT,
                     ],
                     [
-                        "description" => "Xóa hạng khách hàng",
+                        "description" => "Ẩn hạng khách hàng",
                         "name" => self::RANK_DELETE,
                     ],
                 ],
             ],
 
-            // ==== INVENTORY ==== Quản lý kho
-            [
-                'group_permission' => 'PERMISSION_INVENTORY',
-                'group_description' => 'Quyền quản lý kho',
-                'permissions' => [
-                    [
-                        "description" => "Danh sách kho",
-                        "name" => self::INVENTORY_INDEX,
-                    ],
-                    [
-                        "description" => "Thêm kho",
-                        "name" => self::INVENTORY_CREATE,
-                    ],
-                    [
-                        "description" => "Cập nhật kho",
-                        "name" => self::INVENTORY_EDIT,
-                    ],
-                    [
-                        "description" => "Xóa kho",
-                        "name" => self::INVENTORY_DELETE,
-                    ],
-                ],
-            ],
-
-            // ==== INVENTORY AUDIT ==== Quản lý kiểm kê kho
-            [
-                'group_permission' => 'PERMISSION_INVENTORY_AUDIT',
-                'group_description' => 'Quyền quản lý kiểm kê kho',
-                'permissions' => [
-                    [
-                        "description" => "Danh sách kiểm kê kho",
-                        "name" => self::INVENTORY_AUDIT_INDEX,
-                    ],
-                    [
-                        "description" => "Thêm kiểm kê kho",
-                        "name" => self::INVENTORY_AUDIT_CREATE,
-                    ],
-                    [
-                        "description" => "Cập nhật kiểm kê kho",
-                        "name" => self::INVENTORY_AUDIT_EDIT,
-                    ],
-                    [
-                        "description" => "Xóa kiểm kê kho",
-                        "name" => self::INVENTORY_AUDIT_DELETE,
-                    ],
-                ],
-            ],
 
 
 
-            // ==== PRODUCTS ==== Quản lý sản phẩm
-            [
-                'group_permission' => 'PERMISSION_PRODUCT',
-                'group_description' => 'Quyền quản lý sản phẩm',
-                'permissions' => [
-                    [
-                        "description" => "Danh sách sản phẩm",
-                        "name" => self::PRODUCT_INDEX,
-                    ],
-                    [
-                        "description" => "Thêm sản phẩm",
-                        "name" => self::PRODUCT_CREATE,
-                    ],
-                    [
-                        "description" => "Cập nhật sản phẩm",
-                        "name" => self::PRODUCT_EDIT,
-                    ],
-                    [
-                        "description" => "Xóa sản phẩm",
-                        "name" => self::PRODUCT_DELETE,
-                    ],
-                ],
-            ],
+
+
+
+
 
 
 
@@ -420,6 +402,10 @@ class PermissionConstant
                         "description" => "Xóa danh mục",
                         "name" => self::CATEGORY_DELETE,
                     ],
+                    [
+                        "description" => "Chi tiết danh mục",
+                        "name" => self::CATEGORY_SHOW,
+                    ],
                 ],
             ],
 
@@ -435,10 +421,6 @@ class PermissionConstant
                     [
                         "description" => "Thêm đơn vị",
                         "name" => self::UNIT_CREATE,
-                    ],
-                    [
-                        "description" => "Cập nhật đơn vị",
-                        "name" => self::UNIT_EDIT,
                     ],
                     [
                         "description" => "Xóa đơn vị",
@@ -459,10 +441,6 @@ class PermissionConstant
                     [
                         "description" => "Thêm thuộc tính",
                         "name" => self::ATTRIBUTE_CREATE,
-                    ],
-                    [
-                        "description" => "Cập nhật thuộc tính",
-                        "name" => self::ATTRIBUTE_EDIT,
                     ],
                     [
                         "description" => "Xóa thuộc tính",
@@ -495,24 +473,41 @@ class PermissionConstant
             ],
             [
                 'group_permission' => 'PERMISSION_SUPPLIER_TRANSACTION',
-                'group_description' => 'Quyền công nợ nhà cung cấp',
+                'group_description' => 'Quyền quản lý nhà cung cấp',
                 'permissions' => [
                     [
                         "description" => "Danh sách công nợ",
                         "name" => self::SUPPLIER_INDEX,
                     ],
                     [
+                        "description" => "Xoá nhà cung cấp",
+                        "name" => self::SUPPLIER_DELETE,
+                    ],
+                    [
+                        "description" => "Thêm nhà cung cấp nợ",
+                        "name" => self::SUPPLIER_CREATE,
+                    ],
+                    [
+                        "description" => "Sửa nhà cung cấp nợ",
+                        "name" => self::SUPPLIER_EDIT,
+                    ],
+                    [
+                        "description" => "Quản lý sản phẩm nhà cung",
+                        "name" => self::SUPPLIER_PRODUCT,
+                    ],
+                    [
                         "description" => "Chi tiết công nợ",
-                        "name" => self::SUPPLIER_SHOW,
+                        "name" => self::SUPPLIER_TRANSACTION_SHOW,
                     ],
                     [
                         "description" => "Cập nhật hạn công nợ",
-                        "name" => self::SUPPLIER_UPDATE_CREDIT_DUE_DATE,
+                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_DUE_DATE,
                     ],
                     [
-                        "description" => "Cập nhật thanh toán công nợ",
-                        "name" => self::SUPPLIER_UPDATE_CREDIT_PAID_AMOUNT,
+                        "description" => "Cập nhật thành toán công nợ",
+                        "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT,
                     ],
+                
                 ]
             ],
             [

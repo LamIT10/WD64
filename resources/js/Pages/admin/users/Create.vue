@@ -30,11 +30,14 @@
 
                             <input type="file" ref="avatarInput" @change="handleFileChange" accept="image/*"
                                 class="hidden" />
-
+                             
                             <button type="button" @click="triggerInput"
                                 class="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                                 Chọn ảnh
                             </button>
+                            <p v-if="form.errors.avatar" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.avatar }}
+                                    </p>
                         </div>
                     </div>
 

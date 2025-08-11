@@ -6,7 +6,7 @@
                 class="p-4 shadow-sm rounded-lg bg-white mb-4 flex justify-between items-center border border-gray-200">
                 <h5 class="text-lg text-purple-700 font-semibold">Danh sách Khu Vực Kho</h5>
                 <div class="flex items-center space-x-3">
-                    <button @click="openZoneModal"
+                    <button @click="openZoneModal" v-can="'admin.warehouse-zone.create'"
                         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center space-x-2">
                         <i class="fas fa-plus"></i>
                         <span>Thêm mới</span>
@@ -31,14 +31,14 @@
                             <td class="px-6 py-4 text-right text-sm">
                                 <div class="flex justify-end space-x-1">
                                     <!-- Nút Sửa -->
-                                    <button @click="openEditModal(zone)"
+                                    <button @click="openEditModal(zone)" v-can="'admin.warehouse-zone.edit'"
                                         class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                         title="Chỉnh sửa">
                                         <i class="fas fa-edit text-sm"></i>
                                     </button>
 
                                     <!-- Nút Xóa -->
-                                    <ConfirmModal :route-name="'admin.warehouse-zones.destroy'"
+                                    <ConfirmModal :route-name="'admin.warehouse-zones.destroy'" v-can="'admin.warehouse-zone.delete'"
                                         :route-params="{ id: zone.id }" title="Xác nhận xóa khu vực">
                                         <template #trigger="{ openModal }">
                                             <button @click.stop="openModal"

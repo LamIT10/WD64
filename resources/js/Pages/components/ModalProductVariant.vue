@@ -3,7 +3,7 @@
         <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center z-50 modal-overlay">
 
             <Transition name="modal-content" appear>
-                <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-6xl max-h-[90vh] flex flex-col">
+                <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-7xl max-h-[90vh] flex flex-col">
                     <!-- Modal Header -->
                     <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-indigo-50">
                         <div>
@@ -29,7 +29,6 @@
                                             <th scope="col" class="px-6 py-3 z-10">Mã vạch</th>
                                             <th scope="col" class="px-2 py-3">Nhà cung cấp</th>
                                             <th scope="col" class="px-2 py-3">Thuộc tính</th>
-                                            <th scope="col" class="px-2 py-3 text-right">Giá nhập</th>
                                             <th scope="col" class="px-2 py-3 text-right">Giá bán</th>
                                             <th scope="col" class="px-2 py-3 text-right">Tồn kho</th>
                                             <th scope="col" class="px-2 py-3">Vị trí kho</th>
@@ -54,7 +53,7 @@
                                                 <div class="space-y-1">
                                                     <div v-for="supplier in variant.supplier_variants"
                                                         :key="supplier.id" class="text-sm">
-                                                        NCC {{ supplier.supplier_id }}
+                                                        {{ supplier.supplier.name }}
                                                     </div>
                                                 </div>
                                             </td>
@@ -77,15 +76,6 @@
                                                 </div>
                                             </td>
 
-                                            <!-- Cost Price -->
-                                            <td class="px-3 py-4 text-right">
-                                                <div class="space-y-1">
-                                                    <div v-for="supplier in variant.supplier_variants"
-                                                        :key="supplier.id" class="text-sm">
-                                                        {{ formatCurrency(supplier.cost_price) }}
-                                                    </div>
-                                                </div>
-                                            </td>
 
                                             <!-- Sale Price -->
                                             <td class="px-3 py-4 text-right">

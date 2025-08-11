@@ -210,7 +210,7 @@
                                             Hệ số quy đổi
                                         </label>
                                         <input v-model="conversion.conversion_factor"
-                                            v-format-number="conversion.conversion_factor" type="text"
+                                             type="text"
                                             placeholder="Ví dụ: 10.0001"
                                             class="mt-1 w-full px-4 py-2 text-gray-700 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-300" />
                                         <p v-if="form.errors[`unit_conversions.${index}.conversion_factor`]"
@@ -248,7 +248,7 @@
                     <div v-if="!hasVariant" class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Giá bán</label>
-                            <input v-model="form.simple_sale_price" v-format-number="form.simple_sale_price" type="text"
+                            <input v-model="form.simple_sale_price" type="text"
                                 placeholder="Nhập giá bán"
                                 class="w-full px-3 py-2 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300" />
                             <p v-if="form.errors.simple_sale_price" class="text-red-500 text-sm mt-1">
@@ -258,7 +258,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Số lượng tồn kho ban đầu</label>
-                            <input v-model="form.simple_quantity" v-format-number="form.simple_quantity" type="text"
+                            <input v-model="form.simple_quantity" type="text"
                                 disabled placeholder="Nhập số lượng tồn kho"
                                 class="w-full px-3 py-2 border rounded border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-gray-100" />
                             <p v-if="form.errors.simple_quantity" class="text-red-500 text-sm mt-1">
@@ -431,7 +431,7 @@
                                     </p>
                                 </div>
                                 <div>
-                                    <input v-model="item.data.sale_price" v-format-number="item.data.sale_price"
+                                    <input v-model="item.data.sale_price" 
                                         type="text" placeholder="Nhập giá bán"
                                         class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none" />
                                     <p v-if="form.errorsByKey[item.key]?.sale_price" class="text-red-500 text-sm mt-1">
@@ -440,7 +440,7 @@
                                 </div>
                                 <div>
                                     <input v-model="item.data.quantity_on_hand"
-                                        v-format-number="item.data.quantity_on_hand" type="text" disabled
+                                         type="text" disabled
                                         placeholder="Nhập số lượng tồn kho"
                                         class="w-full px-2 py-1 border rounded border-gray-300 text-sm focus:ring-indigo-300 focus:outline-none bg-gray-100" />
                                     <p v-if="form.errorsByKey[item.key]?.quantity_on_hand"
@@ -534,43 +534,6 @@ const props = defineProps({
 });
 const app = getCurrentInstance().appContext.app;
 
-const formatNumber = (value) => {
-    if (!value && value !== 0) return '';
-    const stringValue = value.toString().replace(/[^0-9.]/g, '');
-    const parts = stringValue.split('.');
-    let integerPart = parts[0].replace(/^0+(?!$)/, '') || '0'; 
-    let decimalPart = '';
-    if (parts[1] && parseInt(parts[1]) !== 0) {
-        decimalPart = `.${parts[1].slice(0, 2)}`;
-    }
-    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-    return integerPart + decimalPart;
-};
-app.directive('format-number', {
-    mounted(el, binding) {
-        const handleInput = (event) => {
-            const selectionStart = el.selectionStart;
-            const rawValue = el.value.replace(/,/g, '');
-            const formatted = formatNumber(rawValue);
-
-            if (el.value === formatted) return;
-
-            el.value = formatted;
-            const newSelectionStart = selectionStart + (formatted.length - el.value.length);
-            el.setSelectionRange(newSelectionStart, newSelectionStart);
-
-            binding.instance[binding.expression] = rawValue;
-            el.dispatchEvent(new Event('input'));
-        };
-
-        el.addEventListener('input', handleInput);
-        el.value = formatNumber(binding.value);
-    },
-    updated(el, binding) {
-        el.value = formatNumber(binding.value);
-    }
-});
 
 
 // Hàm gộp biến thể
@@ -753,15 +716,16 @@ onMounted(() => {
 
 const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
+    const totalImages = form.images.length + existingImages.value.length;
 
     if (!files || files.length === 0) return;
 
-    for (const file of files) {
-        if (form.images.length + existingImages.value.length >= maxImages) {
-            form.errors.images = `Chỉ cho phép tối đa ${maxImages} ảnh.`;
-            break;
-        }
+    if (totalImages + files.length > maxImages) {
+        form.errors.images = `Chỉ được phép chọn tối đa ${maxImages} ảnh.`;
+        return;
+    }
 
+    for (const file of files) {
         if (!file.type.match('image.*')) {
             form.errors.images = 'Chỉ chấp nhận file ảnh.';
             continue;

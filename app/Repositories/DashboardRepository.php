@@ -105,6 +105,8 @@ class DashboardRepository extends BaseRepository
             ->orderBy('date', 'asc')
             ->get()->toArray();
 
+        
+
 
 
         $data = [
@@ -154,6 +156,7 @@ class DashboardRepository extends BaseRepository
          
 
             'low_stock_items' => $this->getLowStockItems(10),
+
 
         ];
 

@@ -199,7 +199,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item, index) in transactionSupplier.data" :key="item.id"
+                            <tr v-if="transactionSupplier.data.length > 0" v-for="(item, index) in transactionSupplier.data" :key="item.id"
                                 class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                                 <th scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -288,7 +288,7 @@
                                     </transition>
                                 </td>
                             </tr>
-                            <tr v-if="transactionSupplier.data.length === 0">
+                            <tr v-else="transactionSupplier.data.length === 0">
                                 <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                                     Không có công nợ nào được tìm thấy
                                 </td>

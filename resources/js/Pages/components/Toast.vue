@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showToast"
-    class="fixed top-0 toathihi left-1/2 rounded -translate-x-1/2 z-50 transition-all duration-400 ease-in-out toast-animation"
+    class="fixed top-0 toathihi left-1/2 rounded -translate-x-1/2 z-50 transition-all duration-400 ease-in-out toast-animation " style="z-index:9999;"
     :class="{
       'bg-green-50 border-green-500 dark:bg-green-800': toastType === 'success',
       'bg-red-50 border-red-500 dark:bg-red-800': toastType === 'error',

@@ -7,7 +7,7 @@
           <h1 class="text-2xl font-bold text-indigo-900 mb-1 tracking-tight">{{ reportTitle }}</h1>
           <p class="text-sm text-gray-600">Thống kê tồn kho, nhập xuất vật tư</p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-end gap-3">
           <div class="flex flex-wrap gap-3 items-end">
             <div>
               <label class="block text-sm font-semibold text-indigo-700 mb-1" for="keyword-input">
@@ -27,11 +27,6 @@
             class="flex items-center gap-1.5 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition text-sm font-semibold focus:ring-2 focus:ring-green-400 focus:outline-none active:scale-95 hover:shadow-lg">
             <i class="fa fa-file-export text-base"></i>
             <span class="hidden md:inline">Xuất Excel</span>
-          </button>
-          <button @click="printReport"
-            class="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition text-sm font-semibold focus:ring-2 focus:ring-indigo-400 focus:outline-none active:scale-95 hover:shadow-lg">
-            <i class="fas fa-print text-base"></i>
-            <span class="hidden md:inline">In báo cáo</span>
           </button>
         </div>
       </div>

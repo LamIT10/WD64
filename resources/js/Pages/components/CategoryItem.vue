@@ -67,22 +67,22 @@
                             class="origin-top-right right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
                             ref="dropdown" @click.stop>
                             <div class="py-1">
-                                <Link :href="route('admin.categories.edit', category.id)"
+                                <Link :href="route('admin.categories.edit', category.id)" v-can="'admin.category.edit'"
                                     class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
                                 <i class="fas fa-edit mr-3 text-blue-500 w-4 text-center"></i>
                                 <span>Sửa danh mục</span>
                                 </Link>
-                                <Link :href="route('admin.categories.show', category.id)"
+                                <Link :href="route('admin.categories.show', category.id)" v-can="'admin.category.show'"
                                     class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
                                 <i class="fas fa-plus-circle mr-3 text-green-500 w-4 text-center"></i>
                                 <span>Chi tiết</span>
                                 </Link>
-                                <form :action="route('admin.categories.destroy', category.id)" method="POST"
+                                <form :action="route('admin.categories.destroy', category.id)" method="POST" 
                                     @submit.prevent="() => $inertia.delete(route('admin.categories.destroy', category.id))">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <input type="hidden" name="_token" :value="csrf">
 
-                                    <button type="submit"
+                                    <button type="submit" v-can="'admin.category.delete'"
                                         class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-150">
                                         <i class="fas fa-trash-alt mr-3 text-red-500 w-4 text-center"></i>
                                         <span>Xóa</span>
