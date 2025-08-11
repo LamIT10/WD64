@@ -18,27 +18,6 @@
                         </Waiting>
                     </div>
 
-                    <div class="relative mb-5">
-                        <input
-                            type="text"
-                            placeholder="Tìm hàng hóa theo mã hoặc tên"
-                            class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all"
-                        />
-                        <svg
-                            class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
-                    </div>
-
                     <div class="overflow-x-auto">
                         <div class="relative overflow-x-auto shadow-md">
                             <table
@@ -48,24 +27,6 @@
                                     class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300 dark:bg-gray-700 dark:text-gray-400"
                                 >
                                     <tr>
-                                        <th
-                                            scope="col"
-                                            class="p-4 align-middle"
-                                            rowspan="2"
-                                        >
-                                            <div class="flex items-center">
-                                                <input
-                                                    id="checkbox-all-search"
-                                                    type="checkbox"
-                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                                />
-                                                <label
-                                                    for="checkbox-all-search"
-                                                    class="sr-only"
-                                                    >checkbox</label
-                                                >
-                                            </div>
-                                        </th>
                                         <th
                                             scope="col"
                                             class="px-4 py-2"
@@ -129,19 +90,8 @@
                                         v-for="item in purchaseOrder.items"
                                         :key="item.id"
                                     >
-                                        <td class="p-4">
-                                            <div class="flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                                />
-                                                <label class="sr-only"
-                                                    >checkbox</label
-                                                >
-                                            </div>
-                                        </td>
                                         <td class="px-4 py-2">
-                                            {{ item.id }}
+                                            {{ item.product_variant.code }}
                                         </td>
                                         <td class="px-4 py-2">
                                             {{
@@ -186,17 +136,23 @@
                                                 v-model="receiptForm[item.id]"
                                                 type="number"
                                                 min="0"
-                                                class="w-10 text-blue-800 text-xl text-center bg-transparent focus:outline-none focus:ring-0 border-none"
+                                                class="w-24 text-blue-800 text-xl text-center bg-transparent focus:outline-none focus:ring-0 border-none"
                                                 placeholder="0"
                                             />
                                         </td>
                                         <td class="text-center">
-                                            {{ formatCurrencyVND(item.unit_price) }}
+                                            {{
+                                                formatCurrencyVND(
+                                                    item.unit_price
+                                                )
+                                            }}
                                         </td>
                                         <td
                                             class="text-center font-semibold text-red-700"
                                         >
-                                            {{ formatCurrencyVND(item.subtotal) }}
+                                            {{
+                                                formatCurrencyVND(item.subtotal)
+                                            }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -229,7 +185,7 @@
                                 </div>
                                 <div>
                                     <div class="font-medium text-gray-800">
-                                        minhloc
+                                        hihi
                                     </div>
                                     <div class="text-xs text-gray-400">
                                         20/06/2025 22:16
@@ -240,7 +196,7 @@
                         <div
                             class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
                         >
-                            Chưa nhập hàng
+                            Phiếu in chờ kí
                         </div>
                     </div>
 
@@ -268,18 +224,10 @@
                             </div>
 
                             <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500"
-                                        >Hiện đang nợ NCC:</span
-                                    >
-                                    <span class="font-medium text-red-500"
-                                        >5,405,000</span
-                                    >
-                                </div>
                                 <!-- Tổng tiền hàng tính từ thực nhận -->
                                 <div class="flex justify-between">
                                     <span class="text-gray-500"
-                                        >Tổng tiền hàng:</span
+                                        >Tổng giá trị hàng nhận:</span
                                     >
                                     <span class="font-medium">{{
                                         totalAmount.toLocaleString()
@@ -298,7 +246,7 @@
                                         v-model="realQuantity"
                                         :max="totalAmount"
                                         placeholder="0"
-                                        class="w-24 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all text-right"
+                                        class="w-40 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all text-right"
                                     />
                                 </div>
 
@@ -343,45 +291,60 @@
                             ></textarea>
                             <div
                                 v-if="showReceiveTypeSelector"
-                                class="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded"
+                                class="mt-4 p-3 bg-orange-50 border border-orange-300 rounded"
                             >
                                 <p
-                                    class="text-sm font-medium text-yellow-800 mb-2"
+                                    class="text-sm font-medium text-center text-orange-800 mb-2"
                                 >
+                                    <i
+                                        class="fa-solid fa-triangle-exclamation"
+                                    ></i>
                                     Số lượng hàng nhập chưa đủ
                                 </p>
-                                <div class="flex gap-4">
-                                    <label class="flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            value="partial"
-                                            v-model="form.receive_type"
-                                        />
-                                        <span>Nhập một phần</span>
-                                    </label>
-                                </div>
                             </div>
                         </div>
 
-                        <button
-                            @click="submitGoodReceipt"
-                            class="w-full py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2"
-                        >
-                            <svg
-                                class="h-5 w-5 text-white"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+                        <div class="flex gap-4">
+                            <button
+                                @click="submitGoodReceipt('full')"
+                                class="w-full py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                            <span>Tạo phiếu nhập kho</span>
-                        </button>
+                                <svg
+                                    class="h-5 w-5 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                                <span>Xác nhận kết thúc đơn</span>
+                            </button>
+                            <button
+                                v-if="showReceiveTypeSelector"
+                                @click="submitGoodReceipt('partial')"
+                                class="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+                            >
+                                <svg
+                                    class="h-5 w-5 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                                <span>Nhập một phần</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -427,7 +390,7 @@ const calculateTotals = () => {
 const handleQuantityChange = (item) => {
     const received = Number(receiptForm.value[item.id]);
 
-    if (received > item.quantity_ordered) {
+    if (received > item.quantity_ordered * 2) {
         receiptForm.value[item.id] = item.quantity_ordered;
     }
 
@@ -465,7 +428,16 @@ const form = useForm({
     receive_type: "full",
     payment: 0,
 });
-const submitGoodReceipt = () => {
+const submitGoodReceipt = (receiveType) => {
+    if (receiveType == "full") {
+        if (
+            !confirm(
+                "Bạn có chắc chắn muốn xác nhận hoàn thành và kết thúc đơn nhập này ?"
+            )
+        )
+            return;
+    }
+    form.receive_type = receiveType;
     form.total_amount = totalAmount.value;
     form.payment = realQuantity.value;
 

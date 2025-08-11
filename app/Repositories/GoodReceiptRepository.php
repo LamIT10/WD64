@@ -87,7 +87,7 @@ class GoodReceiptRepository extends BaseRepository
                 $query->select(['id', 'purchase_order_id', 'product_variant_id', 'quantity_ordered', 'quantity_received', 'unit_price', 'unit_id', 'subtotal']);
             },
             'items.productVariant' => function ($query) {
-                $query->select(['id', 'product_id']);
+                $query->select(['id', 'product_id', 'code']);
             },
             'items.productVariant.product' => function ($query) {
                 $query->select(['id', 'name', 'default_unit_id']);

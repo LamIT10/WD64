@@ -128,6 +128,9 @@
                                     {{ formatCurrencyVND(goodReceipt.total_amount) }}
                                     <i class="fa-solid fa-tag text-lg ml-2"></i>
                                 </td>
+                                <td>
+                                    <button @click="printPhieu()">In phiếu</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -314,6 +317,9 @@ function formatDate(dateString) {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+}
+const printPhieu = () =>{
+    window.print();
 }
 </script>
 <style lang="css" scoped>

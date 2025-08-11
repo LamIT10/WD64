@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PurchaseOrderRequest extends FormRequest
+class GoodReceiptRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -38,20 +38,7 @@ class PurchaseOrderRequest extends FormRequest
                     ],
                 ];
             case 'PUT':
-                return [
-                    'order_date' => [
-                        'required',
-                        'date',
-                        'after_or_equal:' . now()->format('Y-m-d')
-                    ],
-                    'user_id' => ['required', 'integer', 'exists:users,id'],
-                    'total_amount' => ['required', 'numeric', 'min:0'],
-                    'items' => ['required', 'array'],
-                    'items.*.variant_id' => ['required', 'integer', 'exists:product_variants,id'],
-                    'items.*.quantity_ordered' => ['required', 'numeric', 'min:0'],
-                    'items.*.unit_id' => ['required', 'integer', 'exists:units,id'],
-                    'items.*.unit_price' => ['required', 'numeric', 'min:0'],
-                ];
+                return [];
             default:
                 return [];
         }
@@ -62,10 +49,6 @@ class PurchaseOrderRequest extends FormRequest
             'orders.*.expected_date.required' => 'Ngày dự kiến không được để trống.',
             'orders.*.expected_date.date' => 'Ngày dự kiến không đúng định dạng.',
             'orders.*.expected_date.after_or_equal' => 'Ngày dự kiến không được ở quá khứ.',
-            'items.*.quantity_ordered.min' => 'Số lượng nhập phải lớn hơn 0',
-            'items.*.unit_price.min' => 'Giá nhập phải lớn hơn 0',
-            'items.required' => 'Phải có sản phẩm trong đơn hàng',
-            'order_date.after_or_equal' => 'Ngày dự kiến không được ở quá khứ',
         ];
     }
 }
