@@ -128,16 +128,15 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     // Routes cho Products (Sản phẩm)
     Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
+        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::get('/', [ProductController::class, 'index'])->middleware('has_permission:' . PermissionConstant::PRODUCT_INDEX)->name('index');
         Route::get('/create', [ProductController::class, 'create'])->middleware('has_permission:' . PermissionConstant::PRODUCT_CREATE)->name('create');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->middleware('has_permission:' . PermissionConstant::PRODUCT_EDIT)->name('edit');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->middleware('has_permission:' . PermissionConstant::PRODUCT_DELETE)->name('destroy');
         Route::get('/{product}', [ProductController::class, 'show'])->middleware('has_permission:' . PermissionConstant::PRODUCT_SHOW)->name('show');
 
-
-        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
         Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
-        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::get('/search', [SupplierController::class, 'searchProducts'])->name('search');
