@@ -17,7 +17,7 @@
 
             <!-- Top Header -->
             <div
-                class="bg-blue-600 text-white p-3 flex items-center justify-between relative"
+                class="bg-indigo-600 text-white p-3 flex items-center justify-between relative"
             >
                 <div class="flex items-center space-x-4 flex-1">
                     <div class="relative flex-1 max-w-md">
@@ -39,7 +39,7 @@
                             <div class="relative">
                                 <ComboboxInput
                                     id="searchProduct"
-                                    class="w-full bg-white pl-10 pr-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    class="w-full bg-white pl-10 pr-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                                     placeholder="Tìm kiếm sản phẩm"
                                     @input="
                                         debouncedSearchProduct(
@@ -108,39 +108,6 @@
                         </Combobox>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button class="p-2 hover:bg-blue-700 rounded" title="Khóa">
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
-                    </button>
-                    <span class="text-sm">0388997335</span>
-                    <button class="p-2 hover:bg-blue-700 rounded" title="Menu">
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
-                    </button>
-                </div>
             </div>
 
             <div class="flex h-screen">
@@ -150,7 +117,7 @@
                     <div
                         v-for="(productGroup, index) in groupedProducts"
                         :key="index"
-                        class="bg-white rounded-lg border-2 border-blue-200 p-4 relative"
+                        class="bg-white rounded-lg border-2 border-indigo-200 p-4 relative"
                         :ref="`productCard-${index}`"
                     >
                         <div
@@ -459,7 +426,7 @@
                                 class="flex justify-between font-semibold text-lg"
                             >
                                 <span>Tổng cộng</span>
-                                <span class="text-blue-600">{{
+                                <span class="text-indigo-600">{{
                                     formatPrice(totalAmount)
                                 }}</span>
                             </div>
@@ -567,7 +534,7 @@
                                 <div class="relative">
                                     <ComboboxInput
                                         id="customer"
-                                        class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                        class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
                                         placeholder="Khách hàng"
                                         @input="
                                             debouncedSearchCustomer(
@@ -638,8 +605,10 @@
 
                         <!-- Phone Number -->
                         <div class="flex items-center space-x-3">
-                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span class="text-blue-600">{{
+                            <div
+                                class="w-3 h-3 bg-indigo-500 rounded-full"
+                            ></div>
+                            <span class="text-indigo-600">{{
                                 form.phone || "Chưa chọn khách hàng"
                             }}</span>
                             <svg
@@ -667,13 +636,13 @@
                                     v-model="form.recipientName"
                                     type="text"
                                     placeholder="Tên người nhận"
-                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
                                 />
                                 <input
                                     v-model="form.phone"
                                     type="text"
                                     placeholder="Số điện thoại"
-                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
                             <!-- Province -->
@@ -681,7 +650,7 @@
                                 <div class="relative">
                                     <ComboboxInput
                                         id="province"
-                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
                                         placeholder="Tỉnh/Thành phố"
                                         @input="
                                             debouncedSearchProvince(
@@ -752,7 +721,7 @@
                                 <div class="relative">
                                     <ComboboxInput
                                         id="ward"
-                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                        class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
                                         placeholder="Phường/Xã"
                                         :disabled="!form.province"
                                         @input="
@@ -822,76 +791,26 @@
                                 v-model="form.address_detail"
                                 type="text"
                                 placeholder="Địa chỉ chi tiết (Số nhà, ngõ, đường)"
-                                class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                                class="w-full py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
                                 :disabled="!form.ward"
                             />
                         </div>
 
                         <!-- Note -->
-                        <div class="flex items-center space-x-2">
-                            <svg
-                                class="w-4 h-4 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-join="round"
-                                    stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                            </svg>
-                            <input
-                                type="text"
-                                placeholder="Ghi chú cho bưu tá"
-                                class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-blue-500"
-                            />
-                        </div>
                     </div>
 
                     <!-- Payment Section -->
                     <div class="bg-white rounded-lg p-4 space-y-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
-                                <span>Customer pay</span>
+                                <span>Số tiền phải trả</span>
                                 <button
                                     class="p-1 hover:bg-gray-100 rounded"
                                     title="Tùy chọn thanh toán"
-                                >
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                        />
-                                    </svg>
-                                </button>
+                                ></button>
                             </div>
-                            <span class="text-2xl font-bold">0</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <span>COD</span>
-                                <label
-                                    class="relative inline-flex items-center cursor-pointer"
-                                >
-                                    <input
-                                        v-model="codEnabled"
-                                        type="checkbox"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                                    ></div>
-                                </label>
-                            </div>
                             <span class="text-2xl font-bold">{{
                                 formatPrice(totalAmount)
                             }}</span>
@@ -900,11 +819,11 @@
 
                     <!-- Complete Button -->
                     <button
-                        class="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+                        class="w-full bg-indigo-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition-colors"
                         @click="handleComplete"
                         :disabled="form.processing || hasQuantityError"
                     >
-                        {{ form.processing ? "Đang xử lý..." : "COMPLETE" }}
+                        {{ form.processing ? "Đang xử lý..." : "HOÀN TẤT" }}
                     </button>
                 </div>
             </div>
