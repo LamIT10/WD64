@@ -56,6 +56,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
         Route::put('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
         Route::post('{id}/end', [PurchaseOrderController::class, 'end'])->name('end');
+        Route::get('export', [PurchaseOrderController::class, 'exportExcel'])->name('export');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->middleware('has_permission:' . PermissionConstant::RECEIVING_INDEX)->name('index');
@@ -64,6 +65,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
+        Route::get('export', [GoodReceiptController::class, 'exportGoodsReceipts'])->name('export');
     });
 
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {

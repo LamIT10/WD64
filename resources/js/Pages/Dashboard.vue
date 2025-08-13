@@ -349,7 +349,7 @@
                   <span class="text-sm font-medium text-gray-700">{{ index + 1 }}. {{ item.customer_name }}</span>
                   <span class="text-sm font-bold text-green-700">{{ formatCurrency(item.total_spent) }}</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="w-full bg-gray-200 rounded-full h-2.5"> 
                   <div class="bg-green-600 h-2.5 rounded-full"
                     :style="{ width: getBarWidthCustomer(item.total_spent) + '%' }">
                   </div>
@@ -374,13 +374,13 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div class="flex justify-between items-center mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Sản phẩm tồn kho thấp</h3>
-            <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Xem tất cả</button>
+            <Link href="/admin/inventory" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Xem tất cả</Link>
           </div>
 
           <div class="space-y-4">
-            <div v-for="item in data.low_stock_items" :key="item.id" class="flex items-center p-3 rounded-lg" :class="item.quantity_on_hand <= 5
+            <div v-for="item in data.low_stock_items" :key="item.id" class="flex items-center p-3 rounded-lg" :class="item.total_quantity <= 50
               ? 'bg-red-50 text-red-600'
-              : item.quantity_on_hand <= 10
+              : item.total_quantity <= 70
                 ? 'bg-orange-50 text-orange-600'
                 : 'bg-gray-100 text-gray-500'">
               <div class="bg-white p-2 rounded-lg mr-3">
@@ -390,9 +390,9 @@
                 </svg>
               </div>
               <div>
-                <p class="font-medium text-gray-800">{{ item.product_name }} - {{ item.code }}</p>
+                <p class="font-medium text-gray-800">{{ item.full_name }}</p>
                 <p class="text-sm">
-                  {{ `Chỉ còn ${item.quantity_on_hand} ${item.unit ?? ''}` }}
+                  {{ `Chỉ còn ${item.total_quantity} ${item.unit ?? ''}` }}
                 </p>
               </div>
             </div>
@@ -554,7 +554,7 @@ const dataFilterDateSaleOrder = reactive({
 })
 console.log(data);
 
-const selectedPeriod = ref('month')
+const selectedPeriod = ref('week')
 
 const topProducts = computed(() => {
   return data?.top_10_product_variants?.[selectedPeriod.value] ?? []
@@ -572,7 +572,7 @@ const getBarWidth = (quantity) => {
 const formatNumber = (val) => {
   return new Intl.NumberFormat().format(val)
 }
-const selectedCustomerPeriod = ref('month')
+const selectedCustomerPeriod = ref('week')
 
 const topCustomers = computed(() => {
   return data?.top_10_customers?.[selectedCustomerPeriod.value] ?? []
@@ -590,9 +590,13 @@ const getBarWidthCustomer = (value) => {
 }
 
 const formatCurrency = (val) => {
-  const number = Number(val) || 0
-  return '₫' + (number / 1_000_000).toFixed(1) + 'M'
-}
+  const number = Number(val) || 0;
+  return number.toLocaleString('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0
+  });
+};
 
 const handleFilterPurchase = () => {
   formFilterDatePurchaseAndSaleOrder.toDatePurchase = formatDateForSubmit(dataFilterDatePurchase.sub_to_date);

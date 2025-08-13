@@ -7,6 +7,8 @@ use App\Http\Requests\PurchaseOrderRequest;
 use App\Repositories\PurchaseOrderRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\PurchaseOrdersExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PurchaseOrderController extends Controller
 {
@@ -74,5 +76,12 @@ class PurchaseOrderController extends Controller
     {
         $success = $this->handleRepository->end($id);
         return $this->returnInertia($success, 'Đã kết thúc đơn hàng', 'admin.purchases.index');
+    }
+    
+      
+        public function exportExcel(Request $request)
+    {
+        $filters = $request->only(['code', 'supplier', 'order_status', 'start', 'end']);
+        return Excel::download(new PurchaseOrdersExport($filters), 'don-nhap.xlsx');
     }
 }

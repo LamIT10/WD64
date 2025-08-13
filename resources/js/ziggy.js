@@ -56,8 +56,17 @@ const Ziggy = {
         },
         "admin.purchases.update": {
             uri: "admin/purchases/{id}/update",
+            methods: ["PUT"],
+            parameters: ["id"],
+        },
+        "admin.purchases.end": {
+            uri: "admin/purchases/{id}/end",
             methods: ["POST"],
             parameters: ["id"],
+        },
+        "admin.purchases.export": {
+            uri: "admin/purchases/export",
+            methods: ["GET", "HEAD"],
         },
         "admin.receiving.index": {
             uri: "admin/receiving",
@@ -87,6 +96,18 @@ const Ziggy = {
             uri: "admin/receiving/store",
             methods: ["POST"],
         },
+        "admin.receiving.export": {
+            uri: "admin/receiving/export",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.reports.index": {
+            uri: "admin/reports",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.reports.export": {
+            uri: "admin/reports/export",
+            methods: ["GET", "HEAD"],
+        },
         "admin.sale-orders.index": {
             uri: "admin/sale-orders",
             methods: ["GET", "HEAD"],
@@ -109,6 +130,11 @@ const Ziggy = {
             methods: ["POST"],
             parameters: ["id"],
         },
+        "admin.sale-orders.complete": {
+            uri: "admin/sale-orders/{id}/complete",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
         "admin.sale-orders.customer.search": {
             uri: "admin/sale-orders/search/customers",
             methods: ["GET", "HEAD"],
@@ -126,11 +152,6 @@ const Ziggy = {
         "admin.sale-orders.find-page": {
             uri: "admin/sale-orders/find-page",
             methods: ["GET", "HEAD"],
-        },
-        "admin.sale-orders.complete": {
-            uri: "admin/sale-orders/{id}/complete",
-            methods: ["POST"],
-            parameters: ["id"],
         },
         "admin.sale-orders.variants.all": {
             uri: "admin/sale-orders/variants/{productId}",
@@ -198,27 +219,6 @@ const Ziggy = {
             uri: "admin/inventory/create",
             methods: ["GET", "HEAD"],
         },
-        "admin.inventory.store": { uri: "admin/inventory", methods: ["POST"] },
-        "admin.inventory.show": {
-            uri: "admin/inventory/{id}",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.inventory.edit": {
-            uri: "admin/inventory/{id}/edit",
-            methods: ["GET", "HEAD"],
-            parameters: ["id"],
-        },
-        "admin.inventory.update": {
-            uri: "admin/inventory/{id}",
-            methods: ["PUT"],
-            parameters: ["id"],
-        },
-        "admin.inventory.destroy": {
-            uri: "admin/inventory/{id}",
-            methods: ["DELETE"],
-            parameters: ["id"],
-        },
         "admin.categories.index": {
             uri: "admin/categories",
             methods: ["GET", "HEAD"],
@@ -255,6 +255,25 @@ const Ziggy = {
             uri: "admin/products",
             methods: ["GET", "HEAD"],
         },
+        "admin.products.create": {
+            uri: "admin/products/create",
+            methods: ["GET", "HEAD"],
+        },
+        "admin.products.edit": {
+            uri: "admin/products/{product}/edit",
+            methods: ["GET", "HEAD"],
+            parameters: ["product"],
+        },
+        "admin.products.destroy": {
+            uri: "admin/products/{product}",
+            methods: ["DELETE"],
+            parameters: ["product"],
+        },
+        "admin.products.show": {
+            uri: "admin/products/{product}",
+            methods: ["GET", "HEAD"],
+            parameters: ["product"],
+        },
         "admin.products.get_inactive": {
             uri: "admin/products/get-inactive",
             methods: ["GET", "HEAD"],
@@ -268,29 +287,10 @@ const Ziggy = {
             uri: "admin/products/print-barcode",
             methods: ["GET", "HEAD"],
         },
-        "admin.products.create": {
-            uri: "admin/products/create",
-            methods: ["GET", "HEAD"],
-        },
         "admin.products.store": { uri: "admin/products", methods: ["POST"] },
-        "admin.products.show": {
-            uri: "admin/products/{product}",
-            methods: ["GET", "HEAD"],
-            parameters: ["product"],
-        },
-        "admin.products.edit": {
-            uri: "admin/products/{product}/edit",
-            methods: ["GET", "HEAD"],
-            parameters: ["product"],
-        },
         "admin.products.update": {
             uri: "admin/products/{product}",
             methods: ["PUT"],
-            parameters: ["product"],
-        },
-        "admin.products.destroy": {
-            uri: "admin/products/{product}",
-            methods: ["DELETE"],
             parameters: ["product"],
         },
         "admin.products.search": {
@@ -315,19 +315,19 @@ const Ziggy = {
             methods: ["DELETE"],
             parameters: ["id"],
         },
+        "admin.units.index": { uri: "admin/units", methods: ["GET", "HEAD"] },
+        "admin.units.store": { uri: "admin/units", methods: ["POST"] },
+        "admin.units.destroy": {
+            uri: "admin/units/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
         "admin.attribute-values.store": {
             uri: "admin/attribute-values",
             methods: ["POST"],
         },
         "admin.attribute-values.destroy": {
             uri: "admin/attribute-values/{id}",
-            methods: ["DELETE"],
-            parameters: ["id"],
-        },
-        "admin.units.index": { uri: "admin/units", methods: ["GET", "HEAD"] },
-        "admin.units.store": { uri: "admin/units", methods: ["POST"] },
-        "admin.units.destroy": {
-            uri: "admin/units/{id}",
             methods: ["DELETE"],
             parameters: ["id"],
         },
@@ -472,6 +472,11 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
+        "admin.suppliers.destroy": {
+            uri: "admin/suppliers/{id}",
+            methods: ["DELETE"],
+            parameters: ["id"],
+        },
         "admin.suppliers.store": {
             uri: "admin/suppliers/store",
             methods: ["POST"],
@@ -479,11 +484,6 @@ const Ziggy = {
         "admin.suppliers.update": {
             uri: "admin/suppliers/{id}/update",
             methods: ["PATCH"],
-            parameters: ["id"],
-        },
-        "admin.suppliers.destroy": {
-            uri: "admin/suppliers/{id}",
-            methods: ["DELETE"],
             parameters: ["id"],
         },
         "admin.suppliers.products": {
@@ -536,14 +536,6 @@ const Ziggy = {
             methods: ["PATCH"],
             parameters: ["id"],
         },
-        "admin.reports.index": {
-            uri: "admin/reports",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.reports.export": {
-            uri: "admin/reports/export",
-            methods: ["GET", "HEAD"],
-        },
         "admin.users.index": { uri: "admin/users", methods: ["GET", "HEAD"] },
         "admin.users.create": {
             uri: "admin/users/create",
@@ -578,19 +570,6 @@ const Ziggy = {
             uri: "admin/users/bulk-delete",
             methods: ["POST"],
         },
-        "admin.notifications.index": {
-            uri: "admin/notifications",
-            methods: ["GET", "HEAD"],
-        },
-        "admin.notifications.read": {
-            uri: "admin/notifications/{id}/read",
-            methods: ["POST"],
-            parameters: ["id"],
-        },
-        "admin.notifications.read-all": {
-            uri: "admin/notifications/read-all",
-            methods: ["POST"],
-        },
         "admin.notifications.show-all": {
             uri: "admin/notifications/show-all",
             methods: ["GET", "HEAD"],
@@ -619,6 +598,19 @@ const Ziggy = {
         "password.update": { uri: "reset-password", methods: ["POST"] },
         "google.login": { uri: "auth/google", methods: ["GET", "HEAD"] },
         profile: { uri: "profile", methods: ["GET", "HEAD"] },
+        "notifications.send-test": {
+            uri: "admin/notifications/send-test",
+            methods: ["POST"],
+        },
+        "notifications.user-notifications": {
+            uri: "admin/notifications/user-notifications",
+            methods: ["GET", "HEAD"],
+        },
+        "notifications.mark-read": {
+            uri: "admin/notifications/{id}/mark-read",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
         "storage.local": {
             uri: "storage/{path}",
             methods: ["GET", "HEAD"],
