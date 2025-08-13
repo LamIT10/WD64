@@ -3,11 +3,18 @@
         <div class="p-6 bg-gray-100 min-h-screen">
             <!-- Header -->
             <div class="bg-white shadow rounded p-4 mb-6 flex justify-between items-center">
-                <h5 class="text-xl text-indigo-700 font-semibold">
-                    Danh sách phiếu nhập kho
-                </h5>
+            <h5 class="text-xl text-indigo-700 font-semibold">
+                Danh sách phiếu nhập kho
+            </h5>
+            <div class="ml-auto">
+                <a
+                :href="route('admin.receiving.export')"
+                class="inline-block px-4 py-2 text-sm font-semibold bg-green-600 text-white rounded hover:bg-green-700 transition"
+                >
+                <i class="fa-solid fa-file-excel mr-2"></i> Xuất Excel
+                </a>
             </div>
-
+            </div>
             <!-- Filter Section -->
             <form
                 class="bg-white shadow rounded p-6 mb-6 flex flex-wrap gap-6 items-end"

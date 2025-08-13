@@ -44,7 +44,7 @@
                                 <input
                                     type="date"
                                     v-model="purchase.order_date"
-                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                                 />
                                 <p
                                     v-if="form.errors[`order_date`]"
@@ -77,7 +77,7 @@
                             <td class="px-4 py-3">
                                 <select
                                     v-model="purchase.user_id"
-                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option
                                         v-for="user in users"
@@ -120,7 +120,7 @@
                                 <th class="px-4 py-3 text-left">Sản phẩm</th>
                                 <th class="px-4 py-3 text-center">Số lượng</th>
                                 <th class="px-4 py-3 text-center">Đơn vị</th>
-                                <th class="px-4 py-3 text-center">Giá nhập</th>
+                                <th class="px-4 py-3 text-center">Giá nhập (VND)</th>
                                 <th class="px-4 py-3 text-right">Thành tiền</th>
                                 <th class="px-4 py-3 text-right"></th>
                             </tr>
@@ -147,7 +147,7 @@
                                         type="number"
                                         v-model.number="item.quantity_ordered"
                                         @input="updateItem(index)"
-                                        class="w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
+                                        class="w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:outline-none focus:ring-indigo-500"
                                         min="0"
                                     />
                                     <p
@@ -186,14 +186,14 @@
                                     <div
                                         class="flex flex-col items-center gap-1"
                                     >
-                                        <input
-                                            type="number"
-                                            v-model.number="item.unit_price"
-                                            @input="updateOriginalPrice(index)"
-                                            class="w-40 text-right border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-indigo-500"
-                                            min="0"
-                                            step="0.01"
-                                        />
+                                      <input
+                                            type="text"
+                                            :value="Number(item.unit_price || 0).toLocaleString('vi-VN')"
+                                            @input="e => moneyInput(item, 'unit_price', () => updateOriginalPrice(index), e)"
+                                            @focus="e => moneyFocus(item, 'unit_price', e)"
+                                            @blur="e => moneyBlur(item, 'unit_price', e)"
+                                            class="w-40 text-right border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:outline-none focus:ring-indigo-500"
+                                            />
                                         <span
                                             v-if="
                                                 item.unit_id !==
@@ -404,6 +404,22 @@ const formatCurrency = (value) => {
         minimumFractionDigits: 0,
     }).format(value);
 };
+//Format money
+
+function moneyInput(obj, key, cb, e) {
+  const raw = e.target.value.replace(/[^\d]/g, '');   // chỉ giữ số
+  obj[key] = Number(raw) || 0;                        // bind số thuần
+  e.target.value = obj[key].toLocaleString('vi-VN');  // format ngay
+  if (typeof cb === 'function') cb();                 // gọi logic cũ
+}
+function moneyFocus(obj, key, e) {
+  e.target.value = obj[key] ? String(obj[key]) : '';
+}
+function moneyBlur(obj, key, e) {
+  e.target.value = (obj[key] || 0).toLocaleString('vi-VN');
+}
+
+
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
