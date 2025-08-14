@@ -247,24 +247,6 @@
                                                         Sửa
                                                     </Waiting>
                                                 </li>
-                                                <li v-can="'admin.supplier.delete'">
-                                                    <ConfirmModal :route-name="'admin.suppliers.destroy'" :route-params="{
-                                                        id: supplier.id,
-                                                    }" title="Xác nhận xóa nhà cung cấp"
-                                                        :message="`Bạn có chắc chắn muốn xóa nhà cung cấp ${supplier.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`">
-                                                        <template #trigger="{
-                                                            openModal,
-                                                        }">
-                                                            <button @click="
-                                                                openModal
-                                                            "
-                                                                class="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-150">
-                                                                <i class="fas fa-trash-alt mr-2"></i>
-                                                                Xóa
-                                                            </button>
-                                                        </template>
-                                                    </ConfirmModal>
-                                                </li>
                                                 <li v-ca="'admin.supplier.product'">
                                                     <Waiting route-name="admin.suppliers.products" color="bg-white"
                                                         :route-params="{
@@ -601,7 +583,6 @@
 <script setup>
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
-import ConfirmModal from "../../components/ConfirmModal.vue";
 import { onMounted, onUnmounted, onUpdated, reactive, ref } from "vue";
 import { router, useForm } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
