@@ -25,9 +25,12 @@
                         <div class="pt-6 ps-6 pe-6 space-y-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền thanh toán (VND)<span class="text-red-500" v-if="form.errors.payment">{{ form.errors.payment }}</span></label>
                             <div class="relative rounded-md shadow-sm">
-                                <input type="text" v-model="form.payment"
-                                    class="block w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                                    placeholder="Nhập số tiền" @change="formatCurrency" />
+                                <input type="text" 
+                                       :value="formattedPayment" 
+                                       @input="handlePaymentInput"
+                                       @keypress="restrictToNumbers"
+                                       class="block w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                                       placeholder="Nhập số tiền" />
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                     <span class="text-gray-500">₫</span>
                                 </div>
@@ -75,45 +78,62 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const { transactionSupplierEdit } = defineProps({
     transactionSupplierEdit: Object,
 });
-// Format số tiền
+
+// Format số tiền hiển thị
 const formatNumber = (value) => {
     return new Intl.NumberFormat("vi-VN").format(value);
 };
 
-// Format currency khi nhập
-const formatCurrency = (event) => {
-    let input = event.target.value;
-    input = input.replace(/\D/g, '');
-    if (input) {
-        input = parseInt(input).toLocaleString('vi-VN');
-    }
-    this.form.payment = input;
-};
-
-// Khởi tạo form với giá trị đã format
+// Khởi tạo form
 const subInitialPayment =
     transactionSupplierEdit.value.total_amount -
     transactionSupplierEdit.value.supplier_transaction.paid_amount;
 const initialPayment = subInitialPayment;
+
 const form = useForm({
     payment: initialPayment,
     note: "",
     file: null,
-    _method:"PATCH"
+    _method: "PATCH"
 });
+
+// Biến ref để lưu giá trị đã định dạng
+const formattedPayment = ref(formatNumber(initialPayment));
+
+// Xử lý khi nhập liệu
+const handlePaymentInput = (e) => {
+    const raw = e.target.value.replace(/[^\d]/g, '');
+    
+    if (!raw) {
+        form.payment = 0;
+        formattedPayment.value = '';
+        return;
+    }
+
+    const numericValue = Number(raw);
+    form.payment = numericValue;
+    formattedPayment.value = formatNumber(numericValue);
+};
+
+// Chỉ cho phép nhập số
+const restrictToNumbers = (e) => {
+    const charCode = e.charCode;
+    if (charCode < 48 || charCode > 57) {
+        e.preventDefault();
+    }
+};
+
+// Xử lý file upload
 function handleFileChange(event) {
-    form.file = event.target.files[0]; // lấy file đầu tiên được chọn
+    form.file = event.target.files[0];
 }
-// Format giá trị ban đầu
-const formattedInitialValue = ref(formatNumber(initialPayment));
 
 const handleSubmit = () => {
-    console.log("Submitting payment:", form);
     form.post(
         route("admin.supplier-transaction.updatePayment", {
             id: transactionSupplierEdit.value.supplier_transaction.id,
