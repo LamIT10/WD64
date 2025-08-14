@@ -47,6 +47,7 @@ class PermissionSeeder extends Seeder
         foreach (ExtendsionConstant::getConstantsAsArray(RoleConstant::class) as $value) {
             if (!Role::where('name', $value['value'])->first()) {
                 $newRole = [
+                    'description' => $value['text'] ?? null,
                     'name' => $value['value'],
                     'guard_name' => 'web',
                     'created_at' => $now,

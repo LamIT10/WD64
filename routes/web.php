@@ -1,5 +1,4 @@
 <?php
-
 use App\Constant\PermissionConstant;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
