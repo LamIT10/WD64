@@ -97,43 +97,10 @@
 <body class="bg-slate-100 font-sans">
     @inertia
     <script>
-        // Sidebar toggle functionality
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-hidden');
-            mainContent.classList.toggle('main-content-full');
-        });
-
-        // Dropdown toggle functionality
-        function toggleDropdown(menuId) {
-            const menu = document.getElementById(menuId);
-            const icon = document.getElementById(`${menuId.split('-')[0]}-icon`);
-            const isHidden = menu.classList.contains('dropdown-menu-hidden');
-
-            // Toggle menu visibility
-            menu.classList.toggle('dropdown-menu-hidden');
-            menu.style.maxHeight = isHidden ? `${menu.scrollHeight}px` : '0';
-            menu.style.opacity = isHidden ? '1' : '0';
-
-            // Toggle icon rotation
-            icon.classList.toggle('dropdown-icon-open');
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (event) => {
-            if (
-                window.innerWidth < 1024 &&
-                !sidebar.contains(event.target) &&
-                !sidebarToggle.contains(event.target)
-            ) {
-                sidebar.classList.add('sidebar-hidden');
-                mainContent.classList.add('main-content-full');
-            }
-        });
+        
     </script>
+
+
 </body>
 
 </html>

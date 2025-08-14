@@ -265,7 +265,7 @@
                                                         </template>
                                                     </ConfirmModal>
                                                 </li>
-                                                <li v-ca="'admin.supplier.product'">
+                                                <li v-can="'admin.supplier.product'">
                                                     <Waiting route-name="admin.suppliers.products" color="bg-white"
                                                         :route-params="{
                                                             id: supplier.id,
