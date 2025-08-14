@@ -1,22 +1,37 @@
 <template>
     <AppLayout>
         <div class="px-4 py-6">
-            <div
-                class="p-4 shadow rounded bg-white mb-4 flex justify-between items-center"
-            >
-                <h5 class="text-lg text-indigo-700 font-semibold">
-                    Danh sách đơn hàng nhập
-                </h5>
+           <div class="p-4 bg-white shadow-md rounded-lg mb-4 flex justify-between items-center">
+  
+            <h2 class="text-xl font-bold text-indigo-700">
+                Danh sách đơn hàng nhập
+            </h2>     
+            <div class="flex gap-3">
                 <Waiting
-                    v-can="'admin.purchase.create'"
-                    route-name="admin.purchases.create"
-                    :route-params="{}"
-                    class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                v-can="'admin.purchase.create'"
+                route-name="admin.purchases.create"
+                :route-params="{}"
+                class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md"
                 >
-                    <i class="fas fa-plus mr-1"></i> Tạo yêu cầu nhập kho
+                <i class="fas fa-plus"></i>
+                <span>Tạo yêu cầu nhập kho</span>
                 </Waiting>
-            </div>
 
+               <a
+                :href="route('admin.purchases.export', {
+                    order_status: filterForm.order_status,
+                    supplier: filterForm.supplier,
+                    code: filterForm.code,
+                    start: filterForm.start,
+                    end: filterForm.end,
+                })"
+                class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
+                download
+                >
+                <i class="fas fa-file-excel mr-1"></i> Xuất Excel
+                </a>
+            </div>
+            </div>
             <div class="mb-6">
                 <div class="bg-white rounded p-3">
                     <div class="flex gap-3">
@@ -89,7 +104,7 @@
                     <input
                         v-model="filterForm.supplier"
                         type="text"
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition"
                         placeholder="Nhập tên nhà cung cấp"
                     />
                 </div>
@@ -100,7 +115,7 @@
                     <input
                         v-model="filterForm.code"
                         type="text"
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition"
                         placeholder="Nhập mã đơn hàng"
                     />
                 </div>
@@ -111,7 +126,7 @@
                     <input
                         v-model="filterForm.start"
                         type="date"
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition"
                         placeholder="Nhập mã đơn hàng"
                     />
                 </div>
@@ -122,7 +137,7 @@
                     <input
                         v-model="filterForm.end"
                         type="date"
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition"
                         placeholder="Nhập mã đơn hàng"
                     />
                 </div>
@@ -699,7 +714,7 @@
                                     v-model="rejectionReason"
                                     rows="4"
                                     placeholder="Nhập lý do từ chối đơn nhập..."
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:outline-none focus:ring-red-500"
                                 ></textarea>
                                 <div class="flex justify-end gap-2 mt-3">
                                     <button

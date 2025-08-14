@@ -420,6 +420,10 @@ item, index
                                     class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
                                     Ngày thực hiện
                                 </th>
+                                <th
+                                    class="px-6 py-3 text-xs font-medium text-indigo-700 uppercase tracking-wider text-center">
+                                    Người thực hiện
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -458,6 +462,9 @@ item, index
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-center">
                                     {{ formatDate(item.created_at) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 text-center">
+                                    {{ item.created_by != null ? item.created_by.name : '' }}
                                 </td>
                             </tr>
                         </tbody>

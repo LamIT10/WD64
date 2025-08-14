@@ -28,7 +28,7 @@ class RoleRepository extends BaseRepository
             if (!empty($data)) {
                 $filters = [
                     'search' => [
-                        'name' => $data['name'] ?? "",
+                        'description' => $data['name'] ?? "",
                     ],
                 ];
                 $query = $this->filterData($query, $filters);
