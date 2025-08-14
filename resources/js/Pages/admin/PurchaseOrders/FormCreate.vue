@@ -18,7 +18,21 @@ const selectOptions = computed(() =>
         value: p.id,
     }))
 );
+//Fomat money input
+function handleMoneyInput(obj, key, cb, e) {
+  const raw = e.target.value.replace(/[^\d]/g, '');
+  obj[key] = Number(raw) || 0;                       
+  e.target.value = obj[key].toLocaleString('vi-VN');  
+  if (typeof cb === 'function') cb(obj);
+}
 
+function handleMoneyFocus(obj, key, e) {
+  e.target.value = obj[key] ? String(obj[key]) : '';
+}
+
+function handleMoneyBlur(obj, key, e) {
+  e.target.value = (obj[key] || 0).toLocaleString('vi-VN');
+}
 // Refs
 const variantOfProducts = ref([]);
 const selectedProduct = ref(null);
@@ -321,7 +335,7 @@ function submitConfirmedOrders() {
                                         Đơn vị
                                     </th>
                                     <th scope="col" class="px-4 py-3 text-left">
-                                        Giá nhập
+                                        Giá nhập (VND)
                                     </th>
                                     <th
                                         scope="col"
@@ -414,14 +428,14 @@ function submitConfirmedOrders() {
 
                                     <td class="px-4 py-3 align-top w-32">
                                         <div class="flex flex-col gap-1">
-                                            <input
-                                                type="number"
-                                                v-model.number="variant.price"
-                                                @input="calculateTotal(variant)"
-                                                min="0"
-                                                step="1000"
-                                                class="w-full bg-transparent border-b border-gray-300 text-sm px-1 py-1 focus:outline-none focus:border-indigo-500"
-                                            />
+                                           <input
+                                                 type="text"
+                                                :value="variant.price?.toLocaleString('vi-VN')"
+                                                 @input="e => handleMoneyInput(variant, 'price', () => calculateTotal(variant), e)"
+                                                 @focus="e => handleMoneyFocus(variant, 'price', e)"
+                                                  @blur="e => handleMoneyBlur(variant, 'price', e)"
+                                                  class="w-full bg-transparent border-b border-gray-300 text-sm px-1 py-1 focus:outline-none focus:border-indigo-500"
+                                                    />
                                             <span
                                                 class="text-xs text-gray-600 pl-1 mt-1"
                                             >
@@ -565,7 +579,7 @@ function submitConfirmedOrders() {
                                     Đơn vị
                                 </th>
                                 <th scope="col" class="px-4 py-3 text-left">
-                                    Giá nhập
+                                    Giá nhập (VND)
                                 </th>
                                 <th scope="col" class="px-4 py-3 text-right">
                                     Thành tiền
@@ -637,15 +651,13 @@ function submitConfirmedOrders() {
 
                                 <td class="px-4 py-3 align-top w-32">
                                     <input
-                                        type="number"
-                                        v-model.number="item.price"
-                                        @input="
-                                            updateItem(i, 'price', item.price)
-                                        "
-                                        min="0"
-                                        step="1000"
+                                        type="text"
+                                        :value="item.price?.toLocaleString('vi-VN')"
+                                        @input="e => handleMoneyInput(item, 'price', () => updateItem(i, 'price', item.price), e)"
+                                        @focus="e => handleMoneyFocus(item, 'price', e)"
+                                        @blur="e => handleMoneyBlur(item, 'price', e)"
                                         class="w-full bg-transparent border-b border-gray-300 text-sm px-1 py-1 text-right focus:outline-none focus:border-indigo-500"
-                                    />
+                                        />
                                 </td>
 
                                 <td
@@ -716,7 +728,7 @@ function submitConfirmedOrders() {
                                         <input
                                             type="date"
                                             v-model="order.expected_date"
-                                            class="border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
+                                            class="border border-gray-300 rounded-md p-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             :class="
                                                 form.errors[
                                                     `orders.${index}.expected_date`

@@ -78,11 +78,14 @@ const percentChange = computed(() => {
   return `${change > 0 ? '+' : ''}${change.toFixed(1)}%`
 })
 
-const formatCurrency = (v) => {
-  const number = Number(v) || 0
-  return '₫' + (number / 1_000_000).toFixed(1) + 'M'
-}
-
+const formatCurrency = (val) => {
+  const number = Number(val) || 0;
+  return number.toLocaleString('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0
+  });
+};
 const renderChart = () => {
   if (chartInstance.value) chartInstance.value.destroy()
 

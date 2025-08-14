@@ -709,4 +709,56 @@ class SaleOrdersRepository extends BaseRepository
 
         return $autoExportCode;
     }
+
+
+    public function getOrderForInvoice($orderId)
+    {
+        return $this->handleModel
+            ->with([
+                'customer' => function ($query) {
+                    $query->select('id', 'name', 'phone', 'email', 'province', 'ward');
+                },
+                'items' => function ($query) {
+                    $query->select(
+                        'id',
+                        'sales_order_id',
+                        'product_variant_id',
+                        'quantity_ordered',
+                        'unit_id',
+                        'unit_price',
+                        'subtotal'
+                    )
+                        ->with([
+                            'productVariant' => function ($query) {
+                                $query->select('id', 'product_id')
+                                    ->with([
+                                        'product' => function ($query) {
+                                            $query->select('id', 'name');
+                                        },
+                                        'attributes' => function ($query) {
+                                            $query->select('attribute_values.id', 'attribute_values.name');
+                                        }
+                                    ]);
+                            },
+                            'unit' => function ($query) {
+                                $query->select('id', 'name');
+                            }
+                        ]);
+                }
+            ])
+            ->select(
+                'id',
+                'code',
+                'customer_id',
+                'order_date',
+                'status',
+                'total_amount',
+                'address_delivery',
+                'created_at',
+                'pay_before',
+                'pay_after',
+                'note'
+            )
+            ->findOrFail($orderId);
+    }
 }
