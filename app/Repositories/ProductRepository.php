@@ -305,7 +305,7 @@ class ProductRepository extends BaseRepository
         } catch (\Throwable $th) {
             Log::error('Lỗi khi tạo sản phẩm: ' . $th->getMessage(), ['data' => $data]);
             DB::rollBack();
-            return $this->returnError($th->getMessage());
+            return $this->returnError('Có lỗi sảy ra');
         }
     }
     public function show($id)
@@ -797,7 +797,7 @@ class ProductRepository extends BaseRepository
         } catch (\Throwable $th) {
             Log::error('Lỗi khi cập nhật sản phẩm: ' . $th->getMessage(), ['data' => $data]);
             DB::rollBack();
-            return $this->returnError($th->getMessage());
+            return $this->returnError('Có lỗi sảy ra');
         }
     }
 
