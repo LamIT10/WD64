@@ -64,16 +64,16 @@ class UpdateProductRequest extends FormRequest
             $rules['variants.*.combinations.*.attribute_value_ids.*'] = ['required', 'exists:attribute_values,id'];
             $rules['variants.*.combinations.*.code'] = ['required', 'string', 'max:100'];
             $rules['variants.*.combinations.*.barcode'] = ['nullable', 'string', 'max:100'];
-            $rules['variants.*.combinations.*.sale_price'] = ['required', 'numeric', 'min:0'];
-            $rules['variants.*.combinations.*.quantity_on_hand'] = ['required', 'numeric', 'min:0'];
+            $rules['variants.*.combinations.*.sale_price'] = ['required', 'numeric', 'min:0', 'max:2147483647'];
+            $rules['variants.*.combinations.*.quantity_on_hand'] = ['required', 'numeric', 'min:0', 'max:2147483647'];
             $rules['variants.*.combinations.*.supplier_ids'] = ['required', 'array']; // Có thể đổi thành 'nullable' nếu không bắt buộc
             $rules['variants.*.combinations.*.supplier_ids.*'] = ['exists:suppliers,id'];
             $rules['variants.*.combinations.*.warehouse_zone_id'] = ['nullable', 'exists:warehouse_zones,id'];
             $rules['variants.*.combinations.*.custom_location_name'] = ['nullable', 'string', 'max:100'];
         } else {
             // Validate sản phẩm đơn giản
-            $rules['simple_sale_price'] = ['nullable', 'numeric', 'min:0'];
-            $rules['simple_quantity'] = ['nullable', 'numeric', 'min:0'];
+            $rules['simple_sale_price'] = ['nullable', 'numeric', 'min:0', 'max:2147483647'];
+            $rules['simple_quantity'] = ['nullable', 'numeric', 'min:0', 'max:2147483647'];
             $rules['simple_barcode'] = ['nullable', 'string', 'max:100'];
             $rules['supplier_ids'] = ['required', 'array'];
             $rules['supplier_ids.*'] = ['exists:suppliers,id'];
@@ -138,11 +138,13 @@ class UpdateProductRequest extends FormRequest
             'unit_conversions.*.conversion_factor.min' => 'Hệ số quy đổi phải lớn hơn 0.',
 
             // Sản phẩm đơn giản
-            'simple_sale_price.numeric' => 'Giá bán phải là số.',
+            'simple_sale_price.numeric' => 'Giá bán phải là số (không nhập chữ hoặc ký tự đặc biệt).',
             'simple_sale_price.min' => 'Giá bán không được âm.',
+            'simple_sale_price.max' => 'Giá bán không được vượt quá 2,147,483,647.',
 
-            'simple_quantity.numeric' => 'Tồn kho phải là số.',
+            'simple_quantity.numeric' => 'Tồn kho phải là số (không nhập chữ hoặc ký tự đặc biệt).',
             'simple_quantity.min' => 'Tồn kho không được âm.',
+            'simple_quantity.max' => 'Tồn kho không được vượt quá 2,147,483,647.',
 
             'simple_barcode.string' => 'Mã vạch phải là chuỗi.',
             'simple_barcode.max' => 'Mã vạch không được vượt quá 100 ký tự.',
@@ -181,12 +183,14 @@ class UpdateProductRequest extends FormRequest
             'variants.*.combinations.*.barcode.max' => 'Mã vạch không được vượt quá 100 ký tự.',
 
             'variants.*.combinations.*.sale_price.required' => 'Vui lòng nhập giá bán cho tổ hợp.',
-            'variants.*.combinations.*.sale_price.numeric' => 'Giá bán phải là số.',
+            'variants.*.combinations.*.sale_price.numeric' => 'Giá bán phải là số (không nhập chữ hoặc ký tự đặc biệt).',
             'variants.*.combinations.*.sale_price.min' => 'Giá bán không được âm.',
+            'variants.*.combinations.*.sale_price.max' => 'Giá bán không được vượt quá 2,147,483,647.',
 
             'variants.*.combinations.*.quantity_on_hand.required' => 'Vui lòng nhập tồn kho cho tổ hợp.',
-            'variants.*.combinations.*.quantity_on_hand.numeric' => 'Tồn kho phải là số.',
+            'variants.*.combinations.*.quantity_on_hand.numeric' => 'Tồn kho phải là số (không nhập chữ hoặc ký tự đặc biệt).',
             'variants.*.combinations.*.quantity_on_hand.min' => 'Tồn kho không được âm.',
+            'variants.*.combinations.*.quantity_on_hand.max' => 'Tồn kho không được vượt quá 2,147,483,647.',
 
             'variants.*.combinations.*.supplier_ids.required' => 'Vui lòng chọn ít nhất một nhà cung cấp cho tổ hợp.',
             'variants.*.combinations.*.supplier_ids.array' => 'Danh sách nhà cung cấp không hợp lệ.',
