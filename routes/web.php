@@ -270,8 +270,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
 });
 
-
-
 // API địa chỉ
 Route::get('/provinces', [LocationController::class, 'getProvinces']);
 Route::get('/wards/{province_code}', [LocationController::class, 'getWardsByProvince']);
@@ -280,7 +278,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('admin.dashboard');
 });
 // Authentication routes
 Route::middleware('check_logined')->group(function () {
