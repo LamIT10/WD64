@@ -14,6 +14,7 @@ use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\WarehouseZone;
 use App\Repositories\DashboardRepository;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,6 +86,14 @@ class InventoryController extends Controller
             $audit->is_adjusted = 1;
             $audit->adjusted_at = now();
             $audit->save();
+
+            // Gửi thông báo đồng bộ thành công
+            app(NotificationService::class)->create(
+                'inventory_audit_synced',
+                'Đồng bộ kiểm kho thành công',
+                "Phiếu kiểm kho #{$audit->code} đã được đồng bộ thành công.",
+                ['audit_id' => $audit->id]
+            );
 
             DB::commit();
             return response()->json([

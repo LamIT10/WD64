@@ -206,7 +206,29 @@ const markAsRead = async (notification) => {
         const found = notifications.value.find((n) => n.id === notification.id);
         if (found) found.isRead = true;
 
-        if (notification.data && notification.data.order_id) {
+        // Chuyển hướng theo loại thông báo kiểm kho
+        if (notification.type === "inventory_audit_created" && notification.data && notification.data.audit_id) {
+            router.visit(route("admin.inventory-audit.show", notification.data.audit_id));
+            await fetchNotifications();
+            return;
+        }
+        if (notification.type === "inventory_audit_rejected" && notification.data && notification.data.audit_id) {
+            router.visit(route("admin.inventory-audit.show", notification.data.audit_id));
+            await fetchNotifications();
+            return;
+        }
+        if (notification.type === "inventory_audit_synced" && notification.data && notification.data.audit_id) {
+            router.visit(route("admin.inventory-audit.show", notification.data.audit_id));
+            await fetchNotifications();
+            return;
+        }
+
+        // Chuyển hướng các loại thông báo khác
+        if (notification.type === "info") {
+            router.visit(route("admin.notifications.info"));
+            await fetchNotifications();
+            return;
+        } else if (notification.data && notification.data.order_id) {
             const res = await axios.get("/admin/sale-orders/find-page", {
                 params: { order_id: notification.data.order_id },
             });
@@ -218,7 +240,10 @@ const markAsRead = async (notification) => {
                     sale_order_id: notification.data.order_id,
                 })
             );
+            await fetchNotifications();
+            return;
         }
+        // Thêm các điều kiện khác nếu cần
 
         await fetchNotifications();
     } catch (error) {
@@ -247,6 +272,13 @@ const getNotificationIcon = (type) => {
             return "fas fa-check-double text-indigo-500";
         case "order_pending":
             return "fas fa-clock text-yellow-500";
+        // Thông báo kiểm kho
+        case "inventory_audit_created":
+            return "fas fa-clipboard-list text-indigo-500";
+        case "inventory_audit_rejected":
+            return "fas fa-times-circle text-red-500";
+        case "inventory_audit_synced":
+            return "fas fa-sync-alt text-green-500";
         // ✅ REAL-TIME: Add more notification types
         case "info":
             return "fas fa-info-circle text-blue-500";

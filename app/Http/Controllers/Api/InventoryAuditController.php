@@ -7,6 +7,7 @@ use App\Models\InventoryLocation;
 use App\Models\Product;
 use App\Models\WarehouseZone;
 use App\Repositories\InventoryAuditRepository;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -155,6 +156,13 @@ class InventoryAuditController extends BaseApiController
             $audit->adjusted_at = now();
             $audit->approved_by = $request->user()->id;
             $audit->save();
+
+            app(NotificationService::class)->create(
+                'inventory_audit_rejected',
+                'Phiếu kiểm kho bị từ chối',
+                "Phiếu kiểm kho #{$audit->code} đã bị từ chối.",
+                ['audit_id' => $audit->id]
+            );
 
             return response()->json([
                 'message' => 'Đã từ chối phiếu kiểm kho!',

@@ -183,6 +183,14 @@ class InventoryAuditController extends Controller
                         ]);
                     }
                 }
+
+                // Gửi thông báo khi tạo phiếu kiểm kho mới
+                app(\App\Services\NotificationService::class)->create(
+                    'inventory_audit_created',
+                    'Tạo phiếu kiểm kho mới',
+                    "Phiếu kiểm kho #{$audit->code} đã được tạo thành công.",
+                    ['audit_id' => $audit->id]
+                );
             });
 
             return redirect()->route('admin.inventory-audit.index')->with('success', 'Đã lưu kiểm kho thành công.');
