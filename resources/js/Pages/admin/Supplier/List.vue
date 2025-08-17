@@ -246,7 +246,7 @@
                                                         <i class="fas fa-edit mr-2"></i>
                                                         Sửa
                                                     </Waiting>
-                                                </li>
+                                                </li>                                                
                                                 <li v-ca="'admin.supplier.product'">
                                                     <Waiting route-name="admin.suppliers.products" color="bg-white"
                                                         :route-params="{
@@ -583,6 +583,7 @@
 <script setup>
 import AppLayout from "../Layouts/AppLayout.vue";
 import Waiting from "../../components/Waiting.vue";
+import ConfirmModal from "../../components/ConfirmModal.vue";
 import { onMounted, onUnmounted, onUpdated, reactive, ref } from "vue";
 import { router, useForm } from "@inertiajs/vue3";
 import { route } from "ziggy-js";

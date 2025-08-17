@@ -86,4 +86,8 @@ class User extends Authenticatable
     public function approvedGoodReceipt(){
         return  $this->hasOne(GoodReceipt::class, 'approved_by');
     }
+    public function supplierDebtHistories()
+    {
+        return $this->hasMany(SupplierDebtHistory::class, 'created_id');
+    }
 }

@@ -20,9 +20,10 @@
 
         <!-- Navigation Menu -->
         <nav class="mt-4 px-3 pb-3 overflow-y-auto h-[calc(100%-4rem)]">
+            
             <!-- Dashboard -->
             <div class="mb-3">
-                <Link :href="route('admin.dashboard')"
+                <Link :href="route('admin.dashboard')" @click="toggleDropdown('')"
                     class="flex items-center p-3 text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                 <div
                     class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-indigo-100 text-indigo-600 group-hover:bg-indigo-200 transition-colors">
@@ -42,7 +43,7 @@
             ">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('warehouse-menu')">
+                    @click="toggleDropdown('warehouse-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
                         <i class="fas fa-warehouse text-sm"></i>
@@ -78,14 +79,14 @@
                     </div>
                     <span class="text-xs">Xuất kho</span>
                     </Link>
-                    <a href="/admin/inventory-audit" v-can="'admin.inventory-audit.index'"
+                    <Link :href="route('admin.inventory-audit.index')" v-can="'admin.inventory-audit.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
-                            <i class="fas fa-clipboard-check text-xs"></i>
-                        </div>
-                        <span class="text-xs">Kiểm kho</span>
-                    </a>
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-clipboard-check text-xs"></i>
+                    </div>
+                    <span class="text-xs">Kiểm kho</span>
+                    </Link>
                     <Link :href="route('admin.inventory.index')" v-can="'admin.inventory.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
@@ -97,10 +98,11 @@
                 </div>
             </div>
             <!-- Report Management -->
-            <div class="mb-1" v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
+            <div class="mb-1"
+                v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('report-menu')">
+                    @click="toggleDropdown('report-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
                         <i class="fas fa-chart-bar sx-sm"></i>
@@ -110,7 +112,7 @@
                         id="report-icon"></i>
                 </button>
 
-                <div id="report-menu" 
+                <div id="report-menu"
                     class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100">
                     <Link :href="route('admin.reports.index')" v-can="'admin.report.index'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
@@ -124,39 +126,31 @@
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
-                    <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                        <i class="fa fa-external-link-square" aria-hidden="true"></i>
                     </div>
                     <span class="text-xs">Báo cáo xuất kho</span>
                     </Link>
-                    <Link
-                        :href="route('admin.reports.suggest')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
-                        >
-                            <i class="fas fa-shopping-cart text-xs"></i>
-                        </div>
-                        <span class="text-xs">Gợi ý nhập hàng</span></Link
-                    >
-                    <Link
-                        :href="route('admin.reports.revenue')"
-                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors"
-                        >
-                            <i class="fa-solid fa-dollar-sign text-xs"></i>
-                        </div>
-                        <span class="text-xs">Doanh thu - Lợi nhuận</span></Link
-                    >
+                    <Link :href="route('admin.reports.suggest')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fas fa-shopping-cart text-xs"></i>
+                    </div>
+                    <span class="text-xs">Gợi ý nhập hàng</span></Link>
+                    <Link :href="route('admin.reports.revenue')"
+                        class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
+                    <div
+                        class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
+                        <i class="fa-solid fa-dollar-sign text-xs"></i>
+                    </div>
+                    <span class="text-xs">Doanh thu - Lợi nhuận</span></Link>
                 </div>
             </div>
             <!-- User Management -->
             <div class="mb-1" v-can="'admin.user.index'">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('user-menu')">
+                    @click="toggleDropdown('user-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors">
                         <i class="fas fa-users sx-sm"></i>
@@ -188,7 +182,7 @@
             ">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('product-menu')">
+                    @click="toggleDropdown('product-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
                         <i class="fas fa-cube text-sm"></i>
@@ -247,7 +241,7 @@
             <div class="mb-2" v-can="'admin.supplier.index'">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('supplier-menu')">
+                    @click="toggleDropdown('supplier-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-orange-100 text-orange-600 group-hover:bg-orange-200 transition-colors">
                         <i class="fas fa-shopping-bag text-sm"></i>
@@ -303,60 +297,11 @@
                     </Link>
                 </div>
             </div>
-            <!-- Customers transaction -->
-            <!-- <div class="mb-1">
-                <button
-                    class="flex items-center w-full p-3 text-gray-700 hover:bg-purple-50 rounded-lg transition-all duration-200 group"
-                    @click="toggleDropdown('customer-transaction-menu')"
-                >
-                    <div
-                        class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors"
-                    >
-                        <i class="fas fa-money-bill-wave text-sm"></i>
-                    </div>
-                    <span class="text-sm font-medium flex-1 text-left"
-                        >Quản lý giao dịch</span
-                    >
-                    <i
-                        class="fas fa-chevron-down text-xs text-gray-400 transition-transform duration-200 dropdown-icon"
-                        id="customer-transaction-icon"
-                    ></i>
-                </button>
-
-                <div
-                    id="customer-transaction-menu"
-                    class="ml-5 mt-1 space-y-1 dropdown-menu dropdown-menu-hidden pl-2 border-l-2 border-gray-100"
-                >
-                    <Link
-                        :href="route('admin.customer-transaction.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
-                        >
-                            <i class="fas fa-file-invoice-dollar text-xs"></i>
-                        </div>
-                        <span class="text-xs">Công nợ khách hàng</span>
-                    </Link>
-                    <Link
-                        v-can="'admin.supplier_transaction.index'"
-                        :href="route('admin.supplier-transaction.index')"
-                        class="flex items-center p-2 text-gray-600 hover:text-purple-600 rounded-lg transition-all duration-200 group"
-                    >
-                        <div
-                            class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-purple-100 transition-colors"
-                        >
-                            <i class="fas fa-file-invoice-dollar text-xs"></i>
-                        </div>
-                        <span class="text-xs">Công nợ nhà cung cấp</span>
-                    </Link>
-                </div>
-            </div> -->
             <!-- Role -->
             <div v-can="'admin.role.index'" class="mb-40">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    onclick="toggleDropdown('admin-menu')">
+                    @click="toggleDropdown('admin-menu')">
                     <div
                         class="w-8 h-8 flex items-center justify-center mr-3 rounded-lg bg-red-100 text-red-600 group-hover:bg-red-200 transition-colors">
                         <i class="fas fa-cog text-sm"></i>
@@ -386,18 +331,130 @@
 import { Link } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import { useAuthStore } from "@/stores/auth";
+import { onMounted, onUnmounted, onUpdated } from "vue";
+
 const authStore = useAuthStore();
 const hasPermission = (permission) => {
-    return authStore.hasPermission(permission);
+    try {
+        return authStore.hasPermission(permission);
+    } catch (error) {
+        console.error("Error in hasPermission:", error);
+        return false;
+    }
 };
-function toggleDropdown(menuId) {
-    const menu = document.getElementById(menuId);
-    const icon = document.getElementById(menuId.replace("-menu", "-icon"));
 
-    menu.classList.toggle("dropdown-menu-open");
+// Sidebar toggle functionality
+const toggleSidebar = () => {
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("main-content");
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+
+    if (!sidebar || !mainContent || !sidebarToggle) {
+        console.error("Sidebar, main-content, or sidebar-toggle not found");
+        return;
+    }
+
+    sidebar.classList.toggle("sidebar-hidden");
+    mainContent.classList.toggle("main-content-full");
+};
+
+// Dropdown toggle functionality
+const toggleDropdown = (menuId) => {
+    const currentMenuId = localStorage.getItem("activeMenu") || "";
+    if (currentMenuId && currentMenuId !== menuId) {
+        closeDropdown(currentMenuId);
+    }
+    localStorage.setItem("activeMenu", menuId);
+    openDropdown(menuId);
+};
+
+// Open dropdown
+const openDropdown = (menuId) => {
+    const menu = document.getElementById(menuId);
+    const icon = document.getElementById(`${menuId.split("-")[0]}-icon`);
+    if (!menu || !icon) {
+        console.error(`Menu (${menuId}) or icon not found`);
+        return;
+    }
+    const isHidden = menu.classList.contains("dropdown-menu-hidden");
     menu.classList.toggle("dropdown-menu-hidden");
-    icon.classList.toggle("rotate-180");
-}
+    menu.style.maxHeight = isHidden ? `${menu.scrollHeight}px` : "0";
+    menu.style.opacity = isHidden ? "1" : "0";
+    icon.classList.toggle("dropdown-icon-open");
+};
+
+// Close dropdown
+const closeDropdown = (menuId) => {
+    const menu = document.getElementById(menuId);
+    const icon = document.getElementById(`${menuId.split("-")[0]}-icon`);
+    if (!menu || !icon) {
+        console.error(`Menu (${menuId}) or icon not found`);
+        return;
+    }
+    menu.classList.add("dropdown-menu-hidden");
+    menu.style.maxHeight = "0";
+    menu.style.opacity = "0";
+    icon.classList.remove("dropdown-icon-open");
+};
+
+// Handle click outside sidebar on mobile
+const handleOutsideClick = (event) => {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    if (
+        window.innerWidth < 1024 &&
+        sidebar &&
+        sidebarToggle &&
+        !sidebar.contains(event.target) &&
+        !sidebarToggle.contains(event.target)
+    ) {
+        sidebar.classList.add("sidebar-hidden");
+        const mainContent = document.getElementById("main-content");
+        if (mainContent) {
+            mainContent.classList.add("main-content-full");
+        } else {
+            console.error("Main-content not found");
+        }
+    }
+};
+
+// Lifecycle hooks
+onMounted(() => {
+    // Restore active menu from localStorage
+    const activeMenuId = localStorage.getItem("activeMenu");
+    if (activeMenuId) {
+        console.log("Restoring active menu:", activeMenuId);
+        openDropdown(activeMenuId);
+    }
+
+    // Attach sidebar toggle event
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", toggleSidebar);
+    } else {
+        console.error("Sidebar-toggle not found");
+    }
+
+    // Attach outside click event
+    document.addEventListener("click", handleOutsideClick);
+});
+
+// Mô phỏng onUpdated: Chạy khi component được cập nhật
+onUpdated(() => {
+    console.log("Component updated");
+    // Ví dụ: Mở dropdown 'product-menu' khi component được cập nhật
+    // Comment dòng dưới nếu không muốn mở dropdown mỗi khi cập nhật
+    // openDropdown('product-menu');
+});
+
+// Cleanup events
+onUnmounted(() => {
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    if (sidebarToggle) {
+        sidebarToggle.removeEventListener("click", toggleSidebar);
+    }
+    document.removeEventListener("click", handleOutsideClick);
+});
 </script>
 
 <style lang="css" scoped>

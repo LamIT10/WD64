@@ -9,7 +9,8 @@
                     Danh sách đơn hàng xuất
                 </h5>
                 <div class="flex gap-2">
-                    <Waiting v-can="'admin.sales-order.create'"
+                    <Waiting
+                        v-can="'admin.sales-order.create'"
                         route-name="admin.sale-orders.create"
                         :route-params="{}"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -17,7 +18,8 @@
                         <i class="fas fa-plus mr-1"></i> Tạo đơn hàng xuất
                     </Waiting>
                     <button
-                        @click="exportExcel" v-can="'admin.sales-order.export'"
+                        @click="exportExcel"
+                        v-can="'admin.sales-order.export'"
                         class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
                         <i class="fas fa-file-excel mr-1"></i> Xuất Excel
@@ -837,6 +839,15 @@
                                     Thanh toán OR Code
                                 </button>
                                 <button
+                                    v-if="selectedOrder.id"
+                                    @click="printInvoice(selectedOrder.id)"
+                                    type="button"
+                                    class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    <i class="fa-solid fa-print"></i>
+                                    In hóa đơn PDF
+                                </button>
+                                <button
                                     @click="closeModal"
                                     type="button"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-600 text-base font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
@@ -1415,6 +1426,9 @@ function onPayAfterInput(e) {
 
 function onPayAfterBlur(e) {
     e.target.value = formatInputCurrency(pay_after.value);
+}
+function printInvoice(orderId) {
+    window.open(route("admin.sale-orders.print", orderId), "_blank");
 }
 </script>
 

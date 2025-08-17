@@ -1,5 +1,4 @@
 <?php
-
 use App\Constant\PermissionConstant;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
@@ -43,19 +42,20 @@ use App\Http\Controllers\SaleOrderController;
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
-    
-  
+
+
     Route::group(['prefix' => 'purchases', 'as' => 'purchases.'], function () {
         Route::get('/', [PurchaseOrderController::class, 'getList'])->middleware('has_permission:' . PermissionConstant::PURCHASE_INDEX)->name('index');
         Route::get('create', [PurchaseOrderController::class, 'create'])->middleware('has_permission:' . PermissionConstant::PURCHASE_CREATE)->name('create');
         Route::post('{id}/approve', [PurchaseOrderController::class, 'approve'])->middleware('has_permission:' . PermissionConstant::PURCHASE_APPROVED)->name('approve');
-        Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->middleware('has_permission:'.PermissionConstant::PURCHASE_EDIT)->name('edit');
+        Route::get('{id}/edit', [PurchaseOrderController::class, 'edit'])->middleware('has_permission:' . PermissionConstant::PURCHASE_EDIT)->name('edit');
         Route::post('{id}/cancel', [PurchaseOrderController::class, 'cancel'])->middleware('has_permission:' . PermissionConstant::PURCHASE_CANCEL)->name('cancel');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
         Route::put('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
         Route::post('{id}/end', [PurchaseOrderController::class, 'end'])->name('end');
+        Route::get('export', [PurchaseOrderController::class, 'exportExcel'])->name('export');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
         Route::get('/', [GoodReceiptController::class, 'getList'])->middleware('has_permission:' . PermissionConstant::RECEIVING_INDEX)->name('index');
@@ -64,6 +64,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-variants', [PurchaseOrderController::class, 'getVariants'])->name('getVariants');
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
+        Route::get('export', [GoodReceiptController::class, 'exportGoodsReceipts'])->name('export');
     });
 
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
@@ -80,29 +81,30 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('export', [SaleOrderController::class, 'export'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_EXPORT)->name('export');
         Route::post('/{id}/reject', [SaleOrderController::class, 'rejectSaleOrder'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_REJECT)->name('reject');
         Route::post('{id}/complete', [SaleOrderController::class, 'complete'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_COMPLETE)->name('complete');
-        
+
         Route::get('/search/customers', [SaleOrderController::class, 'searchCustomerJson'])->name('customer.search');
         Route::get('/inventory/{productVariantId}', [SaleOrderController::class, 'getInventoryQuantity'])->name('inventory');
         Route::post('/{id}/generate-qr', [SaleOrderController::class, 'generateQR'])->name('generate-qr');
         Route::get('/find-page', [SaleOrderController::class, 'findPage'])->name('find-page');
-        
+
         Route::get('/variants/{productId}', [SaleOrderController::class, 'getAllVariantsJson'])->name('variants.all');
         Route::get('/unit-conversions/{productId}', [SaleOrderController::class, 'getAllUnitJson'])->name('unit.all');
 
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
+        Route::get('{id}/print', [SaleOrderController::class, 'print'])->name('print');
     });
-  
 
 
 
 
-    Route::get('inventory-audit', [InventoryAuditController::class, 'index'])->middleware('has_permission:'. PermissionConstant::INVENTORY_AUDIT_INDEX)->name('inventory-audit.index');    
-    Route::get('inventory-audit/create', [InventoryAuditController::class, 'create'])->middleware('has_permission:'. PermissionConstant::INVENTORY_AUDIT_CREATE)->name('inventory-audit.create'); 
-    Route::post('inventory-audit', [InventoryAuditController::class, 'store'])->name('inventory-audit.store');      
-    Route::get('inventory-audit/{id}', [InventoryAuditController::class, 'show'])->middleware('has_permission:'. PermissionConstant::INVENTORY_AUDIT_SHOW)->name('inventory-audit.show');     
+
+    Route::get('inventory-audit', [InventoryAuditController::class, 'index'])->middleware('has_permission:' . PermissionConstant::INVENTORY_AUDIT_INDEX)->name('inventory-audit.index');
+    Route::get('inventory-audit/create', [InventoryAuditController::class, 'create'])->middleware('has_permission:' . PermissionConstant::INVENTORY_AUDIT_CREATE)->name('inventory-audit.create');
+    Route::post('inventory-audit', [InventoryAuditController::class, 'store'])->name('inventory-audit.store');
+    Route::get('inventory-audit/{id}', [InventoryAuditController::class, 'show'])->middleware('has_permission:' . PermissionConstant::INVENTORY_AUDIT_SHOW)->name('inventory-audit.show');
     Route::get('inventory-audit/{id}/edit', [InventoryAuditController::class, 'edit'])->name('inventory-audit.edit');
-    Route::put('inventory-audit/{id}', [InventoryAuditController::class, 'update'])->name('inventory-audit.update');  
+    Route::put('inventory-audit/{id}', [InventoryAuditController::class, 'update'])->name('inventory-audit.update');
     Route::delete('inventory-audit/{id}', [InventoryAuditController::class, 'destroy'])->name('inventory-audit.destroy');
 
 
@@ -126,16 +128,15 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     // Routes cho Products (Sản phẩm)
     Route::prefix('products')->as('products.')->group(function () {
+        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
+        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::get('/', [ProductController::class, 'index'])->middleware('has_permission:' . PermissionConstant::PRODUCT_INDEX)->name('index');
         Route::get('/create', [ProductController::class, 'create'])->middleware('has_permission:' . PermissionConstant::PRODUCT_CREATE)->name('create');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->middleware('has_permission:' . PermissionConstant::PRODUCT_EDIT)->name('edit');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->middleware('has_permission:' . PermissionConstant::PRODUCT_DELETE)->name('destroy');
         Route::get('/{product}', [ProductController::class, 'show'])->middleware('has_permission:' . PermissionConstant::PRODUCT_SHOW)->name('show');
 
-
-        Route::get('/get-inactive', [ProductController::class, 'getInactive'])->name('get_inactive');
         Route::post('/restore/{id}', [ProductController::class, 'restore'])->name('restore');
-        Route::get('/print-barcode', [ProductController::class, 'printBarcode'])->name('print_barcode');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::get('/search', [SupplierController::class, 'searchProducts'])->name('search');
@@ -259,7 +260,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/update-status', action: [UserController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
         Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('bulk-delete');
     });
-   
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
@@ -317,4 +318,3 @@ Route::prefix('admin/notifications')->as('notifications.')->group(function () {
 Route::get('/admin/notifications', [NotificationRealtimeController::class, 'getHeaderNotifications']);
 Route::post('/admin/notifications/{id}/read', [NotificationRealtimeController::class, 'markAsRead']);
 Route::post('/admin/notifications/read-all', [NotificationRealtimeController::class, 'markAllAsRead']);
-

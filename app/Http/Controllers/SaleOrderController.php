@@ -12,6 +12,7 @@ use App\Repositories\UnitRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleOrderController extends Controller
 {
@@ -156,5 +157,13 @@ class SaleOrderController extends Controller
             ->getPageOfOrder($orderId, $perPage);
 
         return response()->json(['page' => $page]);
+    }
+
+    public function print($id)
+    {
+        $order = $this->saleOrdersRepository->getOrderForInvoice($id);
+
+        return Pdf::loadView('pdf.saleorders', compact('order'))
+            ->stream("phieu-xuat-{$order->id}.pdf");
     }
 }

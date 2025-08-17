@@ -8,6 +8,7 @@ use App\Models\SupplierDebtHistory;
 use App\Models\SupplierTransaction;
 use App\Repositories\BaseRepository;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -110,6 +111,7 @@ class SupplierTransactionRepository extends BaseRepository
                 'new_value' => $newObj['credit_due_date'],
                 'update_type' => "due_date",
                 'note' => $data['note'] ?? "",
+                'created_id' => Auth::user()->id,
             ]);
 
             DB::commit();
@@ -124,7 +126,6 @@ class SupplierTransactionRepository extends BaseRepository
         try {
             $obj = $this->handleModel::with("goodReceipt")->where("id", $id)->firstOrFail();
             $newObj = [];
-
             $newObj["paid_amount"] = $obj['paid_amount'] + $data["payment"];
             if ($newObj["paid_amount"] > $obj->goodReceipt->total_amount) {
                 throw new \Exception("Tổng tiền thanh toán đã vượt quá đơn hàng");
@@ -141,7 +142,8 @@ class SupplierTransactionRepository extends BaseRepository
                 'new_value' => $data['payment'],
                 'update_type' => "payment",
                 'note' => $data['note'] ?? "",
-                'proof_image' => $this->handleUploadOneFile($data['file'])
+                'proof_image' => $this->handleUploadOneFile($data['file']),
+                'created_id' => Auth::user()->id,
             ]);
             DB::commit();
             return $obj;
@@ -218,7 +220,7 @@ class SupplierTransactionRepository extends BaseRepository
             ]
         )->where('goods_receipt_id', $id)->select(['id', 'paid_amount', 'transaction_date', 'credit_due_date', 'description', 'goods_receipt_id'])->first();
 
-        $supplierDebtHistory = $this->supplierDebt::where("supplier_transaction_id", $id)->orderBy("created_at", 'desc')->get();
+        $supplierDebtHistory = $this->supplierDebt::with('createdBy')->where("supplier_transaction_id", $id)->orderBy("created_at", 'desc')->get();
         $supplierDebtHistory = $supplierDebtHistory->map(function ($history) {
             $formated = $history->toArray();
             if ($history->update_type === 'payment') {
