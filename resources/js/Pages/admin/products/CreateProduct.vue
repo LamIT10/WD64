@@ -262,7 +262,7 @@
                     <div v-if="!hasVariant" class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Giá bán</label>
-                            <input v-model="form.simple_sale_price"  type="text" placeholder="Giá bán"
+                            <input v-model="form.simple_sale_price"  type="number" placeholder="Giá bán"
                                 class="w-full px-3 py-2 border rounded border-gray-300" />
                             <p v-if="form.errors.simple_sale_price" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_sale_price }}
@@ -270,7 +270,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-indigo-700">Số lượng tồn kho ban đầu</label>
-                            <input v-model="form.simple_quantity"  type="text" placeholder="Số lượng tồn kho"
+                            <input v-model="form.simple_quantity"  type="number" placeholder="Số lượng tồn kho"
                                 class="w-full px-3 py-2 border rounded border-gray-300" />
                             <p v-if="form.errors.simple_quantity" class="text-red-500 text-sm mt-1">
                                 {{ form.errors.simple_quantity }}
@@ -426,7 +426,7 @@
                                 </div>
                                 <div>
                                     <input v-model="item.data.sale_price" 
-                                        type="text" placeholder="Giá bán" :class="[
+                                        type="number" placeholder="Giá bán" :class="[
                                             'w-full px-2 py-1 border rounded text-sm border-gray-300'
                                         ]" />
                                     <p v-if="form.errors[`variants.0.combinationData.${item.key}.sale_price`]"
