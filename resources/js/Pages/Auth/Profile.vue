@@ -4,10 +4,10 @@
     <header class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white shadow-lg">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <Link  :href="route('dashboard')" class="flex items-center text-white hover:text-indigo-200 transition-colors">
-            <i class="fas fa-arrow-left text-lg mr-2"></i>
-            <span class="font-medium">Trang chủ</span>
-          </Link>
+          <a href="admin/dashboard" class="flex items-center text-white hover:text-indigo-200 transition-colors">
+    <i class="fas fa-arrow-left text-lg mr-2"></i>
+    <span class="font-medium">Trang chủ</span>
+</a>
         </div>
         <div class="text-right">
           <h1 class="text-2xl font-bold">Quản lý tài khoản</h1>

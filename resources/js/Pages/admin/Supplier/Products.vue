@@ -8,17 +8,13 @@
                     Sản phẩm của nhà cung cấp: {{ supplier.name }}
                 </h5>
                 <div class="flex items-center space-x-3">
-                    <button
-                        @click="openAddProductModal"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
-                    >
+                    <button @click="openAddProductModal"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
                         Thêm biến thể
                     </button>
-                    <Link
-                        :href="route('admin.suppliers.index')"
-                        class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300"
-                    >
-                        Quay lại
+                    <Link :href="route('admin.suppliers.index')"
+                        class="px-4 py-2 bg-gray-200 rounded-md text-sm hover:bg-gray-300">
+                    Quay lại
                     </Link>
                 </div>
             </div>
@@ -26,9 +22,7 @@
             <div class="bg-white overflow-hidden">
                 <div class="relative overflow-x-auto rounded-lg shadow-sm">
                     <table class="w-full text-left text-gray-600">
-                        <thead
-                            class="text-xs text-gray-700 bg-blue-50 border-b border-blue-200"
-                        >
+                        <thead class="text-xs text-gray-700 bg-blue-50 border-b border-blue-200">
                             <tr>
                                 <th class="px-6 py-3 font-semibold">
                                     Tên sản phẩm
@@ -42,14 +36,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="product in products"
-                                :key="product.id"
-                                class="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
-                            >
-                                <th
-                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                                >
+                            <tr v-for="product in products" :key="product.id"
+                                class="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150">
+                                <th class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                     {{ product.name }}
                                 </th>
                                 <td class="px-6 py-4">
@@ -58,22 +47,18 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-3">
                                         <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                                        >
+                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             {{
                                                 product.product_variants
                                                     ?.length || 0
                                             }}
                                             biến thể
                                         </span>
-                                        <button
-                                            v-if="
-                                                product.product_variants
-                                                    ?.length > 0
-                                            "
-                                            class="text-blue-600 hover:text-blue-800 transition-colors duration-150"
-                                            @click="showVariants(product)"
-                                        >
+                                        <button v-if="
+                                            product.product_variants
+                                                ?.length > 0
+                                        " class="text-blue-600 hover:text-blue-800 transition-colors duration-150"
+                                            @click="showVariants(product)">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -85,128 +70,70 @@
             </div>
 
             <!-- Modal xem biến thể -->
-            <ModalProductVariantDisplay
-                :isOpen="isModalOpen"
-                :variants="selectedProduct.product_variants"
-                :selectedProduct="selectedProduct"
-                :supplier="supplier"
-                @close="closeModal"
-            />
+            <ModalProductVariantDisplay :isOpen="isModalOpen" :variants="selectedProduct.product_variants"
+                :selectedProduct="selectedProduct" :supplier="supplier" @close="closeModal" />
             <!-- Modal thêm biến thể -->
-            <div
-                v-if="showAddProductModal"
-                class="fixed inset-0 backdrop-blur-sm bg-opacity-20 flex items-center justify-center z-50 transition-opacity duration-300"
-            >
-                <div
-                    class="bg-white p-6 rounded-xl w-full max-w-xl relative shadow-lg border border-indigo-50"
-                >
+            <div v-if="showAddProductModal"
+                class="fixed inset-0 backdrop-blur-sm bg-opacity-20 flex items-center justify-center z-50 transition-opacity duration-300">
+                <div class="bg-white p-6 rounded-xl w-full max-w-xl relative shadow-lg border border-indigo-50">
                     <h3 class="text-xl font-medium mb-6 text-indigo-900">
                         Thêm biến thể cho nhà cung cấp
                     </h3>
                     <form @submit.prevent="confirmAddProduct" class="space-y-5">
                         <div class="space-y-4">
                             <div>
-                                <label
-                                    class="block text-sm font-normal text-indigo-700 mb-1"
-                                    >Biến thể</label
-                                >
-                                <span
-                                    class="text-red-500"
-                                    v-if="formAddVariant.errors.id"
-                                    >{{ formAddVariant.errors.id }}</span
-                                >
-                                <Multiselect
-                                    v-model="formAddVariant.id"
-                                    :options="formattedVariants"
-                                    :searchable="true"
-                                    :placeholder="'Chọn biến thể'"
-                                    label="displayName"
-                                    valueProp="id"
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Biến thể</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.id">{{ formAddVariant.errors.id
+                                    }}</span>
+                                <Multiselect v-model="formAddVariant.id" :options="formattedVariants" :searchable="true"
+                                    :placeholder="'Chọn biến thể'" label="displayName" valueProp="id"
                                     :filterResults="customFilter"
-                                    class="p-2 border border-indigo-100 rounded-lg bg-indigo-50/30"
-                                >
+                                    class="p-2 border border-indigo-100 rounded-lg bg-indigo-50/30">
                                     <template v-slot:option="{ option }">
                                         {{ option.product.name }}
-                                        <span
-                                            v-for="(att, index) in option.attributes"
-                                            :key="index"
-                                        >
+                                        <span v-for="(att, index) in option.attributes" :key="index">
                                             <span v-if="index === 0">/ {{ att.name }} -</span>
-                                            <span v-else-if="index === option.attributes.length - 1">{{ att.name }}</span>
+                                            <span v-else-if="index === option.attributes.length - 1">{{ att.name
+                                                }}</span>
                                             <span v-else>{{ att.name + " - " }}</span>
                                         </span>
                                     </template>
                                 </Multiselect>
                             </div>
 
-                            <div>
-                                <label
-                                    class="block text-sm font-normal text-indigo-700 mb-1"
-                                    >Số lượng đặt tối thiểu</label
-                                >
-                                <span
-                                    class="text-red-500"
-                                    v-if="formAddVariant.errors.min_order_quantity"
-                                    >{{ formAddVariant.errors.min_order_quantity }}</span
-                                >
-                                <input
-                                    type="number"
-                                    v-model="formAddVariant.min_order_quantity"
-                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30"
-                                />
-                            </div>
+                            <!-- <div>
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Số lượng đặt tối
+                                    thiểu</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.min_order_quantity">{{
+                                    formAddVariant.errors.min_order_quantity }}</span>
+                                <input type="number" v-model="formAddVariant.min_order_quantity"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30" />
+                            </div> -->
 
                             <div>
-                                <label
-                                    class="block text-sm font-normal text-indigo-700 mb-1"
-                                    >Giá vốn</label
-                                >
-                                <span
-                                    class="text-red-500"
-                                    v-if="formAddVariant.errors.cost_price"
-                                    >{{ formAddVariant.errors.cost_price }}</span
-                                >
-                                <input
-                                    type="number"
-                                    v-model="formAddVariant.cost_price"
-                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30"
-                                />
+                                <label class="block text-sm font-normal text-indigo-700 mb-1">Giá vốn</label>
+                                <span class="text-red-500" v-if="formAddVariant.errors.cost_price">{{
+                                    formAddVariant.errors.cost_price }}</span>
+                                <input type="number" v-model="formAddVariant.cost_price"
+                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30" />
                             </div>
                         </div>
 
                         <div class="flex justify-end space-x-3 pt-2">
-                            <button
-                                type="button"
-                                @click="closeAddProductModal"
-                                class="px-4 py-2 text-sm text-indigo-700 hover:text-indigo-900 rounded-lg hover:bg-indigo-50 transition-colors duration-200"
-                            >
+                            <button type="button" @click="closeAddProductModal"
+                                class="px-4 py-2 text-sm text-indigo-700 hover:text-indigo-900 rounded-lg hover:bg-indigo-50 transition-colors duration-200">
                                 Hủy
                             </button>
-                            <button
-                                type="submit"
-                                :disabled="isAdding"
-                                class="px-4 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center"
-                            >
+                            <button type="submit" :disabled="isAdding"
+                                class="px-4 py-2 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center">
                                 <span v-if="isAdding" class="flex items-center">
-                                    <svg
-                                        class="animate-spin mr-2 h-4 w-4 text-indigo-600"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            class="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            stroke-width="4"
-                                        ></circle>
-                                        <path
-                                            class="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
+                                    <svg class="animate-spin mr-2 h-4 w-4 text-indigo-600"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
                                     </svg>
                                     Đang xử lý...
                                 </span>
@@ -229,7 +156,7 @@ import { Link, useForm } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import Multiselect from '@vueform/multiselect';
 
-    
+
 // Props
 const { supplier, products, listVariants } = defineProps({
     supplier: Object,
