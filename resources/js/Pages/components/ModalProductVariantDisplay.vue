@@ -25,7 +25,7 @@
                       <th class="px-6 py-3">Tên thuộc tính</th>
                       <th class="px-6 py-3">Giá trị</th>
                       <th class="px-6 py-3">Giá nhập</th>
-                      <th class="px-6 py-3">Số lượng tối thiểu</th>
+                      <!-- <th class="px-6 py-3">Số lượng tối thiểu</th> -->
                       <th class="px-6 py-3">Hành động</th>
 
                     </tr>
@@ -41,7 +41,7 @@
                         </td>
                         <td class="px-6 py-3">{{ variant.attributes.att_value }}</td>
                         <td class="px-6 py-3">{{ formatNumber(variant.attributes.cost_price) + " ₫" }}</td>
-                        <td class="px-6 py-3">{{ formatNumber(variant.attributes.min_order_quantity) }}</td>
+                        <!-- <td class="px-6 py-3">{{ formatNumber(variant.attributes.min_order_quantity) }}</td> -->
                         <td class="px-6 py-3">
                           <ConfirmModal :route-name="'admin.suppliers.products.destroy'" :route-params="{
                             id: props.supplier.id,
