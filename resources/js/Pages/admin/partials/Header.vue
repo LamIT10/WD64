@@ -1,42 +1,11 @@
 <template>
     <!-- Header -->
     <header
-        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30"
-    >
-        <div
-            class="flex items-center px-3 py-1.5"
-        >
-            <!-- <div class="text-indigo-600">
-                <i class="fas fa-layer-group"></i>
-            </div>
-            <div class="text-sm hidden sm:block">
-                <span>Đang xử lý</span>
-                <span class="font-medium ml-1">5 mục</span>
-            </div> -->
+        class="bg-white shadow-sm border-b border-gray-100 h-16 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-30">
+        <div class="flex items-center px-3 py-1.5">
         </div>
         <!-- Right side - User controls -->
         <div class="flex items-center space-x-3">
-            <!-- Quick Actions -->
-            <div class="flex items-center space-x-1 sm:space-x-2">
-                <!-- QR Code Scanner -->
-                <button
-                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 relative group"
-                    title="Quét mã vạch">
-                    <i class="fas fa-qrcode text-lg"></i>
-                    <span
-                        class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                        Quét mã vạch
-                    </span>
-                </button>
-
-                <!-- Dark Mode Toggle -->
-                <button
-                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
-                    title="Chế độ tối">
-                    <i class="fas fa-moon text-lg"></i>
-                </button>
-            </div>
-
             <!-- Notifications -->
             <div class="relative" ref="notificationRef">
                 <button @click="toggleNotifications"
@@ -126,16 +95,19 @@
             <div class="flex items-center space-x-2 pl-2 border-l border-gray-200">
                 <div class="text-right hidden sm:block">
                     <div class="text-sm font-medium text-gray-800">
-                        Nguyễn Văn Admin
+                        {{ $page.props.auth.user?.name }}
                     </div>
-                    <div class="text-xs text-gray-500">Quản trị viên</div>
+                    <div class="text-xs text-gray-500">{{ $page.props.auth.user?.position }}</div>
                 </div>
                 <div class="relative group">
-                    <img class="inline-block h-8 w-8 rounded-full object-cover cursor-pointer"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="User profile" />
-
-                    <!-- Dropdown arrow indicator -->
+                    <img v-if="$page.props.auth.user?.avatar" :src="`/storage/${$page.props.auth.user.avatar}`"
+                        :key="$page.props.auth.user.avatar"
+                        class="inline-block h-8 w-8 rounded-full object-cover cursor-pointer" alt="User profile" />
+                    <div v-else
+                        class="flex h-8 w-8 rounded-full bg-indigo-500 text-white text-xs items-center justify-center cursor-pointer">
+                        {{ getInitial($page.props.auth.user?.name) }}
+                    </div>
+                    <!-- Dropdown arrow -->
                     <div @click.stop="showDropdown = !showDropdown"
                         class="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 cursor-pointer select-none">
                         <div
@@ -143,7 +115,8 @@
                             <i class="fas fa-chevron-down text-[6px] text-gray-500 group-hover:text-white"></i>
                         </div>
                     </div>
-                    <!-- Dropdown menu -->
+
+                    <!-- Dropdown -->
                     <transition name="fade">
                         <div v-if="showDropdown"
                             class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-40 py-2 text-sm">
@@ -157,6 +130,7 @@
                     </transition>
                 </div>
             </div>
+
         </div>
     </header>
 </template>
@@ -300,7 +274,7 @@ const formatNotificationTime = (date) => {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 1) return 'Vừa xong';
     if (minutes < 60) return `${minutes} phút trước`;
     if (hours < 24) return `${hours} giờ trước`;
@@ -329,22 +303,22 @@ let notificationChannel = null;
 // Lifecycle hooks
 onMounted(() => {
     fetchNotifications();
-    
+
     // ✅ REAL-TIME: Replace polling with WebSocket
     // interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s - DISABLED
-    
+
     // ✅ REAL-TIME: Setup WebSocket notifications
     if (window.Echo) {
         console.log('🔔 Setting up real-time notifications in Header...');
-        
+
         // Subscribe to user-specific notifications (assuming user ID = 1 for now)
         // TODO: Replace with actual authenticated user ID
         const currentUserId = 1; // Get from auth context
-        
+
         notificationChannel = window.Echo.channel(`notifications.user.${currentUserId}`);
         notificationChannel.listen('NotificationCreated', (e) => {
             console.log('🔔 Real-time notification received in Header:', e);
-            
+
             // Add new notification to the beginning of the list
             const newNotification = {
                 id: e.notification.id,
@@ -355,26 +329,26 @@ onMounted(() => {
                 isRead: false,
                 time: formatNotificationTime(new Date(e.notification.created_at))
             };
-            
+
             notifications.value.unshift(newNotification);
             unreadCount.value++;
-            
+
             // Show notification dropdown briefly
             showNotifications.value = true;
             setTimeout(() => {
                 showNotifications.value = false;
             }, 3000);
-            
+
             // Emit event for other components
             emitter.emit("notification-updated");
         });
-        
+
         console.log(`🔔 Subscribed to notifications.user.${currentUserId}`);
     } else {
         console.warn('⚠️ Echo not available, falling back to polling');
         interval = setInterval(fetchNotifications, 60000);
     }
-    
+
     emitter.on("notification-updated", () => {
         console.log("Received notification-updated event");
         fetchNotifications();
@@ -385,13 +359,13 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (interval) clearInterval(interval);
-    
+
     // ✅ REAL-TIME: Cleanup WebSocket subscription
     if (notificationChannel) {
         notificationChannel.stopListening('NotificationCreated');
         console.log('🔌 Unsubscribed from notification channel');
     }
-    
+
     document.removeEventListener("click", handleClickOutside);
     emitter.off("notification-updated");
 });
@@ -411,7 +385,7 @@ onMounted(() => {
 
         // Add both raw and Echo listeners for debugging
         if (channel.pusher) {
-            channel.pusher.bind('NotificationCreated', function(data) {
+            channel.pusher.bind('NotificationCreated', function (data) {
                 console.log('🔥 Header RAW Pusher Event:', data);
                 addEvent(`📨 RAW: ${JSON.stringify(data)}`);
             });

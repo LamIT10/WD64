@@ -22,7 +22,7 @@ use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\ProxyController;
-
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\RankController;
 use App\Models\InventoryAudit;
 use App\Http\Controllers\Admin\SupplierTransactionController;
@@ -316,3 +316,7 @@ Route::prefix('admin/notifications')->as('notifications.')->group(function () {
 Route::get('/admin/notifications', [NotificationRealtimeController::class, 'getHeaderNotifications']);
 Route::post('/admin/notifications/{id}/read', [NotificationRealtimeController::class, 'markAsRead']);
 Route::post('/admin/notifications/read-all', [NotificationRealtimeController::class, 'markAllAsRead']);
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+});
