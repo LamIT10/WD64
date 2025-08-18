@@ -151,6 +151,9 @@ class InventoryAuditController extends BaseApiController
             if (!$request->user()) {
                 return response()->json([['message' => 'Chưa đăng nhập!'], 'id' => Auth::id()], 401);
             }
+            if ($audit->is_adjusted !== 0) {
+                return response()->json(['message' => 'Phiếu kiểm kho đã được thay đổi trước đó, không thể tiếp tục thay đổi!'], 400);
+            }
 
             $audit->is_adjusted = 2; // hoặc $audit->status = 'rejected';
             $audit->adjusted_at = now();

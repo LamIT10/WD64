@@ -60,11 +60,8 @@ class InventoryController extends Controller
         if (!$audit) {
             return response()->json(['message' => 'Không tìm thấy phiếu kiểm kho!'], 404);
         }
-        // ... Xử lý đồng bộ ...
-
-        // Kiểm tra đã đồng bộ chưa
-        if ($audit->is_adjusted != 0) {
-            return response()->json(['message' => 'Phiếu đã được đồng bộ trước đó!'], 400);
+        if ($audit->is_adjusted !== 0) {
+            return response()->json(['message' => 'Phiếu kiểm kho đã được thay đổi trước đó, không thể tiếp tục thay đổi!'], 400);
         }
 
         // Lấy danh sách item kiểm kho
@@ -103,7 +100,7 @@ class InventoryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Lỗi khi đồng bộ: ' . $e->getMessage()
+                'message' => 'Lỗi khi đồng bộ: '
             ], 500);
         }
     }
