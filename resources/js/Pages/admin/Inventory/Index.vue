@@ -5,7 +5,11 @@
       <InventoryStatsCards/>
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <div class="grid grid-cols-1 gap-6">
-          <div class="flex justify-center">
+          <div class="flex justify-center items-center gap-4">
+            <!-- Icon động bên trái -->
+            <span class="animate-bounce text-3xl text-indigo-400">
+              <i class="fas fa-box-open"></i>
+            </span>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2 text-center">Chọn khu vực xem sản
                 phẩm</label>
@@ -17,6 +21,10 @@
                 </button>
               </div>
             </div>
+            <!-- Icon động bên phải -->
+            <span class="animate-bounce text-3xl text-yellow-400" style="animation-delay:0.3s">
+              <i class="fas fa-dolly-flatbed"></i>
+            </span>
           </div>
         </div>
       </div>

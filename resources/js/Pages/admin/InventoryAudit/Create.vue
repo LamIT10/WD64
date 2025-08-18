@@ -1,5 +1,6 @@
 <template>
   <AppLayout>
+    <ToastClient ref="toastRef" />
     <form @submit.prevent="handleSubmit">
       <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-4 md:p-8">
         <!-- Header Card -->
@@ -169,10 +170,11 @@
 import { reactive, ref, watch, computed } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { usePage, router } from '@inertiajs/vue3';
+import ToastClient from '../../components/ToastClient.vue';
 import * as XLSX from 'xlsx';
 
 const importInput = ref(null);
-const toastRef = ref(null);
+const toastRef = ref();
 const page = usePage();
 const zones = page.props.zones || [];
 const products = reactive([]);
@@ -341,10 +343,7 @@ const submitForm = () => {
     preserveState: true,
     onSuccess: (page) => {
       console.log('Success response:', page);
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lưu phiếu kiểm kho thành công!', 'success');
-      }
+      toastSuccess('Tạo phiếu kiểm kho thành công.');
       // resetForm();
       images.value = [];
       imagePreviews.value = [];
@@ -352,10 +351,7 @@ const submitForm = () => {
     onError: (errors) => {
       console.error('Lỗi từ backend:', errors);
       console.error('Full error object:', JSON.stringify(errors, null, 2));
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lỗi khi lưu phiếu kiểm kho: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
-      }
+      toastError('Lỗi khi tạo phiếu kiểm kho. Vui lòng thử lại!');
     },
     onProgress: (progress) => {
       console.log('Upload progress:', progress);
@@ -364,6 +360,23 @@ const submitForm = () => {
 };
 
 const filteredProducts = computed(() => products);
+
+function toastSuccess(message) {
+  toastRef.value?.triggerToast(message, 'success');
+}
+function toastError(message) {
+  toastRef.value?.triggerToast(message, 'error');
+}
+
+// Tự động hiển thị thông báo từ controller (flash message)
+watch(() => page.props.flash, (flash) => {
+  if (flash?.success) {
+    toastSuccess(flash.success);
+  }
+  if (flash?.error) {
+    toastError(flash.error);
+  }
+});
 
 const exportSampleExcel = () => {
   const sampleData = [
