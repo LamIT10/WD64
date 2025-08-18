@@ -112,6 +112,7 @@ class SaleOrdersRepository extends BaseRepository
         $searchTerm = $request->input('searchProduct', '');
         $products = Product::query()
             ->where('name', 'LIKE', "%{$searchTerm}%")
+            ->where('status_product', 1)
             ->with([
                 'productVariants' => function ($query) {
                     $query->select('id', 'product_id', 'sale_price')
