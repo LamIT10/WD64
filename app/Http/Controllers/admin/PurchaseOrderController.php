@@ -19,6 +19,7 @@ class PurchaseOrderController extends Controller
     public function getList(Request $request)
     {
         $listOrders = $this->handleRepository->getList($request);
+        
         return Inertia::render('admin/PurchaseOrders/List',  [
             'listOrders' => $listOrders,
             'filters' => $request->only(['order_status','supplier','code','start','end']),
@@ -83,5 +84,18 @@ class PurchaseOrderController extends Controller
     {
         $filters = $request->only(['code', 'supplier', 'order_status', 'start', 'end']);
         return Excel::download(new PurchaseOrdersExport($filters), 'don-nhap.xlsx');
+    }
+    public function log($id)
+    {
+        $data = $this->handleRepository->getLog($id);
+        
+        if (isset($data['error'])) {
+            return back()->with('error', $data['message']);
+        }
+        return Inertia::render('admin/PurchaseOrders/PurchaseLog', [
+            'logs' => $data['logs'],
+            'purchase' => $data['purchase'],
+            'purchaseId' => $id
+        ]);
     }
 }

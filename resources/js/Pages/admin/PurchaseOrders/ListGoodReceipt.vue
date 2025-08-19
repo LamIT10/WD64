@@ -64,9 +64,9 @@
                     <button
                         type="button"
                         @click="resetFilter"
-                        class="border border-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-100 transition font-medium"
+                        class="border border-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-100 transition font-medium"
                     >
-                        Xóa lọc
+                        <i class="fa-solid text-xl fa-rotate-left"></i>
                     </button>
                 </div>
             </form>

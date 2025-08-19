@@ -122,7 +122,6 @@
                                 <th class="px-4 py-3 text-center">Đơn vị</th>
                                 <th class="px-4 py-3 text-center">Giá nhập (VND)</th>
                                 <th class="px-4 py-3 text-right">Thành tiền</th>
-                                <th class="px-4 py-3 text-right"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -196,6 +195,7 @@
                                             />
                                         <span
                                             v-if="
+                                                item.hasUnitChanged &&
                                                 item.unit_id !==
                                                 item.product_variant.product
                                                     .default_unit_id
@@ -236,14 +236,6 @@
                                                 item.converted_price
                                         )
                                     }}
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <button
-                                        @click="removeItem(index)"
-                                        class="text-red-600 hover:text-red-800"
-                                    >
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
                                 </td>
                             </tr>
                             <tr v-if="!purchase.items.length">
@@ -298,6 +290,12 @@ const { purchase, users, products } = defineProps({
 const calculateConvertedPrice = (item) => {
     const product = item.product_variant.product;
     const unitPrice = Number(item.unit_price) || 0;
+    
+    // Nếu chưa thay đổi đơn vị (lần đầu load), giữ nguyên giá gốc
+    if (!item.hasUnitChanged) {
+        return unitPrice;
+    }
+    
     if (item.unit_id === product.default_unit_id) {
         return unitPrice;
     }
@@ -327,17 +325,19 @@ onMounted(() => {
         const isDefaultUnit = item.unit_id === product.default_unit_id;
         // Ensure unit_price is a number
         item.unit_price = Number(item.unit_price) || 0;
+        
+        // Đánh dấu là chưa thay đổi đơn vị (lần đầu load)
+        item.hasUnitChanged = false;
+        
         if (isDefaultUnit) {
             item.original_unit_price = item.unit_price;
+            item.converted_price = item.unit_price;
         } else {
-            const conversion = product.unit_conversions.find(
-                (conv) => conv.to_unit_id === item.unit_id
-            );
-            const factor = Number(conversion?.conversion_factor) || 1;
-            item.original_unit_price = item.unit_price / factor;
+            // Lần đầu load: giữ nguyên giá gốc, không tính theo factor
+            item.original_unit_price = item.unit_price;
+            item.converted_price = item.unit_price;
         }
-        // Converted price is always a number
-        item.converted_price = calculateConvertedPrice(item);
+        
         item.subtotal =
             (Number(item.quantity_ordered) || 0) *
             (Number(item.converted_price) || 0);
@@ -412,6 +412,13 @@ function moneyInput(obj, key, cb, e) {
   e.target.value = obj[key].toLocaleString('vi-VN');  // format ngay
   if (typeof cb === 'function') cb();                 // gọi logic cũ
 }
+const getVariantName = (item) => {
+  const baseName = item?.product_variant?.product?.name ?? '';
+  const attrs = Array.isArray(item?.product_variant?.attributes)
+    ? item.product_variant.attributes.map(a => a?.name).filter(Boolean)
+    : [];
+  return [baseName, ...attrs].filter(Boolean).join(' - ').trim();
+};
 function moneyFocus(obj, key, e) {
   e.target.value = obj[key] ? String(obj[key]) : '';
 }
@@ -498,7 +505,27 @@ const updateOriginalPrice = (index) => {
 
 const updateUnitPrice = (index) => {
     const item = purchase.items[index];
+    const product = item.product_variant.product;
+    
+    // Đánh dấu là đã thay đổi đơn vị
+    item.hasUnitChanged = true;
+    
+    // Giữ nguyên unit_price user nhập, chỉ tính lại converted_price
     item.unit_price = Number(item.unit_price) || 0;
+    
+    if (item.unit_id === product.default_unit_id) {
+        // Nếu là đơn vị gốc, giá cơ bản = unit_price
+        item.original_unit_price = item.unit_price;
+    } else {
+        // Nếu là đơn vị quy đổi, tính giá cơ bản từ unit_price hiện tại
+        const conversion = product.unit_conversions.find(
+            (conv) => conv.to_unit_id === item.unit_id
+        );
+        const factor = Number(conversion?.conversion_factor) || 1;
+        // Giá cơ bản = giá hiện tại / hệ số quy đổi
+        item.original_unit_price = item.unit_price / factor;
+    }
+
     item.converted_price = calculateConvertedPrice(item);
     item.subtotal =
         (Number(item.quantity_ordered) || 0) *
@@ -512,10 +539,6 @@ const updateUnitPrice = (index) => {
             0
         );
     });
-};
-
-const removeItem = (index) => {
-    purchase.items.splice(index, 1);
 };
 
 const form = useForm({
@@ -546,6 +569,18 @@ const savePurchase = () => {
     form.items = purchase.items.map((item) => {
         const qty = Number(item.quantity_ordered) || 0;
         const price = Number(item.converted_price) || 0;
+        
+        // Tính factor dựa trên đơn vị được chọn
+        const product = item.product_variant.product;
+        let factor = 1;
+        
+        if (item.unit_id !== product.default_unit_id) {
+            const conversion = product.unit_conversions.find(
+                (conv) => conv.to_unit_id === item.unit_id
+            );
+            factor = Number(conversion?.conversion_factor) || 1;
+        }
+        
         return {
             id: item.id,
             variant_id: item.product_variant.id,
@@ -554,6 +589,8 @@ const savePurchase = () => {
             unit_price: price,
             subtotal: qty * price,
             supplier_id: item.supplier_id,
+            variant_name: getVariantName(item),
+            factor: factor,
         };
     });
 

@@ -217,7 +217,10 @@ const markAsRead = async (notification) => {
             await fetchNotifications();
             return;
         }
-        // Thêm các điều kiện khác nếu cần
+        if(notification.type === "hihi") {
+            await fetchNotifications();
+            return;
+        }
 
         await fetchNotifications();
     } catch (error) {

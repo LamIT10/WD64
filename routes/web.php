@@ -55,6 +55,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
         Route::put('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
         Route::post('{id}/end', [PurchaseOrderController::class, 'end'])->name('end');
+        Route::get('{id}/log', [PurchaseOrderController::class, 'log'])->name('log');
         Route::get('export', [PurchaseOrderController::class, 'exportExcel'])->name('export');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {

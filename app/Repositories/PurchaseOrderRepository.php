@@ -8,7 +8,11 @@ use App\Models\ProductUnitConversion;
 use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseOrderLog;
+use App\Models\SupplierProductVariant;
+use App\Models\Unit;
 use App\Models\User;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +21,11 @@ use Illuminate\Support\Facades\Log;
 class PurchaseOrderRepository extends BaseRepository
 {
     protected $productRepository;
-    public function __construct(PurchaseOrder $model)
+    protected $log;
+    public function __construct(PurchaseOrder $model, PurchaseOrderLogRepository $log)
     {
         $this->handleModel = $model;
+        $this->log = $log;
     }
     public function getList($request)
     {
@@ -65,21 +71,19 @@ class PurchaseOrderRepository extends BaseRepository
         }
         $query->orderByDesc('id');
 
-        $purchaseList = $query->paginate(3)->withQueryString();
+        $purchaseList = $query->paginate(10)->withQueryString();
         return $purchaseList;
     }
     public function getDataForcreate()
     {
         $data = [];
-        $data['products'] = Product::all();
+        $data['products'] = Product::where('status_product', 1)->get();
         return $data;
     }
     public function getVariants($idProduct)
     {
         $variants = Product::with([
-            'productVariants.suppliers' => function ($query) {
-                $query->select(['*']);
-            },
+            'productVariants.suppliers',
             'productVariants.attributes' => function ($query) {
                 $query->select(['*']);
             },
@@ -103,9 +107,7 @@ class PurchaseOrderRepository extends BaseRepository
     public function getSupplierAndUnit($idVariant)
     {
         $data = ProductVariant::with([
-            'suppliers' => function ($query) {
-                $query->select(['*']);
-            },
+            'suppliers',
             'product' => function ($query) {
                 $query->select(['id', 'name', 'default_unit_id']);
             },
@@ -148,6 +150,11 @@ class PurchaseOrderRepository extends BaseRepository
                     DB::rollBack();
                     return $this->returnError('Lỗi khi tạo đơn hàng, vui lòng thử lại');
                 }
+                $this->log->createLog(1, [
+                    'purchase_order_id' => $newPurchaseOrder->id,
+                    'created_by' => Auth::user()->id,
+                    'detail' => 'Tạo mới đơn hàng'
+                ]);
                 $newPurchaseOrderItem = $value['items'] ?? [];
                 foreach ($newPurchaseOrderItem as $item) {
                     $item['purchase_order_id'] = $newPurchaseOrder->id;
@@ -166,9 +173,23 @@ class PurchaseOrderRepository extends BaseRepository
                         DB::rollBack();
                         return $this->returnError('Lỗi khi tạo đơn hàng, vui lòng thử lại');
                     }
+                    $supplierVariant = SupplierProductVariant::where('product_variant_id', $item['product_variant_id'])
+                        ->where('supplier_id', $value['supplier_id'])
+                        ->first();
+                    if (!$supplierVariant) {
+                        DB::rollBack();
+                        return $this->returnError('Không tìm thấy nhà cung cấp cho sản phẩm này');
+                    }
+                    $supplierVariant->update(['cost_price' => $item['price_base']]);
                 }
             }
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase',
+                'Đặt hàng nhập',
+                'Có ' . count($listPurchaseOrderItems) . ' đơn hàng đề xuất nhập kho mới',
+                [],
+            );
             return $newPurchaseOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -225,6 +246,11 @@ class PurchaseOrderRepository extends BaseRepository
                     'quantity_in_transit' => $inventory->quantity_in_transit + $quantityLast,
                 ]);
             }
+            $this->log->createLog(2, [
+                'purchase_order_id' => $purchaseOrder->id,
+                'approved_by' => Auth::user()->id,
+                'detail' => 'Phê duyệt đơn hàng'
+            ]);
 
             DB::commit();
             return $purchaseOrder;
@@ -255,6 +281,11 @@ class PurchaseOrderRepository extends BaseRepository
             $orderApproved['order_status'] = 4;
             $purchaseOrder->update($orderApproved);
 
+            $this->log->createLog(3, [
+                'purchase_order_id' => $purchaseOrder->id,
+                'refused_by' => Auth::user()->id,
+                'detail' => 'Từ chối với lý do: ' . $data['reason'],
+            ]);
             DB::commit();
             return $purchaseOrder;
         } catch (\Throwable $th) {
@@ -342,26 +373,92 @@ class PurchaseOrderRepository extends BaseRepository
                 DB::rollBack();
                 return $this->returnError('Đơn hàng không tồn tại');
             }
+            $textUpdateDetail = '';
             $dataUpdate = [];
             $dataUpdate['user_id'] = $data['user_id'];
             $dataUpdate['order_date'] = $data['order_date'];
             $dataUpdate['total_amount'] = $data['total_amount'];
 
+            // So sánh user_id
+            if ($data['user_id'] != $purchase->user_id) {
+                $textUpdateDetail .= 'Thay đổi người đặt hàng từ ' . $purchase->user->name . ' thành ' . $data['user_id'] . '. ';
+            }
+
+            // So sánh ngày đặt hàng chỉ theo ngày
+            $orderItemDate = Carbon::parse($purchase->order_date)->toDateString();
+            $dataOrderDate = Carbon::parse($data['order_date'])->toDateString();
+            if ($orderItemDate != $dataOrderDate) {
+                $textUpdateDetail .= 'Thay đổi ngày đặt hàng từ ' . $orderItemDate . ' thành ' . $dataOrderDate . '. ';
+            }
+
             $purchase->update($dataUpdate);
+
+            $isAnyItemUpdated = false;
             foreach ($data['items'] as $key => $value) {
                 $orderItem = PurchaseOrderItem::find($value['id']);
                 if (!$orderItem) {
                     DB::rollBack();
                     return $this->returnError('Có lỗi khi cập nhật sản phẩm trong đơn');
                 }
-                $dataItemUpdate = [];
 
+                // So sánh unit_id, quantity_ordered, unit_price (float)
+                $isUpdateVariant = false;
+                $variantLog = '';
+
+                if ($orderItem->unit_id != $value['unit_id']) {
+                    $oldUnit = Unit::find($orderItem->unit_id)->name ?? '';
+                    $newUnit = Unit::find($value['unit_id'])->name ?? '';
+                    $variantLog .= 'Đơn vị từ ' . $oldUnit . ' thành ' . $newUnit . '. ';
+                    $isUpdateVariant = true;
+                }
+                if ($orderItem->quantity_ordered != $value['quantity_ordered']) {
+                    $variantLog .= 'Số lượng từ ' . $orderItem->quantity_ordered . ' thành ' . $value['quantity_ordered'] . '. ';
+                    $isUpdateVariant = true;
+                }
+                // So sánh float với float
+                if (abs(floatval($orderItem->unit_price) - floatval($value['unit_price'])) > 0.00001) {
+                    $variantLog .= 'Giá nhập cho một ' . ($newUnit ?? Unit::find($orderItem->unit_id)->name) . ' từ ' . number_format($orderItem->unit_price) . ' thành ' . number_format($value['unit_price']) . '. ';
+                    $isUpdateVariant = true;
+                }
+
+                if ($isUpdateVariant) {
+                    $textUpdateDetail .= 'Thay đổi sản phẩm ' . ($value['variant_name'] ?? '') . ': ' . $variantLog;
+                    $isAnyItemUpdated = true;
+                }
+
+                $dataItemUpdate = [];
                 $dataItemUpdate['quantity_ordered'] = $value['quantity_ordered'];
                 $dataItemUpdate['unit_id'] = $value['unit_id'];
                 $dataItemUpdate['unit_price'] = $value['unit_price'];
                 $dataItemUpdate['subtotal'] = $value['subtotal'];
 
                 $orderItem->update($dataItemUpdate);
+
+                if (isset($value['factor']) && floatval($value['factor']) > 0) {
+                    $costPrice = floatval($value['unit_price']) / floatval($value['factor']);
+                    $supplierProductVariant = SupplierProductVariant::where([
+                        'supplier_id' => $purchase->supplier_id,
+                        'product_variant_id' => $orderItem->product_variant_id
+                    ])->first();
+
+                    if ($supplierProductVariant) {
+                        $supplierProductVariant->update([
+                            'cost_price' => $costPrice
+                        ]);
+                    }
+                }
+            }
+
+            if (
+                $purchase->user_id != $data['user_id']
+                || $isAnyItemUpdated
+                || $orderItemDate != $dataOrderDate
+            ) {
+                $this->log->createLog(4, [
+                    'purchase_order_id' => $purchase->id,
+                    'updated_by' => Auth::user()->id,
+                    'detail' => $textUpdateDetail
+                ]);
             }
             DB::commit();
             return $purchase;
@@ -406,6 +503,11 @@ class PurchaseOrderRepository extends BaseRepository
             }
             DB::beginTransaction();
             $purchaseOrder->update(['order_status' => 3]);
+            $this->log->createLog(5, [
+                'purchase_order_id' => $purchaseOrder->id,
+                'end_by' => Auth::user()->id,
+                'detail' => 'Kết thúc đơn hàng'
+            ]);
             DB::commit();
             return $purchaseOrder;
         } catch (\Throwable $th) {
@@ -413,5 +515,40 @@ class PurchaseOrderRepository extends BaseRepository
             Log::error('Lỗi khi kết thúc đơn hàng: ' . $th->getMessage());
             return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
         }
+    }
+    public function getLog($id)
+    {
+        $purchase = $this->handleModel->find($id);
+        if (!$purchase) {
+            return $this->returnError('Đơn hàng không tồn tại');
+        }
+
+        $logs = PurchaseOrderLog::where('purchase_order_id', $id)
+            ->with([
+                'createdBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'updatedBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'refusedBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'approvedBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'endBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                },
+                'createGrnBy' => function ($query) {
+                    $query->select(['id', 'name']);
+                }
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+        return [
+            'logs' => $logs,
+            'purchase' => $purchase
+        ];
     }
 }
