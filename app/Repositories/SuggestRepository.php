@@ -24,6 +24,9 @@ class SuggestRepository extends BaseRepository
                         ->orWhere('code', 'like', "%$search%");
                 });
             })
+            ->whereHas('product', function ($query) {
+                $query->where('status_product', 1);
+            })
             ->get();
 
         $result = [];
@@ -74,7 +77,7 @@ class SuggestRepository extends BaseRepository
         return $result;
     }
 
-    public function getRevenueReport($startDate, $endDate, $search = '', $perPage = 5)
+    public function getRevenueReport($startDate, $endDate, $search = '', $perPage = 10)
     {
         $query = ProductVariant::with(['product', 'attributes.attribute', 'unit'])
             ->when($search, function ($q) use ($search) {

@@ -9,8 +9,10 @@ use App\Models\ProductVariant;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseOrderLog;
+use App\Models\SupplierProductVariant;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -75,15 +77,13 @@ class PurchaseOrderRepository extends BaseRepository
     public function getDataForcreate()
     {
         $data = [];
-        $data['products'] = Product::all();
+        $data['products'] = Product::where('status_product', 1)->get();
         return $data;
     }
     public function getVariants($idProduct)
     {
         $variants = Product::with([
-            'productVariants.suppliers' => function ($query) {
-                $query->select(['*']);
-            },
+            'productVariants.suppliers',
             'productVariants.attributes' => function ($query) {
                 $query->select(['*']);
             },
@@ -107,9 +107,7 @@ class PurchaseOrderRepository extends BaseRepository
     public function getSupplierAndUnit($idVariant)
     {
         $data = ProductVariant::with([
-            'suppliers' => function ($query) {
-                $query->select(['*']);
-            },
+            'suppliers',
             'product' => function ($query) {
                 $query->select(['id', 'name', 'default_unit_id']);
             },
@@ -175,9 +173,23 @@ class PurchaseOrderRepository extends BaseRepository
                         DB::rollBack();
                         return $this->returnError('Lỗi khi tạo đơn hàng, vui lòng thử lại');
                     }
+                    $supplierVariant = SupplierProductVariant::where('product_variant_id', $item['product_variant_id'])
+                        ->where('supplier_id', $value['supplier_id'])
+                        ->first();
+                    if (!$supplierVariant) {
+                        DB::rollBack();
+                        return $this->returnError('Không tìm thấy nhà cung cấp cho sản phẩm này');
+                    }
+                    $supplierVariant->update(['cost_price' => $item['price_base']]);
                 }
             }
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase',
+                'Đặt hàng nhập',
+                'Có ' . count($listPurchaseOrderItems) . ' đơn hàng đề xuất nhập kho mới',
+                [],
+            );
             return $newPurchaseOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -421,6 +433,20 @@ class PurchaseOrderRepository extends BaseRepository
                 $dataItemUpdate['subtotal'] = $value['subtotal'];
 
                 $orderItem->update($dataItemUpdate);
+
+                if (isset($value['factor']) && floatval($value['factor']) > 0) {
+                    $costPrice = floatval($value['unit_price']) / floatval($value['factor']);
+                    $supplierProductVariant = SupplierProductVariant::where([
+                        'supplier_id' => $purchase->supplier_id,
+                        'product_variant_id' => $orderItem->product_variant_id
+                    ])->first();
+
+                    if ($supplierProductVariant) {
+                        $supplierProductVariant->update([
+                            'cost_price' => $costPrice
+                        ]);
+                    }
+                }
             }
 
             if (
@@ -490,12 +516,13 @@ class PurchaseOrderRepository extends BaseRepository
             return $this->returnError('Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
-    public function getLog($id){
+    public function getLog($id)
+    {
         $purchase = $this->handleModel->find($id);
         if (!$purchase) {
             return $this->returnError('Đơn hàng không tồn tại');
         }
-        
+
         $logs = PurchaseOrderLog::where('purchase_order_id', $id)
             ->with([
                 'createdBy' => function ($query) {

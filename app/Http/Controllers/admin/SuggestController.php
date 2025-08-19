@@ -31,7 +31,7 @@ class SuggestController extends Controller
         $search = $request->input('product_search', '');
         $page = $request->input('page', 1);
 
-        $result = $this->reportRepository->getRevenueReport($startDate, $endDate, $search, 5);
+        $result = $this->reportRepository->getRevenueReport($startDate, $endDate, $search, 10);
 
         return Inertia::render('admin/Reports/Revenue', [
             'revenues' => $result['data'],
