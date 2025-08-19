@@ -1,4 +1,5 @@
 <?php
+
 use App\Constant\PermissionConstant;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
@@ -94,6 +95,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
         Route::get('{id}/print', [SaleOrderController::class, 'print'])->name('print');
+        Route::post('/{id}/return', [SaleOrderController::class, 'returnOrder'])->name('return');
+        Route::post('/{id}/returned', [SaleOrderController::class, 'returnedOrder'])->name('returned');
     });
 
 
