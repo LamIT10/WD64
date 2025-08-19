@@ -90,11 +90,11 @@
                                     class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
                                     <i class="fas fa-user-check mr-2 text-xs"></i> Quay lại làm việc
                                 </button>
-                                <div class="border-t border-gray-100 my-1"></div>
-                                <button @click="bulkDelete"
+                                <!-- <div class="border-t border-gray-100 my-1"></div> -->
+                                <!-- <button @click="bulkDelete"
                                     class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50">
                                     <i class="fas fa-trash-alt mr-2 text-xs"></i> Xóa
-                                </button>
+                                </button> -->
                             </template>
                         </div>
                     </div>
