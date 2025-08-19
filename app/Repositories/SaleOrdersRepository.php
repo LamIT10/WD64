@@ -13,6 +13,7 @@ use App\Models\Rank;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\Unit;
+use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -780,29 +781,45 @@ class SaleOrdersRepository extends BaseRepository
             "Đơn hàng #{$order->code} đang được hoàn hàng. Lý do: {$returnReason}",
             ['order_id' => $order->id]
         );
-        $userId = $order->user_id ?? Auth::id();
-        event(new NotificationCreated([
-            'user_id' => $userId,
-            'type' => 'order_returning',
-            'title' => 'Đơn hàng đang hoàn',
-            'message' => "Đơn hàng #{$order->code} đang được hoàn hàng. Lý do: {$returnReason}",
-            'data' => [
-                'order_id' => $order->id,
-                'return_reason' => $returnReason,
-                'action_url' => "/admin/sale-orders?sale_order_id={$order->id}"
-            ],
-            'is_read' => false,
-            'created_at' => now()->toISOString(),
-        ]));
+        $actor = Auth::user();
+        $allUsers = User::all();
+        foreach ($allUsers as $user) {
+            // 1. Lưu vào database
+            $notification = \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'type' => 'order_returning',
+                'title' => 'Đơn hàng đang hoàn',
+                'message' => "Đơn hàng #{$order->code} đang được hoàn hàng. Lý do: {$returnReason} (Thực hiện bởi {$actor->name})",
+                'data' => [
+                    'order_id' => $order->id,
+                    'return_reason' => $returnReason,
+                    'actor_id' => $actor->id,
+                    'actor_name' => $actor->name,
+                    'action_url' => "/admin/sale-orders?sale_order_id={$order->id}"
+                ],
+                'is_read' => false,
+            ]);
+            // 2. Broadcast realtime
+            event(new NotificationCreated([
+                'id' => $notification->id,
+                'user_id' => $user->id,
+                'type' => $notification->type,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'data' => $notification->data,
+                'is_read' => false,
+                'created_at' => $notification->created_at,
+            ]));
+        }
         return ['success' => true];
     }
+
 
     public function returnedOrder($orderId)
     {
         $order = $this->handleModel->with('items')->find($orderId);
         if (!$order) return ['error' => 'Không tìm thấy đơn hàng'];
         if ($order->status !== 'returning') return ['error' => 'Chỉ xác nhận khi đang hoàn hàng'];
-        // Hồi lại tồn kho
         foreach ($order->items as $item) {
             $inventory = Inventory::where('product_variant_id', $item->product_variant_id)->first();
             if ($inventory) {
@@ -818,19 +835,36 @@ class SaleOrdersRepository extends BaseRepository
             "Đơn hàng #{$order->code} đã hoàn hàng thành công.",
             ['order_id' => $order->id]
         );
-        $userId = $order->user_id ?? Auth::id();
-        event(new NotificationCreated([
-            'user_id' => $userId,
-            'type' => 'order_returned',
-            'title' => 'Đơn hàng đã hoàn hàng thành công',
-            'message' => "Đơn hàng #{$order->code} đã hoàn hàng thành công.",
-            'data' => [
-                'order_id' => $order->id,
-                'action_url' => "/admin/sale-orders?sale_order_id={$order->id}"
-            ],
-            'is_read' => false,
-            'created_at' => now()->toISOString(),
-        ]));
+
+        $actor = Auth::user();
+        $allUsers = User::all();
+        foreach ($allUsers as $user) {
+            // 1. Lưu vào database
+            $notification = \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'type' => 'order_returned',
+                'title' => 'Đơn hàng đã hoàn hàng thành công',
+                'message' => "Đơn hàng #{$order->code} đã hoàn hàng thành công bởi {$actor->name}.",
+                'data' => [
+                    'order_id' => $order->id,
+                    'actor_id' => $actor->id,
+                    'actor_name' => $actor->name,
+                    'action_url' => "/admin/sale-orders?sale_order_id={$order->id}"
+                ],
+                'is_read' => false,
+            ]);
+            // 2. Broadcast realtime
+            event(new NotificationCreated([
+                'id' => $notification->id,
+                'user_id' => $user->id,
+                'type' => $notification->type,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'data' => $notification->data,
+                'is_read' => false,
+                'created_at' => $notification->created_at,
+            ]));
+        }
         return ['success' => true];
     }
 }

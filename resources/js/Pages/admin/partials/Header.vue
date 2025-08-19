@@ -197,7 +197,7 @@
 <script setup>
 import emitter from "../../../eventBus.js";
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { Link, router } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import axios from "axios";
 
@@ -218,7 +218,7 @@ const notificationRef = ref(null);
 const userDropdownRef = ref(null);
 const notifications = ref([]);
 const unreadCount = ref(0);
-
+const page = usePage(); // Get the page context
 // Methods
 const toggleNotifications = () => {
     showNotifications.value = !showNotifications.value;
@@ -342,6 +342,10 @@ const getNotificationIcon = (type) => {
             return "fas fa-exclamation-triangle text-yellow-500";
         case "error":
             return "fas fa-times-circle text-red-500";
+        case "order_returning":
+            return "fas fa-undo text-orange-500";
+        case "order_returned":
+            return "fas fa-undo text-green-500";
         default:
             return "fas fa-bell text-gray-500";
     }
@@ -393,7 +397,7 @@ onMounted(() => {
 
         // Subscribe to user-specific notifications (assuming user ID = 1 for now)
         // TODO: Replace with actual authenticated user ID
-        const currentUserId = 1; // Get from auth context
+        const currentUserId = page.props.auth.user.id; // Get from auth context
 
         notificationChannel = window.Echo.channel(
             `notifications.user.${currentUserId}`
