@@ -22,7 +22,7 @@
 
           <!-- New Due Date -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hạn mới</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hạn mới <span class="text-red-500">*</span></label>
             <input 
               type="date" 
               v-model="form.credit_due_date"

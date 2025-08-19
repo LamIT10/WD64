@@ -67,6 +67,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
         Route::get('export', [GoodReceiptController::class, 'exportGoodsReceipts'])->name('export');
+        Route::get('{id}/print', [GoodReceiptController::class, 'print'])->name('print');
     });
 
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
