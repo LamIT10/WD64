@@ -267,6 +267,7 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
@@ -350,6 +351,12 @@ function submit() {
         },
         onSuccess: () => {
             console.log('Cập nhật nhân viên thành công!');
+            router.reload({
+        only: ['auth'],
+        onSuccess: () => {
+            console.log('Dữ liệu auth sau khi reload:', $page.props.auth);
+        },
+    }); // Làm mới dữ liệu auth
             form.reset(); // Đặt lại form
             previewUrl.value = null; // Xóa ảnh xem trước
         },

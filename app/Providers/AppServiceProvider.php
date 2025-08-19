@@ -12,6 +12,7 @@ namespace App\Providers;
 // use App\Services\Product\ProductServiceInterface;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,5 +40,21 @@ class AppServiceProvider extends ServiceProvider
         //         return session('errors');
         //     },
         // ]);
+        Inertia::share([
+            'auth' => function () {
+                $user = Auth::user();
+                return [
+                    'user' => $user ? [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'position' => $user->position ?? 'Nhân viên',
+                        'avatar' => $user->avatar
+                            ? asset('storage/' . $user->avatar) . '?v=' . $user->updated_at->timestamp
+                            : null,
+                    ] : null,
+                ];
+            },
+        ]);
     }
 }

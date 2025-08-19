@@ -331,7 +331,7 @@
 </template>
 <script setup>
 
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
@@ -503,6 +503,9 @@ const handleSync = async () => {
     } catch (e) {
         console.error(e);
         toastError('Đồng bộ thất bại!');
+        //  Cho lệnh Load trang
+        await fetchAudit();
+        toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
 };
 
@@ -522,6 +525,9 @@ const handleReject = async () => {
     } catch (e) {
         console.error(e);
         toastError('Từ chối thất bại!');
+        //  Cho lệnh Load trang
+        await fetchAudit();
+        toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
 };
 
