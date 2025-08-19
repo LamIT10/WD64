@@ -166,4 +166,22 @@ class SaleOrderController extends Controller
         return Pdf::loadView('pdf.saleorders', compact('order'))
             ->stream("phieu-xuat-{$order->id}.pdf");
     }
+    public function returnOrder(Request $request, $id)
+    {
+        $request->validate(['return_reason' => 'required|string|max:255']);
+        $result = $this->saleOrdersRepository->returnOrder($id, $request->return_reason);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+        return response()->json(['success' => true]);
+    }
+
+    public function returnedOrder($id)
+    {
+        $result = $this->saleOrdersRepository->returnedOrder($id);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 400);
+        }
+        return response()->json(['success' => true]);
+    }
 }
