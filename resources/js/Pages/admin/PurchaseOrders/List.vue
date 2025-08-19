@@ -2,10 +2,11 @@
     <AppLayout>
         <div class="px-4 py-6">
             <div
-                class="p-4 bg-white shadow-md rounded-lg mb-4 flex justify-between items-center"
+                class="p-4 bg-white shadow rounded-lg mb-4 flex justify-between items-center"
             >
-                <h2 class="text-xl font-bold text-indigo-700">
-                    Danh sách đơn hàng nhập
+                <h2 class="text-xl font-semibold text-indigo-700">
+                    <i class="fa-solid fa-clipboard-list"></i> Danh sách đơn
+                    hàng nhập
                 </h2>
                 <div class="flex gap-3">
                     <Waiting
@@ -311,7 +312,11 @@
                                         <h3
                                             class="text-lg leading-6 font-medium text-gray-900"
                                         >
-                                            Đơn nhập <span class="font-bold text-indigo-600">{{ selectedOrder.code }}</span>
+                                            Đơn nhập
+                                            <span
+                                                class="font-bold text-indigo-600"
+                                                >{{ selectedOrder.code }}</span
+                                            >
                                         </h3>
                                         <button
                                             @click="closeModal"
@@ -1008,5 +1013,4 @@ select {
         left: 130%;
     }
 }
-
 </style>

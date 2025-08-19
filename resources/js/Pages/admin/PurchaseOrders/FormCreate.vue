@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import Multiselect from "@vueform/multiselect";
 import "@vueform/multiselect/themes/default.css";
 import AppLayout from "../Layouts/AppLayout.vue";
@@ -47,7 +47,6 @@ const showConfirmModal = ref(false);
 const preparedOrders = ref([]);
 const finalItems = ref([]);
 
-// Track selected variant IDs to prevent duplicates
 const selectedVariantIds = computed(() =>
     finalItems.value.map((item) => item.variants)
 );
@@ -114,8 +113,11 @@ function confirmVariants() {
         const defaultUnit = unitDefault.value;
         const unitOpts = unitOptionsMap.value[v.id] || [defaultUnit];
         const processedVendors = v.suppliers.map((s) => ({
-            id: s.pivot.supplier_id,
+            id: s.id,
             name: s.name,
+            cost_price: s.pivot.cost_price || 0,
+            sale_price: s.pivot.sale_price || 0,
+            min_order_quantity: s.pivot.min_order_quantity || 1,
         }));
 
         return {
@@ -157,6 +159,19 @@ function calculateTotal(variant) {
     variant.total = variant.quantity * variant.convertedPrice;
 }
 
+// Update price when vendor is selected
+function updatePriceOnVendorChange(variant) {
+    if (variant.vendorSelected) {
+        const selectedVendor = variant.vendors.find(v => v.id === variant.vendorSelected);
+        if (selectedVendor && selectedVendor.cost_price > 0) {
+            variant.price = Number(selectedVendor.cost_price);
+        } else {
+            variant.price = 0; // Reset to 0 if no cost_price
+        }
+        calculateTotal(variant);
+    }
+}
+
 // Get supplier name
 function getSupplierName(supplierId) {
     const item = finalItems.value.find((i) => i.vendorSelected === supplierId);
@@ -172,21 +187,29 @@ function addToList() {
             (item) =>
                 item.vendorSelected && item.quantity > 0 && item.price >= 0
         )
-        .map((item) => ({
-            name: item.name,
-            vendors: item.vendors,
-            vendorSelected: item.vendorSelected,
-            quantity: item.quantity,
-            variants: item.variantId,
-            unitId: item.unitSelected,
-            unit:
-                item.unitOptions.find((u) => u.id === item.unitSelected)
-                    ?.name || "",
-            unitSelected: item.unitSelected,
-            conversionFactor: item.conversionFactor,
-            price: item.price * item.conversionFactor,
-            total: item.total,
-        }));
+        .map((item) => {
+            const factor = item.conversionFactor || 1;
+            const priceBase = item.price; // Giá gốc trước khi nhân với factor
+            const convertedPrice = item.price * factor;
+            
+            return {
+                name: item.name,
+                vendors: item.vendors,
+                vendorSelected: item.vendorSelected,
+                quantity: item.quantity,
+                variants: item.variantId,
+                unitId: item.unitSelected,
+                unit:
+                    item.unitOptions.find((u) => u.id === item.unitSelected)
+                        ?.name || "",
+                unitSelected: item.unitSelected,
+                conversionFactor: factor,
+                factor: factor,
+                price: convertedPrice,
+                priceBase: priceBase,
+                total: item.total,
+            };
+        });
 
     finalItems.value.push(...convertedItems);
     selectedVariants.value = [];
@@ -215,6 +238,13 @@ function removeItem(index) {
 function updateItem(index, field, value) {
     finalItems.value[index][field] = value;
     const item = finalItems.value[index];
+    
+    // Nếu thay đổi giá, cập nhật priceBase
+    if (field === 'price') {
+        const factor = item.factor || 1;
+        item.priceBase = value / factor;
+    }
+    
     item.total = item.quantity * item.price;
 }
 
@@ -246,6 +276,8 @@ function preparePurchaseOrders() {
             unit_id: item.unitId,
             unit: item.unit,
             price: item.price,
+            price_base: item.priceBase || item.price, // Giá cơ bản
+            factor: item.factor || 1, // Hệ số quy đổi
             total: item.total,
         });
 
@@ -364,7 +396,7 @@ function submitConfirmedOrders() {
                                 </tr>
                                 <tr
                                     v-for="(variant, i) in selectedVariants"
-                                    :key="i"
+                                    :key="`sv-${variant.variantId}`"
                                     class="hover:bg-gray-50 transition"
                                 >
                                     <td
@@ -391,6 +423,7 @@ function submitConfirmedOrders() {
                                             :close-on-select="true"
                                             :can-clear="false"
                                             class="w-full"
+                                            @update:modelValue="updatePriceOnVendorChange(variant)"
                                         ></Multiselect>
                                         <span
                                             v-else
@@ -434,6 +467,7 @@ function submitConfirmedOrders() {
                                                  @input="e => handleMoneyInput(variant, 'price', () => calculateTotal(variant), e)"
                                                  @focus="e => handleMoneyFocus(variant, 'price', e)"
                                                   @blur="e => handleMoneyBlur(variant, 'price', e)"
+                                                  :placeholder="variant.price === 0 ? 'Nhập giá' : ''"
                                                   class="w-full bg-transparent border-b border-gray-300 text-sm px-1 py-1 focus:outline-none focus:border-indigo-500"
                                                     />
                                             <span
