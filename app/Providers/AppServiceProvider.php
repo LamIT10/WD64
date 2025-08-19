@@ -13,6 +13,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,21 +41,69 @@ class AppServiceProvider extends ServiceProvider
         //         return session('errors');
         //     },
         // ]);
+        // Inertia::share([
+        //     'auth' => function () {
+        //         $user = Auth::user();
+        //         return [
+        //             'user' => $user ? [
+        //                 'id' => $user->id,
+        //                 'name' => $user->name,
+        //                 'email' => $user->email,
+        //                 'position' => $user->position ?? 'Nhân viên',
+        //                 'avatar' => $user->avatar
+        //                     ? asset('storage/' . $user->avatar) . '?v=' . $user->updated_at->timestamp
+        //                     : null,
+        //             ] : null,
+        //         ];
+        //     },
+        // ]);
         Inertia::share([
-            'auth' => function () {
-                $user = Auth::user();
-                return [
-                    'user' => $user ? [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                        'position' => $user->position ?? 'Nhân viên',
-                        'avatar' => $user->avatar
-                            ? asset('storage/' . $user->avatar) . '?v=' . $user->updated_at->timestamp
-                            : null,
-                    ] : null,
-                ];
-            },
-        ]);
+    'auth' => function () {
+        $user = Auth::user();
+
+        if (!$user) return null;
+
+        // Lấy dữ liệu liên quan
+        $department = DB::table('departments')->where('id', $user->department_id)->value('name');
+        $role = DB::table('roles')->where('id', $user->role_id)->value('name');
+
+        // Lấy quyền của user
+        $permissions = DB::table('role_permissions')
+            ->join('permissions', 'role_permissions.permission_id', '=', 'permissions.id')
+            ->where('role_permissions.role_id', $user->role_id)
+            ->pluck('permissions.name')
+            ->toArray();
+
+        // Lấy activity logs gần đây
+        $activities = DB::table('activity_logs')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get(['action', 'description', 'created_at as time']);
+
+        return [
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'position' => $user->position ?? 'Nhân viên',
+                'avatar' => $user->avatar
+                    ? asset('storage/' . $user->avatar) . '?v=' . $user->updated_at->timestamp
+                    : null,
+                'department' => $department,
+                'employee_code' => $user->employee_code,
+                'role' => $role,
+                'shift' => $user->shift,
+                'birthday' => $user->birthday,
+                'gender' => $user->gender,
+                'phone' => $user->phone,
+                'last_login' => $user->last_login,
+                'status' => $user->status,
+                'activities' => $activities,
+                'permissions' => $permissions,
+            ]
+        ];
+    },
+]);
     }
 }
