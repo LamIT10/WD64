@@ -179,6 +179,7 @@ class SupplierRepository extends BaseRepository
     public function getProductBySupplierId($id)
     {
         try {
+            $supplierId = $id;
             $data = [];
             $query = Supplier::with([
                 'variants' => function ($query) {
@@ -199,18 +200,17 @@ class SupplierRepository extends BaseRepository
             });
 
             $listVariantByProduct = Supplier::with(['supplierVariants'])->find(($id));
-            $data['listVariants'] = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
-
+            $data['listVariants'] = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereHas("product" , function($query){ return $query->where('status_product', 1);})->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
 
             // Chuẩn hóa dữ liệu cho frontend
-            $data['products'] = $groupedVariants->map(function ($variants, $productId) {
+            $data['products'] = $groupedVariants->map(function ($variants) use  ($supplierId) {
                 $product = $variants->first()->product;
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'category' => $product->category ? ['name' => $product->category->name] : null,
-                    'product_variants' => $variants->map(function ($variant) {
-                        $product_variant_supplier = SupplierProductVariant::where('product_variant_id', $variant->id)->first();
+                    'product_variants' => $variants->map(function ($variant) use($supplierId) {
+                        $product_variant_supplier = SupplierProductVariant::where('product_variant_id', $variant->id)->where('supplier_id', $supplierId)->first();
                         $att = [
                             'att_value' => "",
                             "att" => "",
@@ -243,7 +243,7 @@ class SupplierRepository extends BaseRepository
             DB::beginTransaction();
             $newObj = [];
             $newObj['cost_price'] = $data['cost_price'];
-            $newObj['min_order_quantity'] = $data['min_order_quantity'];
+            $newObj['min_order_quantity'] = 0;
             $newObj['product_variant_id'] = $data['id'];
             $newObj['supplier_id'] = $data['supplier_id'];
             $newObj = SupplierProductVariant::create($newObj);

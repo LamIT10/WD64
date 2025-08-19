@@ -16,7 +16,7 @@ class StoreSupplierProductRequest extends FormRequest
         return [
             'id' => ['required', 'integer', 'exists:product_variants,id'],
             'cost_price' => ['required', 'integer', 'min:1'],
-            'min_order_quantity' => ['required', 'integer', 'min:1'],
+          
         ];
     }
 
@@ -31,9 +31,7 @@ class StoreSupplierProductRequest extends FormRequest
             'cost_price.integer' => 'Giá vốn phải là số nguyên.',
             'cost_price.min' => 'Giá vốn phải lớn hơn 0.',
 
-            'min_order_quantity.required' => 'Vui lòng nhập số lượng đặt tối thiểu.',
-            'min_order_quantity.integer' => 'Số lượng đặt tối thiểu phải là số nguyên.',
-            'min_order_quantity.min' => 'Số lượng đặt tối thiểu phải lớn hơn 0.',
+ 
         ];
     }
 }
