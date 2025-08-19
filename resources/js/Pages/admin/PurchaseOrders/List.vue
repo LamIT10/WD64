@@ -1,36 +1,39 @@
 <template>
     <AppLayout>
         <div class="px-4 py-6">
-           <div class="p-4 bg-white shadow-md rounded-lg mb-4 flex justify-between items-center">
-  
-            <h2 class="text-xl font-bold text-indigo-700">
-                Danh sách đơn hàng nhập
-            </h2>     
-            <div class="flex gap-3">
-                <Waiting
-                v-can="'admin.purchase.create'"
-                route-name="admin.purchases.create"
-                :route-params="{}"
-                class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md"
-                >
-                <i class="fas fa-plus"></i>
-                <span>Tạo yêu cầu nhập kho</span>
-                </Waiting>
+            <div
+                class="p-4 bg-white shadow-md rounded-lg mb-4 flex justify-between items-center"
+            >
+                <h2 class="text-xl font-bold text-indigo-700">
+                    Danh sách đơn hàng nhập
+                </h2>
+                <div class="flex gap-3">
+                    <Waiting
+                        v-can="'admin.purchase.create'"
+                        route-name="admin.purchases.create"
+                        :route-params="{}"
+                        class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-md"
+                    >
+                        <i class="fas fa-plus"></i>
+                        <span>Tạo yêu cầu nhập kho</span>
+                    </Waiting>
 
-               <a
-                :href="route('admin.purchases.export', {
-                    order_status: filterForm.order_status,
-                    supplier: filterForm.supplier,
-                    code: filterForm.code,
-                    start: filterForm.start,
-                    end: filterForm.end,
-                })"
-                class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
-                download
-                >
-                <i class="fas fa-file-excel mr-1"></i> Xuất Excel
-                </a>
-            </div>
+                    <a
+                        :href="
+                            route('admin.purchases.export', {
+                                order_status: filterForm.order_status,
+                                supplier: filterForm.supplier,
+                                code: filterForm.code,
+                                start: filterForm.start,
+                                end: filterForm.end,
+                            })
+                        "
+                        class="inline-flex items-center px-4 shadow-xl py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        download
+                    >
+                        <i class="fas fa-file-excel mr-1"></i> Xuất Excel
+                    </a>
+                </div>
             </div>
             <div class="mb-6">
                 <div class="bg-white rounded p-3">
@@ -39,54 +42,42 @@
                             @click="filterByStatus('')"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-500 shadow-sm hover:shadow-md hover:text-indigo-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-border-all text-xl"
-                            ></i>
+                            <i class="fa-solid fa-border-all text-xl"></i>
                             Tất cả
                         </button>
                         <button
                             @click="filterByStatus(0)"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 font-semibold border border-amber-500 shadow-sm hover:shadow-md hover:text-amber-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-hourglass-start text-xl"
-                            ></i>
+                            <i class="fa-solid fa-hourglass-start text-xl"></i>
                             Chờ duyệt
                         </button>
                         <button
                             @click="filterByStatus(1)"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 font-semibold border border-green-500 shadow-sm hover:shadow-md hover:text-green-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-circle-check text-xl"
-                            ></i>
+                            <i class="fa-solid fa-circle-check text-xl"></i>
                             Đã duyệt
                         </button>
                         <button
                             @click="filterByStatus(2)"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-500 shadow-sm hover:shadow-md hover:text-blue-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-bars-progress text-xl"
-                            ></i>
+                            <i class="fa-solid fa-bars-progress text-xl"></i>
                             Nhập một phần
                         </button>
                         <button
                             @click="filterByStatus(3)"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 font-semibold border border-purple-500 shadow-sm hover:shadow-md hover:text-purple-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-clipboard-check text-xl"
-                            ></i>
+                            <i class="fa-solid fa-clipboard-check text-xl"></i>
                             Hoàn thành
                         </button>
                         <button
                             @click="filterByStatus(4)"
                             class="btn-shiny flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-500 shadow-sm hover:shadow-md hover:bg-red-100 hover:text-red-900 transition-all duration-200 ease-in-out cursor-pointer"
                         >
-                            <i
-                                class="fa-solid fa-ban text-xl"
-                            ></i>
+                            <i class="fa-solid fa-ban text-xl"></i>
                             Từ chối
                         </button>
                     </div>
@@ -128,6 +119,7 @@
                         type="date"
                         class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500 transition"
                         placeholder="Nhập mã đơn hàng"
+                        title="Ngày tạo đơn"
                     />
                 </div>
                 <div class="flex-1 min-w-[200px]">
@@ -151,9 +143,9 @@
                     <button
                         type="button"
                         @click="resetFilter"
-                        class="border border-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-100 transition font-medium"
+                        class="border border-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-100 transition font-medium"
                     >
-                        Xóa lọc
+                        <i class="fa-solid text-xl fa-rotate-left"></i>
                     </button>
                 </div>
                 <!-- <div class="mt-4 flex gap-3">
@@ -247,10 +239,16 @@
                                         "
                                     >
                                         <i
-                                            class="fas fa-exclamation-triangle text-red-500 ml-2"
+                                            class="fas fa-exclamation-triangle text-red-500 ml-2 text-lg"
                                             title="Ngày giao đã quá hạn"
                                         ></i>
                                     </span>
+                                    <span v-else
+                                        ><i
+                                            title="Chưa đến hạn giao"
+                                            class="fa-solid text-green-500 ml-2 text-lg fa-calendar-check"
+                                        ></i
+                                    ></span>
                                 </span>
                             </td>
                             <td
@@ -313,7 +311,7 @@
                                         <h3
                                             class="text-lg leading-6 font-medium text-gray-900"
                                         >
-                                            Đơn nhập {{ selectedOrder.id }}
+                                            Đơn nhập <span class="font-bold text-indigo-600">{{ selectedOrder.code }}</span>
                                         </h3>
                                         <button
                                             @click="closeModal"
@@ -668,6 +666,14 @@
                             class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                         >
                             <button
+                                style="height: max-content"
+                                @click="viewOrderLog(selectedOrder.id)"
+                                class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                Xem lịch sử đơn hàng
+                            </button>
+                            <button
                                 v-can="'admin.purchase.approve'"
                                 v-if="selectedOrder.order_status == 0"
                                 @click="approveOrder(selectedOrder.id)"
@@ -842,6 +848,10 @@ function openModal(order) {
     selectedOrder.value = order;
     isModalOpen.value = true;
 }
+const viewOrderLog = (id) => {
+    const form = useForm({});
+    form.get(route("admin.purchases.log", id));
+};
 
 function formatDate(dateString) {
     if (!dateString) return "";
@@ -858,38 +868,7 @@ const ordersToShow = computed(() => {
     const arr = listOrders?.data;
     return Array.isArray(arr) ? arr : [];
 });
-// const filteredOrders = computed(() => {
-//     let orders = listOrders.data || [];
 
-//     if (activeTab.value !== "all") {
-//         orders = orders.filter(
-//             (order) => order.status.toLowerCase() === activeTab.value
-//         );
-//     }
-//     if(initialFilters != undefined){
-//     if (initialFilters.supplier) {
-//         orders = orders.filter((order) =>
-//             order.supplier.name
-//                 .toLowerCase()
-//                 .includes(initialFilters.supplier.toLowerCase())
-//         );
-//     }
-//     if (initialFilters.created_at) {
-//         orders = orders.filter(
-//             (order) =>
-//                 new Date(order.created_at).toDateString() ===
-//                 new Date(initialFilters.created_at).toDateString()
-//         );
-//     }
-//     if (initialFilters.status) {
-//         orders = orders.filter(
-//             (order) => order.status === initialFilters.status
-//         );
-//     }
-// }
-
-//     return orders;
-// });
 const approve = useForm({});
 const end = useForm({});
 const cancel = useForm({
@@ -994,31 +973,40 @@ select {
         top: 0;
     }
 }
-.btn-shiny{
-  position: relative;
-  overflow: hidden;
+.btn-shiny {
+    position: relative;
+    overflow: hidden;
 }
 
 /* Vệt sáng */
-.btn-shiny::before{
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -130%;
-  width: 45%;
-  height: 200%;
-  background: linear-gradient(120deg, transparent, rgba(255,255,255,.7), transparent);
-  transform: rotate(25deg);
-  pointer-events: none;
+.btn-shiny::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -130%;
+    width: 45%;
+    height: 200%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.7),
+        transparent
+    );
+    transform: rotate(25deg);
+    pointer-events: none;
 }
 
-.btn-shiny:hover::before{
-  animation: shiny-sweep .9s ease;
+.btn-shiny:hover::before {
+    animation: shiny-sweep 0.9s ease;
 }
 
-@keyframes shiny-sweep{
-  0%   { left: -130%; }
-  100% { left: 130%; }
+@keyframes shiny-sweep {
+    0% {
+        left: -130%;
+    }
+    100% {
+        left: 130%;
+    }
 }
 
 </style>

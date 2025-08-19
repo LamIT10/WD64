@@ -124,8 +124,11 @@
                                             class="text-center text-blue-800"
                                         >
                                             {{
-                                                item.quantity_ordered -
-                                                item.quantity_received
+                                                Math.max(
+                                                    item.quantity_ordered -
+                                                        item.quantity_received,
+                                                    0
+                                                )
                                             }}
                                         </td>
                                         <td class="text-center">
