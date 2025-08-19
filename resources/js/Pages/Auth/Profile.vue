@@ -67,9 +67,9 @@
       </h2>
       <p class="text-sm text-gray-500">Thông tin cơ bản về bạn</p>
     </div>
-    <button class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors">
+    <!-- <button class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors">
       <i class="fas fa-pen mr-2"></i>Chỉnh sửa
-    </button>
+    </button> -->
   </div>
 
   <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -96,6 +96,30 @@
         {{ $page.props.auth.user?.gender === 'male' || $page.props.auth.user?.gender === '1' ? 'Nam' : 
            $page.props.auth.user?.gender === 'female' || $page.props.auth.user?.gender === '0' ? 'Nữ' : 
            'Chưa cập nhật' }}
+      </p>
+    </div>
+
+    <!-- CMND/CCCD -->
+    <div class="space-y-1">
+      <label class="block text-sm font-medium text-gray-500">CMND/CCCD</label>
+      <p class="text-gray-800">
+        {{ $page.props.auth.user?.identity_number || 'Chưa cập nhật' }}
+      </p>
+    </div>
+
+    <!-- Địa Chỉ -->
+    <div class="space-y-1">
+      <label class="block text-sm font-medium text-gray-500">Địa Chỉ</label>
+      <p class="text-gray-800">
+        {{ $page.props.auth.user?.address || 'Chưa cập nhật' }}
+      </p>
+    </div>
+
+    <!-- Facebook -->
+    <div class="space-y-1">
+      <label class="block text-sm font-medium text-gray-500">Facebook</label>
+      <p class="text-gray-800">
+        {{ $page.props.auth.user?.facebook || 'Chưa cập nhật' }}
       </p>
     </div>
 
