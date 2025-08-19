@@ -451,7 +451,7 @@ const submitGoodReceipt = (receiveType) => {
             unit_id: item.unit.id,
             unit_default: item.product_variant.product.default_unit_id,
             product_id: item.product_variant.product_id,
-            quantity_expected: item.quantity_ordered,
+            quantity_ordered: item.quantity_ordered - item.quantity_received, // Số lượng còn lại chưa nhận
             quantity_received: receiptForm.value[item.id],
             unit_price: item.unit_price,
             subtotal: item.unit_price * receiptForm.value[item.id],

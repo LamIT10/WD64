@@ -395,7 +395,7 @@ function submitConfirmedOrders() {
                                     </td>
                                 </tr>
                                 <tr
-                                    v-for="(variant, i) in selectedVariants"
+                                    v-for="(variant) in selectedVariants"
                                     :key="`sv-${variant.variantId}`"
                                     class="hover:bg-gray-50 transition"
                                 >

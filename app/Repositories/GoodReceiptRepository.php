@@ -150,17 +150,34 @@ class GoodReceiptRepository extends BaseRepository
 
                 // cập nhật tồn kho
                 $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
-                $quantityLast = null;
+                
+                // tính số lượng theo đơn vị cơ bản cho quantity_received
+                $quantityReceivedInBase = null;
                 if ($item['unit_default'] == $item['unit_id']) {
-                    $quantityLast = $item['quantity_received'];
+                    $quantityReceivedInBase = $item['quantity_received'];
                 } else {
-                    $factor = ProductUnitConversion::where('product_id', $item['product_id'])->where('from_unit_id', $item['unit_default'])->where('to_unit_id', $item['unit_id'])->first();
-                    $quantityLast = $factor->conversion_factor * $item['quantity_received'];
+                    $factor = ProductUnitConversion::where('product_id', $item['product_id'])
+                        ->where('from_unit_id', $item['unit_default'])
+                        ->where('to_unit_id', $item['unit_id'])
+                        ->first();
+                    $quantityReceivedInBase = $factor->conversion_factor * $item['quantity_received'];
                 }
-                $factor = ProductUnitConversion::where('product_id', $item['product_id'])->where('from_unit_id', $item['unit_default'])->where('to_unit_id', $item['unit_id'])->first();
+                
+                // tính số lượng theo đơn vị cơ bản cho quantity_ordered (số đặt - để trừ trong quantity_in_transit)
+                $quantityOrderedInBase = null;
+                if ($item['unit_default'] == $item['unit_id']) {
+                    $quantityOrderedInBase = $item['quantity_ordered'];
+                } else {
+                    $factor = ProductUnitConversion::where('product_id', $item['product_id'])
+                        ->where('from_unit_id', $item['unit_default'])
+                        ->where('to_unit_id', $item['unit_id'])
+                        ->first();
+                    $quantityOrderedInBase = $factor->conversion_factor * $item['quantity_ordered'];
+                }
+                
                 $inventory->update([
-                    'quantity_in_transit' => $inventory->quantity_in_transit - $quantityLast,
-                    'quantity_on_hand' => $inventory->quantity_on_hand + $quantityLast,
+                    'quantity_in_transit' => max(0, $inventory->quantity_in_transit - $quantityOrderedInBase),
+                    'quantity_on_hand' => $inventory->quantity_on_hand + $quantityReceivedInBase,
                 ]);
 
                 // tạo mới chi tiết phiếu nhập kho
