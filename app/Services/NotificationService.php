@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\NotificationCreated;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationService
@@ -30,5 +31,33 @@ class NotificationService
         ]));
 
         return $notification;
+    }
+    public function notifyAll(string $type, string $title, string $message, array $data = [])
+    {
+        $actor = Auth::user();
+        $allUsers = User::all();
+        foreach ($allUsers as $user) {
+            $notification = Notification::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'message' => $message,
+                'data' => array_merge($data, [
+                    'actor_id' => $actor->id,
+                    'actor_name' => $actor->name,
+                ]),
+                'is_read' => false,
+            ]);
+            event(new NotificationCreated([
+                'id' => $notification->id,
+                'user_id' => $user->id,
+                'type' => $notification->type,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'data' => $notification->data,
+                'is_read' => false,
+                'created_at' => $notification->created_at,
+            ]));
+        }
     }
 }
