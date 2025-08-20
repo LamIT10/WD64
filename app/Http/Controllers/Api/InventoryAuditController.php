@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Api\BaseApiController;
 use App\Models\InventoryAudit;
 use App\Models\InventoryLocation;
@@ -166,6 +167,13 @@ class InventoryAuditController extends BaseApiController
                 "Phiếu kiểm kho #{$audit->code} đã bị từ chối.",
                 ['audit_id' => $audit->id]
             );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'inventory_audit_rejected',
+                'Phiếu kiểm kho bị từ chối',
+                "Đơn hàng #{$audit->code} đã bị từ chối bởi {$actor->name} ",
+                ['audit_id' => $audit->id]
+            );
 
             return response()->json([
                 'message' => 'Đã từ chối phiếu kiểm kho!',
@@ -188,7 +196,7 @@ class InventoryAuditController extends BaseApiController
             'items.productVariant.inventoryLocations',
             'items.productVariant.attributes.attribute',
             'user',
-            'approvedBy', 
+            'approvedBy',
         ])->findOrFail($id);
 
         $variantIds = $audit->items->pluck('product_variant_id');
@@ -238,7 +246,7 @@ class InventoryAuditController extends BaseApiController
     public function exportExcel(Request $request)
     {
         $status = $request->input('status');
-        
+
         // Lấy dữ liệu dựa trên status
         $query = InventoryAudit::with(['items.productVariant.product', 'user'])
             ->latest('id');
