@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="bg-white rounded-lg shadow">
+        <div class="bg-white rounded-lg shadow w-[98%] mx-auto mt-4">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
@@ -87,7 +87,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-4 flex justify-between items-center">
+            <div class="mt-4 flex justify-between items-center p-4">
                 <div class="text-sm text-gray-700">
                     Hiển thị {{ notifications.current_page }} /
                     {{ notifications.last_page }} trang (Tổng cộng

@@ -50,8 +50,7 @@
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-indigo-600 mb-4 border-b pb-2">Thông tin đăng nhập</h3>
                         <div class="space-y-4">
-                            <InfoItem icon="fa-sign-in-alt" label="Đăng nhập lần cuối"
-                                :value="user.last_login_at ? formatDate(user.last_login_at) : 'Chưa đăng nhập'" />
+                        
                             <InfoItem icon="fa-calendar-plus" label="Ngày tạo"
                                 :value="user.created_at ? formatDate(user.created_at) : ''" />
                             <InfoItem icon="fa-calendar-check" label="Ngày cập nhật"

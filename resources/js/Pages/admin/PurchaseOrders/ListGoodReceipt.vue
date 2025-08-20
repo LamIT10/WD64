@@ -93,6 +93,7 @@
                                 <th scope="col" class="px-4 py-2">Ngày nhận hàng</th>
                                 <th scope="col" class="px-4 py-2">Người tạo phiếu</th>
                                 <th scope="col" class="px-4 py-2 text-end">Đã thanh toán</th>
+                                <th scope="col" class="px-4 py-2 text-end"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -135,8 +136,13 @@
                                     {{ formatCurrencyVND(goodReceipt.total_amount) }}
                                     <i class="fa-solid fa-tag text-lg ml-2"></i>
                                 </td>
-                                <td>
-                                    <button @click="printPhieu()">In phiếu</button>
+                               <td>
+                                <button
+                                    class="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+                                    @click.stop="printSingle(goodReceipt.id)"
+                                >
+                                    In phiếu
+                                </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -325,8 +331,9 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
 }
-const printPhieu = () =>{
-    window.print();
+function printSingle(id) {
+  // Mở tab mới hiển thị bản in riêng của phiếu
+  window.open(route('admin.receiving.print', id), '_blank');
 }
 </script>
 <style lang="css" scoped>

@@ -82,6 +82,11 @@ const Ziggy = {
             methods: ["POST"],
             parameters: ["id"],
         },
+        "admin.receiving.print": {
+            uri: "admin/receiving/{id}/print",
+            methods: ["POST"],
+            parameters: ["id"],
+        },
         "admin.receiving.getVariants": {
             uri: "admin/receiving/{id}/get-variants",
             methods: ["GET", "HEAD"],

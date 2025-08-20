@@ -15,6 +15,8 @@ class CustomerTransaction extends Model
         'transaction_date',
         'credit_due_date',
         'description',
+        'proof_image',
+        'created_id',
         'type',
         
     ];
@@ -30,6 +32,9 @@ class CustomerTransaction extends Model
     {
         return $this->belongsTo(SaleOrder::class);
     }
-
+    public function creator()
+{
+    return $this->belongsTo(User::class, 'created_id');
+}
     
 }

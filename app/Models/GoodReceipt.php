@@ -20,6 +20,9 @@ class GoodReceipt extends Model
         'approved_at',
         'total_amount',
     ];
+    protected $casts = [
+    'receipt_date' => 'date',
+];
     public function purchaseOrder()
     {
         return $this->belongsTo(PurchaseOrder::class, 'purchase_order_id');

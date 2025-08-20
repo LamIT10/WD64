@@ -7,6 +7,7 @@ use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class CustomerTransactionRepository extends BaseRepository
@@ -143,7 +144,7 @@ class CustomerTransactionRepository extends BaseRepository
     {
         $order = SaleOrder::with([
             'customer',
-            'transactions',
+            'transactions.creator',
             'items' => function ($query) {
                 $query->with([
                     'productVariant' => function ($q) {
@@ -180,6 +181,7 @@ class CustomerTransactionRepository extends BaseRepository
         return [
             'id' => $order->id,
             'order_code' => $order->code,
+            'total_amount' => $total,
             'paid_amount' => $paid,
             'remaining_amount' => $remaining,
             'status' => $status,
@@ -225,6 +227,12 @@ class CustomerTransactionRepository extends BaseRepository
                             ? Carbon::parse($t->created_at)->format('Y-m-d')
                             : null,
                         'note' => $t->description,
+                        'proof_image' => $t->proof_image,
+                        'creator' => $t->creator ? [
+                            'id' => $t->creator->id,
+                            'name' => $t->creator->name,
+                            'email' => $t->creator->email,
+                        ] : null,
                     ];
                 }),
 
@@ -246,6 +254,7 @@ class CustomerTransactionRepository extends BaseRepository
                 'transaction_date' => 'Ngày thanh toán không hợp lệ.'
             ]);
         }
+
         $total = $order->total_amount;
 
         $paidSoFar = ($order->pay_before ?? 0)
@@ -256,19 +265,25 @@ class CustomerTransactionRepository extends BaseRepository
 
         if ($newPaid > $remaining) {
             throw ValidationException::withMessages([
-                'paid_amount' => 'Số tiền thanh toán vượt quá số tiền còn nợ .'
+                'paid_amount' => 'Số tiền thanh toán vượt quá số tiền còn nợ.'
             ]);
         }
+
         return DB::transaction(function () use ($order, $data) {
+            $imagePath = null;
+            if (!empty($data['file']) && ($data['payment_method'] ?? null) === 'bank_transfer') {
+                $imagePath = $this->handleUploadOneFile($data['file']);
+            }
             return $order->transactions()->create([
                 'type' => 'payment',
                 'paid_amount' => $data['paid_amount'],
                 'transaction_date' => $data['transaction_date'],
                 'description' => $data['description'] ?? null,
+                'created_id' => Auth::id(),
+                'proof_image' => $imagePath,
             ]);
         });
     }
-
     public function updateDueDate($orderId, string $newDueDate)
     {
         $order = SaleOrder::findOrFail($orderId);
@@ -295,6 +310,7 @@ class CustomerTransactionRepository extends BaseRepository
                 'transaction_date' => now(),
                 'credit_due_date' => $newDueDate,
                 'description' => 'Điều chỉnh hạn thanh toán',
+                'created_id' => Auth::user()->id,
             ]);
 
             return $order;
