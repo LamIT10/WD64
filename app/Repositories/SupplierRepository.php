@@ -203,35 +203,46 @@ class SupplierRepository extends BaseRepository
             $data['listVariants'] = ProductVariant::with(["product", 'attributes', 'attributes.attribute'])->whereHas("product" , function($query){ return $query->where('status_product', 1);})->whereNotIn('Id', $listVariantByProduct->supplierVariants->pluck("product_variant_id"))->get();
 
             // Chuẩn hóa dữ liệu cho frontend
-            $data['products'] = $groupedVariants->map(function ($variants) use  ($supplierId) {
+            $data['products'] = $groupedVariants
+            ->filter(function ($variants) {
+                $product = optional($variants->first())->product;
+                return $product && $product->status_product != 0; // chỉ giữ sản phẩm còn hoạt động
+            })
+            ->map(function ($variants) use ($supplierId) {
                 $product = $variants->first()->product;
+        
+                // preload SupplierProductVariant cho tất cả variant để tránh N+1
+                $variantIds = $variants->pluck('id');
+                $spvMap = SupplierProductVariant::whereIn('product_variant_id', $variantIds)
+                    ->where('supplier_id', $supplierId)
+                    ->get()
+                    ->keyBy('product_variant_id');
+        
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'category' => $product->category ? ['name' => $product->category->name] : null,
-                    'product_variants' => $variants->map(function ($variant) use($supplierId) {
-                        $product_variant_supplier = SupplierProductVariant::where('product_variant_id', $variant->id)->where('supplier_id', $supplierId)->first();
+                    'product_variants' => $variants->map(function ($variant) use ($spvMap) {
+                        $spv = $spvMap->get($variant->id); // có thể null
                         $att = [
-                            'att_value' => "",
-                            "att" => "",
-                            'cost_price' => $product_variant_supplier ? $product_variant_supplier->cost_price : 0,
-                            'min_order_quantity' => $product_variant_supplier->min_order_quantity  != null ? $product_variant_supplier->min_order_quantity : 0,
-                            'id' => $product_variant_supplier->id,
+                            'att_value' => $variant->attributes->pluck('name')->implode(' - '),
+                            'att'       => $variant->attributes->map(fn($i) => $i->attribute->name)->implode(' - '),
+                            'cost_price' => $spv->cost_price ?? 0,
+                            'min_order_quantity' => $spv->min_order_quantity ?? 0,
+                            'id' => $spv->id ?? null,
                         ];
-                        foreach ($variant->attributes as $key => $item) {
-                            $att['att_value'] = $key != 0  ? $att['att_value'] . " - " . $item->name : $item->name;
-                            $att['att'] = $key != 0  ?  $att['att'] . " - " . $item->attribute->name : $item->attribute->name;
-                        }
                         return [
-                            'id' => $variant->id,
-                            'code' => $variant->code,
-                            'barcode' => $variant->barcode,
-                            'sale_price' => $variant->sale_price, // Lấy từ product_variants
-                            'attributes' => $att
+                            'id'        => $variant->id,
+                            'code'      => $variant->code,
+                            'barcode'   => $variant->barcode,
+                            'sale_price'=> $variant->sale_price,
+                            'attributes'=> $att,
                         ];
-                    })->toArray()
+                    })->values()->toArray(),
                 ];
-            })->values()->toArray();
+            })
+            ->values()        // reset key
+            ->toArray();
             return $data;
         } catch (Exception $e) {
             return $this->returnError($e->getMessage());

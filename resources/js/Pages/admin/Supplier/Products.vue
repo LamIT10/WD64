@@ -84,7 +84,7 @@
                             <div>
                                 <label class="block text-sm font-normal text-indigo-700 mb-1">Biến thể</label>
                                 <span class="text-red-500" v-if="formAddVariant.errors.id">{{ formAddVariant.errors.id
-                                    }}</span>
+                                }}</span>
                                 <Multiselect v-model="formAddVariant.id" :options="formattedVariants" :searchable="true"
                                     :placeholder="'Chọn biến thể'" label="displayName" valueProp="id"
                                     :filterResults="customFilter"
@@ -92,9 +92,9 @@
                                     <template v-slot:option="{ option }">
                                         {{ option.product.name }}
                                         <span v-for="(att, index) in option.attributes" :key="index">
-                                            <span v-if="index === 0">/ {{ att.name }} -</span>
-                                            <span v-else-if="index === option.attributes.length - 1">{{ att.name
-                                                }}</span>
+                                            <span v-if="index === 0">/ {{ att.name }} </span>
+                                            <span v-else-if="index === option.attributes.length - 1">-{{ att.name
+                                            }}</span>
                                             <span v-else>{{ att.name + " - " }}</span>
                                         </span>
                                     </template>
@@ -109,14 +109,17 @@
                                 <input type="number" v-model="formAddVariant.min_order_quantity"
                                     class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30" />
                             </div> -->
-
                             <div>
                                 <label class="block text-sm font-normal text-indigo-700 mb-1">Giá vốn</label>
-                                <span class="text-red-500" v-if="formAddVariant.errors.cost_price">{{
-                                    formAddVariant.errors.cost_price }}</span>
-                                <input type="number" v-model="formAddVariant.cost_price"
-                                    class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30" />
+                                <span class="text-red-500" v-if="formAddVariant.errors.cost_price">
+                                    {{ formAddVariant.errors.cost_price }}
+                                </span>
+                                <input type="text" :value="formattedCostPrice" @input="handleCostPriceInput"
+                                    @keypress="restrictToNumbers" class="w-full p-2.5 text-sm border border-indigo-100 rounded-lg 
+               focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 bg-indigo-50/30"
+                                    placeholder="Nhập giá vốn" />
                             </div>
+
                         </div>
 
                         <div class="flex justify-end space-x-3 pt-2">
@@ -225,7 +228,7 @@ const resetForm = () => {
 
 const formAddVariant = useForm({
     id: "",
-    cost_price: "",
+    cost_price: 0,
     min_order_quantity: "",
 });
 
@@ -238,9 +241,40 @@ const confirmAddProduct = () => {
             onSuccess: () => {
                 showAddProductModal.value = false;
                 formAddVariant.reset();
+                formattedCostPrice.value = 0;
             },
         }
     );
+};
+// Format số theo kiểu VNĐ
+const formatNumber = (value) => {
+    return new Intl.NumberFormat("vi-VN").format(value);
+};
+
+
+
+// Biến hiển thị giá vốn có format
+const formattedCostPrice = ref(formatNumber(formAddVariant.cost_price));
+
+// Xử lý nhập
+const handleCostPriceInput = (e) => {
+    const raw = e.target.value.replace(/[^\d]/g, ''); // bỏ ký tự không phải số
+    if (!raw) {
+        formAddVariant.cost_price = 0;
+        formattedCostPrice.value = '';
+        return;
+    }
+    const numericValue = Number(raw);
+    formAddVariant.cost_price = numericValue;
+    formattedCostPrice.value = formatNumber(numericValue);
+};
+
+// Chỉ cho nhập số
+const restrictToNumbers = (e) => {
+    const charCode = e.charCode;
+    if (charCode < 48 || charCode > 57) {
+        e.preventDefault();
+    }
 };
 
 const showVariants = (product) => {
