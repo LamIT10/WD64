@@ -166,42 +166,6 @@
 
                 <!-- RIGHT SIDE: ORDER INFO -->
                 <div class="w-2/5 p-5 bg-gray-50">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <div
-                                    class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center"
-                                >
-                                    <svg
-                                        class="h-5 w-5 text-indigo-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-800">
-                                        hihi
-                                    </div>
-                                    <div class="text-xs text-gray-400">
-                                        20/06/2025 22:16
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div
-                            class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full"
-                        >
-                            Phiếu in chờ kí
-                        </div>
-                    </div>
 
                     <div class="space-y-5">
                         <div
@@ -244,13 +208,21 @@
                                     <span class="text-gray-700 font-semibold"
                                         >Tiền trả NCC:</span
                                     >
-                                    <input
-                                        type="number"
-                                        v-model="realQuantity"
-                                        :max="totalAmount"
-                                        placeholder="0"
-                                        class="w-40 px-2 py-1 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all text-right"
-                                    />
+                                    <div class="w-40">
+                                        <input
+                                            type="number"
+                                            v-model="realQuantity"
+                                            :max="totalAmount"
+                                            placeholder="0"
+                                            :class="[
+                                                'w-full px-2 py-1 border rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all text-right',
+                                                errors.payment ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                                            ]"
+                                        />
+                                        <div v-if="errors.payment" class="text-red-500 text-xs mt-1">
+                                            {{ errors.payment }}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Tính vào công nợ -->
@@ -290,8 +262,16 @@
                                 rows="2"
                                 placeholder="Nhập ghi chú..."
                                 v-model="form.note"
-                                class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-all"
+                                :class="[
+                                    'w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 transition-all',
+                                    errors?.note
+                                        ? 'border-red-500 bg-red-50 focus:ring-red-200 focus:border-red-500'
+                                        : 'border-gray-200 focus:ring-indigo-200 focus:border-indigo-500'
+                                ]"
                             ></textarea>
+                            <div v-if="errors?.note" class="mt-1 text-sm text-red-600">
+                                {{ errors.note }}
+                            </div>
                             <div
                                 v-if="showReceiveTypeSelector"
                                 class="mt-4 p-3 bg-orange-50 border border-orange-300 rounded"
@@ -352,6 +332,74 @@
                 </div>
             </div>
         </div>
+        
+        <div
+            v-if="showConfirmModal"
+            class="fixed inset-0 z-50 flex items-center justify-center"
+            style="background-color: rgba(0, 0, 0, 0.6);"
+        >
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
+                        <svg
+                            class="w-6 h-6 text-yellow-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"
+                            />
+                        </svg>
+                    </div>
+                    <p class="text-sm text-orange-600 text-center mb-4">Vui lòng kiểm tra kĩ thông tin trước khi tạo phiếu</p>
+                    <h3 class="text-lg font-semibold text-center text-gray-900 mb-3">
+                        {{ confirmModalData.title }}
+                    </h3>
+                    
+                    <div class="text-sm text-gray-600 text-center mb-4">
+                        <p class="mb-3">{{ confirmModalData.message?.split('\n')[0] }}</p>
+                        
+                        <!-- Thông tin tài chính -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-left">
+                            <h4 class="font-semibold text-blue-800 mb-2 text-center">Xác nhận thông tin thanh toán</h4>
+                            <div class="space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Số tiền phải trả:</span>
+                                    <span class="font-medium text-red-600">{{ totalAmount.toLocaleString('vi-VN') }} VND</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Số tiền đã trả:</span>
+                                    <span class="font-medium text-green-600">{{ realQuantity.toLocaleString('vi-VN') }} VND</span>
+                                </div>
+                                <div class="flex justify-between border-t pt-1">
+                                    <span class="text-gray-600">Nợ nhà cung cấp:</span>
+                                    <span class="font-semibold text-orange-600">{{ debtAmount.toLocaleString('vi-VN') }} VND</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button
+                            @click="closeConfirmModal"
+                            class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                        >
+                            {{ confirmModalData.cancelText || 'Hủy bỏ' }}
+                        </button>
+                        <button
+                            @click="handleConfirm"
+                            class="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                        >
+                            {{ confirmModalData.confirmText || 'Xác nhận' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </AppLayout>
 </template>
 
@@ -364,10 +412,14 @@ import { useForm } from "@inertiajs/vue3";
 import Waiting from "../../components/Waiting.vue";
 
 const today = new Date().toLocaleDateString("vi-VN");
-const { purchaseOrder } = defineProps({
+const { purchaseOrder, errors } = defineProps({
     purchaseOrder: {
         type: Object,
         required: true,
+    },
+    errors: {
+        type: Object,
+        default: () => ({}),
     },
 });
 console.log(purchaseOrder);
@@ -376,6 +428,9 @@ const realQuantity = ref(0);
 const totalAmount = ref(0);
 const debtAmount = ref(0);
 const receiptForm = ref({});
+const showConfirmModal = ref(false);
+const confirmModalData = ref({});
+const pendingReceiveType = ref(null);
 
 const calculateTotals = () => {
     totalAmount.value = purchaseOrder.items.reduce((sum, item) => {
@@ -433,13 +488,42 @@ const form = useForm({
 });
 const submitGoodReceipt = (receiveType) => {
     if (receiveType == "full") {
-        if (
-            !confirm(
-                "Bạn có chắc chắn muốn xác nhận hoàn thành và kết thúc đơn nhập này ?"
-            )
-        )
-            return;
+        showConfirmModal.value = true;
+        pendingReceiveType.value = receiveType;
+        confirmModalData.value = {
+            title: 'NHẬP MỘT PHẦN',
+            message: 'Bạn có chắc chắn muốn xác nhận hoàn thành và kết thúc đơn nhập này?',
+            confirmText: 'Xác nhận',
+            cancelText: 'Hủy bỏ'
+        };
+        return;
     }
+    
+    if (receiveType == "partial") {
+        showConfirmModal.value = true;
+        pendingReceiveType.value = receiveType;
+        confirmModalData.value = {
+            title: 'XÁC NHẬN KẾT THÚC ĐƠN',
+            message: 'Bạn có chắc chắn muốn tạo phiếu nhập cho một phần hàng hóa?',
+            confirmText: 'Xác nhận',
+            cancelText: 'Hủy bỏ'
+        };
+        return;
+    }
+};
+
+const handleConfirm = () => {
+    processSubmit(pendingReceiveType.value);
+    closeConfirmModal();
+};
+
+const closeConfirmModal = () => {
+    showConfirmModal.value = false;
+    pendingReceiveType.value = null;
+    confirmModalData.value = {};
+};
+
+const processSubmit = (receiveType) => {
     form.receive_type = receiveType;
     form.total_amount = totalAmount.value;
     form.payment = realQuantity.value;

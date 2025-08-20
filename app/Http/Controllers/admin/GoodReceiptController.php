@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\GoodsReceiptsExport;
 use App\Http\Controllers\Controller;
 use App\Repositories\GoodReceiptRepository;
+use App\Http\Requests\GoodReceiptRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -33,9 +34,9 @@ class GoodReceiptController extends Controller
             'purchaseOrder' => $purchaseOrder
         ]);
     }
-    public function store(Request $request)
+    public function store(GoodReceiptRequest $request)
     {
-        $data = $request->all();
+        $data = $request->validated();
         $goodReceipt = $this->handleRepository->store($data);
         return $this->returnInertia($goodReceipt, 'Tạo đơn hàng phiếu nhập kho thành công', 'admin.purchases.index');
     }
