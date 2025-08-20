@@ -46,8 +46,8 @@
                           <ConfirmModal :route-name="'admin.suppliers.products.destroy'" :route-params="{
                             id: props.supplier.id,
                             variantId: variant.id,
-                          }" title="Xác nhận xóa biến thể "
-                            :message="`Bạn có chắc chắn muốn xóa biến thể ${productName}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`" @close="removeItem">
+                          }" title="Xác nhận ngừng kinh doanh biến thể "
+                            :message="`Bạn có chắc chắn muốn xóa biến thể ${productName}? Bạn sẽ không thể khôi phục lại sau khi xác nhận ngừng kinh doanh`" @close="removeItem">
                             <template #trigger="{
                               openModal,
                             }">
