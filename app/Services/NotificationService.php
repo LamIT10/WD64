@@ -37,6 +37,9 @@ class NotificationService
         $actor = Auth::user();
         $allUsers = User::all();
         foreach ($allUsers as $user) {
+            if ($user->id == $actor->id) {
+                continue; // Bỏ qua user thực hiện, vì đã có notification riêng từ hàm create
+            }
             $notification = Notification::create([
                 'user_id' => $user->id,
                 'type' => $type,
