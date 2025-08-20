@@ -48,4 +48,8 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(GoodReceipt::class, 'purchase_order_id');
     }
+    public function logs()
+    {
+        return $this->hasMany(PurchaseOrderLog::class, 'purchase_order_id');
+    }
 }

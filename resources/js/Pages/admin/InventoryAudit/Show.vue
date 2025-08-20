@@ -106,12 +106,12 @@
                             <div v-if="audit.is_adjusted == 0">
                                 <button
                                     class="px-2 py-0.5 mr-3 rounded bg-green-600 hover:bg-green-700 text-white font-semibold text-xs"
-                                    @click="handleSync">
+                                    @click="showSyncConfirm = true">
                                     Đồng bộ
                                 </button>
                                 <button
                                     class="px-2 py-0.5 rounded bg-red-600 hover:bg-red-700 text-white font-semibold text-xs"
-                                    @click="handleReject">
+                                    @click="showRejectConfirm = true">
                                     Từ chối
                                 </button>
                             </div>
@@ -289,11 +289,49 @@
                 Date().getMonth() + 1 }} năm {{ new Date().getFullYear() }}</p>
         </div>
     </div>
+    <Teleport to="body">
+        <div v-if="showSyncConfirm" class="fixed inset-0 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận đồng bộ phiếu kiểm kho</h4>
+                <p class="text-gray-600 text-sm mb-4">
+                    Bạn có chắc chắn muốn đồng bộ phiếu kiểm kho này? Hãy kiểm tra lại thông tin trước khi đồng bộ.<br />Vui lòng xác nhận.
+                </p>
+                <div class="flex justify-end gap-2">
+                    <button @click="showSyncConfirm = false"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
+                        Hủy
+                    </button>
+                    <button @click="confirmSync"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div v-if="showRejectConfirm" class="fixed inset-0 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận từ chối phiếu kiểm kho</h4>
+                <p class="text-gray-600 text-sm mb-4">
+                    Bạn có chắc chắn muốn từ chối phiếu kiểm kho này? Hãy kiểm tra lại thông tin trước khi từ chối.<br />Vui lòng xác nhận.
+                </p>
+                <div class="flex justify-end gap-2">
+                    <button @click="showRejectConfirm = false"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
+                        Hủy
+                    </button>
+                    <button @click="confirmReject"
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Teleport>
     <ToastClient ref="toastRef" />
 </template>
 <script setup>
 
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
@@ -465,6 +503,9 @@ const handleSync = async () => {
     } catch (e) {
         console.error(e);
         toastError('Đồng bộ thất bại!');
+        //  Cho lệnh Load trang
+        await fetchAudit();
+        toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
 };
 
@@ -484,12 +525,27 @@ const handleReject = async () => {
     } catch (e) {
         console.error(e);
         toastError('Từ chối thất bại!');
+        //  Cho lệnh Load trang
+        await fetchAudit();
+        toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
 };
 
 // In phiếu
 const handlePrint = () => {
     window.print();
+};
+
+const showSyncConfirm = ref(false);
+const showRejectConfirm = ref(false);
+
+const confirmSync = async () => {
+  showSyncConfirm.value = false;
+  await handleSync();
+};
+const confirmReject = async () => {
+  showRejectConfirm.value = false;
+  await handleReject();
 };
 </script>
 

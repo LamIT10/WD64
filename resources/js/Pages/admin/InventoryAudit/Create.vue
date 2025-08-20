@@ -1,6 +1,7 @@
 <template>
   <AppLayout>
-    <form @submit.prevent="submitForm">
+    <ToastClient ref="toastRef" />
+    <form @submit.prevent="handleSubmit">
       <div class="bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen p-4 md:p-8">
         <!-- Header Card -->
         <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100 flex items-center justify-between">
@@ -19,11 +20,37 @@
         <!-- Upload Ảnh Kiểm Kho -->
         <div class="bg-white rounded-lg shadow p-4 mb-4 border border-gray-100">
           <label class="block text-sm font-medium text-gray-700 mb-2">Ảnh kiểm kho (có thể chọn nhiều)</label>
-          <input type="file" multiple accept="image/*" @change="handleImageChange" class="mb-2" />
-          <div v-if="imagePreviews.length" class="flex flex-wrap gap-3 mt-2">
-            <div v-for="(img, idx) in imagePreviews" :key="idx" class="relative w-24 h-24 border rounded overflow-hidden group">
-              <img :src="img" class="object-cover w-full h-full" />
-              <button type="button" @click="removeImage(idx)" class="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
+          <div
+            class="flex flex-col items-center justify-center border-2 border-dashed border-indigo-300 rounded-lg p-6 cursor-pointer hover:bg-indigo-50 transition"
+            @click="$refs.imageInput.click()"
+            @dragover.prevent
+            @drop.prevent="e => { handleImageChange({ target: { files: e.dataTransfer.files } }) }"
+          >
+            <input
+              ref="imageInput"
+              type="file"
+              multiple
+              accept="image/*"
+              @change="handleImageChange"
+              class="hidden"
+            />
+            <i class="fa fa-cloud-upload text-3xl text-indigo-400 mb-2"></i>
+            <span class="text-indigo-600 text-sm font-semibold">Nhấn hoặc kéo thả ảnh vào đây</span>
+            <span class="text-xs text-gray-400 mt-1">Chọn nhiều ảnh kiểm kho cùng lúc</span>
+          </div>
+          <div v-if="imagePreviews.length" class="flex flex-wrap gap-4 mt-4">
+            <div
+              v-for="(img, idx) in imagePreviews"
+              :key="idx"
+              class="relative w-32 h-32 border-2 border-indigo-100 rounded-lg overflow-hidden group shadow-sm"
+            >
+              <img :src="img" class="object-cover w-full h-full transition group-hover:opacity-80" />
+              <button
+                type="button"
+                @click.stop="removeImage(idx)"
+                class="absolute top-2 right-2 bg-white bg-opacity-90 rounded-full p-1 text-red-500 shadow hover:bg-opacity-100 transition"
+                title="Xóa ảnh"
+              >
                 <i class="fa fa-times"></i>
               </button>
             </div>
@@ -116,6 +143,24 @@
             Lưu Phiếu Kiểm Kho
           </button>
         </div>
+
+        <!-- Confirm Dialog -->
+        <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận lưu phiếu kiểm kho</h4>
+            <p class="text-gray-600 text-sm mb-4">Bạn có chắc chắn muốn lưu phiếu kiểm kho này? Hãy kiểm tra lại thông tin trước khi lưu. <br /> Vui lòng xác nhận.</p>
+            <div class="flex justify-end gap-2">
+              <button @click="showConfirm = false"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">
+                Hủy
+              </button>
+              <button @click="confirmSubmit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -125,10 +170,11 @@
 import { reactive, ref, watch, computed } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { usePage, router } from '@inertiajs/vue3';
+import ToastClient from '../../components/ToastClient.vue';
 import * as XLSX from 'xlsx';
 
 const importInput = ref(null);
-const toastRef = ref(null);
+const toastRef = ref();
 const page = usePage();
 const zones = page.props.zones || [];
 const products = reactive([]);
@@ -250,6 +296,17 @@ const handleImportExcel = async (event) => {
   reader.readAsArrayBuffer(file);
 };
 
+const showConfirm = ref(false);
+
+const handleSubmit = () => {
+  showConfirm.value = true;
+};
+
+const confirmSubmit = () => {
+  showConfirm.value = false;
+  submitForm();
+};
+
 const submitForm = () => {
   // Kiểm tra trạng thái hoàn thành hay có chênh lệch
   const allMatched = auditData.value.items.every(item =>
@@ -286,10 +343,7 @@ const submitForm = () => {
     preserveState: true,
     onSuccess: (page) => {
       console.log('Success response:', page);
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lưu phiếu kiểm kho thành công!', 'success');
-      }
+      toastSuccess('Tạo phiếu kiểm kho thành công.');
       // resetForm();
       images.value = [];
       imagePreviews.value = [];
@@ -297,10 +351,7 @@ const submitForm = () => {
     onError: (errors) => {
       console.error('Lỗi từ backend:', errors);
       console.error('Full error object:', JSON.stringify(errors, null, 2));
-      const toast = document.querySelector('toast');
-      if (toast && toast.showLocalToast) {
-        toast.showLocalToast('Lỗi khi lưu phiếu kiểm kho: ' + (errors.message || 'Vui lòng kiểm tra lại dữ liệu!'), 'error');
-      }
+      toastError('Lỗi khi tạo phiếu kiểm kho. Vui lòng thử lại!');
     },
     onProgress: (progress) => {
       console.log('Upload progress:', progress);
@@ -309,6 +360,23 @@ const submitForm = () => {
 };
 
 const filteredProducts = computed(() => products);
+
+function toastSuccess(message) {
+  toastRef.value?.triggerToast(message, 'success');
+}
+function toastError(message) {
+  toastRef.value?.triggerToast(message, 'error');
+}
+
+// Tự động hiển thị thông báo từ controller (flash message)
+watch(() => page.props.flash, (flash) => {
+  if (flash?.success) {
+    toastSuccess(flash.success);
+  }
+  if (flash?.error) {
+    toastError(flash.error);
+  }
+});
 
 const exportSampleExcel = () => {
   const sampleData = [

@@ -28,23 +28,27 @@ class NotificationController extends Controller
                     'type' => $n->type,
                     'title' => $n->title,
                     'message' => $n->message,
-                    'time' => $n->created_at->diffForHumans(), // e.g., "2 phút trước"
+                    'time' => $n->created_at->diffForHumans(),
                     'isRead' => $n->is_read,
-                    'data' => $n->data, // Để redirect
+                    'data' => $n->data,
                 ];
             });
 
         $unreadCount = Notification::where('user_id', Auth::id())->where('is_read', false)->count();
         return response()->json([
             'notifications' => $notifications,
-            'unreadCount' => $unreadCount, // <-- Trả về số thực
+            'unreadCount' => $unreadCount,
         ]);
     }
 
     public function markAsRead($id)
     {
-        $notification = Notification::where('user_id', Auth::id())->findOrFail($id);
-        $notification->update(['is_read' => true]);
+        $notification = Notification::findOrFail($id);
+
+        if ($notification->user_id === Auth::id()) {
+            $notification->update(['is_read' => true]);
+        }
+
         return response()->json(['success' => true]);
     }
 

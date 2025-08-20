@@ -1,4 +1,5 @@
 <?php
+
 use App\Constant\PermissionConstant;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\InventoryAuditController;
@@ -55,6 +56,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('store', [PurchaseOrderController::class, 'store'])->name('store');
         Route::put('{id}/update', [PurchaseOrderController::class, 'update'])->name('update');
         Route::post('{id}/end', [PurchaseOrderController::class, 'end'])->name('end');
+        Route::get('{id}/log', [PurchaseOrderController::class, 'log'])->name('log');
         Route::get('export', [PurchaseOrderController::class, 'exportExcel'])->name('export');
     });
     Route::group(['prefix' => 'receiving', 'as' => 'receiving.'], function () {
@@ -65,6 +67,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::get('{id}/get-supplier-and-unit', [PurchaseOrderController::class, 'getSupplierAndUnit'])->name('getSupplierAndUnit');
         Route::post('store', [GoodReceiptController::class, 'store'])->name('store');
         Route::get('export', [GoodReceiptController::class, 'exportGoodsReceipts'])->name('export');
+        Route::get('{id}/print', [GoodReceiptController::class, 'print'])->name('print');
     });
 
     Route::group(['prefix' => 'reports', 'as' => 'reports.'], function () {
@@ -93,6 +96,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
         Route::get('{id}/print', [SaleOrderController::class, 'print'])->name('print');
+        Route::post('/{id}/return', [SaleOrderController::class, 'returnOrder'])->name('return');
+        Route::post('/{id}/returned', [SaleOrderController::class, 'returnedOrder'])->name('returned');
     });
 
 
@@ -271,8 +276,6 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
     });
 });
 
-
-
 // API địa chỉ
 Route::get('/provinces', [LocationController::class, 'getProvinces']);
 Route::get('/wards/{province_code}', [LocationController::class, 'getWardsByProvince']);
@@ -281,7 +284,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('admin.dashboard');
 });
 // Authentication routes
 Route::middleware('check_logined')->group(function () {

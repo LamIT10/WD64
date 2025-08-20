@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Events\NotificationCreated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -69,8 +70,8 @@ class NotificationRealtimeController extends Controller
      */
     public function getUserNotifications(Request $request)
     {
-        $userId = $request->get('user_id', 1); // Default user 1
-        
+        $userId = Auth::id(); // Default user 1
+
         $notifications = DB::table('notifications')
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -87,8 +88,8 @@ class NotificationRealtimeController extends Controller
      */
     public function getHeaderNotifications(Request $request)
     {
-        $userId = $request->get('user_id', 1); // Default user 1 or get from auth
-        
+        $userId = Auth::id(); // Default user 1 or get from auth
+
         $notifications = DB::table('notifications')
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -126,16 +127,16 @@ class NotificationRealtimeController extends Controller
         $date = new \DateTime($createdAt);
         $now = new \DateTime();
         $diff = $now->getTimestamp() - $date->getTimestamp();
-        
+
         $minutes = floor($diff / 60);
         $hours = floor($diff / 3600);
         $days = floor($diff / 86400);
-        
+
         if ($minutes < 1) return 'Vừa xong';
         if ($minutes < 60) return $minutes . ' phút trước';
         if ($hours < 24) return $hours . ' giờ trước';
         if ($days < 7) return $days . ' ngày trước';
-        
+
         return $date->format('d/m/Y');
     }
 
@@ -159,8 +160,8 @@ class NotificationRealtimeController extends Controller
      */
     public function markAllAsRead(Request $request)
     {
-        $userId = $request->get('user_id', 1);
-        
+        $userId = Auth::id();
+
         DB::table('notifications')
             ->where('user_id', $userId)
             ->where('is_read', false)

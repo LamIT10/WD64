@@ -1,11 +1,18 @@
 <template>
   <AppLayout>
+    <ToastClient ref="toastRef" />
     <div class="p-3 min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50">
       <!-- Header -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-        <div>
-          <h1 class="text-xl font-bold text-indigo-900 mb-0.5 tracking-tight">Lịch sử Kiểm kho</h1>
-          <p class="text-xs text-gray-500">Quản lý và theo dõi các phiếu kiểm kho gần đây</p>
+        <div class="flex items-center gap-3 relative">
+          <span class="inline-flex items-center justify-center bg-indigo-100 rounded-full p-2 shadow text-indigo-600 animate-bounce-slow">
+            <i class="fas fa-user-ninja text-lg"></i>
+            <i class="fas fa-search text-xs -ml-2 -mr-1"></i>
+          </span>
+          <div>
+            <h1 class="text-xl font-bold text-indigo-900 mb-0.5 tracking-tight">Lịch sử Kiểm kho</h1>
+            <p class="text-xs text-gray-500">Quản lý và theo dõi các phiếu kiểm kho gần đây</p>
+          </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <!-- Search -->
@@ -279,6 +286,7 @@ import Waiting from '../../components/Waiting.vue';
 import { route } from 'ziggy-js';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import ToastClient from '../../components/ToastClient.vue';
 
 // Props
 const props = defineProps({
@@ -429,6 +437,14 @@ watch(() => page.props.flash, (flash) => {
   }
 });
 
+const toastRef = ref();
+function toastSuccess(message) {
+    toastRef.value?.triggerToast(message, 'success');
+}
+function toastError(message) {
+    toastRef.value?.triggerToast(message, 'error');
+}
+
 const exportToExcel = async () => {
   try {
     // Gọi API để lấy dữ liệu Excel
@@ -452,21 +468,38 @@ const exportToExcel = async () => {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'KiemKe');
       const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      
       // Download file
       saveAs(new Blob([wbout], { type: 'application/octet-stream' }), result.filename);
+      toastSuccess('Đã tải file Excel thành công.');
     } else {
-      alert('Lỗi khi xuất Excel');
+      toastError('Lỗi khi xuất Excel');
     }
   } catch (error) {
     console.error('Export error:', error);
-    alert('Lỗi khi xuất Excel: ' + error.message);
+    toastError('Lỗi khi xuất Excel: ' + error.message);
   }
 };
 
 
 </script>
 <style lang="css" scoped>
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 1.4s infinite;
+}
+@keyframes carry-move {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  80% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+.animate-carry-move {
+  animation: carry-move 2.2s infinite linear;
+}
 ::-webkit-scrollbar {
   height: 8px;
   width: 8px;

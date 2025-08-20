@@ -19,9 +19,26 @@
               class="absolute right-3 top-2/3 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">₫</span>
           </div>
 
+          <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Phương thức thanh toán <span class="text-red-500">*</span></label>
+          <select v-model="form.payment_method"
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            <option value="cash">Tiền mặt</option>
+            <option value="bank_transfer">Chuyển khoản</option>
+          </select>
+        </div>
+
+        <!-- Proof Image -->
+        <div v-if="form.payment_method === 'bank_transfer'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ảnh chuyển khoản <span class="text-red-500">*</span></label>
+          <input type="file" @change="handleFileUpload"
+            accept="image/*"
+            class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
+        </div>
+
           <!-- Payment Amount -->
           <div class="relative">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền thanh toán</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Số tiền thanh toán <span class="text-red-500">*</span></label>
             <input type="text" inputmode="numeric" pattern="\d*" :value="formattedAmount" @input="handleAmountInput"
               @keypress="restrictToNumbers"
               class="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-semibold"
@@ -32,7 +49,7 @@
 
           <!-- Transaction Date -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày giao dịch</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ngày giao dịch <span class="text-red-500">*</span></label>
             <input type="date" v-model="form.transaction_date"
               class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
           </div>
@@ -78,9 +95,19 @@ const emit = defineEmits(['closeModal'])
 const form = useForm({
   paid_amount: 0,
   transaction_date: new Date().toISOString().slice(0, 10),
-  description: ''
+  description: '',
+    payment_method: 'cash',
+  file: null
 })
 
+const handleFileUpload = (e) => {
+  const files = e.target.files
+  if (files && files.length > 0) {
+    form.file = files[0]  // đảm bảo là File object
+  } else {
+    form.file = null
+  }
+}
 // Currency formatter
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -124,9 +151,12 @@ watch(() => props.debt, (newDebt) => {
 }, { immediate: true })
 
 const handleSubmit = () => {
-  router.post(route('admin.customer-transaction.add', props.debt.id), form, {
+  form.post(route('admin.customer-transaction.add', props.debt.id), {
+    forceFormData: true,
     onSuccess: () => emit('closeModal'),
-    onError: () => alert('Có lỗi xảy ra khi thêm giao dịch.'),
+    onError: (errors) => {
+      alert('Có lỗi xảy ra khi thêm giao dịch.')
+    },
   })
 }
 

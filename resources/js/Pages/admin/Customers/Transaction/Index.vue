@@ -14,9 +14,9 @@
         <div class="flex items-center space-x-3">
           <!-- Search bar -->
           <div class="relative">
-            <input type="text" placeholder="Tìm theo tên, số điện thoại..."
+            <!-- <input type="text" placeholder="Tìm theo tên, số điện thoại..."
               class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:outline-none focus:ring-indigo-500 focus:border-transparent transition-all font-sans" />
-            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i> -->
           </div>
 
           

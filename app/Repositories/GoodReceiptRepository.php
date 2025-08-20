@@ -19,9 +19,11 @@ use Illuminate\Support\Facades\Log;
 class GoodReceiptRepository extends BaseRepository
 {
     protected $productRepository;
-    public function __construct(GoodReceipt $model)
+    protected $log;
+    public function __construct(GoodReceipt $model, PurchaseOrderLogRepository $log)
     {
         $this->handleModel = $model;
+        $this->log = $log;
     }
     public function getList($request)
     {
@@ -202,6 +204,12 @@ class GoodReceiptRepository extends BaseRepository
                 DB::rollBack();
                 return $this->returnError('Có lỗi khi lưu lịch sử thanh toán');
             }
+            // ghi log
+            $this->log->createLog(6, [
+                'purchase_order_id' => $purchaseOrder->id,
+                'create_grn_by' => Auth::user()->id,
+                'detail' => $goodReceipt->code
+            ]);
 
             DB::commit();
             return $goodReceipt;

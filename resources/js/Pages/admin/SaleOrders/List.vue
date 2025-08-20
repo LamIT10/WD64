@@ -92,6 +92,10 @@
                                 <option value="shipped">Đang giao hàng</option>
                                 <option value="completed">Hoàn thành</option>
                                 <option value="cancelled">Từ chối</option>
+                                <option value="returning">
+                                    Đang hoàn hàng
+                                </option>
+                                <option value="returned">Đã hoàn hàng</option>
                             </select>
                         </div>
                     </div>
@@ -203,6 +207,10 @@
                                                 order.status === 'completed',
                                             'text-red-600 bg-red-100 px-2 py-1 rounded-xl':
                                                 order.status === 'cancelled',
+                                            'text-orange-700 bg-orange-100 px-2 py-1 rounded-xl ':
+                                                order.status === 'returning',
+                                            'text-green-700 bg-green-100 px-2 py-1 rounded-xl ':
+                                                order.status === 'returned',
                                         }"
                                     >
                                         {{ getStatusText(order.status) }}
@@ -443,6 +451,26 @@
                                                         class="px-4 py-2 text-red-700"
                                                     >
                                                         {{ selectedOrder.note }}
+                                                    </td>
+                                                </tr>
+                                                <tr
+                                                    v-if="
+                                                        [
+                                                            'returning',
+                                                            'returned',
+                                                        ].includes(
+                                                            selectedOrder.status
+                                                        ) && selectedOrder.note
+                                                    "
+                                                >
+                                                    <td>📝 Lý do hoàn hàng</td>
+                                                    <td class="text-yellow-700">
+                                                        {{
+                                                            selectedOrder.note.replace(
+                                                                "[RETURN] ",
+                                                                ""
+                                                            )
+                                                        }}
                                                     </td>
                                                 </tr>
                                                 <!-- Input pay_before khi trạng thái là pending -->
@@ -824,6 +852,113 @@
                                 >
                                     <i class="fa-solid fa-check-double"></i>
                                     Xác nhận hoàn thành
+                                </button>
+                                <button
+                                    v-if="selectedOrder.status === 'shipped'"
+                                    @click="openReturnModal(selectedOrder.id)"
+                                    class="inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700"
+                                >
+                                    <i class="fa-solid fa-undo"></i>
+                                    Hoàn hàng
+                                </button>
+                                <!-- Modal nhập lý do hoàn hàng -->
+                                <div
+                                    v-if="showReturnModal"
+                                    class="fixed inset-0 overflow-y-auto z-50"
+                                >
+                                    <div
+                                        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+                                    >
+                                        <div
+                                            class="fixed inset-0 z-40 transition-opacity"
+                                            aria-hidden="true"
+                                        >
+                                            <div
+                                                class="absolute inset-0 bg-gray-500 opacity-50"
+                                                @click="closeReturnModal"
+                                            ></div>
+                                        </div>
+                                        <div
+                                            class="inline-block relative z-50 align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                                        >
+                                            <div
+                                                class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4"
+                                            >
+                                                <div
+                                                    class="sm:flex sm:items-start"
+                                                >
+                                                    <div
+                                                        class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10"
+                                                    >
+                                                        <i
+                                                            class="fa-solid fa-undo text-yellow-600 text-lg"
+                                                        ></i>
+                                                    </div>
+                                                    <div
+                                                        class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                                                    >
+                                                        <h3
+                                                            class="text-lg leading-6 font-medium text-gray-900 mb-4"
+                                                        >
+                                                            Hoàn hàng đơn xuất
+                                                        </h3>
+                                                        <div class="mt-2">
+                                                            <p
+                                                                class="text-sm text-gray-500 mb-4"
+                                                            >
+                                                                Vui lòng nhập lý
+                                                                do hoàn hàng.
+                                                                Thông tin này sẽ
+                                                                được lưu lại.
+                                                            </p>
+                                                            <textarea
+                                                                v-model="
+                                                                    returnReason
+                                                                "
+                                                                rows="4"
+                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 shadow-sm text-sm resize-none"
+                                                                placeholder="Nhập lý do hoàn hàng..."
+                                                            ></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                                            >
+                                                <button
+                                                    @click="submitReturnReason"
+                                                    type="button"
+                                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                                    :disabled="
+                                                        !returnReason.trim()
+                                                    "
+                                                >
+                                                    <i
+                                                        class="fa-solid fa-undo mr-2"
+                                                    ></i>
+                                                    Xác nhận hoàn hàng
+                                                </button>
+                                                <button
+                                                    @click="closeReturnModal"
+                                                    type="button"
+                                                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                                >
+                                                    Hủy
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nút xác nhận đã hoàn hàng thành công khi trạng thái là 'returning' -->
+                                <button
+                                    v-if="selectedOrder.status === 'returning'"
+                                    @click="confirmReturned(selectedOrder.id)"
+                                    class="inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700"
+                                >
+                                    <i class="fa-solid fa-check"></i>
+                                    Xác nhận đã hoàn hàng thành công
                                 </button>
                                 <button
                                     v-if="
@@ -1310,6 +1445,10 @@ const getStatusText = (status) => {
             return "Hoàn thành";
         case "cancelled":
             return "Từ chối";
+        case "returning":
+            return "Đang hoàn hàng";
+        case "returned":
+            return "Đã hoàn hàng";
         default:
             return "Không xác định";
     }
@@ -1429,6 +1568,60 @@ function onPayAfterBlur(e) {
 }
 function printInvoice(orderId) {
     window.open(route("admin.sale-orders.print", orderId), "_blank");
+}
+const showReturnModal = ref(false);
+const returnReason = ref("");
+const selectedReturnOrderId = ref(null);
+
+function openReturnModal(orderId) {
+    selectedReturnOrderId.value = orderId;
+    showReturnModal.value = true;
+}
+function closeReturnModal() {
+    showReturnModal.value = false;
+    returnReason.value = "";
+}
+function submitReturnReason() {
+    if (!returnReason.value.trim()) {
+        alert("Vui lòng nhập lý do hoàn hàng.");
+        return;
+    }
+    axios
+        .post(route("admin.sale-orders.return", selectedReturnOrderId.value), {
+            return_reason: returnReason.value,
+        })
+        .then(() => {
+            // Cập nhật trạng thái ngay trên giao diện
+            const order = listOrders.data.find(
+                (o) => o.id === selectedReturnOrderId.value
+            );
+            if (order) {
+                order.status = "returning";
+                order.note = "[RETURN] " + returnReason.value;
+            }
+            closeReturnModal();
+            closeModal();
+            emitter.emit("notification-updated");
+        })
+        .catch(() => {
+            alert("Có lỗi xảy ra khi hoàn hàng.");
+        });
+}
+function confirmReturned(orderId) {
+    axios
+        .post(route("admin.sale-orders.returned", orderId))
+        .then(() => {
+            // Cập nhật trạng thái ngay trên giao diện
+            const order = listOrders.data.find((o) => o.id === orderId);
+            if (order) {
+                order.status = "returned";
+            }
+            closeModal();
+            emitter.emit("notification-updated");
+        })
+        .catch(() => {
+            alert("Có lỗi xảy ra khi xác nhận hoàn hàng.");
+        });
 }
 </script>
 

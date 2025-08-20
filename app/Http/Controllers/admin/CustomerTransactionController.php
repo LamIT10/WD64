@@ -34,11 +34,20 @@ class CustomerTransactionController extends Controller
 
     public function addTransaction(Request $request, $orderId)
     {
+
+
+
         $validated = $request->validate([
             'paid_amount' => ['required', 'numeric', 'min:0'],
             'transaction_date' => ['required', 'date'],
             'description' => ['nullable', 'string', 'max:250'],
+            'payment_method' => ['required', 'in:cash,bank_transfer'],
+            'file' => ['nullable', 'image', 'max:10240'],
         ]);
+
+        if ($request->hasFile('file')) {
+            $validated['file'] = $request->file('file');
+        }
 
         try {
             $this->customerTransactionRepo->updateTransaction($orderId, $validated);
