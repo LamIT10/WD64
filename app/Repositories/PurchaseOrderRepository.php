@@ -185,10 +185,17 @@ class PurchaseOrderRepository extends BaseRepository
             }
             DB::commit();
             app(NotificationService::class)->create(
-                'purchase',
+                'purchase_order_created',
                 'Đặt hàng nhập',
-                'Có ' . count($listPurchaseOrderItems) . ' đơn hàng đề xuất nhập kho mới',
+                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới",
                 [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'purchase_order_created',
+                'Đặt hàng nhập',
+                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới bởi {$actor->name} ",
+                []
             );
             return $newPurchaseOrder;
         } catch (\Throwable $th) {
@@ -253,6 +260,19 @@ class PurchaseOrderRepository extends BaseRepository
             ]);
 
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase_order_approved',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã được phê duyệt thành công.",
+                [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'purchase_order_approved',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã được phê duyệt thành công.', bởi {$actor->name} ",
+                []
+            );
             return $purchaseOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -287,6 +307,19 @@ class PurchaseOrderRepository extends BaseRepository
                 'detail' => 'Từ chối với lý do: ' . $data['reason'],
             ]);
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase_order_cancelled',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã bị từ chối.",
+                [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'purchase_order_cancelled',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã bị từ chối.', bởi {$actor->name} ",
+                []
+            );
             return $purchaseOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -461,6 +494,19 @@ class PurchaseOrderRepository extends BaseRepository
                 ]);
             }
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase_order_updated',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.",
+                [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'purchase_order_updated',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.', bởi {$actor->name} ",
+                []
+            );
             return $purchase;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -509,6 +555,19 @@ class PurchaseOrderRepository extends BaseRepository
                 'detail' => 'Kết thúc đơn hàng'
             ]);
             DB::commit();
+            app(NotificationService::class)->create(
+                'purchase_order_ended',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã được kết thúc.",
+                [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'purchase_order_ended',
+                'Đặt hàng nhập',
+                "Đơn hàng #{$purchaseOrder->code} đã được kết thúc.', bởi {$actor->name} ",
+                []
+            );
             return $purchaseOrder;
         } catch (\Throwable $th) {
             DB::rollBack();
