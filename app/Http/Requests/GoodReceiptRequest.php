@@ -35,7 +35,7 @@ class GoodReceiptRequest extends FormRequest
                     'items.*.unit_default' => ['required', 'integer', 'exists:units,id'],
                     'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
                     'items.*.quantity_ordered' => ['required', 'numeric', 'min:0'],
-                    'items.*.quantity_received' => ['required', 'numeric', 'gt:0'],
+                    'items.*.quantity_received' => ['required', 'numeric', 'min:0', 'max:99999'],
                     'items.*.unit_price' => ['required', 'numeric', 'min:0'],
                     'items.*.subtotal' => ['required', 'numeric', 'min:0'],
                 ];
@@ -59,7 +59,7 @@ class GoodReceiptRequest extends FormRequest
             'payment.min' => 'Số tiền thanh toán phải lớn hơn hoặc bằng 0.',
             'receive_type.required' => 'Loại nhận hàng không được để trống.',
             'receive_type.in' => 'Loại nhận hàng không hợp lệ.',
-            'items.required' => 'Danh sách sản phẩm không được để trống.',
+            'items.required' => 'Vui lòng nhập số lượng hàng hoá nhập thực tế !!!',
             'items.array' => 'Danh sách sản phẩm không hợp lệ.',
             'items.min' => 'Phải có ít nhất 1 sản phẩm.',
             'items.*.product_variant_id.required' => 'Mã sản phẩm không được để trống.',

@@ -5,6 +5,26 @@
                 class="flex w-full h-full bg-white rounded-lg overflow-hidden border border-gray-100"
             >
                 <div class="w-4/5 p-5 border-r border-gray-100">
+                    <div v-if="errors && Object.keys(errors).length > 0" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                            <h4 class="text-red-800 font-medium">Có lỗi xảy ra khi tạo phiếu nhập hàng</h4>
+                        </div>
+                        <div class="space-y-2">
+                            <div
+                                v-for="(error, field) in errors"
+                                :key="field"
+                                class="flex items-start gap-2 bg-red-100 rounded-lg px-3 py-2"
+                            >
+                                <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+                                <div>
+                                    <span class="font-semibold text-gray-700">{{ getFieldLabel(field) }}:</span>
+                                    <span class="text-red-700 ml-1">{{ error }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-semibold ml-2 text-gray-800">
                             Danh sách hàng hoá
@@ -198,7 +218,7 @@
                                     >
                                     <span class="font-medium">{{
                                         totalAmount.toLocaleString()
-                                    }}</span>
+                                    }} đ</span>
                                 </div>
 
                                 <!-- Tiền trả NCC -->
@@ -231,7 +251,7 @@
                                         >Tính vào công nợ:</span
                                     >
                                     <span class="font-medium text-red-600">
-                                        {{ debtAmount.toLocaleString() }}
+                                        {{ debtAmount.toLocaleString() }} đ
                                     </span>
                                 </div>
                             </div>
@@ -446,7 +466,12 @@ const calculateTotals = () => {
 };
 
 const handleQuantityChange = (item) => {
-    const received = Number(receiptForm.value[item.id]);
+    let received = Number(receiptForm.value[item.id]);
+    
+    if (received < 0) {
+        receiptForm.value[item.id] = 0;
+        received = 0;
+    }
 
     if (received > item.quantity_ordered * 2) {
         receiptForm.value[item.id] = item.quantity_ordered;
@@ -478,6 +503,30 @@ const checkReceiveType = () => {
     showReceiveTypeSelector.value = hasPartial;
 };
 
+const getFieldLabel = (field) => {
+    const labels = {
+        'note': 'Ghi chú',
+        'payment': 'Tiền trả NCC',
+        'receive_type': 'Loại nhận hàng',
+        'items': 'Danh sách sản phẩm',
+        'total_amount': 'Tổng tiền',
+        'purchase_order_id': 'Mã đơn nhập',
+    };
+    
+    // Handle nested field names like "items.0.quantity_received"
+    if (field.includes('items.') && field.includes('.quantity_received')) {
+        return 'Số lượng nhận hàng';
+    }
+    if (field.includes('items.') && field.includes('.unit_price')) {
+        return 'Đơn giá';
+    }
+    if (field.includes('items.') && field.includes('.subtotal')) {
+        return 'Thành tiền';
+    }
+    
+    return labels[field] || field;
+};
+
 const form = useForm({
     note: "",
     total_amount: totalAmount.value,
@@ -491,7 +540,7 @@ const submitGoodReceipt = (receiveType) => {
         showConfirmModal.value = true;
         pendingReceiveType.value = receiveType;
         confirmModalData.value = {
-            title: 'NHẬP MỘT PHẦN',
+            title: 'XÁC NHẬN KẾT THÚC ĐƠN',
             message: 'Bạn có chắc chắn muốn xác nhận hoàn thành và kết thúc đơn nhập này?',
             confirmText: 'Xác nhận',
             cancelText: 'Hủy bỏ'
@@ -503,7 +552,7 @@ const submitGoodReceipt = (receiveType) => {
         showConfirmModal.value = true;
         pendingReceiveType.value = receiveType;
         confirmModalData.value = {
-            title: 'XÁC NHẬN KẾT THÚC ĐƠN',
+            title: 'NHẬP MỘT PHẦN',
             message: 'Bạn có chắc chắn muốn tạo phiếu nhập cho một phần hàng hóa?',
             confirmText: 'Xác nhận',
             cancelText: 'Hủy bỏ'

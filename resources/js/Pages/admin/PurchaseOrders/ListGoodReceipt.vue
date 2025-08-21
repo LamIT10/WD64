@@ -77,23 +77,13 @@
                     <table class="w-full text-left text-gray-500">
                         <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300">
                             <tr>
-                                <th scope="col" class="p-4">
-                                    <div class="flex items-center">
-                                        <input
-                                            id="checkbox-all-search"
-                                            type="checkbox"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                        />
-                                        <label for="checkbox-all-search" class="sr-only">checkbox</label>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-4 py-2">Mã phiếu nhập</th>
-                                <th scope="col" class="px-4 py-2">Mã đơn nhập</th>
-                                <th scope="col" class="px-4 py-2">Nhà cung cấp</th>
-                                <th scope="col" class="px-4 py-2">Ngày nhận hàng</th>
-                                <th scope="col" class="px-4 py-2">Người tạo phiếu</th>
-                                <th scope="col" class="px-4 py-2 text-end">Đã thanh toán</th>
-                                <th scope="col" class="px-4 py-2 text-end"></th>
+                                <th scope="col" class="px-4 py-3">Mã phiếu nhập</th>
+                                <th scope="col" class="px-4 py-3">Mã đơn nhập</th>
+                                <th scope="col" class="px-4 py-3">Nhà cung cấp</th>
+                                <th scope="col" class="px-4 py-3">Ngày nhận hàng</th>
+                                <th scope="col" class="px-4 py-3">Người tạo phiếu</th>
+                                <th scope="col" class="px-4 py-3 text-end">Đã thanh toán</th>
+                                <th scope="col" class="px-4 py-3 text-end">In phiếu</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,45 +93,32 @@
                                 @click="openModal(goodReceipt)"
                                 class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                             >
-                                <td class="w-4 p-4">
-                                    <div class="flex items-center">
-                                        <input
-                                            :id="'checkbox-table-search-' + goodReceipt.id"
-                                            type="checkbox"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                        />
-                                        <label
-                                            :for="'checkbox-table-search-' + goodReceipt.id"
-                                            class="sr-only"
-                                            >checkbox</label
-                                        >
-                                    </div>
-                                </td>
-                                <th scope="row" class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+                                <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
                                     {{ goodReceipt.code }}
                                 </th>
-                                <td class="px-4 py-2">
+                                <td class="px-4 py-3">
                                     {{ goodReceipt.purchase_order?.code || '' }}
                                 </td>
-                                <td class="px-4 py-2 text-indigo-700 font-semibold">
+                                <td class="px-4 py-3 text-indigo-700 font-semibold">
                                     {{ goodReceipt.purchase_order?.supplier?.name || '' }}
                                 </td>
-                                <td class="px-4 py-2">
+                                <td class="px-4 py-3">
                                     {{ formatDate(goodReceipt.receipt_date) }}
                                 </td>
-                                <td class="px-4 py-2">
+                                <td class="px-4 py-3">
                                     {{ goodReceipt.create_by?.name || '' }}
                                 </td>
-                                <td class="px-4 py-2 text-blue-800 font-semibold flex items-center justify-end">
+                                <td class="px-4 py-3 text-blue-800 font-semibold flex items-center justify-end">
                                     {{ formatCurrencyVND(goodReceipt.total_amount) }}
                                     <i class="fa-solid fa-tag text-lg ml-2"></i>
                                 </td>
-                               <td>
+                               <td class="text-end px-3">
                                 <button
                                     class="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700"
                                     @click.stop="printSingle(goodReceipt.id)"
+                                    :title="'In phiếu nhập ' + goodReceipt.code"
                                 >
-                                    In phiếu
+                                    <i class="fa-solid fa-print"></i>
                                 </button>
                                 </td>
                             </tr>
@@ -152,19 +129,21 @@
 
             <!-- Pagination -->
             <div class="mt-6 flex justify-end" v-if="listGoodReceipts.links">
-                <nav class="inline-flex rounded-md shadow-sm gap-1" aria-label="Pagination">
+                <nav class="inline-flex rounded-md gap-1" aria-label="Pagination">
                     <button
                         v-for="(link, i) in listGoodReceipts.links"
                         :key="i"
                         :disabled="!link.url"
                         @click="goToPage(link.url)"
-                        v-html="link.label"
                         class="px-4 py-2 text-sm rounded-md transition"
                         :class="{
                             'bg-indigo-600 text-white': link.active,
                             'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100': !link.active,
                             'opacity-50 cursor-not-allowed': !link.url,
                         }"
+                        v-html="link.label
+                            .replace('Previous', 'Trước')
+                            .replace('Next', 'Sau')"
                     ></button>
                 </nav>
             </div>

@@ -11,6 +11,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
 use App\Models\SupplierDebtHistory;
 use App\Models\SupplierTransaction;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,8 +74,8 @@ class GoodReceiptRepository extends BaseRepository
         }
 
         $query->orderBy('created_at', 'desc');
-        // Phân trang 5 bản ghi/trang
-        return $query->paginate(5)->withQueryString();
+
+        return $query->paginate(10)->withQueryString();
     }
     public function getByPurchaseOrder($id)
     {
@@ -150,7 +151,7 @@ class GoodReceiptRepository extends BaseRepository
 
                 // cập nhật tồn kho
                 $inventory = Inventory::where('product_variant_id', $item['product_variant_id'])->first();
-                
+
                 // tính số lượng theo đơn vị cơ bản cho quantity_received
                 $quantityReceivedInBase = null;
                 if ($item['unit_default'] == $item['unit_id']) {
@@ -162,7 +163,7 @@ class GoodReceiptRepository extends BaseRepository
                         ->first();
                     $quantityReceivedInBase = $factor->conversion_factor * $item['quantity_received'];
                 }
-                
+
                 // tính số lượng theo đơn vị cơ bản cho quantity_ordered (số đặt - để trừ trong quantity_in_transit)
                 $quantityOrderedInBase = null;
                 if ($item['unit_default'] == $item['unit_id']) {
@@ -174,7 +175,7 @@ class GoodReceiptRepository extends BaseRepository
                         ->first();
                     $quantityOrderedInBase = $factor->conversion_factor * $item['quantity_ordered'];
                 }
-                
+
                 $inventory->update([
                     'quantity_in_transit' => max(0, $inventory->quantity_in_transit - $quantityOrderedInBase),
                     'quantity_on_hand' => $inventory->quantity_on_hand + $quantityReceivedInBase,
@@ -229,6 +230,19 @@ class GoodReceiptRepository extends BaseRepository
             ]);
 
             DB::commit();
+            app(NotificationService::class)->create(
+                'grn',
+                'Tạo phiếu nhập kho',
+                "Tạo phiếu nhập kho cho đơn hàng #{$purchaseOrder->code}.",
+                [],
+            );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'grn',
+                'Tạo phiếu nhập kho',
+                "Tạo phiếu nhập kho cho đơn hàng #{$purchaseOrder->code} bởi {$actor->name} ",
+                []
+            );
             return $goodReceipt;
         } catch (\Exception $e) {
             DB::rollBack();
