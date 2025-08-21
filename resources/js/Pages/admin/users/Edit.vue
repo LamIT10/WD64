@@ -352,11 +352,11 @@ function submit() {
         onSuccess: () => {
             console.log('Cập nhật nhân viên thành công!');
             router.reload({
-        only: ['auth'],
-        onSuccess: () => {
-            console.log('Dữ liệu auth sau khi reload:', $page.props.auth);
-        },
-    }); // Làm mới dữ liệu auth
+                only: ['auth'],
+                onSuccess: (page) => {
+                    console.log('Dữ liệu auth sau khi reload:', page.props.auth);
+                },
+            }); // Làm mới dữ liệu auth
             form.reset(); // Đặt lại form
             previewUrl.value = null; // Xóa ảnh xem trước
         },
