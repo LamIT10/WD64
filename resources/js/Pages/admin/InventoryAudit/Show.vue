@@ -95,12 +95,12 @@
                                 lệch</span>
                             <span v-else class="ml-1 text-red-700 font-bold">Có chênh lệch</span>
                         </div>
-                        <div v-if="audit.status !== 'completed'">
+                        <div v-if="audit.status !== 'completed'" >
                             <span class="font-semibold">Đồng bộ:</span>
                             <span v-if="audit.is_adjusted == 1" class="ml-1 text-green-700 font-bold">Đã đồng bộ</span>
                             <span v-else class="ml-1 text-red-700 font-bold">Chưa đồng bộ</span>
                         </div>
-                        <div v-if="audit.is_adjusted != 1 && audit.status !== 'completed'"
+                        <div v-if="audit.is_adjusted != 1 && audit.status !== 'completed'" v-can="'admin.inventory-audit.update'"
                             class="flex items-center gap-2">
                             <span class="font-semibold">Đồng bộ dữ liệu?</span>
                             <div v-if="audit.is_adjusted == 0">
@@ -503,7 +503,6 @@ const handleSync = async () => {
     } catch (e) {
         console.error(e);
         toastError('Đồng bộ thất bại!');
-        //  Cho lệnh Load trang
         await fetchAudit();
         toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
@@ -525,7 +524,6 @@ const handleReject = async () => {
     } catch (e) {
         console.error(e);
         toastError('Từ chối thất bại!');
-        //  Cho lệnh Load trang
         await fetchAudit();
         toastSuccess('Đã tải lại thông tin phiếu kiểm kho.');
     }
