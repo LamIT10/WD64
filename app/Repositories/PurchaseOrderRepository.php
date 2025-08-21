@@ -64,10 +64,13 @@ class PurchaseOrderRepository extends BaseRepository
         if ($request->filled('code')) {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
-        if ($request->filled('start') || $request->filled('end')) {
-            $start = $request->start ? Carbon::parse($request->start)->startOfDay() : Carbon::minValue();
-            $end   = $request->end   ? Carbon::parse($request->end)->endOfDay()   : Carbon::maxValue();
-            $query->whereBetween('created_at', [$start, $end]);
+        if ($request->filled('start')) {
+            $start = Carbon::parse($request->start)->startOfDay();
+            $query->where('created_at', '>=', $start);
+        }
+        if ($request->filled('end')) {
+            $end = Carbon::parse($request->end)->endOfDay();
+            $query->where('created_at', '<=', $end);
         }
         $query->orderByDesc('id');
 
