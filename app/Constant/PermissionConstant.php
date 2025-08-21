@@ -28,6 +28,7 @@ class PermissionConstant
     public const INVENTORY_AUDIT_CREATE  = 'admin.inventory-audit.create';
     public const INVENTORY_AUDIT_SHOW    = 'admin.inventory-audit.show';
     public const INVENTORY_AUDIT_EXPORT  = 'admin.inventory-audit.export';
+    public const INVENTORY_AUDIT_INFORMATION_UPDATE = 'admin.inventory-audit.update';
     // ==== INVENTORY ==== Quản lý kho
     public const INVENTORY_INDEX   = 'admin.inventory.index';
 
@@ -229,6 +230,10 @@ class PermissionConstant
                     [
                         "description" => "Xuất excel kiểm kê kho",
                         "name" => self::INVENTORY_AUDIT_EXPORT,
+                    ],
+                    [
+                        "description" => "Cập nhật thông tin kiểm kê kho",
+                        "name" => self::INVENTORY_AUDIT_INFORMATION_UPDATE,
                     ],
                 ],
             ],

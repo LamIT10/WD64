@@ -35,7 +35,7 @@
           <tbody>
             <tr v-for="(row, i) in pagedRows" :key="i" :class="[
               'hover:bg-indigo-50 transition-all duration-200',
-              row.qty < 0 ? 'text-red-600' : 'text-gray-800',
+              'text-gray-800',
               i % 2 === 0 ? 'bg-white' : 'bg-indigo-50/50'
             ]">
               <td class="px-6 py-3 border-b">{{ formatDate(row.date) }}</td>
@@ -107,7 +107,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in detail.items" :key="item.id" :class="[item.qty < 0 ? 'text-red-600' : 'text-gray-800', 'hover:bg-indigo-50 transition-all duration-200', 'border-b', 'align-top']">
+                <tr v-for="item in detail.items" :key="item.id" :class="['text-gray-800', 'hover:bg-indigo-50 transition-all duration-200', 'border-b', 'align-top']">
                   <td class="px-4 py-3">
                     <span class="font-semibold">{{ item.product }}</span>
                     <span v-if="item.variant && item.variant !== item.product"> - <span class="text-gray-500">{{ item.variant }}</span></span>

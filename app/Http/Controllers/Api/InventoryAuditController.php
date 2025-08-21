@@ -97,6 +97,11 @@ class InventoryAuditController extends BaseApiController
         foreach ($products as $product) {
             foreach ($product->productVariants as $variant) {
                 // Lấy zone cho biến thể này
+                // check status_product nếu là 0 và số lượng bằng 0 thì không hiển thị
+                if ($product->status_product == 0 &&  optional($variant->inventory->first())->quantity_on_hand == 0) {
+                    continue;
+                }
+
                 $zoneLocation = $variant->inventoryLocations->first(function ($loc) use ($zones) {
                     return $loc->zone && in_array($loc->zone->name, $zones);
                 });
@@ -112,6 +117,7 @@ class InventoryAuditController extends BaseApiController
                     'id_product_variant' => $variant->id,
                     'name_product' => $product->name,
                     'variant_attributes' => $attributes,
+                    'status_product' => $product->status_product,
                     'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
                     'quantity_reserved' => optional($variant->inventory->first())->quantity_reserved,
                     'quantity_in_transit' => optional($variant->inventory->first())->quantity_in_transit,
