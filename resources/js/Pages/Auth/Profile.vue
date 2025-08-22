@@ -208,16 +208,30 @@
               </button> -->
             </div>
             <div class="p-6 space-y-6">
-              <div class="flex items-center gap-2">Trạng thái:
-                <span class="h-2 w-2 rounded-full bg-green-500"></span>
-                <p class="text-green-600 font-medium">{{ $page.props.auth.user?.status }}</p>
+              <div class="flex items-center gap-2">
+                Trạng thái:
+                <span class="h-2 w-2 rounded-full" :class="{
+                  'bg-green-500': $page.props.auth.user?.status === 'active',
+                  'bg-red-500': $page.props.auth.user?.status === 'inactive'
+                }"></span>
+                <p class="font-medium" :class="{
+                  'text-green-600': $page.props.auth.user?.status === 'active',
+                  'text-red-600': $page.props.auth.user?.status === 'inactive'
+                }">
+                  {{
+                    $page.props.auth.user?.status === 'active'
+                      ? 'Đang làm việc'
+                  : 'Đã nghỉ việc'
+                  }}
+                </p>
               </div>
-              <p>Lần đăng nhập gần nhất: {{ $page.props.auth.user?.last_login }}</p>
+
+              <!-- <p>Lần đăng nhập gần nhất: {{ $page.props.auth.user?.last_login }}</p>
               <div v-for="activity in $page.props.auth.user?.activities" :key="activity.id"
                 class="border-l-2 border-indigo-200 pl-4 py-1">
                 <p class="text-sm">{{ activity.action }} - <span class="text-gray-500 text-xs">{{ activity.time
                 }}</span></p>
-              </div>
+              </div> -->
               <div class="grid grid-cols-2 gap-2 mt-2">
                 <div v-for="perm in $page.props.auth.user?.permissions" :key="perm"
                   class="flex items-center gap-1 bg-indigo-50 p-2 rounded">
@@ -246,47 +260,15 @@
                   <h3 class="text-lg font-medium text-gray-900">Mật khẩu</h3>
                   <p class="text-sm text-gray-500">Cập nhật mật khẩu thường xuyên</p>
                 </div>
-                <button @click="showPasswordModal = true"
-                  class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Đổi mật khẩu</button>
+                <a href="/forgot-password" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                  Lấy lại mật khẩu
+                </a>
               </div>
             </div>
           </section>
         </main>
       </div>
     </div>
-
-    <!-- Password Modal -->
-    <transition name="modal">
-      <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold text-gray-800">Đổi mật khẩu</h3>
-            <button @click="showPasswordModal = false" class="text-gray-500 hover:text-gray-700">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <form @submit.prevent="changePassword" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Mật khẩu hiện tại</label>
-              <input type="password" v-model="password.current" required class="w-full border rounded p-2" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Mật khẩu mới</label>
-              <input type="password" v-model="password.new" required class="w-full border rounded p-2" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Xác nhận mật khẩu mới</label>
-              <input type="password" v-model="password.confirm" required class="w-full border rounded p-2" />
-            </div>
-            <div class="flex justify-end gap-2">
-              <button type="button" @click="showPasswordModal = false"
-                class="px-4 py-2 bg-gray-200 rounded">Hủy</button>
-              <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Cập nhật</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
@@ -294,8 +276,6 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const activeSection = ref('');
-const showPasswordModal = ref(false);
-const password = ref({ current: '', new: '', confirm: '' });
 
 const getInitial = (name) => !name ? '' : name.split(' ').map(n => n[0]).join('').toUpperCase();
 
@@ -305,12 +285,6 @@ const handleScroll = () => {
     if (window.pageYOffset >= sec.offsetTop - 200) current = sec.id;
   });
   activeSection.value = current;
-};
-
-const changePassword = () => {
-  alert(`Đổi mật khẩu: ${password.value.current} -> ${password.value.new}`);
-  password.value = { current: '', new: '', confirm: '' };
-  showPasswordModal.value = false;
 };
 
 onMounted(() => window.addEventListener('scroll', handleScroll));
