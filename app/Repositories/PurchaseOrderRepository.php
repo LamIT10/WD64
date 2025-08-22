@@ -197,7 +197,7 @@ class PurchaseOrderRepository extends BaseRepository
             app(NotificationService::class)->notifyAll(
                 'purchase_order_created',
                 'Đặt hàng nhập',
-                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới bởi {$actor->name} ",
+                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới bởi " . $actor->name,
                 []
             );
             return $newPurchaseOrder;

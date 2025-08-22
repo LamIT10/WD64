@@ -188,6 +188,9 @@
             page-break-inside: avoid;
             break-inside: avoid;
         }
+        .nowrap {
+    white-space: nowrap;
+}
 
         @media print {
 
@@ -204,6 +207,7 @@
             font-family: 'DejaVu Sans', sans-serif;
 
         }
+        
     </style>
 </head>
 
@@ -215,7 +219,7 @@
 
         <div class="header">
             <div class="title">Phiếu xuất kho</div>
-            <div class="order-id">Đơn xuất số: {{ $order->id }}</div>
+            <div class="order-id">Đơn xuất số: {{ $order->code }}</div>
         </div>
 
         <div class="info-section">
@@ -295,7 +299,7 @@
                             </td>
                             <td class="text-center">{{ $item->quantity_ordered }}</td>
                             <td class="text-center">{{ optional($item->unit)->name ?? '---' }}</td>
-                            <td class="text-right">{{ number_format($item->subtotal, 0, ',', '.') }} ₫</td>
+                            <td class="text-right nowrap">{{ number_format($item->subtotal, 0, ',', '.') }} ₫</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -307,19 +311,19 @@
                 <table class="summary-table">
                     <tr>
                         <td class="label">Tổng tiền đơn:</td>
-                        <td class="text-right">{{ number_format($order->total_amount, 0, ',', '.') }} ₫</td>
+                        <td class="text-right nowrap">{{ number_format($order->total_amount, 0, ',', '.') }} ₫</td>
                     </tr>
                     <tr>
                         <td class="label">Đã thanh toán trước:</td>
-                        <td class="text-right">{{ number_format($order->pay_before ?? 0, 0, ',', '.') }} ₫</td>
+                        <td class="text-right nowrap">{{ number_format($order->pay_before ?? 0, 0, ',', '.') }} ₫</td>
                     </tr>
                     <tr>
                         <td class="label">Đã thanh toán sau:</td>
-                        <td class="text-right">{{ number_format($order->pay_after ?? 0, 0, ',', '.') }} ₫</td>
+                        <td class="text-right nowrap">{{ number_format($order->pay_after ?? 0, 0, ',', '.') }} ₫</td>
                     </tr>
                     <tr class="total-row">
                         <td class="label">Cần thanh toán:</td>
-                        <td class="text-right">
+                        <td class="text-right nowrap">
                             {{ number_format(($order->total_amount ?? 0) - ($order->pay_before ?? 0) - ($order->pay_after ?? 0), 0, ',', '.') }}
                             ₫
                         </td>

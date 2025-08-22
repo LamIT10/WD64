@@ -35,10 +35,6 @@
             </div>
 
             <div v-else>
-                <div class="mb-6">
-                    <div class="bg-white rounded p-3"></div>
-                </div>
-
                 <!-- Filters -->
                 <div
                     class="mb-6 bg-white p-6 rounded-sm border border-gray-100"
@@ -117,20 +113,6 @@
                             class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300"
                         >
                             <tr>
-                                <th scope="col" class="p-4">
-                                    <div class="flex items-center">
-                                        <input
-                                            id="checkbox-all-search"
-                                            type="checkbox"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                        />
-                                        <label
-                                            for="checkbox-all-search"
-                                            class="sr-only"
-                                            >checkbox</label
-                                        >
-                                    </div>
-                                </th>
                                 <th scope="col" class="px-4 py-2">
                                     Mã đơn xuất
                                 </th>
@@ -159,26 +141,6 @@
                                 class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                                 @click="openModal(order)"
                             >
-                                <td class="w-4 p-4">
-                                    <div class="flex items-center">
-                                        <input
-                                            :id="
-                                                'checkbox-table-search-' +
-                                                order.id
-                                            "
-                                            type="checkbox"
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 focus:ring-2"
-                                        />
-                                        <label
-                                            :for="
-                                                'checkbox-table-search-' +
-                                                order.id
-                                            "
-                                            class="sr-only"
-                                            >checkbox</label
-                                        >
-                                    </div>
-                                </td>
                                 <th
                                     scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
@@ -225,7 +187,7 @@
                                     }}
                                 </td>
                                 <td
-                                    class="px-4 py-2 text-blue-800 font-semibold flex items-center justify-end"
+                                    class="px-4 py-2 text-blue-800 font-semibold flex items-center justify-end text-center"
                                 >
                                     {{ formatCurrencyVND(order.total_amount) }}
                                     <i class="fa-solid fa-tag text-lg ml-2"></i>
@@ -314,7 +276,11 @@
                                             <h3
                                                 class="text-lg leading-6 font-medium text-gray-900"
                                             >
-                                                Đơn xuất {{ selectedOrder.id }}
+                                                Đơn xuất
+                                                {{
+                                                    selectedOrder.code ||
+                                                    "Chưa xác định"
+                                                }}
                                             </h3>
                                             <button
                                                 @click="closeModal"
@@ -463,7 +429,7 @@
                                                         ) && selectedOrder.note
                                                     "
                                                 >
-                                                    <td>📝 Lý do hoàn hàng</td>
+                                                    <td>Lý do hoàn hàng</td>
                                                     <td class="text-yellow-700">
                                                         {{
                                                             selectedOrder.note.replace(
@@ -856,7 +822,7 @@
                                 <button
                                     v-if="selectedOrder.status === 'shipped'"
                                     @click="openReturnModal(selectedOrder.id)"
-                                    class="inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700"
+                                    class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     <i class="fa-solid fa-undo"></i>
                                     Hoàn hàng
@@ -955,7 +921,7 @@
                                 <button
                                     v-if="selectedOrder.status === 'returning'"
                                     @click="confirmReturned(selectedOrder.id)"
-                                    class="inline-flex shadow-xl justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700"
+                                    class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     <i class="fa-solid fa-check"></i>
                                     Xác nhận đã hoàn hàng thành công
