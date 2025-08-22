@@ -495,21 +495,21 @@ class PurchaseOrderRepository extends BaseRepository
                     'updated_by' => Auth::user()->id,
                     'detail' => $textUpdateDetail
                 ]);
+                app(NotificationService::class)->create(
+                    'purchase_order_updated',
+                    'Đặt hàng nhập',
+                    "Đơn hàng #{$purchase->code} đã được cập nhật thành công.",
+                    [],
+                );
+                $actor = Auth::user();
+                app(NotificationService::class)->notifyAll(
+                    'purchase_order_updated',
+                    'Đặt hàng nhập',
+                    "Đơn hàng #{$purchase->code} đã được cập nhật thành công.', bởi {$actor->name} ",
+                    []
+                );
             }
             DB::commit();
-            app(NotificationService::class)->create(
-                'purchase_order_updated',
-                'Đặt hàng nhập',
-                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.",
-                [],
-            );
-            $actor = Auth::user();
-            app(NotificationService::class)->notifyAll(
-                'purchase_order_updated',
-                'Đặt hàng nhập',
-                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.', bởi {$actor->name} ",
-                []
-            );
             return $purchase;
         } catch (\Throwable $th) {
             DB::rollBack();
