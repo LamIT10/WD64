@@ -232,6 +232,8 @@ class InventoryController extends Controller
         $variantId = $request->input('product_variant_id');
         $queryStart = $request->input('start_date');
         $queryEnd = $request->input('end_date');
+        $page = (int) $request->input('page', 1);
+        $perPage = 50;
 
         $start = $queryStart ? Carbon::parse($queryStart)->startOfDay() : Carbon::minValue();
         $end = $queryEnd ? Carbon::parse($queryEnd)->endOfDay() : Carbon::now();
@@ -346,11 +348,35 @@ class InventoryController extends Controller
             $history = $history->concat($receipts)->concat($shipments)->concat($audits);
         }
 
-        // Sắp xếp theo ngày giảm dần
-        $history = $history->sortByDesc('date')->values();
+        // Gộp các dòng trùng code+type, lấy ngày mới nhất, đồng thời gom tất cả sản phẩm/biến thể cùng đơn vào mảng items
+        $grouped = [];
+        foreach ($history as $row) {
+            $key = $row['code'] . '|' . $row['type'];
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = $row;
+                $grouped[$key]['items'] = [$row];
+            } else {
+                // Nếu có nhiều dòng cùng code+type, lấy ngày lớn nhất làm đại diện, đồng thời gom tất cả vào items
+                if (strtotime($row['date']) > strtotime($grouped[$key]['date'])) {
+                    $grouped[$key] = $row;
+                    $grouped[$key]['items'] = [];
+                }
+                $grouped[$key]['items'][] = $row;
+            }
+        }
+        $history = collect(array_values($grouped))->sortByDesc('date')->values();
+
+        // Paginate theo đơn (sau khi đã gộp)
+        $total = $history->count();
+        $items = $history->forPage($page, $perPage)->values();
+        $lastPage = (int) ceil($total / $perPage);
 
         return response()->json([
-            'data' => $history,
+            'data' => $items,
+            'current_page' => $page,
+            'last_page' => $lastPage,
+            'per_page' => $perPage,
+            'total' => $total,
         ]);
     }
 

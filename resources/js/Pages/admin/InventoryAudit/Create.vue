@@ -105,7 +105,8 @@
                   <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
                   <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
                   <td class="px-3 py-2">
-                    {{ product.name_product }}
+                    <br>
+                    {{ product.name_product }} <br>
                     <span
                       :class="[
                         'px-2 py-0.5 rounded text-xs font-medium',
