@@ -105,7 +105,18 @@
                   <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
                   <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
                   <td class="px-3 py-2">
-                    {{ product.name_product }}
+                    <br>
+                    {{ product.name_product }} <br>
+                    <span
+                      :class="[
+                        'px-2 py-0.5 rounded text-xs font-medium',
+                        product.status_product === 0
+                          ? 'bg-red-100 text-red-600 border border-red-200'
+                          : 'bg-green-100 text-green-700 border border-green-200'
+                      ]"
+                    >
+                      {{ product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
+                    </span>
                     <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
                       <div class="text-xs text-gray-500 mt-1">
                         <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
@@ -227,7 +238,7 @@ const toggleZone = async (zone) => {
   }
   await fetchProductsByZones();
 };
-const fetchProductsByZones = async () => {
+const fetchProductsByZones = async (showAllZero = true) => {
   if (!selectedZones.value.length) {
     products.length = 0;
     auditData.value.items = [];
@@ -236,10 +247,9 @@ const fetchProductsByZones = async () => {
   try {
     const params = new URLSearchParams();
     selectedZones.value.forEach(z => params.append('zones[]', z));
+    params.append('show_all_zero', showAllZero ? 1 : 0);
     const response = await fetch(`/api/inventory-audit/information-create?${params.toString()}`);
     const data = await response.json();
-    console.log(data);
-    
     products.length = 0;
     products.push(...(data.data || []));
     auditData.value.items = products.map(product => ({

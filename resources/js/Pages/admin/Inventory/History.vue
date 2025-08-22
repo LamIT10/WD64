@@ -128,13 +128,70 @@
           </div>
         </div>
       </div>
-      <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 mt-6">
-        <button @click="page.value = 1" :disabled="page.value === 1" class="px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-lg shadow-sm hover:bg-indigo-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all" title="Trang đầu">&lt;&lt;</button>
-        <button @click="page.value--" :disabled="page.value === 1" class="px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-lg shadow-sm hover:bg-indigo-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">&lt;</button>
-        <span class="text-indigo-900 font-medium">Trang {{ page }} / {{ totalPages }}</span>
-        <button @click="page.value++" :disabled="page.value === totalPages" class="px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-lg shadow-sm hover:bg-indigo-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">&gt;</button>
-        <button @click="page.value = totalPages" :disabled="page.value === totalPages" class="px-3 py-1.5 bg-white text-indigo-700 border border-indigo-200 rounded-lg shadow-sm hover:bg-indigo-100 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all" title="Trang cuối">&gt;&gt;</button>
+      <!-- Modern Pagination with beautiful design -->
+      <div class="flex flex-col items-center gap-4 mt-10">
+        <div class="flex items-center justify-center gap-1 p-2 bg-white rounded-2xl shadow-lg border border-indigo-100/50 backdrop-blur-sm">
+          <!-- First page button -->
+          <button 
+            @click="goToPage(1)" 
+            :disabled="page.value === 1" 
+            class="pagination-nav-btn" 
+            title="Trang đầu"
+          >
+            <i class="fas fa-angle-double-left text-sm"></i>
+          </button>
+          
+          <!-- Page numbers -->
+          <div class="flex items-center gap-1 mx-2">
+            <template v-for="p in visiblePages" :key="p">
+              <div 
+                v-if="p === page.value" 
+                class="pagination-current"
+                aria-current="page"
+              >
+                {{ p }}
+              </div>
+              <button
+                v-else-if="p !== '...'"
+                @click="goToPage(p)"
+                class="pagination-number"
+                :title="`Trang ${p}`"
+              >
+                {{ p }}
+              </button>
+              <span v-else class="pagination-ellipsis">⋯</span>
+            </template>
+          </div>
+          
+          <!-- Last page button -->
+          <button 
+            @click="goToPage(totalPages)" 
+            :disabled="page.value === totalPages" 
+            class="pagination-nav-btn" 
+            title="Trang cuối"
+          >
+            <i class="fas fa-angle-double-right text-sm"></i>
+          </button>
+        </div>
+        
+        <!-- Page info with beautiful styling -->
+        <div class="flex items-center gap-4 text-sm">
+          <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-full border border-indigo-200/50">
+            <i class="fas fa-file-alt text-indigo-500"></i>
+            <span class="text-indigo-700 font-medium">
+              Trang <span class="font-bold text-indigo-800">{{ page }}</span> 
+              / <span class="font-bold text-indigo-800">{{ totalPages }}</span>
+            </span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-100 rounded-full border border-green-200/50">
+            <i class="fas fa-database text-green-500"></i>
+            <span class="text-green-700 font-medium">
+              Tổng <span class="font-bold text-green-800">{{ totalRows }}</span> bản ghi
+            </span>
+          </div>
+        </div>
       </div>
+
     </div>
   </AppLayout>
 </template>
@@ -142,7 +199,28 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import AppLayout from '../Layouts/AppLayout.vue'
-
+import { computed as vComputed } from 'vue'
+const visiblePages = vComputed(() => {
+  const total = totalPages.value
+  const current = page.value
+  console.log('Visible pages:', { total, current })
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const pages = []
+  if (current > 4) {
+    pages.push(1)
+    if (current > 5) pages.push('...')
+  }
+  for (let i = Math.max(2, current - 2); i <= Math.min(total - 1, current + 2); i++) {
+    pages.push(i)
+  }
+  if (current < total - 3) {
+    if (current < total - 4) pages.push('...')
+    pages.push(total)
+  }
+  return pages
+})
 // Định dạng ngày từ ISO thành dd/MM/yyyy
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -164,61 +242,50 @@ const startDate = ref()
 const endDate = ref('')
 const keyword = ref('')
 
-// Phân trang client
+
+// Pagination state (from backend)
 const page = ref(1)
-const perPage = 50
-// Gộp các đơn hàng trùng code+type thành 1 dòng duy nhất (lấy ngày lớn nhất, note đầu tiên)
-const groupedRows = computed(() => {
-  const map = new Map();
-  for (const r of rows.value) {
-    const key = r.code + '|' + r.type;
-    if (!map.has(key)) {
-      map.set(key, { ...r });
-    } else {
-      // Nếu có nhiều dòng cùng code+type, lấy ngày lớn nhất
-      const exist = map.get(key);
-      if (new Date(r.date) > new Date(exist.date)) {
-        map.set(key, { ...r });
-      }
-    }
-  }
-  return Array.from(map.values());
-});
+const perPage = ref(20)
+const totalPages = ref(1)
+const totalRows = ref(0)
+
+// Filtered rows (search by keyword)
 const filteredRows = computed(() => {
-  if (!keyword.value) return groupedRows.value;
-  return groupedRows.value.filter(
+  if (!keyword.value) return rows.value
+  return rows.value.filter(
     r =>
       (r.product || '').toLowerCase().includes(keyword.value.toLowerCase()) ||
       (r.variant || '').toLowerCase().includes(keyword.value.toLowerCase()) ||
       (r.code || '').toLowerCase().includes(keyword.value.toLowerCase())
-  );
-});
-const pagedRows = computed(() => {
-  const start = (page.value - 1) * perPage;
-  return filteredRows.value.slice(start, start + perPage);
-});
-const totalPages = computed(() => Math.ceil(filteredRows.value.length / perPage));
+  )
+})
+
+const pagedRows = computed(() => filteredRows.value)
 
 const fetchHistory = async () => {
   let url = '/api/inventory/history?'
-  // Nếu chưa chọn startDate thì mặc định là 2025-01-01
   url += `start_date=${startDate.value || '2025-01-01'}&`
   if (endDate.value) url += `end_date=${endDate.value}&`
+  url += `page=${page.value}`
   const res = await fetch(url)
   const json = await res.json()
   rows.value = json.data || []
-  page.value = 1 // reset về trang đầu khi lọc
-  console.log('Fetched inventory history:', rows.value);
+  totalPages.value = json.last_page || 1
+  totalRows.value = json.total || 0
+  perPage.value = json.per_page || 20
+  // Always sync page.value with backend current_page
+  if (json.current_page && page.value !== json.current_page) {
+    page.value = json.current_page
+  }
+  console.log('Fetched inventory history:', rows.value, 'Current page:', page.value);
 }
 
-const showDetail = async (row) => {
+const showDetail = (row) => {
   if (!row.id) return;
   showModal.value = false;
   detail.value = null;
-  // Lấy tất cả các dòng cùng mã chứng từ (code) và type
-  const items = rows.value.filter(r => r.code === row.code && r.type === row.type);
-  // Map lại các trường cho từng item
-  const mappedItems = items.map(item => {
+  // Use the items array provided by the backend for this order
+  const mappedItems = (row.items || []).map(item => {
     let product = item.product_variant?.product?.name || item.product || '';
     let variant = '';
     if (item.product_variant?.name && item.product_variant?.name !== product) {
@@ -237,10 +304,201 @@ const showDetail = async (row) => {
   showModal.value = true;
 }
 
-onMounted(fetchHistory)
+
+
+// Chuyển trang an toàn
+function goToPage(p) {
+  if (p < 1) p = 1
+  if (p > totalPages.value) p = totalPages.value
+  if (p !== page.value) {
+    page.value = p
+    fetchHistory()
+  }
+}
+
+onMounted(() => {
+  fetchHistory()
+})
+
+// Reset về trang 1 khi lọc/search
+import { watch } from 'vue'
+watch([startDate, endDate, keyword], () => {
+  page.value = 1
+  fetchHistory()
+})
 
 </script>
 <style scoped>
 table { border-collapse: collapse; }
 th, td { border: 1px solid #e5e7eb; }
+
+/* Modern pagination styling */
+.pagination-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e0e7ff;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  color: #6366f1;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.pagination-nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  transition: left 0.5s;
+}
+
+.pagination-nav-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.pagination-nav-btn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #eef2ff 0%, #e0e7ff 100%);
+  color: #4338ca;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-nav-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #9ca3af;
+  border-color: #d1d5db;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  outline: none;
+  position: relative;
+}
+
+.pagination-number:hover {
+  background: linear-gradient(145deg, #f0f4ff 0%, #e0e7ff 100%);
+  color: #4338ca;
+  border-color: #c7d2fe;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px -2px rgba(99, 102, 241, 0.15);
+}
+
+.pagination-current {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid #4f46e5;
+  box-shadow: 
+    0 4px 12px -2px rgba(99, 102, 241, 0.4),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  cursor: default;
+}
+
+.pagination-current::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+.pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 36px;
+  color: #9ca3af;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+/* Animation for page transitions */
+@keyframes pageTransition {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.pagination-current {
+  animation: pageTransition 0.2s ease-out;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .pagination-nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  
+  .pagination-number,
+  .pagination-current {
+    min-width: 32px;
+    height: 32px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}
+
+/* Beautiful gradient animation for active state */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.pagination-current {
+  background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
+  background-size: 400% 400%;
+  animation: gradientShift 3s ease infinite, pageTransition 0.2s ease-out;
+}
 </style>
