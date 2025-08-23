@@ -1366,7 +1366,7 @@ const openRejectModal = (orderId) => {
 };
 const submitRejectReason = () => {
     if (!rejectReason.value.trim()) {
-        alert("Vui lòng nhập lý do từ chối.");
+        console.log("Vui lòng nhập lý do từ chối.");
         return;
     }
 
@@ -1375,14 +1375,14 @@ const submitRejectReason = () => {
     reject.post(route("admin.sale-orders.reject", selectedOrderId.value), {
         reject_reason: rejectReason.value,
         onSuccess: () => {
-            alert("Đơn hàng đã được từ chối.");
+            console.log("Đơn hàng đã được từ chối.");
             closeRejectModal();
             closeModal();
             emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error rejecting order:", errors);
-            alert("Có lỗi xảy ra khi từ chối đơn hàng.");
+            console.log("Có lỗi xảy ra khi từ chối đơn hàng.");
         },
         onFinish: () => {
             console.log("Reject request finished");
@@ -1557,7 +1557,7 @@ function closeReturnModal() {
 }
 function submitReturnReason() {
     if (!returnReason.value.trim()) {
-        alert("Vui lòng nhập lý do hoàn hàng.");
+        console.log("Vui lòng nhập lý do hoàn hàng.");
         return;
     }
     axios
@@ -1578,7 +1578,7 @@ function submitReturnReason() {
             emitter.emit("notification-updated");
         })
         .catch(() => {
-            alert("Có lỗi xảy ra khi hoàn hàng.");
+            console.log("Có lỗi xảy ra khi hoàn hàng.");
         });
 }
 function confirmReturned(orderId) {
@@ -1594,7 +1594,7 @@ function confirmReturned(orderId) {
             emitter.emit("notification-updated");
         })
         .catch(() => {
-            alert("Có lỗi xảy ra khi xác nhận hoàn hàng.");
+            console.log("Có lỗi xảy ra khi xác nhận hoàn hàng.");
         });
 }
 </script>
