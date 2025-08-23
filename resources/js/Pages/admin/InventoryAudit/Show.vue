@@ -109,7 +109,8 @@
                         <div>
                             <span class="font-semibold">Ngày tạo phiếu:</span>
                             <span class="ml-1">{{ audit.created_at ? (new
-                                Date(audit.created_at).toLocaleDateString('vi-VN')) : '-' }}</span>
+                                Date(audit.created_at).toLocaleDateString('vi-VN')) : '-' }}
+                            </span>
                         </div>
                         <div>
                             <span class="font-semibold">Trạng thái:</span>
@@ -152,7 +153,9 @@
                             class="flex items-center gap-2">
                             <span class="font-semibold">Thời gian thực hiện: </span>
                             <div >
-                               <span class="ml-1">{{ audit.adjusted_at}}</span>
+                            <span class="ml-1">
+                                {{ audit.adjusted_at ? (new Date(audit.adjusted_at).toLocaleString('vi-VN', { hour12: false })) : '-' }}
+                            </span>
                             </div>
                         </div>
                         <div class="md:col-span-2"><span class="font-semibold">Ghi chú:</span> <span class="ml-1">{{

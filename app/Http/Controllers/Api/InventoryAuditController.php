@@ -164,7 +164,7 @@ class InventoryAuditController extends BaseApiController
             }
 
             $audit->is_adjusted = 2; // hoặc $audit->status = 'rejected';
-            $audit->adjusted_at = now();
+            $audit->adjusted_at = now()->addHours(7);
             $audit->approved_by = $request->user()->id;
             $audit->save();
 
