@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Api\BaseApiController;
 use App\Models\InventoryAudit;
 use App\Models\InventoryLocation;
@@ -70,6 +71,8 @@ class InventoryAuditController extends BaseApiController
     public function showInformationCreate(Request $request)
     {
         $zones = $request->input('zones', []);
+        $showAllZero = $request->boolean('show_all_zero', false); // nhận biến
+
         if (!is_array($zones) || empty($zones)) {
             return response()->json([
                 'data' => [],
@@ -96,7 +99,11 @@ class InventoryAuditController extends BaseApiController
         $result = [];
         foreach ($products as $product) {
             foreach ($product->productVariants as $variant) {
-                // Lấy zone cho biến thể này
+                // Nếu không muốn show hàng hết, thì lọc như cũ
+                if (!$showAllZero && $product->status_product == 0 && optional($variant->inventory->first())->quantity_on_hand == 0) {
+                    continue;
+                }
+
                 $zoneLocation = $variant->inventoryLocations->first(function ($loc) use ($zones) {
                     return $loc->zone && in_array($loc->zone->name, $zones);
                 });
@@ -112,6 +119,7 @@ class InventoryAuditController extends BaseApiController
                     'id_product_variant' => $variant->id,
                     'name_product' => $product->name,
                     'variant_attributes' => $attributes,
+                    'status_product' => $product->status_product,
                     'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
                     'quantity_reserved' => optional($variant->inventory->first())->quantity_reserved,
                     'quantity_in_transit' => optional($variant->inventory->first())->quantity_in_transit,
@@ -166,6 +174,13 @@ class InventoryAuditController extends BaseApiController
                 "Phiếu kiểm kho #{$audit->code} đã bị từ chối.",
                 ['audit_id' => $audit->id]
             );
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'inventory_audit_rejected',
+                'Phiếu kiểm kho bị từ chối',
+                "Đơn hàng #{$audit->code} đã bị từ chối bởi {$actor->name} ",
+                ['audit_id' => $audit->id]
+            );
 
             return response()->json([
                 'message' => 'Đã từ chối phiếu kiểm kho!',
@@ -188,7 +203,7 @@ class InventoryAuditController extends BaseApiController
             'items.productVariant.inventoryLocations',
             'items.productVariant.attributes.attribute',
             'user',
-            'approvedBy', 
+            'approvedBy',
         ])->findOrFail($id);
 
         $variantIds = $audit->items->pluck('product_variant_id');
@@ -238,7 +253,7 @@ class InventoryAuditController extends BaseApiController
     public function exportExcel(Request $request)
     {
         $status = $request->input('status');
-        
+
         // Lấy dữ liệu dựa trên status
         $query = InventoryAudit::with(['items.productVariant.product', 'user'])
             ->latest('id');

@@ -80,7 +80,19 @@
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ product.zone }}</td>
                 <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ product.code }}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ product.name_product }}
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-gray-800">{{ product.name_product }}</span>
+                    <span
+                      :class="[
+                        'px-2 py-0.5 rounded text-xs font-medium',
+                        product.status_product === 0
+                          ? 'bg-red-100 text-red-600 border border-red-200'
+                          : 'bg-green-100 text-green-700 border border-green-200'
+                      ]"
+                    >
+                      {{ product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
+                    </span>
+                  </div>
                   <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
                     <div class="text-xs text-gray-500 mt-1">
                       <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">

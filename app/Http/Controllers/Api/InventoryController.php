@@ -91,7 +91,13 @@ class InventoryController extends Controller
                 "Phiếu kiểm kho #{$audit->code} đã được đồng bộ thành công.",
                 ['audit_id' => $audit->id]
             );
-
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'inventory_audit_synced',
+                'Đồng bộ kiểm kho thành công',
+                "Phiếu kiểm kho #{$audit->code} đã được đồng bộ thành công bởi {$actor->name} ",
+                ['audit_id' => $audit->id]
+            );
             DB::commit();
             return response()->json([
                 'message' => 'Đồng bộ thành công!',
@@ -155,7 +161,7 @@ class InventoryController extends Controller
             $totalAdjustedBefore = InventoryAuditItem::where('product_variant_id', $variant->id)
                 ->whereHas('audit', function ($q) use ($beforeStart) {
                     $q->where('is_adjusted', 1)
-                      ->where('adjusted_at', '<', $beforeStart);
+                        ->where('adjusted_at', '<', $beforeStart);
                 })
                 ->sum(DB::raw('actual_quantity - expected_quantity'));
             $openingQty = $openingStock + $totalReceivedBefore - $totalShippedBefore + $totalAdjustedBefore;
@@ -195,7 +201,7 @@ class InventoryController extends Controller
             // Lấy chuỗi thuộc tính của biến thể (giống history)
             $attributeString = '';
             if ($variant->attributes && $variant->attributes->count()) {
-                $attributeString = $variant->attributes->map(function($attrVal) {
+                $attributeString = $variant->attributes->map(function ($attrVal) {
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
@@ -232,6 +238,8 @@ class InventoryController extends Controller
         $variantId = $request->input('product_variant_id');
         $queryStart = $request->input('start_date');
         $queryEnd = $request->input('end_date');
+        $page = (int) $request->input('page', 1);
+        $perPage = 50;
 
         $start = $queryStart ? Carbon::parse($queryStart)->startOfDay() : Carbon::minValue();
         $end = $queryEnd ? Carbon::parse($queryEnd)->endOfDay() : Carbon::now();
@@ -259,7 +267,7 @@ class InventoryController extends Controller
             // Lấy thông tin thuộc tính của biến thể
             $attributeString = '';
             if ($variant->attributes && $variant->attributes->count()) {
-                $attributeString = $variant->attributes->map(function($attrVal) {
+                $attributeString = $variant->attributes->map(function ($attrVal) {
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
@@ -269,10 +277,10 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('goodReceipt', fn($q) => $q->whereBetween('receipt_date', [$start, $end]))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -295,10 +303,10 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'shipped'))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -321,11 +329,11 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('audit', fn($q) => $q->where('is_adjusted', 1)->whereBetween('audit_date', [$start, $end]))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $diff = ($item->actual_quantity ?? 0) - ($item->expected_quantity ?? 0);
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -346,12 +354,35 @@ class InventoryController extends Controller
             $history = $history->concat($receipts)->concat($shipments)->concat($audits);
         }
 
-        // Sắp xếp theo ngày giảm dần
-        $history = $history->sortByDesc('date')->values();
+        // Gộp các dòng trùng code+type, lấy ngày mới nhất, đồng thời gom tất cả sản phẩm/biến thể cùng đơn vào mảng items
+        $grouped = [];
+        foreach ($history as $row) {
+            $key = $row['code'] . '|' . $row['type'];
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = $row;
+                $grouped[$key]['items'] = [$row];
+            } else {
+                // Nếu có nhiều dòng cùng code+type, lấy ngày lớn nhất làm đại diện, đồng thời gom tất cả vào items
+                if (strtotime($row['date']) > strtotime($grouped[$key]['date'])) {
+                    $grouped[$key] = $row;
+                    $grouped[$key]['items'] = [];
+                }
+                $grouped[$key]['items'][] = $row;
+            }
+        }
+        $history = collect(array_values($grouped))->sortByDesc('date')->values();
+
+        // Paginate theo đơn (sau khi đã gộp)
+        $total = $history->count();
+        $items = $history->forPage($page, $perPage)->values();
+        $lastPage = (int) ceil($total / $perPage);
 
         return response()->json([
-            'data' => $history,
+            'data' => $items,
+            'current_page' => $page,
+            'last_page' => $lastPage,
+            'per_page' => $perPage,
+            'total' => $total,
         ]);
     }
-
 }
