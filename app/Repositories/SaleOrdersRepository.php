@@ -463,7 +463,31 @@ class SaleOrdersRepository extends BaseRepository
             if ($pay_before > $saleOrder->total_amount) {
                 throw new \Exception("Số tiền thanh toán trước ({$pay_before} VND) không được vượt quá tổng tiền đơn hàng ({$saleOrder->total_amount} VND).");
             }
-            // Lấy danh sách sale_order_items
+            $customer = Customer::find($saleOrder->customer_id);
+            if ($customer) {
+                $customer->total_spent += $pay_before;
+
+                $MaxMinTotalSpentRank = $this->rank->latest('min_total_spent')->first();
+                $MinMinTotalSpentRank = $this->rank->oldest('min_total_spent')->first();
+                $AllMinTotalSpentRanks = $this->rank->orderBy('min_total_spent')->get();
+
+                if ($customer->total_spent >= $MaxMinTotalSpentRank->min_total_spent) {
+                    $customer->rank_id = $MaxMinTotalSpentRank->id;
+                } else if ($customer->total_spent == $MinMinTotalSpentRank->min_total_spent) {
+                    $customer->rank_id = $MinMinTotalSpentRank->id;
+                } else if ($customer->total_spent > $MinMinTotalSpentRank->min_total_spent  && $customer->total_spent < $MaxMinTotalSpentRank->min_total_spent) {
+                    $previousRank = $MinMinTotalSpentRank;
+                    foreach ($AllMinTotalSpentRanks as $rank) {
+                        if ($customer->total_spent < $rank->min_total_spent) {
+                            $customer->rank_id = $previousRank->id;
+                            break;
+                        }
+                        $previousRank = $rank;
+                    }
+                }
+                $customer->save();
+            }
+
             $items = $this->saleOrderItem->where('sales_order_id', $orderId)->get();
 
             // Khôi phục inventory
@@ -568,7 +592,7 @@ class SaleOrdersRepository extends BaseRepository
             $remainingAmount = $saleOrder->total_amount - ($saleOrder->pay_before ?? 0);
             if ($totalPaid < $minPayTotal) {
                 throw new \Exception(
-                    "Bạn phải thanh toán tối thiểu " . number_format($minPayTotal, 0, ',', '.') . " VND. Hạn mức nợ tối đa của bạn là " . number_format($maxDebt, 0, ',', '.') . " VND."
+                    "Bạn phải thanh toán tối thiểu " . number_format($minPayTotal - $saleOrder->pay_before, 0, ',', '.') . " VND. Hạn mức nợ tối đa của bạn là " . number_format($maxDebt, 0, ',', '.') . " VND."
                 );
             }
 
@@ -580,46 +604,26 @@ class SaleOrdersRepository extends BaseRepository
                 'status' => 'completed',
                 'pay_after' => $pay_after
             ]);
-            // Thêm tổng tiền đã thanh toán vào tích số tiền đã tiêu của khách hàng
-            $totalSpent = $this->handleModel
-                ->where('customer_id', $customerId)
-                ->where('status', 'completed')
-                ->whereRaw('total_amount = pay_before + pay_after')
-                ->sum('total_amount');
-            if ($saleOrder->total_amount - $saleOrder->pay_before == $pay_after) {
-                $customer->update(
-                    [
-                        'total_spent' => $totalSpent
-                    ]
-                );
-                // Cập nhật rank của khách hàng khi đơn hàng hoàn thành và không nợ
-                if ($MaxMinTotalSpentRank->min_total_spent <= $customer->total_spent) {
-                    $customer->update(
-                        [
-                            'rank_id' => $MaxMinTotalSpentRank->id
-                        ]
-                    );
-                } else if ($customer->total_spent == $MinMinTotalSpentRank->min_total_spent) {
-                    $customer->update(
-                        [
-                            'rank_id' => $MinMinTotalSpentRank->id
-                        ]
-                    );
-                } else if ($customer->total_spent > $MinMinTotalSpentRank->min_total_spent  && $customer->total_spent < $MaxMinTotalSpentRank->min_total_spent) {
-                    $previousRank = $MinMinTotalSpentRank;
-                    foreach ($AllMinTotalSpentRanks as $rank) {
-                        if ($customer->total_spent < $rank->min_total_spent) {
-                            $customer->update(
-                                [
-                                    'rank_id' => $previousRank->id
-                                ]
-                            );
-                            break;
-                        }
-                        $previousRank = $rank;
+
+
+            $customer->total_spent += $pay_after;
+
+
+            if ($customer->total_spent >= $MaxMinTotalSpentRank->min_total_spent) {
+                $customer->rank_id = $MaxMinTotalSpentRank->id;
+            } else if ($customer->total_spent == $MinMinTotalSpentRank->min_total_spent) {
+                $customer->rank_id = $MinMinTotalSpentRank->id;
+            } else if ($customer->total_spent > $MinMinTotalSpentRank->min_total_spent  && $customer->total_spent < $MaxMinTotalSpentRank->min_total_spent) {
+                $previousRank = $MinMinTotalSpentRank;
+                foreach ($AllMinTotalSpentRanks as $rank) {
+                    if ($customer->total_spent < $rank->min_total_spent) {
+                        $customer->rank_id = $previousRank->id;
+                        break;
                     }
+                    $previousRank = $rank;
                 }
             }
+            $customer->save();
             Log::info("Đã xác nhận hoàn thành đơn hàng xuất {$orderId} với pay_after = {$pay_after}.");
 
             DB::commit();
