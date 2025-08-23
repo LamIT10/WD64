@@ -130,9 +130,14 @@
                   <td class="px-3 py-2 text-center">{{ product.unit }}</td>
                   <td class="px-3 py-2 text-center">{{ product.quantity_on_hand }}</td>
                   <td class="px-3 py-2 text-center">
-                    <input type="number" v-model="auditData.items[index].actual_quantity"
-                      class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center" min="0"
-                      required />
+                    <input
+                      type="number"
+                      v-model="auditData.items[index].actual_quantity"
+                      class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center"
+                      min="0"
+                      required
+                      @input="() => { if (auditData.items[index].actual_quantity < 0) auditData.items[index].actual_quantity = 0 }"
+                    />
                   </td>
                   <td class="px-3 py-2 text-center">
                     {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
