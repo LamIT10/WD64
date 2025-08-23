@@ -212,11 +212,10 @@
               </div>
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Vai trò</label>
-                <div v-if="$page.props.auth.role" class="flex flex-wrap gap-2">
-                  <span
+                <div v-if="$page.props.auth.user?.roles?.length" class="flex flex-wrap gap-2">
+                  <span v-for="role in $page.props.auth.user.roles" :key="role.id"
                     class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 flex items-center">
-                    <i class="fas fa-user-shield mr-1 text-xs"></i>
-                    {{ $page.props.auth.role.name }}
+                    <i class="fas fa-user-shield mr-1 text-xs"></i> {{ role.name }}
                   </span>
                 </div>
                 <div v-else>
@@ -375,7 +374,7 @@ import { usePage, router } from '@inertiajs/vue3'
 const activeSection = ref('')
 const page = usePage()
 const user = page.props.auth.user
-const role = page.props.auth.role
+const roles = user?.roles || []
 
 const isEditing = ref(false)
 
