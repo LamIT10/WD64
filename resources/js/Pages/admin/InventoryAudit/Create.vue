@@ -30,13 +30,13 @@
               ref="imageInput"
               type="file"
               multiple
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp"
               @change="handleImageChange"
               class="hidden"
             />
             <i class="fa fa-cloud-upload text-3xl text-indigo-400 mb-2"></i>
             <span class="text-indigo-600 text-sm font-semibold">Nhấn hoặc kéo thả ảnh vào đây</span>
-            <span class="text-xs text-gray-400 mt-1">Chọn nhiều ảnh kiểm kho cùng lúc</span>
+            <span class="text-xs text-gray-400 mt-1">Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP, BMP) - Tối đa 5MB</span>
           </div>
           <div v-if="imagePreviews.length" class="flex flex-wrap gap-4 mt-4">
             <div
@@ -71,12 +71,14 @@
             <h6 class="text-base font-semibold text-indigo-800">Danh sách Sản phẩm</h6>
             <div class="flex gap-2">
               <button @click="exportSampleExcel"
+                type="button"
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-download"></i> Tải mẫu
               </button>
               <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
                 @change="handleImportExcel" />
               <button @click="$refs.importInput.click()"
+                type="button"
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-sign-in"></i> Nhập file
               </button>
@@ -213,15 +215,55 @@ const imagePreviews = ref([]); // string[]
 
 const handleImageChange = (e) => {
   const files = Array.from(e.target.files);
-  images.value.push(...files);
-  // Tạo preview cho ảnh mới
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+  const maxFileSize = 5 * 1024 * 1024; // 5MB
+  
+  const validFiles = [];
+  const invalidFiles = [];
+  
   files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      imagePreviews.value.push(ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    // Kiểm tra định dạng file
+    if (!validImageTypes.includes(file.type)) {
+      invalidFiles.push({ name: file.name, reason: 'Định dạng không hợp lệ' });
+      return;
+    }
+    
+    // Kiểm tra kích thước file
+    if (file.size > maxFileSize) {
+      invalidFiles.push({ name: file.name, reason: 'Kích thước quá lớn (>5MB)' });
+      return;
+    }
+    
+    validFiles.push(file);
   });
+  
+  // Hiển thị thông báo lỗi cho các file không hợp lệ
+  if (invalidFiles.length > 0) {
+    const errorMessages = invalidFiles.map(f => `${f.name}: ${f.reason}`).join('\n');
+    toastError(`Một số file không thể upload:\n${errorMessages}`);
+  }
+  
+  // Chỉ xử lý các file hợp lệ
+  if (validFiles.length > 0) {
+    images.value.push(...validFiles);
+    
+    // Tạo preview cho ảnh hợp lệ
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imagePreviews.value.push(ev.target.result);
+      };
+      reader.onerror = () => {
+        toastError(`Lỗi khi đọc file ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    if (validFiles.length > 0) {
+      toastSuccess(`Đã thêm ${validFiles.length} ảnh thành công`);
+    }
+  }
+  
   // Reset input để chọn lại được cùng 1 file nếu cần
   e.target.value = '';
 };
