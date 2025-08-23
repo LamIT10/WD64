@@ -24,7 +24,7 @@ class NotificationRepository
                     'type' => $n->type,
                     'title' => $n->title,
                     'message' => $n->message,
-                    'time' => $n->created_at->diffForHumans(),
+                    'time' => $n->created_at,
                     'isRead' => $n->is_read,
                     'data' => $n->data,
                 ];

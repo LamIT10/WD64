@@ -36,9 +36,10 @@ class NotificationService
     {
         $actor = Auth::user();
         $allUsers = User::all();
+        $notificationLast = null;
         foreach ($allUsers as $user) {
             if ($user->id == $actor->id) {
-                continue; // Bỏ qua user thực hiện, vì đã có notification riêng từ hàm create
+                continue;
             }
             $notification = Notification::create([
                 'user_id' => $user->id,
@@ -51,16 +52,17 @@ class NotificationService
                 ]),
                 'is_read' => false,
             ]);
-            event(new NotificationCreated([
-                'id' => $notification->id,
-                'user_id' => $user->id,
-                'type' => $notification->type,
-                'title' => $notification->title,
-                'message' => $notification->message,
-                'data' => $notification->data,
-                'is_read' => false,
-                'created_at' => $notification->created_at,
-            ]));
+            $notificationLast = $notification;
         }
+        event(new NotificationCreated([
+            'id' => $notificationLast->id,
+            'user_id' => 1,
+            'type' => $notificationLast->type,
+            'title' => $notificationLast->title,
+            'message' => $notificationLast->message,
+            'data' => $notificationLast->data,
+            'is_read' => false,
+            'created_at' => $notificationLast->created_at,
+        ]));
     }
 }
