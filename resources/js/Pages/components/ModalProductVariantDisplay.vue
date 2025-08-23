@@ -43,11 +43,11 @@
                         <td class="px-6 py-3">{{ formatNumber(variant.attributes.cost_price) + " ₫" }}</td>
                         <!-- <td class="px-6 py-3">{{ formatNumber(variant.attributes.min_order_quantity) }}</td> -->
                         <td class="px-6 py-3">
-                          <ConfirmModal :route-name="'admin.suppliers.products.destroy'" :route-params="{
+                          <ConfirmModal :route-name="'admin.suppliers.products.destroy'" v-can="'admin.supplier.product.delete'" :route-params="{
                             id: props.supplier.id,
                             variantId: variant.id,
-                          }" title="Xác nhận xóa biến thể "
-                            :message="`Bạn có chắc chắn muốn xóa biến thể ${productName}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xoá`" @close="removeItem">
+                          }" title="Xác nhận ngừng kinh doanh biến thể "
+                            :message="`Bạn có chắc chắn muốn xóa biến thể ${productName}? Bạn sẽ không thể khôi phục lại sau khi xác nhận ngừng kinh doanh`" @close="removeItem">
                             <template #trigger="{
                               openModal,
                             }">
@@ -94,7 +94,6 @@ const props = defineProps({
     default: () => ({}),
   },
 });
-console.log(props.variants);
 const emit = defineEmits(['close']);
 
 const closeModal = () => emit('close');

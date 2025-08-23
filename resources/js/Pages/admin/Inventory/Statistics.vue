@@ -14,7 +14,7 @@
                 Tìm kiếm
               </label>
               <div class="relative">
-                <input id="keyword-input" type="text" v-model="filter.keyword" placeholder="Tìm mã/tên vật tư..."
+                <input id="keyword-input" type="text" v-model="filter.keyword" placeholder="Tìm mã/tên ..."
                   class="w-48 md:w-64 pl-10 pr-4 py-2.5 border border-indigo-200 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none text-sm bg-white transition placeholder-gray-400"
                   :disabled="!selectedPeriod" />
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500 pointer-events-none">
@@ -318,8 +318,8 @@ watch(tempYear, (newYear) => {
   }
 })
 const importBQGQ = (item) => {
-  const totalQty = Number(item.opening_qty) + Number(item.received_qty)
-  const totalVal = Number(item.opening_value) + Number(item.received_value)
+  const totalQty = (Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0)
+  const totalVal = (Number(item.opening_value) || 0) + (Number(item.received_value) || 0)
   return totalQty > 0 ? totalVal / totalQty : 0
 }
 
@@ -453,12 +453,13 @@ const exportExcel = () => {
     const valueStyle = isEven ? dataStyleValueEven : dataStyleValueOdd;
     const adjStyle = isEven ? dataStyleAdjustmentEven : dataStyleAdjustmentOdd;
 
-    const rowNum = rowIndex + 5; // Row thực tế trong Excel (1-based)
+    const rowNum = rowIndex + 5;
 
     // Tính toán giá trị trước bằng JS cho các cột công thức
     const closingQty = (Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0) - (Number(item.shipped_qty) || 0) + (Number(item.increase_qty) || 0);
-    const closingValue = (Number(item.opening_value) || 0) + (Number(item.received_value) || 0) - (Number(item.shipped_value) || 0);
-    const unitPriceBQGQ = (Number(item.shipped_qty) || 0) > 0 ? (Number(item.shipped_value) || 0) / (Number(item.shipped_qty) || 0) : 0;
+    const closingValue = Number(item.closing_value) || 0; // Sử dụng giá trị thực tế từ dữ liệu
+    const unitPriceBQGQ = ((Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0)) > 0 ? 
+      ((Number(item.opening_value) || 0) + (Number(item.received_value) || 0)) / ((Number(item.opening_qty) || 0) + (Number(item.received_qty) || 0)) : 0;
 
     return [
       { v: item.item_code, t: 's', s: textStyle },
@@ -472,8 +473,8 @@ const exportExcel = () => {
       { v: Number(item.shipped_value) || 0, t: 'n', s: valueStyle },
       { v: Number(item.increase_qty) || 0, t: 'n', s: adjStyle },
       { v: closingQty, t: 'n', f: `=D${rowNum}+F${rowNum}-H${rowNum}+J${rowNum}`, s: numStyle }, // Giá trị + công thức (xóa khoảng trắng để Sheets parse tốt hơn)
-      { v: closingValue, t: 'n', f: `=E${rowNum}+G${rowNum}-I${rowNum}`, s: valueStyle }, // Giá trị + công thức
-      { v: unitPriceBQGQ, t: 'n', f: `=IF(H${rowNum}=0,0,I${rowNum}/H${rowNum})`, s: valueStyle } // Giá trị + công thức
+      { v: closingValue, t: 'n', s: valueStyle },
+      { v: unitPriceBQGQ, t: 'n', f: `=IF((D${rowNum}+F${rowNum})=0,0,(E${rowNum}+G${rowNum})/(D${rowNum}+F${rowNum}))`, s: valueStyle } // Công thức mới: (Tồn đầu TT + Nhập TT) / (Tồn đầu SL + Nhập SL)
     ]
   });
 

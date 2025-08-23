@@ -153,7 +153,9 @@ class UserRepository extends BaseRepository
                     throw new \Exception('Có lỗi khi thêm vai trò người dùng');
                 }
             } else {
-                $role = $user->syncRoles([]);
+                if(!$user->hasRole('admin')) {
+                    $user->syncRoles([]);
+                }
             }
             $user->update($dataUser);
             DB::commit();

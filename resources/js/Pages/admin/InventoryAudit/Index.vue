@@ -150,8 +150,6 @@
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
                       })
                       : '-'
                   }}
@@ -164,7 +162,7 @@
                   <i class="far fa-clock text-indigo-400"></i>
                   {{
                     item.created_at
-                      ? new Date(new Date(item.created_at).getTime() + 7 * 60 * 60 * 1000).toLocaleString('vi-VN', {
+                      ? new Date(new Date(item.created_at).getTime()).toLocaleString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

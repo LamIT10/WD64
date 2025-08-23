@@ -5,7 +5,7 @@
             <div
                 class="p-3 bg-white mb-4 flex justify-between items-center rounded-lg shadow-sm border border-gray-200">
                 <h5 class="text-lg text-indigo-700 font-semibold" v-if="$page.url === '/admin/products/get-inactive'">
-                    Danh sách Sản phẩm Đã xóa
+                    Danh sách Sản phẩm ngừng bán
                 </h5>
                 <h5 class="text-lg text-indigo-700 font-semibold" v-else>
                     Danh sách Sản phẩm
@@ -14,7 +14,7 @@
                     <Waiting v-if="$page.url.startsWith('/admin/products') && !isInactivePage"
                         route-name="admin.products.get_inactive" :route-params="{}"
                         :color="'bg-red-500 hover:bg-red-700 text-white'">
-                        <span>Danh Sách Đã Xóa</span>
+                        <span>Danh Sách ngừng bán</span>
                     </Waiting>
                     <!-- Search Toggle Button -->
                     <button @click="toggleSearchForm"
@@ -283,30 +283,34 @@
                                 <!-- Hành động -->
                                 <td class="px-4 py-3 table-cell-nowrap">
                                     <div class="flex items-center space-x-2">
-                                        <Link :href="route('admin.products.show', product.id)" v-can="'admin.product.show'"
+                                        <Link :href="route('admin.products.show', product.id)"
+                                            v-can="'admin.product.show'"
                                             class="inline-flex items-center p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors"
                                             title="Xem chi tiết">
                                         <i class="fas fa-eye text-sm"></i>
                                         </Link>
-                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage" v-can="'admin.product.edit'"
+                                        <Link :href="route('admin.products.edit', product.id)" v-if="!isInactivePage"
+                                            v-can="'admin.product.edit'"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Chỉnh sửa">
                                         <i class="fas fa-edit text-sm"></i>
 
                                         </Link>
-                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"v-can="'admin.product.delete'"
+                                        <button v-if="isInactivePage" @click="restoreProduct(product.id)"
+                                            v-can="'admin.product.delete'"
                                             class="inline-flex items-center p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors"
                                             title="Khôi phục">
                                             <i class="fas fa-undo text-sm"></i>
                                         </button>
 
-                                        <!-- Nếu là trang active, hiện nút ConfirmModal để xóa -->
-                                        <ConfirmModal v-else :route-name="'admin.products.destroy'" v-can="'admin.product.delete'"
-                                            :route-params="{ id: product.id }" title="Xác nhận xóa sản phẩm">
+                                        <!-- Nếu là trang active, hiện nút ConfirmModal để ngừng bán sản phẩm -->
+                                        <ConfirmModal v-else :route-name="'admin.products.destroy'"
+                                            v-can="'admin.product.delete'" :route-params="{ id: product.id }"
+                                            title="Xác nhận ngừng bán sản phẩm">
                                             <template #trigger="{ openModal }">
                                                 <button @click="openModal"
                                                     class="inline-flex items-center p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-                                                    title="Xóa sản phẩm">
+                                                    title="ngừng bán sản phẩm">
                                                     <i class="fas fa-trash text-sm"></i>
                                                 </button>
                                             </template>
@@ -326,12 +330,18 @@
                         <span class="font-medium text-gray-900">{{ products.total }}</span> kết quả
                     </div>
                     <div class="flex items-center space-x-1">
-                        <button v-for="link in products.links" :key="link.label" @click="goToPage(link.url)"
-                            :disabled="!link.url" class="px-3 py-2 text-sm font-medium rounded-md" :class="{
-                                'bg-indigo-600 text-white shadow-sm': link.active,
-                                'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50': !link.active,
-                                'opacity-50 cursor-not-allowed': !link.url
-                            }" v-html="link.label"></button>
+                        <template v-for="(link, idx) in products.links" :key="idx">
+                            <button
+                                v-if="link.url"
+                                @click="goToPage(link.url)"
+                                :class="[
+                                    'px-3 py-1 rounded transition-colors',
+                                    link.active ? 'bg-indigo-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-indigo-50 border border-gray-300'
+                                ]"
+                                v-html="replacePaginationLabel(link.label)"
+                            ></button>
+                            <span v-else class="px-3 py-1 text-gray-400" v-html="replacePaginationLabel(link.label)"></span>
+                        </template>
                     </div>
                 </div>
             </div>
@@ -569,14 +579,17 @@ const closeImageGallery = () => {
 };
 
 const goToPage = (url) => {
-    if (!url) return;
-
-    const page = new URL(url).searchParams.get('page');
-    Inertia.get(route('admin.products.index'), { page }, {
+    searchForm.get(url, {
         preserveState: true,
-        replace: true
+        replace: true,
     });
 };
+
+function replacePaginationLabel(label) {
+    if (label.includes('Previous') || label.includes('&laquo;')) return 'Trước';
+    if (label.includes('Next') || label.includes('&raquo;')) return 'Sau';
+    return label;
+}
 </script>
 
 <style scoped>

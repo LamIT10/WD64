@@ -30,13 +30,13 @@
               ref="imageInput"
               type="file"
               multiple
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp"
               @change="handleImageChange"
               class="hidden"
             />
             <i class="fa fa-cloud-upload text-3xl text-indigo-400 mb-2"></i>
             <span class="text-indigo-600 text-sm font-semibold">Nhấn hoặc kéo thả ảnh vào đây</span>
-            <span class="text-xs text-gray-400 mt-1">Chọn nhiều ảnh kiểm kho cùng lúc</span>
+            <span class="text-xs text-gray-400 mt-1">Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP, BMP) - Tối đa 5MB</span>
           </div>
           <div v-if="imagePreviews.length" class="flex flex-wrap gap-4 mt-4">
             <div
@@ -71,12 +71,14 @@
             <h6 class="text-base font-semibold text-indigo-800">Danh sách Sản phẩm</h6>
             <div class="flex gap-2">
               <button @click="exportSampleExcel"
+                type="button"
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-download"></i> Tải mẫu
               </button>
               <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
                 @change="handleImportExcel" />
               <button @click="$refs.importInput.click()"
+                type="button"
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-sign-in"></i> Nhập file
               </button>
@@ -105,7 +107,18 @@
                   <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
                   <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
                   <td class="px-3 py-2">
-                    {{ product.name_product }}
+                    <br>
+                    {{ product.name_product }} <br>
+                    <span
+                      :class="[
+                        'px-2 py-0.5 rounded text-xs font-medium',
+                        product.status_product === 0
+                          ? 'bg-red-100 text-red-600 border border-red-200'
+                          : 'bg-green-100 text-green-700 border border-green-200'
+                      ]"
+                    >
+                      {{ product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
+                    </span>
                     <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
                       <div class="text-xs text-gray-500 mt-1">
                         <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
@@ -117,9 +130,14 @@
                   <td class="px-3 py-2 text-center">{{ product.unit }}</td>
                   <td class="px-3 py-2 text-center">{{ product.quantity_on_hand }}</td>
                   <td class="px-3 py-2 text-center">
-                    <input type="number" v-model="auditData.items[index].actual_quantity"
-                      class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center" min="0"
-                      required />
+                    <input
+                      type="number"
+                      v-model="auditData.items[index].actual_quantity"
+                      class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center"
+                      min="0"
+                      required
+                      @input="() => { if (auditData.items[index].actual_quantity < 0) auditData.items[index].actual_quantity = 0 }"
+                    />
                   </td>
                   <td class="px-3 py-2 text-center">
                     {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
@@ -202,15 +220,55 @@ const imagePreviews = ref([]); // string[]
 
 const handleImageChange = (e) => {
   const files = Array.from(e.target.files);
-  images.value.push(...files);
-  // Tạo preview cho ảnh mới
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+  const maxFileSize = 5 * 1024 * 1024; // 5MB
+  
+  const validFiles = [];
+  const invalidFiles = [];
+  
   files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      imagePreviews.value.push(ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    // Kiểm tra định dạng file
+    if (!validImageTypes.includes(file.type)) {
+      invalidFiles.push({ name: file.name, reason: 'Định dạng không hợp lệ' });
+      return;
+    }
+    
+    // Kiểm tra kích thước file
+    if (file.size > maxFileSize) {
+      invalidFiles.push({ name: file.name, reason: 'Kích thước quá lớn (>5MB)' });
+      return;
+    }
+    
+    validFiles.push(file);
   });
+  
+  // Hiển thị thông báo lỗi cho các file không hợp lệ
+  if (invalidFiles.length > 0) {
+    const errorMessages = invalidFiles.map(f => `${f.name}: ${f.reason}`).join('\n');
+    toastError(`Một số file không thể upload:\n${errorMessages}`);
+  }
+  
+  // Chỉ xử lý các file hợp lệ
+  if (validFiles.length > 0) {
+    images.value.push(...validFiles);
+    
+    // Tạo preview cho ảnh hợp lệ
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imagePreviews.value.push(ev.target.result);
+      };
+      reader.onerror = () => {
+        toastError(`Lỗi khi đọc file ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    if (validFiles.length > 0) {
+      toastSuccess(`Đã thêm ${validFiles.length} ảnh thành công`);
+    }
+  }
+  
   // Reset input để chọn lại được cùng 1 file nếu cần
   e.target.value = '';
 };
@@ -227,7 +285,7 @@ const toggleZone = async (zone) => {
   }
   await fetchProductsByZones();
 };
-const fetchProductsByZones = async () => {
+const fetchProductsByZones = async (showAllZero = true) => {
   if (!selectedZones.value.length) {
     products.length = 0;
     auditData.value.items = [];
@@ -236,10 +294,9 @@ const fetchProductsByZones = async () => {
   try {
     const params = new URLSearchParams();
     selectedZones.value.forEach(z => params.append('zones[]', z));
+    params.append('show_all_zero', showAllZero ? 1 : 0);
     const response = await fetch(`/api/inventory-audit/information-create?${params.toString()}`);
     const data = await response.json();
-    console.log(data);
-    
     products.length = 0;
     products.push(...(data.data || []));
     auditData.value.items = products.map(product => ({

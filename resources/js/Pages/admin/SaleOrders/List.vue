@@ -820,7 +820,7 @@
                                     Xác nhận hoàn thành
                                 </button>
                                 <button
-                                    v-if="selectedOrder.status === 'shipped'"
+                                    v-if="selectedOrder.status === 'shipped'" v-can="'admin.sales-order.refund'"
                                     @click="openReturnModal(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
@@ -893,7 +893,7 @@
                                                 class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                                             >
                                                 <button
-                                                    @click="submitReturnReason"
+                                                    @click="submitReturnReason" 
                                                     type="button"
                                                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm"
                                                     :disabled="
@@ -919,7 +919,7 @@
 
                                 <!-- Nút xác nhận đã hoàn hàng thành công khi trạng thái là 'returning' -->
                                 <button
-                                    v-if="selectedOrder.status === 'returning'"
+                                    v-if="selectedOrder.status === 'returning'" v-can="'admin.sales-order.refund-confirm'"
                                     @click="confirmReturned(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
@@ -1019,7 +1019,7 @@ import ToastClient from "../../components/ToastClient.vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { clearCanvas } from "chart.js/helpers";
 import axios from "axios";
-const { listOrders } = defineProps({
+const { listOrders, filters: initialFilters } = defineProps({
     listOrders: {
         default: () => ({
             data: [],
@@ -1030,6 +1030,14 @@ const { listOrders } = defineProps({
                 total: 0,
                 links: [],
             },
+        }),
+    },
+    filters: {
+        type: Object,
+        default: () => ({
+            customer: "",
+            order_date: "",
+            status: "",
         }),
     },
 });
@@ -1051,9 +1059,9 @@ const selectedOrder = ref({
 });
 const activeTab = ref("all");
 const filters = ref({
-    customer: "",
-    order_date: "",
-    status: "",
+    customer: initialFilters.customer || "",
+    order_date: initialFilters.order_date || "",
+    status: initialFilters.status || "",
 });
 
 function setActiveTab(tab) {
@@ -1358,7 +1366,7 @@ const openRejectModal = (orderId) => {
 };
 const submitRejectReason = () => {
     if (!rejectReason.value.trim()) {
-        alert("Vui lòng nhập lý do từ chối.");
+        console.log("Vui lòng nhập lý do từ chối.");
         return;
     }
 
@@ -1367,14 +1375,14 @@ const submitRejectReason = () => {
     reject.post(route("admin.sale-orders.reject", selectedOrderId.value), {
         reject_reason: rejectReason.value,
         onSuccess: () => {
-            alert("Đơn hàng đã được từ chối.");
+            console.log("Đơn hàng đã được từ chối.");
             closeRejectModal();
             closeModal();
             emitter.emit("notification-updated");
         },
         onError: (errors) => {
             console.error("Error rejecting order:", errors);
-            alert("Có lỗi xảy ra khi từ chối đơn hàng.");
+            console.log("Có lỗi xảy ra khi từ chối đơn hàng.");
         },
         onFinish: () => {
             console.log("Reject request finished");
@@ -1549,7 +1557,7 @@ function closeReturnModal() {
 }
 function submitReturnReason() {
     if (!returnReason.value.trim()) {
-        alert("Vui lòng nhập lý do hoàn hàng.");
+        console.log("Vui lòng nhập lý do hoàn hàng.");
         return;
     }
     axios
@@ -1570,7 +1578,7 @@ function submitReturnReason() {
             emitter.emit("notification-updated");
         })
         .catch(() => {
-            alert("Có lỗi xảy ra khi hoàn hàng.");
+            console.log("Có lỗi xảy ra khi hoàn hàng.");
         });
 }
 function confirmReturned(orderId) {
@@ -1586,7 +1594,7 @@ function confirmReturned(orderId) {
             emitter.emit("notification-updated");
         })
         .catch(() => {
-            alert("Có lỗi xảy ra khi xác nhận hoàn hàng.");
+            console.log("Có lỗi xảy ra khi xác nhận hoàn hàng.");
         });
 }
 </script>
