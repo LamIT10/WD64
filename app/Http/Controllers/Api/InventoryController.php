@@ -91,7 +91,13 @@ class InventoryController extends Controller
                 "Phiếu kiểm kho #{$audit->code} đã được đồng bộ thành công.",
                 ['audit_id' => $audit->id]
             );
-
+            $actor = Auth::user();
+            app(NotificationService::class)->notifyAll(
+                'inventory_audit_synced',
+                'Đồng bộ kiểm kho thành công',
+                "Phiếu kiểm kho #{$audit->code} đã được đồng bộ thành công bởi {$actor->name} ",
+                ['audit_id' => $audit->id]
+            );
             DB::commit();
             return response()->json([
                 'message' => 'Đồng bộ thành công!',
@@ -155,7 +161,7 @@ class InventoryController extends Controller
             $totalAdjustedBefore = InventoryAuditItem::where('product_variant_id', $variant->id)
                 ->whereHas('audit', function ($q) use ($beforeStart) {
                     $q->where('is_adjusted', 1)
-                      ->where('adjusted_at', '<', $beforeStart);
+                        ->where('adjusted_at', '<', $beforeStart);
                 })
                 ->sum(DB::raw('actual_quantity - expected_quantity'));
             $openingQty = $openingStock + $totalReceivedBefore - $totalShippedBefore + $totalAdjustedBefore;
@@ -195,7 +201,7 @@ class InventoryController extends Controller
             // Lấy chuỗi thuộc tính của biến thể (giống history)
             $attributeString = '';
             if ($variant->attributes && $variant->attributes->count()) {
-                $attributeString = $variant->attributes->map(function($attrVal) {
+                $attributeString = $variant->attributes->map(function ($attrVal) {
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
@@ -261,7 +267,7 @@ class InventoryController extends Controller
             // Lấy thông tin thuộc tính của biến thể
             $attributeString = '';
             if ($variant->attributes && $variant->attributes->count()) {
-                $attributeString = $variant->attributes->map(function($attrVal) {
+                $attributeString = $variant->attributes->map(function ($attrVal) {
                     return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                 })->implode(', ');
             }
@@ -271,10 +277,10 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('goodReceipt', fn($q) => $q->whereBetween('receipt_date', [$start, $end]))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -297,10 +303,10 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'shipped'))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -323,11 +329,11 @@ class InventoryController extends Controller
                 ->where('product_variant_id', $variant->id)
                 ->whereHas('audit', fn($q) => $q->where('is_adjusted', 1)->whereBetween('audit_date', [$start, $end]))
                 ->get()
-                ->map(function($item) use ($variant) {
+                ->map(function ($item) use ($variant) {
                     $diff = ($item->actual_quantity ?? 0) - ($item->expected_quantity ?? 0);
                     $attributeString = '';
                     if ($item->productVariant && $item->productVariant->attributes && $item->productVariant->attributes->count()) {
-                        $attributeString = $item->productVariant->attributes->map(function($attrVal) {
+                        $attributeString = $item->productVariant->attributes->map(function ($attrVal) {
                             return ($attrVal->attribute->name ?? '') . ': ' . $attrVal->name;
                         })->implode(', ');
                     }
@@ -379,5 +385,4 @@ class InventoryController extends Controller
             'total' => $total,
         ]);
     }
-
 }

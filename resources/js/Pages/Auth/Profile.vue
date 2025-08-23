@@ -165,14 +165,14 @@
               </div>
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Vai trò</label>
-                <div v-if="$page.props.auth.user?.roles && $page.props.auth.user?.roles.length"
-                  class="flex flex-wrap gap-2">
-                  <span v-for="(role, index) in $page.props.auth.user.roles" :key="index"
+                <div v-if="$page.props.auth.role" class="flex flex-wrap gap-2">
+                  <span
                     class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 flex items-center">
                     <i class="fas fa-user-shield mr-1 text-xs"></i>
-                    {{ role }}
+                    {{ $page.props.auth.role.name }}
                   </span>
                 </div>
+
                 <div v-else>
                   <p class="text-gray-800">Chưa cập nhật</p>
                 </div>
@@ -187,7 +187,7 @@
               </div> -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Ngày bắt đầu làm việc</label>
-                <p class="text-gray-800">{{ $page.props.auth.user?.start_date || "Chưa cập nhật" }}</p>
+                <p class="text-gray-800">{{ formatDate($page.props.auth.user?.start_date) || "Chưa cập nhật" }}</p>
               </div>
             </div>
           </section>
@@ -209,14 +209,14 @@
             </div>
             <div class="p-6 space-y-6">
               <div class="flex items-center gap-2">Trạng thái:
-                <span class="h-2 w-2 rounded-full bg-green-500"></span> 
+                <span class="h-2 w-2 rounded-full bg-green-500"></span>
                 <p class="text-green-600 font-medium">{{ $page.props.auth.user?.status }}</p>
               </div>
               <p>Lần đăng nhập gần nhất: {{ $page.props.auth.user?.last_login }}</p>
               <div v-for="activity in $page.props.auth.user?.activities" :key="activity.id"
                 class="border-l-2 border-indigo-200 pl-4 py-1">
                 <p class="text-sm">{{ activity.action }} - <span class="text-gray-500 text-xs">{{ activity.time
-                    }}</span></p>
+                }}</span></p>
               </div>
               <div class="grid grid-cols-2 gap-2 mt-2">
                 <div v-for="perm in $page.props.auth.user?.permissions" :key="perm"
@@ -248,7 +248,7 @@
                 </div>
                 <button @click="showPasswordModal = true"
                   class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Đổi mật khẩu</button>
-              </div>         
+              </div>
             </div>
           </section>
         </main>

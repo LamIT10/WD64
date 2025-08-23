@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\WarehouseZone;
 use App\Models\InventoryLocation;
+use App\Services\NotificationService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,21 +31,21 @@ class InventoryAuditController extends Controller
             ->paginate(20);
 
         foreach ($audits as $audit) {
-        $variantIds = $audit->items->pluck('product_variant_id');
-        // Lấy danh sách zone (A, B, C...) mà các sản phẩm thuộc về
-        $zoneIds = InventoryLocation::whereIn('product_variant_id', $variantIds)
-            ->whereNotNull('zone_id')
-            ->distinct()
-            ->pluck('zone_id');
-        $zones = WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
-        $audit->audited_zones = $zones;
+            $variantIds = $audit->items->pluck('product_variant_id');
+            // Lấy danh sách zone (A, B, C...) mà các sản phẩm thuộc về
+            $zoneIds = InventoryLocation::whereIn('product_variant_id', $variantIds)
+                ->whereNotNull('zone_id')
+                ->distinct()
+                ->pluck('zone_id');
+            $zones = WarehouseZone::whereIn('id', $zoneIds)->pluck('name');
+            $audit->audited_zones = $zones;
 
-        // Lấy custom_location_name (học theo logic show)
-        $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
-            ->whereNotNull('custom_location_name')
-            ->distinct()
-            ->pluck('custom_location_name');
-        $audit->audited_locations = $locations;
+            // Lấy custom_location_name (học theo logic show)
+            $locations = InventoryLocation::whereIn('product_variant_id', $variantIds)
+                ->whereNotNull('custom_location_name')
+                ->distinct()
+                ->pluck('custom_location_name');
+            $audit->audited_locations = $locations;
         }
 
         return Inertia::render('admin/InventoryAudit/Index', [
@@ -146,7 +148,7 @@ class InventoryAuditController extends Controller
     {
         // Debug: Log dữ liệu nhận được
         Log::info('Store request data:', $request->all());
-        
+
         $auditData = $request->validate([
             'notes' => 'nullable|string|max:255',
             'audit_date' => 'required|date',
@@ -166,7 +168,7 @@ class InventoryAuditController extends Controller
                     'user_id' => $request->user()->id
                 ]);
                 $audit->save();
-                
+
                 // Tạo mã code tự động (KK + id)
                 $audit->code = 'KK' . $audit->id;
                 $audit->save();
@@ -185,10 +187,17 @@ class InventoryAuditController extends Controller
                 }
 
                 // Gửi thông báo khi tạo phiếu kiểm kho mới
-                app(\App\Services\NotificationService::class)->create(
+                app(NotificationService::class)->create(
                     'inventory_audit_created',
                     'Tạo phiếu kiểm kho mới',
                     "Phiếu kiểm kho #{$audit->code} đã được tạo thành công.",
+                    ['audit_id' => $audit->id]
+                );
+                $actor = Auth::user();
+                app(NotificationService::class)->notifyAll(
+                    'inventory_audit_created',
+                    'Tạo phiếu kiểm kho mới',
+                    "Phiếu kiểm kho #{$audit->code} đã được tạo thành công. bởi {$actor->name} ",
                     ['audit_id' => $audit->id]
                 );
             });
@@ -199,5 +208,4 @@ class InventoryAuditController extends Controller
             return back()->withErrors(['error' => 'Có lỗi xảy ra khi lưu: ' . $e->getMessage()]);
         }
     }
-
 }

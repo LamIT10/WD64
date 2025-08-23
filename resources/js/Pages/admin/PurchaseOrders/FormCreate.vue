@@ -46,6 +46,7 @@ const unitConversions = ref([]);
 const showConfirmModal = ref(false);
 const preparedOrders = ref([]);
 const finalItems = ref([]);
+const isSubmitting = ref(false);
 
 const selectedVariantIds = computed(() =>
     finalItems.value.map((item) => item.variants)
@@ -299,9 +300,15 @@ const form = useForm({
     orders: preparedOrders.value,
 });
 function submitConfirmedOrders() {
+    isSubmitting.value = true;
     form.orders = preparedOrders.value;
     form.post(route("admin.purchases.store"), {
+        onSuccess: () => {
+            isSubmitting.value = false;
+            showConfirmModal.value = false;
+        },
         onError: () => {
+            isSubmitting.value = false;
             console.error(form.errors);
         },
     });
@@ -395,7 +402,7 @@ function submitConfirmedOrders() {
                                     </td>
                                 </tr>
                                 <tr
-                                    v-for="(variant, i) in selectedVariants"
+                                    v-for="(variant) in selectedVariants"
                                     :key="`sv-${variant.variantId}`"
                                     class="hover:bg-gray-50 transition"
                                 >
@@ -887,10 +894,16 @@ function submitConfirmedOrders() {
                             </button>
                             <button
                                 @click="submitConfirmedOrders"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                :disabled="isSubmitting"
+                                :class="[
+                                    'px-4 py-2 rounded-md text-white',
+                                    isSubmitting 
+                                        ? 'bg-gray-400 cursor-not-allowed' 
+                                        : 'bg-indigo-600 hover:bg-indigo-700'
+                                ]"
                             >
-                                <i class="fa-solid fa-paper-plane mr-2"></i> Xác
-                                nhận & Gửi
+                                <i :class="isSubmitting ? 'fa-solid fa-spinner fa-spin mr-2' : 'fa-solid fa-paper-plane mr-2'"></i>
+                                {{ isSubmitting ? 'Đang gửi...' : 'Xác nhận & Gửi' }}
                             </button>
                         </div>
                     </div>

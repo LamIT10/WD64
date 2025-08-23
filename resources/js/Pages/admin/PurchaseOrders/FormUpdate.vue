@@ -1,273 +1,502 @@
 <template>
     <AppLayout>
-        <div class="container mx-auto px-4 py-8">
-            <!-- Header -->
-            <div
-                class="flex justify-between items-center mb-6 bg-white p-4 rounded shadow-sm"
-            >
-                <h1 class="text-xl font-semibold text-indigo-800">
-                    Cập nhật đơn nhập hàng
-                </h1>
-                <Waiting
-                    route-name="admin.purchases.index"
-                    :route-params="{}"
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100"
+        <div class="min-h-screen bg-gray-50 py-6">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <!-- Header Section -->
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
                 >
-                    <i class="fas fa-arrow-left mr-2"></i> Quay lại
-                </Waiting>
-            </div>
-
-            <!-- Main Content -->
-            <div class="bg-white shadow-lg rounded-lg p-8">
-                <!-- Purchase Details -->
-                <table
-                    class="w-full border border-gray-300 rounded-lg text-sm mb-6"
-                >
-                    <tbody>
-                        <tr class="border-b border-gray-200">
-                            <td
-                                class="bg-indigo-50 font-medium text-gray-700 px-4 py-3 w-1/3"
-                            >
-                                🏢 Nhà cung cấp
-                            </td>
-                            <td class="px-4 py-3 text-gray-900">
-                                {{ purchase.supplier.name }}
-                            </td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td
-                                class="bg-indigo-50 font-medium text-gray-700 px-4 py-3 w-1/3"
-                            >
-                                Ngày giao dự kiến
-                            </td>
-                            <td class="px-4 py-3">
-                                <input
-                                    type="date"
-                                    v-model="purchase.order_date"
-                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                                />
-                                <p
-                                    v-if="form.errors[`order_date`]"
-                                    class="text-red-500 text-xs mt-1"
-                                >
-                                    {{ form.errors[`order_date`] }}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-3 bg-indigo-100 rounded-lg">
+                                <i
+                                    class="fas fa-edit text-indigo-600 text-xl"
+                                ></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">
+                                    Cập nhật đơn nhập hàng
+                                </h1>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Chỉnh sửa thông tin đơn hàng và sản phẩm
                                 </p>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td
-                                class="bg-indigo-50 font-medium text-gray-700 px-4 py-3"
-                            >
-                                📌 Trạng thái
-                            </td>
-                            <td class="px-4 py-3">
-                                <span
-                                    class="inline-block px-3 py-1 rounded-xl text-sm font-medium text-yellow-600 bg-yellow-100 border border-yellow-300"
-                                >
-                                    Chờ duyệt
-                                </span>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td
-                                class="bg-indigo-50 font-medium text-gray-700 px-4 py-3"
-                            >
-                                Người tạo đơn
-                            </td>
-                            <td class="px-4 py-3">
-                                <select
-                                    v-model="purchase.user_id"
-                                    class="w-full border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500"
-                                >
-                                    <option
-                                        v-for="user in users"
-                                        :key="user.id"
-                                        :value="user.id"
-                                    >
-                                        {{ user.name }}
-                                    </option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr class="border-b border-gray-200">
-                            <td
-                                class="bg-indigo-50 font-medium text-gray-700 px-4 py-3"
-                            >
-                                Ngày tạo đơn
-                            </td>
-                            <td class="px-4 py-3">
-                                {{ formatDate(purchase.created_at) }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- Existing Items -->
-                <div class="overflow-x-auto mt-10">
-                    <h2 class="text-lg font-semibold text-indigo-600 mb-6">
-                        <i class="fa-solid fa-check mr-2"></i> Danh sách sản
-                        phẩm trong đơn
-                    </h2>
-                    <p
-                        v-if="form.errors.items"
-                        class="text-red-500 text-xs mb-4"
-                    >
-                        {{ form.errors.items }}
-                    </p>
-                    <table class="w-full border-collapse border-b text-sm">
-                        <thead class="bg-indigo-600 text-white">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Sản phẩm</th>
-                                <th class="px-4 py-3 text-center">Số lượng</th>
-                                <th class="px-4 py-3 text-center">Đơn vị</th>
-                                <th class="px-4 py-3 text-center">Giá nhập (VND)</th>
-                                <th class="px-4 py-3 text-right">Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="(item, index) in purchase.items"
-                                :key="index"
-                                class="border-b hover:bg-gray-50"
-                            >
-                                <td class="px-4 py-3">
-                                    {{ item.product_variant.product.name }}
-                                    <span
-                                        v-for="(attribute, i) in item
-                                            .product_variant.attributes"
-                                        :key="i"
-                                        class="ml-2 text-indigo-600 font-bold"
-                                    >
-                                        {{ attribute.name }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <input
-                                        type="number"
-                                        v-model.number="item.quantity_ordered"
-                                        @input="updateItem(index)"
-                                        class="w-20 text-center border border-gray-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:outline-none focus:ring-indigo-500"
-                                        min="0"
-                                    />
-                                    <p
-                                        v-if="
-                                            form.errors[
-                                                `items.${index}.quantity_ordered`
-                                            ]
-                                        "
-                                        class="text-red-500 text-xs mt-1"
-                                    >
-                                        {{
-                                            form.errors[
-                                                `items.${index}.quantity_ordered`
-                                            ]
-                                        }}
-                                    </p>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <select
-                                        v-model="item.unit_id"
-                                        @change="updateUnitPrice(index)"
-                                        class="w-full border border-gray-300 rounded px-3 py-1 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    >
-                                        <option
-                                            v-for="unit in getAvailableUnits(
-                                                item
-                                            )"
-                                            :key="unit.id"
-                                            :value="unit.id"
-                                        >
-                                            {{ unit.name }}
-                                        </option>
-                                    </select>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <div
-                                        class="flex flex-col items-center gap-1"
-                                    >
-                                      <input
-                                            type="text"
-                                            :value="Number(item.unit_price || 0).toLocaleString('vi-VN')"
-                                            @input="e => moneyInput(item, 'unit_price', () => updateOriginalPrice(index), e)"
-                                            @focus="e => moneyFocus(item, 'unit_price', e)"
-                                            @blur="e => moneyBlur(item, 'unit_price', e)"
-                                            class="w-40 text-right border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:outline-none focus:ring-indigo-500"
-                                            />
-                                        <span
-                                            v-if="
-                                                item.hasUnitChanged &&
-                                                item.unit_id !==
-                                                item.product_variant.product
-                                                    .default_unit_id
-                                            "
-                                            class="text-gray-600 pl-1 mt-1"
-                                        >
-                                            Giá quy đổi:
-                                            <span
-                                                class="text-green-600 font-semibold"
-                                            >
-                                                {{
-                                                    formatCurrency(
-                                                        item.converted_price
-                                                    )
-                                                }}
-                                            </span>
-                                        </span>
-                                        <p
-                                            v-if="
-                                                form.errors[
-                                                    `items.${index}.unit_price`
-                                                ]
-                                            "
-                                            class="text-red-500 text-xs mt-1"
-                                        >
-                                            {{
-                                                form.errors[
-                                                    `items.${index}.unit_price`
-                                                ]
-                                            }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-right font-medium">
-                                    {{
-                                        formatCurrency(
-                                            item.quantity_ordered *
-                                                item.converted_price
-                                        )
-                                    }}
-                                </td>
-                            </tr>
-                            <tr v-if="!purchase.items.length">
-                                <td
-                                    colspan="6"
-                                    class="p-4 text-center text-gray-500"
-                                >
-                                    Chưa có sản phẩm trong đơn
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Total and Save -->
-                <div class="flex justify-end mt-6">
-                    <div class="text-right space-y-2">
-                        <p class="text-base font-semibold text-gray-800">
-                            Tổng tiền đơn: {{ formatCurrency(totalAmount) }}
-                        </p>
-                        <p class="text-sm text-gray-600">
-                            Số lượng sản phẩm: {{ purchase.items.length }}
-                        </p>
+                            </div>
+                        </div>
+                        <Waiting
+                            route-name="admin.purchases.index"
+                            :route-params="{}"
+                            class="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Quay lại</span>
+                        </Waiting>
                     </div>
                 </div>
-                <div class="mt-8 flex justify-end gap-3">
-                    <button
-                        class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700"
-                        @click="savePurchase"
-                    >
-                        Lưu thay đổi
-                    </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Right Column: Product List -->
+                    <div class="lg:col-span-2">
+                        <div
+                            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                        >
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-emerald-100 rounded-lg">
+                                    <i class="fas fa-box text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <h2
+                                        class="text-lg font-semibold text-gray-900"
+                                    >
+                                        Danh sách sản phẩm
+                                    </h2>
+                                    <p class="text-sm text-gray-500">
+                                        Cập nhật số lượng, đơn vị và giá cho
+                                        từng sản phẩm
+                                    </p>
+                                </div>
+                            </div>
+
+                            <p
+                                v-if="form.errors.items"
+                                class="text-red-500 text-sm mb-4 p-3 bg-red-50 rounded-lg border border-red-200"
+                            >
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                {{ form.errors.items }}
+                            </p>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr
+                                            class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200"
+                                        >
+                                            <th
+                                                class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                            >
+                                                Sản phẩm
+                                            </th>
+                                            <th
+                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                            >
+                                                Số lượng
+                                            </th>
+                                            <th
+                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                            >
+                                                Đơn vị
+                                            </th>
+                                            <th
+                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                            >
+                                                Giá nhập (VND)
+                                            </th>
+                                            <th
+                                                class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                            >
+                                                Thành tiền
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr
+                                            v-for="(
+                                                item, index
+                                            ) in purchase.items"
+                                            :key="index"
+                                            class="hover:bg-gray-50 transition-colors"
+                                        >
+                                            <td class="px-4 py-4">
+                                                <div
+                                                    class="flex items-start space-x-3"
+                                                >
+                                                    <div
+                                                        class="p-2 bg-blue-100 rounded-lg"
+                                                    >
+                                                        <i
+                                                            class="fas fa-cube text-blue-600"
+                                                        ></i>
+                                                    </div>
+                                                    <div>
+                                                        <p
+                                                            class="font-medium text-gray-900"
+                                                        >
+                                                            {{
+                                                                item
+                                                                    .product_variant
+                                                                    .product
+                                                                    .name
+                                                            }}
+                                                        </p>
+                                                        <div
+                                                            class="flex flex-wrap gap-1 mt-1"
+                                                        >
+                                                            <span
+                                                                v-for="(
+                                                                    attribute, i
+                                                                ) in item
+                                                                    .product_variant
+                                                                    .attributes"
+                                                                :key="i"
+                                                                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                                            >
+                                                                {{
+                                                                    attribute.name
+                                                                }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-center">
+                                                <div
+                                                    class="max-w-[80px] mx-auto"
+                                                >
+                                                    <input
+                                                        type="number"
+                                                        v-model.number="
+                                                            item.quantity_ordered
+                                                        "
+                                                        @input="
+                                                            updateItem(index)
+                                                        "
+                                                        :class="[
+                                                            'w-full text-center border rounded-lg px-2 py-1 text-sm transition-colors',
+                                                            form.errors[
+                                                                `items.${index}.quantity_ordered`
+                                                            ]
+                                                                ? 'border-red-300 bg-red-50'
+                                                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-200',
+                                                        ]"
+                                                        min="0"
+                                                    />
+                                                    <p
+                                                        v-if="
+                                                            form.errors[
+                                                                `items.${index}.quantity_ordered`
+                                                            ]
+                                                        "
+                                                        class="text-red-500 text-xs mt-1"
+                                                    >
+                                                        {{
+                                                            form.errors[
+                                                                `items.${index}.quantity_ordered`
+                                                            ]
+                                                        }}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-center">
+                                                <select
+                                                    v-model="item.unit_id"
+                                                    @change="
+                                                        updateUnitPrice(index)
+                                                    "
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 focus:ring-indigo-200"
+                                                >
+                                                    <option
+                                                        v-for="unit in getAvailableUnits(
+                                                            item
+                                                        )"
+                                                        :key="unit.id"
+                                                        :value="unit.id"
+                                                    >
+                                                        {{ unit.name }}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td class="px-4 py-4 text-center">
+                                                <div class="space-y-2">
+                                                    <input
+                                                        type="text"
+                                                        :value="
+                                                            Number(
+                                                                item.unit_price ||
+                                                                    0
+                                                            ).toLocaleString(
+                                                                'vi-VN'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            (e) =>
+                                                                moneyInput(
+                                                                    item,
+                                                                    'unit_price',
+                                                                    () =>
+                                                                        updateOriginalPrice(
+                                                                            index
+                                                                        ),
+                                                                    e
+                                                                )
+                                                        "
+                                                        @focus="
+                                                            (e) =>
+                                                                moneyFocus(
+                                                                    item,
+                                                                    'unit_price',
+                                                                    e
+                                                                )
+                                                        "
+                                                        @blur="
+                                                            (e) =>
+                                                                moneyBlur(
+                                                                    item,
+                                                                    'unit_price',
+                                                                    e
+                                                                )
+                                                        "
+                                                        :class="[
+                                                            'w-full text-right border rounded-lg px-3 py-1 text-sm transition-colors',
+                                                            form.errors[
+                                                                `items.${index}.unit_price`
+                                                            ]
+                                                                ? 'border-red-300 bg-red-50'
+                                                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-200',
+                                                        ]"
+                                                    />
+                                                    <div
+                                                        v-if="
+                                                            item.hasUnitChanged &&
+                                                            item.unit_id !==
+                                                                item
+                                                                    .product_variant
+                                                                    .product
+                                                                    .default_unit_id
+                                                        "
+                                                        class="text-xs"
+                                                    >
+                                                        <span
+                                                            class="text-gray-500"
+                                                            >Giá quy đổi:</span
+                                                        >
+                                                        <span
+                                                            class="font-semibold text-emerald-600 ml-1"
+                                                            >{{
+                                                                formatCurrency(
+                                                                    item.converted_price
+                                                                )
+                                                            }}</span
+                                                        >
+                                                    </div>
+                                                    <p
+                                                        v-if="
+                                                            form.errors[
+                                                                `items.${index}.unit_price`
+                                                            ]
+                                                        "
+                                                        class="text-red-500 text-xs"
+                                                    >
+                                                        {{
+                                                            form.errors[
+                                                                `items.${index}.unit_price`
+                                                            ]
+                                                        }}
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-4 text-right">
+                                                <span
+                                                    class="font-semibold text-lg text-gray-900"
+                                                >
+                                                    {{
+                                                        formatCurrency(
+                                                            item.quantity_ordered *
+                                                                item.converted_price
+                                                        )
+                                                    }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="!purchase.items.length">
+                                            <td
+                                                colspan="5"
+                                                class="px-4 py-8 text-center"
+                                            >
+                                                <div
+                                                    class="flex flex-col items-center space-y-3"
+                                                >
+                                                    <div
+                                                        class="p-4 bg-gray-100 rounded-full"
+                                                    >
+                                                        <i
+                                                            class="fas fa-box-open text-2xl text-gray-400"
+                                                        ></i>
+                                                    </div>
+                                                    <p class="text-gray-500">
+                                                        Chưa có sản phẩm trong
+                                                        đơn
+                                                    </p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Left Column: Order Information -->
+                    <div class="lg:col-span-1">
+                        <div
+                            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                        >
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i
+                                        class="fas fa-info-circle text-blue-600"
+                                    ></i>
+                                </div>
+                                <h2 class="text-lg font-semibold text-gray-900">
+                                    Thông tin đơn hàng
+                                </h2>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Supplier -->
+                                <div
+                                    class="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-100"
+                                >
+                                    <label
+                                        class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2"
+                                    >
+                                        <i
+                                            class="fas fa-building text-indigo-500"
+                                        ></i>
+                                        Nhà cung cấp
+                                    </label>
+                                    <p class="text-gray-900 font-medium">
+                                        {{ purchase.supplier.name }}
+                                    </p>
+                                </div>
+
+                                <!-- Expected Date -->
+                                <div>
+                                    <label
+                                        class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2"
+                                    >
+                                        <i
+                                            class="fas fa-calendar-alt text-green-500"
+                                        ></i>
+                                        Ngày giao dự kiến
+                                    </label>
+                                    <input
+                                        type="date"
+                                        v-model="purchase.order_date"
+                                        :class="[
+                                            'w-full px-3 py-2 border rounded-lg text-sm transition-colors',
+                                            form.errors.order_date
+                                                ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                                : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-200',
+                                        ]"
+                                    />
+                                    <p
+                                        v-if="form.errors.order_date"
+                                        class="text-red-500 text-xs mt-1"
+                                    >
+                                        {{ form.errors.order_date }}
+                                    </p>
+                                </div>
+
+                                <!-- Status -->
+                                <div>
+                                    <label
+                                        class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2"
+                                    >
+                                        <i
+                                            class="fas fa-flag text-yellow-500"
+                                        ></i>
+                                        Trạng thái
+                                    </label>
+                                    <div
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                    >
+                                        <i class="fas fa-clock mr-2"></i>
+                                        Chờ duyệt
+                                    </div>
+                                </div>
+
+                                <!-- User -->
+                                <div>
+                                    <label
+                                        class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2"
+                                    >
+                                        <i
+                                            class="fas fa-user text-purple-500"
+                                        ></i>
+                                        Người tạo đơn
+                                    </label>
+                                    <select
+                                        v-model="purchase.user_id"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-indigo-500 focus:ring-indigo-200"
+                                    >
+                                        <option
+                                            v-for="user in users"
+                                            :key="user.id"
+                                            :value="user.id"
+                                        >
+                                            {{ user.name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Created Date -->
+                                <div>
+                                    <label
+                                        class="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2"
+                                    >
+                                        <i
+                                            class="fas fa-clock text-gray-500"
+                                        ></i>
+                                        Ngày tạo đơn
+                                    </label>
+                                    <p class="text-gray-600 text-sm">
+                                        {{ formatDate(purchase.created_at) }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Summary -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div
+                                    class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-4 border border-emerald-200"
+                                >
+                                    <div
+                                        class="flex items-center justify-between mb-2"
+                                    >
+                                        <span
+                                            class="text-sm font-medium text-gray-700"
+                                            >Tổng giá trị đơn</span
+                                        >
+                                        <span
+                                            class="text-lg font-bold text-emerald-600"
+                                            >{{
+                                                formatCurrency(totalAmount)
+                                            }}</span
+                                        >
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span class="text-xs text-gray-600"
+                                            >Số lượng sản phẩm</span
+                                        >
+                                        <span
+                                            class="text-sm font-medium text-gray-700"
+                                            >{{ purchase.items.length }} mặt
+                                            hàng</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save Button -->
+                            <button
+                                @click="savePurchase"
+                                class="w-full mt-6 bg-indigo-600 text-white font-medium py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                            >
+                                <i class="fas fa-save mr-2"></i>
+                                Lưu thay đổi
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,12 +519,12 @@ const { purchase, users, products } = defineProps({
 const calculateConvertedPrice = (item) => {
     const product = item.product_variant.product;
     const unitPrice = Number(item.unit_price) || 0;
-    
+
     // Nếu chưa thay đổi đơn vị (lần đầu load), giữ nguyên giá gốc
     if (!item.hasUnitChanged) {
         return unitPrice;
     }
-    
+
     if (item.unit_id === product.default_unit_id) {
         return unitPrice;
     }
@@ -325,10 +554,10 @@ onMounted(() => {
         const isDefaultUnit = item.unit_id === product.default_unit_id;
         // Ensure unit_price is a number
         item.unit_price = Number(item.unit_price) || 0;
-        
+
         // Đánh dấu là chưa thay đổi đơn vị (lần đầu load)
         item.hasUnitChanged = false;
-        
+
         if (isDefaultUnit) {
             item.original_unit_price = item.unit_price;
             item.converted_price = item.unit_price;
@@ -337,7 +566,7 @@ onMounted(() => {
             item.original_unit_price = item.unit_price;
             item.converted_price = item.unit_price;
         }
-        
+
         item.subtotal =
             (Number(item.quantity_ordered) || 0) *
             (Number(item.converted_price) || 0);
@@ -407,26 +636,24 @@ const formatCurrency = (value) => {
 //Format money
 
 function moneyInput(obj, key, cb, e) {
-  const raw = e.target.value.replace(/[^\d]/g, '');   // chỉ giữ số
-  obj[key] = Number(raw) || 0;                        // bind số thuần
-  e.target.value = obj[key].toLocaleString('vi-VN');  // format ngay
-  if (typeof cb === 'function') cb();                 // gọi logic cũ
+    const raw = e.target.value.replace(/[^\d]/g, ""); // chỉ giữ số
+    obj[key] = Number(raw) || 0; // bind số thuần
+    e.target.value = obj[key].toLocaleString("vi-VN"); // format ngay
+    if (typeof cb === "function") cb(); // gọi logic cũ
 }
 const getVariantName = (item) => {
-  const baseName = item?.product_variant?.product?.name ?? '';
-  const attrs = Array.isArray(item?.product_variant?.attributes)
-    ? item.product_variant.attributes.map(a => a?.name).filter(Boolean)
-    : [];
-  return [baseName, ...attrs].filter(Boolean).join(' - ').trim();
+    const baseName = item?.product_variant?.product?.name ?? "";
+    const attrs = Array.isArray(item?.product_variant?.attributes)
+        ? item.product_variant.attributes.map((a) => a?.name).filter(Boolean)
+        : [];
+    return [baseName, ...attrs].filter(Boolean).join(" - ").trim();
 };
 function moneyFocus(obj, key, e) {
-  e.target.value = obj[key] ? String(obj[key]) : '';
+    e.target.value = obj[key] ? String(obj[key]) : "";
 }
 function moneyBlur(obj, key, e) {
-  e.target.value = (obj[key] || 0).toLocaleString('vi-VN');
+    e.target.value = (obj[key] || 0).toLocaleString("vi-VN");
 }
-
-
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -506,13 +733,13 @@ const updateOriginalPrice = (index) => {
 const updateUnitPrice = (index) => {
     const item = purchase.items[index];
     const product = item.product_variant.product;
-    
+
     // Đánh dấu là đã thay đổi đơn vị
     item.hasUnitChanged = true;
-    
+
     // Giữ nguyên unit_price user nhập, chỉ tính lại converted_price
     item.unit_price = Number(item.unit_price) || 0;
-    
+
     if (item.unit_id === product.default_unit_id) {
         // Nếu là đơn vị gốc, giá cơ bản = unit_price
         item.original_unit_price = item.unit_price;
@@ -569,18 +796,18 @@ const savePurchase = () => {
     form.items = purchase.items.map((item) => {
         const qty = Number(item.quantity_ordered) || 0;
         const price = Number(item.converted_price) || 0;
-        
+
         // Tính factor dựa trên đơn vị được chọn
         const product = item.product_variant.product;
         let factor = 1;
-        
+
         if (item.unit_id !== product.default_unit_id) {
             const conversion = product.unit_conversions.find(
                 (conv) => conv.to_unit_id === item.unit_id
             );
             factor = Number(conversion?.conversion_factor) || 1;
         }
-        
+
         return {
             id: item.id,
             variant_id: item.product_variant.id,
