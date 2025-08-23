@@ -6,7 +6,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <h2 class="text-lg font-medium text-gray-900">
-                            All Notifications
+                            Tất cả thông báo
                         </h2>
                         <span
                             class="ml-2 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
@@ -16,7 +16,7 @@
                     <div class="flex items-center space-x-4">
                         <div class="flex items-center">
                             <span class="text-sm text-gray-700 mr-3"
-                                >Only Show Unread</span
+                                >Chỉ hiển thị chưa đọc</span
                             >
                             <button
                                 @click="toggleUnreadOnly"
@@ -70,7 +70,7 @@
                                 </div>
                                 <div class="flex items-center space-x-4 ml-4">
                                     <span class="text-sm text-gray-500">{{
-                                        notification.time
+                                        formatTime(notification.time)
                                     }}</span>
                                     <button
                                         @click.stop="
@@ -137,7 +137,14 @@ import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import axios from "axios";
 import emitter from "../../../eventBus.js";
-
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/vi";
+dayjs.extend(relativeTime);
+dayjs.locale("vi");
+const formatTime = (time) => {
+    return dayjs(time).fromNow();
+};
 const showUnreadOnly = ref(false);
 const entriesPerPage = ref(20);
 
