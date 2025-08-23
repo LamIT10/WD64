@@ -4,7 +4,7 @@
             <div class="px-4 sm:px-6 lg:px-8">
                 <!-- Header Section -->
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6"
+                    class="bg-white rounded shadow border border-gray-200 p-6 mb-6"
                 >
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
@@ -14,12 +14,9 @@
                                 ></i>
                             </div>
                             <div>
-                                <h1 class="text-2xl font-bold text-gray-900">
+                                <h1 class="text-xl font-semibold text-gray-900">
                                     Cập nhật đơn nhập hàng
                                 </h1>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    Chỉnh sửa thông tin đơn hàng và sản phẩm
-                                </p>
                             </div>
                         </div>
                         <Waiting
@@ -37,7 +34,7 @@
                     <!-- Right Column: Product List -->
                     <div class="lg:col-span-2">
                         <div
-                            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                            class="bg-white rounded shadow border border-gray-200 p-6"
                         >
                             <div class="flex items-center space-x-3 mb-6">
                                 <div class="p-2 bg-emerald-100 rounded-lg">
@@ -49,10 +46,6 @@
                                     >
                                         Danh sách sản phẩm
                                     </h2>
-                                    <p class="text-sm text-gray-500">
-                                        Cập nhật số lượng, đơn vị và giá cho
-                                        từng sản phẩm
-                                    </p>
                                 </div>
                             </div>
 
@@ -336,7 +329,7 @@
                     <!-- Left Column: Order Information -->
                     <div class="lg:col-span-1">
                         <div
-                            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+                            class="bg-white rounded shadow border border-gray-200 p-6"
                         >
                             <div class="flex items-center space-x-3 mb-6">
                                 <div class="p-2 bg-blue-100 rounded-lg">
