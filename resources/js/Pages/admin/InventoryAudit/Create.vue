@@ -98,54 +98,60 @@
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">Thực tế</th>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">SL chênh</th>
                   <th class="px-3 py-2 text-left font-semibold text-indigo-700">Ghi chú chênh</th>
+                  <th class="px-3 py-2 text-center font-semibold text-indigo-700">Bỏ kiểm</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
-                <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
+                <tr v-for="(item, index) in filteredProducts" :key="item.product.id" class="hover:bg-gray-50">
                   <td class="px-3 py-2 text-center">{{ index + 1 }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.zone }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
-                  <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.zone }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.custom_location_name }}</td>
+                  <td class="px-3 py-2 text-center font-medium">{{ item.product.code }}</td>
                   <td class="px-3 py-2">
                     <br>
-                    {{ product.name_product }} <br>
+                    {{ item.product.name_product }} <br>
                     <span
                       :class="[
                         'px-2 py-0.5 rounded text-xs font-medium',
-                        product.status_product === 0
+                        item.product.status_product === 0
                           ? 'bg-red-100 text-red-600 border border-red-200'
                           : 'bg-green-100 text-green-700 border border-green-200'
                       ]"
                     >
-                      {{ product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
+                      {{ item.product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
                     </span>
-                    <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
+                    <template v-if="item.product.variant_attributes && Object.keys(item.product.variant_attributes).length">
                       <div class="text-xs text-gray-500 mt-1">
-                        <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
+                        <span v-for="(value, key) in item.product.variant_attributes" :key="key" class="mr-2">
                           <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
                         </span>
                       </div>
                     </template>
                   </td>
-                  <td class="px-3 py-2 text-center">{{ product.unit }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.quantity_on_hand }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.unit }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.quantity_on_hand }}</td>
                   <td class="px-3 py-2 text-center">
                     <input
                       type="number"
-                      v-model="auditData.items[index].actual_quantity"
+                      v-model="auditData.items[item.originalIndex].actual_quantity"
                       class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center"
                       min="0"
                       required
-                      @input="() => { if (auditData.items[index].actual_quantity < 0) auditData.items[index].actual_quantity = 0 }"
+                      @input="() => { if (auditData.items[item.originalIndex].actual_quantity < 0) auditData.items[item.originalIndex].actual_quantity = 0 }"
                     />
                   </td>
                   <td class="px-3 py-2 text-center">
-                    {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
+                    {{ auditData.items[item.originalIndex].actual_quantity - item.product.quantity_on_hand || 0 }}
                   </td>
                   <td class="px-3 py-2">
-                    <input type="text" v-model="auditData.items[index].discrepancy_reason"
+                    <input type="text" v-model="auditData.items[item.originalIndex].discrepancy_reason"
                       class="w-full border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm"
                       placeholder="Lý do chênh lệch" />
+                  </td>
+                  <td class="px-3 py-2 text-center">
+                    <button type="button" @click="excludeProduct(item.originalIndex)" class="text-red-500 hover:text-red-700" title="Bỏ kiểm sản phẩm này">
+                      <i class="fa fa-times-circle text-xl"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -204,8 +210,8 @@ const auditData = ref({
   items: []
 });
 const canSubmit = computed(() =>
-  auditData.value.items.length > 0 &&
-  auditData.value.items.every(item =>
+  auditData.value.items.filter(item => !item.excluded).length > 0 &&
+  auditData.value.items.filter(item => !item.excluded).every(item =>
     item.actual_quantity !== '' &&
     item.actual_quantity !== null &&
     item.actual_quantity !== undefined &&
@@ -424,6 +430,7 @@ const submitForm = () => {
   formData.append('audit_date', auditData.value.audit_date);
   formData.append('status', status);
   auditData.value.items.forEach((item, idx) => {
+    if (item.excluded) return;
     formData.append(`items[${idx}][product_variant_id]`, item.product_variant_id);
     formData.append(`items[${idx}][expected_quantity]`, item.expected_quantity);
     formData.append(`items[${idx}][actual_quantity]`, item.actual_quantity);
@@ -454,7 +461,18 @@ const submitForm = () => {
   });
 };
 
-const filteredProducts = computed(() => products);
+const filteredProducts = computed(() => {
+  // Trả về cả product và index gốc để loại bỏ chính xác
+  return products
+    .map((product, idx) => ({ product, originalIndex: idx }))
+    .filter(item => !auditData.value.items[item.originalIndex]?.excluded);
+});
+
+function excludeProduct(originalIndex) {
+  if (auditData.value.items[originalIndex]) {
+    auditData.value.items[originalIndex].excluded = true;
+  }
+}
 
 function toastSuccess(message) {
   toastRef.value?.triggerToast(message, 'success');
@@ -476,16 +494,19 @@ watch(() => page.props.flash, (flash) => {
 const exportSampleExcel = () => {
   const sampleData = [
     ['Khu vực', 'Chi tiết khu vực','Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', 'Thực tế', 'Ghi chú chênh'],
-    ...filteredProducts.value.map((product, idx) => [
-      product.zone,
-      product.custom_location_name,
-      product.code,
-      product.name_product,
-      product.unit,
-      product.quantity_on_hand,
-      auditData.value.items[idx]?.actual_quantity || '',
-      auditData.value.items[idx]?.discrepancy_reason || ''
-    ])
+    ...products.map((product, idx) => {
+      if (auditData.value.items[idx]?.excluded) return null;
+      return [
+        product.zone,
+        product.custom_location_name,
+        product.code,
+        product.name_product,
+        product.unit,
+        product.quantity_on_hand,
+        auditData.value.items[idx]?.actual_quantity || '',
+        auditData.value.items[idx]?.discrepancy_reason || ''
+      ];
+    }).filter(Boolean)
   ];
   const ws = XLSX.utils.aoa_to_sheet(sampleData);
   const wb = XLSX.utils.book_new();
