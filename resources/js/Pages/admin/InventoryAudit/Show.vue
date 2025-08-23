@@ -1,32 +1,46 @@
 <template>
-    <!-- Modal xem ảnh lớn -->
-    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-        <div class="relative bg-white rounded shadow-lg p-2 max-w-lg w-full flex flex-col items-center">
-            <img :src="audit.images[modalIndex]?.url" class="max-h-[70vh] object-contain rounded" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" />
-            <button @click="closeModal" class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
-                <i class="fa fa-times"></i>
+    <!-- Modal xem ảnh lớn - Giao diện đẹp, responsive, có tải tất cả -->
+    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+        <div @click.self="closeModal" class="absolute inset-0 z-40 cursor-pointer" style="background:rgba(0,0,0,0.01);"></div>
+        <div class="relative w-full max-w-3xl mx-2 bg-white rounded-2xl shadow-2xl p-0 flex flex-col items-center overflow-hidden z-50" style="height:80vh; min-height:400px;">
+            <!-- Nút đóng -->
+            <button @click="closeModal" class="absolute top-4 right-4 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 rounded-full p-2 shadow transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
             </button>
-            <div class="flex gap-2 mt-2">
-                <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-10 h-10 border rounded', idx === modalIndex ? 'border-indigo-500' : 'border-gray-200']">
-                    <img :src="img.url" class="object-cover w-full h-full rounded" />
-                </button>
+            <!-- Ảnh chính -->
+            <div class="flex-1 flex items-center justify-center w-full bg-gradient-to-br from-gray-50 to-gray-100 p-4 min-h-0">
+                <img :src="audit.images[modalIndex]?.url" class="max-h-full max-w-full object-contain rounded-xl shadow-lg border border-gray-200 bg-white" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" style="max-height:56vh;" />
+            </div>
+            <!-- Thanh điều khiển và thumbnail luôn cố định dưới -->
+            <div class="w-full flex flex-col md:flex-row items-center justify-between gap-2 px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
+                <div class="flex gap-2 items-center flex-wrap">
+                    <button @click="downloadCurrentImage" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Tải ảnh này
+                    </button>
+                    <button @click="downloadAllImages" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Tải tất cả
+                    </button>
+                    <span class="text-xs text-gray-500 ml-2">({{ modalIndex+1 }}/{{ audit.images.length }})</span>
+                </div>
+                <!-- Thanh thumbnail -->
+                <div class="flex gap-1 overflow-x-auto py-1 w-full md:w-auto justify-center">
+                    <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-12 h-12 border-2 rounded-lg overflow-hidden flex-shrink-0 transition', idx === modalIndex ? 'border-indigo-500 ring-2 ring-indigo-300' : 'border-gray-200 hover:border-gray-300']">
+                        <img :src="img.url" class="object-cover w-full h-full" />
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
     <!-- Modal xem ảnh lớn -->
-    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-        <div class="relative bg-white rounded shadow-lg p-2 max-w-lg w-full flex flex-col items-center">
-            <img :src="audit.images[modalIndex]?.url" class="max-h-[70vh] object-contain rounded" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" />
-            <button @click="closeModal" class="absolute top-2 right-2 bg-white bg-opacity-80 rounded-full p-1 text-red-500 hover:bg-opacity-100 transition">
-                <i class="fa fa-times"></i>
-            </button>
-            <div class="flex gap-2 mt-2">
-                <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-10 h-10 border rounded', idx === modalIndex ? 'border-indigo-500' : 'border-gray-200']">
-                    <img :src="img.url" class="object-cover w-full h-full rounded" />
-                </button>
-            </div>
-        </div>
-    </div>
     <div class="no-print">
         <AppLayout>
 
@@ -62,7 +76,15 @@
                 <div class="bg-white rounded-2xl shadow p-4 mb-4 border border-indigo-100 text-sm">
                     <!-- Ảnh kiểm kho -->
                     <div v-if="audit.images && audit.images.length" class="mb-4">
-                        <div class="font-semibold text-gray-700 mb-2">Ảnh kiểm kho đã đăng:</div>
+                        <div class="font-semibold text-gray-700 mb-2 flex items-center justify-between">
+                            <span>Ảnh kiểm kho đã đăng: ({{ audit.images.length }} ảnh)</span>
+                            <button @click="downloadAllImages" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Tải tất cả
+                            </button>
+                        </div>
                         <div class="flex flex-wrap gap-3">
                             <div v-for="(img, idx) in audit.images" :key="idx" class="relative w-28 h-28 border rounded overflow-hidden group cursor-pointer" @click="showImageModal(idx)">
                                 <img :src="img.url" class="object-cover w-full h-full" :alt="'Ảnh kiểm kho ' + (idx+1)" />
@@ -351,6 +373,43 @@ const showImageModal = (idx) => {
 };
 const closeModal = () => {
   showModal.value = false;
+};
+
+// Tải ảnh hiện tại trong modal
+const downloadCurrentImage = async () => {
+  const img = audit.images[modalIndex.value];
+  await downloadImage(img, modalIndex.value);
+};
+// Tải tất cả ảnh
+const downloadAllImages = async () => {
+  try {
+    for (let i = 0; i < audit.images.length; i++) {
+      await downloadImage(audit.images[i], i);
+      // Đợi 300ms giữa các lần tải để tránh browser block
+      await new Promise(r => setTimeout(r, 300));
+    }
+    toastSuccess('Đã tải tất cả ảnh thành công!');
+  } catch (e) {
+    toastError('Lỗi khi tải tất cả ảnh!');
+  }
+};
+// Tải ảnh bất kỳ
+const downloadImage = async (img, idx) => {
+  try {
+    const url = img.url;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `kiem-kho-${audit.id}-anh-${idx+1}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
+    toastSuccess('Đã tải ảnh thành công!');
+  } catch (e) {
+    toastError('Lỗi khi tải ảnh!');
+  }
 };
 
 const page = usePage();
