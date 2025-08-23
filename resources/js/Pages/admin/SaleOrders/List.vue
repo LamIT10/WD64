@@ -820,7 +820,7 @@
                                     Xác nhận hoàn thành
                                 </button>
                                 <button
-                                    v-if="selectedOrder.status === 'shipped'"
+                                    v-if="selectedOrder.status === 'shipped'" v-can="'admin.sales-order.refund'"
                                     @click="openReturnModal(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
@@ -893,7 +893,7 @@
                                                 class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                                             >
                                                 <button
-                                                    @click="submitReturnReason"
+                                                    @click="submitReturnReason" 
                                                     type="button"
                                                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm"
                                                     :disabled="
@@ -919,7 +919,7 @@
 
                                 <!-- Nút xác nhận đã hoàn hàng thành công khi trạng thái là 'returning' -->
                                 <button
-                                    v-if="selectedOrder.status === 'returning'"
+                                    v-if="selectedOrder.status === 'returning'" v-can="'admin.sales-order.refund-confirm'"
                                     @click="confirmReturned(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
