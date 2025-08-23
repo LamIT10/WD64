@@ -75,7 +75,7 @@
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-download"></i> Tải mẫu
               </button>
-              <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
+              <input ref="importInput" :key="fileInputKey" type="file" accept=".xlsx,.xls" style="display: none"
                 @change="handleImportExcel" />
               <button @click="$refs.importInput.click()"
                 type="button"
@@ -313,42 +313,80 @@ const fetchProductsByZones = async (showAllZero = true) => {
 };
 
 
+const fileInputKey = ref(0);
 const handleImportExcel = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
+  // Kiểm tra định dạng file
+  const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+  if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    toastError('Vui lòng chọn file Excel hợp lệ (.xlsx, .xls)');
+    return;
+  }
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-    // Xác định header
-    const headers = jsonData[0].map(h => h ? h.toString().trim() : '');
-    const rows = jsonData.slice(1).filter(row => row.length && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
-
-    // Lấy danh sách khu vực từ file
-    const importedZones = Array.from(new Set(rows.map(row => row[headers.indexOf('Khu vực')] || '').filter(Boolean)));
-    // Cập nhật selectedZones và chờ API load xong products rồi mới xử lý tiếp
-    selectedZones.value = importedZones;
-    await fetchProductsByZones();
-
-    // Map dữ liệu từ file Excel vào auditData.value.items
-    rows.forEach(row => {
-      const code = row[headers.indexOf('Mã hàng')] || '';
-      const zone = row[headers.indexOf('Khu vực')] || '';
-      const actual_quantity = row[headers.indexOf('Thực tế')] ?? '';
-      const discrepancy_reason = row[headers.indexOf('Ghi chú chênh')] ?? '';
-      // Tìm đúng item trong auditData.value.items để cập nhật
-      const idx = products.findIndex(
-        p => p.code === code && p.zone === zone
-      );
-      if (idx !== -1 && auditData.value.items[idx]) {
-        auditData.value.items[idx].actual_quantity = actual_quantity;
-        auditData.value.items[idx].discrepancy_reason = discrepancy_reason;
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        toastError('File Excel không có sheet dữ liệu!');
+        return;
       }
-    });
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      if (!jsonData.length) {
+        toastError('File Excel không có dữ liệu!');
+        return;
+      }
+      // Xác định header
+      const headers = jsonData[0].map(h => h ? h.toString().trim() : '');
+      const rows = jsonData.slice(1).filter(row => row.length && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
+      if (!headers.includes('Khu vực') || !headers.includes('Mã hàng')) {
+        toastError('File Excel sai cấu trúc. ');
+        return;
+      }
+      // Lấy danh sách khu vực từ file
+      const importedZones = Array.from(new Set(rows.map(row => row[headers.indexOf('Khu vực')] || '').filter(Boolean)));
+      // Cập nhật selectedZones và chờ API load xong products rồi mới xử lý tiếp
+      selectedZones.value = importedZones;
+      await fetchProductsByZones();
+      // Map dữ liệu từ file Excel vào auditData.value.items
+      let invalidRows = [];
+      rows.forEach((row, i) => {
+        const code = row[headers.indexOf('Mã hàng')] || '';
+        const zone = row[headers.indexOf('Khu vực')] || '';
+        let actual_quantity = row[headers.indexOf('Thực tế')] ?? '';
+        const discrepancy_reason = row[headers.indexOf('Ghi chú chênh')] ?? '';
+        // Nếu actual_quantity là số âm hoặc không phải số, bỏ qua và lưu lại dòng lỗi
+        if (actual_quantity !== '' && (!/^-?\d+(\.\d+)?$/.test(actual_quantity) || Number(actual_quantity) < 0)) {
+          invalidRows.push(`#${i+2} (Mã hàng: ${code}, Khu vực: ${zone}, Thực tế: ${actual_quantity})`);
+          return;
+        }
+        // Tìm đúng item trong auditData.value.items để cập nhật
+        const idx = products.findIndex(
+          p => p.code === code && p.zone === zone
+        );
+        if (idx !== -1 && auditData.value.items[idx]) {
+          auditData.value.items[idx].actual_quantity = actual_quantity;
+          auditData.value.items[idx].discrepancy_reason = discrepancy_reason;
+        }
+      });
+      if (invalidRows.length) {
+        toastError(`Có ${invalidRows.length} dòng dữ liệu không hợp lệ (số thực tế âm hoặc không phải số):\n` + invalidRows.join('\n'));
+      } else {
+        toastSuccess('Nhập file Excel thành công!');
+      }
+    } catch (err) {
+      toastError('Lỗi khi đọc file Excel. Vui lòng kiểm tra lại file!');
+    } finally {
+      // Reset input để lần sau chọn lại file vẫn nhận sự kiện
+      fileInputKey.value++;
+    }
+  };
+  reader.onerror = () => {
+    toastError('Không thể đọc file. Vui lòng thử lại!');
+    fileInputKey.value++;
   };
   reader.readAsArrayBuffer(file);
 };
