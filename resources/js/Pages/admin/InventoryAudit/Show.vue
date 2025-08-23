@@ -1,83 +1,46 @@
 <template>
-    <!-- Modal xem ảnh lớn - Cải thiện giao diện -->
-    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
-        <div class="relative max-w-6xl max-h-[90vh] w-full mx-4 p-4">
-            <!-- Header với thông tin ảnh -->
-            <div class="absolute top-4 left-4 z-10 bg-black bg-opacity-60 text-white px-4 py-2 rounded-full text-sm font-medium">
-                {{ modalIndex + 1 }} / {{ audit.images.length }}
-            </div>
-            
+    <!-- Modal xem ảnh lớn - Giao diện đẹp, responsive, có tải tất cả -->
+    <div v-if="showModal && audit.images && audit.images.length" class="fixed inset-0 z-50 flex items-center justify-center bg-transparent">
+        <div @click.self="closeModal" class="absolute inset-0 z-40 cursor-pointer" style="background:rgba(0,0,0,0.01);"></div>
+        <div class="relative w-full max-w-3xl mx-2 bg-white rounded-2xl shadow-2xl p-0 flex flex-col items-center overflow-hidden z-50" style="height:80vh; min-height:400px;">
             <!-- Nút đóng -->
-            <button @click="closeModal" class="absolute top-4 right-4 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-3 transition-all duration-200" title="Đóng (ESC)">
+            <button @click="closeModal" class="absolute top-4 right-4 z-10 bg-white bg-opacity-80 hover:bg-opacity-100 text-red-500 rounded-full p-2 shadow transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            
-            <!-- Nút điều hướng -->
-            <button v-if="audit.images.length > 1" @click="previousImage" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-3 transition-all duration-200" title="Ảnh trước (←)">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </button>
-            
-            <button v-if="audit.images.length > 1" @click="nextImage" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-3 transition-all duration-200" title="Ảnh sau (→)">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
-            
             <!-- Ảnh chính -->
-            <div class="flex items-center justify-center h-full">
-                <img 
-                    :src="audit.images[modalIndex]?.url" 
-                    class="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform duration-300"
-                    :class="{ 'scale-125': isZoomed }"
-                    @click="toggleZoom"
-                    :alt="'Ảnh kiểm kho ' + (modalIndex + 1)"
-                />
+            <div class="flex-1 flex items-center justify-center w-full bg-gradient-to-br from-gray-50 to-gray-100 p-4 min-h-0">
+                <img :src="audit.images[modalIndex]?.url" class="max-h-full max-w-full object-contain rounded-xl shadow-lg border border-gray-200 bg-white" :alt="'Ảnh kiểm kho ' + (modalIndex+1)" style="max-height:56vh;" />
             </div>
-            
-            <!-- Controls bottom -->
-            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                <button @click="toggleZoom" class="bg-black bg-opacity-60 hover:bg-opacity-80 text-white px-4 py-2 rounded-full text-sm transition-all duration-200" :title="isZoomed ? 'Thu nhỏ' : 'Phóng to'">
-                    <svg v-if="!isZoomed" class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-                    </svg>
-                    <svg v-else class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path>
-                    </svg>
-                    {{ isZoomed ? 'Thu nhỏ' : 'Phóng to' }}
-                </button>
-                <button @click="downloadCurrentImage" class="bg-black bg-opacity-60 hover:bg-opacity-80 text-white px-4 py-2 rounded-full text-sm transition-all duration-200" title="Tải xuống">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    Tải xuống
-                </button>
-                <button @click="downloadAllImages" class="bg-indigo-600 bg-opacity-80 hover:bg-opacity-100 text-white px-4 py-2 rounded-full text-sm transition-all duration-200" title="Tải tất cả">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    Tải tất cả
-                </button>
-            </div>
-            
-            <!-- Thumbnail strip -->
-            <div v-if="audit.images.length > 1" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black bg-opacity-50 p-2 rounded-lg max-w-full overflow-x-auto">
-                <button
-                    v-for="(img, idx) in audit.images"
-                    :key="idx"
-                    @click="modalIndex = idx"
-                    class="relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 flex-shrink-0"
-                    :class="idx === modalIndex ? 'border-white' : 'border-transparent opacity-60 hover:opacity-80'"
-                >
-                    <img :src="img.url" class="w-full h-full object-cover" />
-                    <div v-if="idx === modalIndex" class="absolute inset-0 bg-white bg-opacity-20"></div>
-                </button>
+            <!-- Thanh điều khiển và thumbnail luôn cố định dưới -->
+            <div class="w-full flex flex-col md:flex-row items-center justify-between gap-2 px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
+                <div class="flex gap-2 items-center flex-wrap">
+                    <button @click="downloadCurrentImage" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Tải ảnh này
+                    </button>
+                    <button @click="downloadAllImages" class="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Tải tất cả
+                    </button>
+                    <span class="text-xs text-gray-500 ml-2">({{ modalIndex+1 }}/{{ audit.images.length }})</span>
+                </div>
+                <!-- Thanh thumbnail -->
+                <div class="flex gap-1 overflow-x-auto py-1 w-full md:w-auto justify-center">
+                    <button v-for="(img, idx) in audit.images" :key="idx" @click="modalIndex = idx" :class="['w-12 h-12 border-2 rounded-lg overflow-hidden flex-shrink-0 transition', idx === modalIndex ? 'border-indigo-500 ring-2 ring-indigo-300' : 'border-gray-200 hover:border-gray-300']">
+                        <img :src="img.url" class="object-cover w-full h-full" />
+                    </button>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal xem ảnh lớn -->
     <div class="no-print">
         <AppLayout>
 
@@ -122,22 +85,9 @@
                                 Tải tất cả
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                            <div v-for="(img, idx) in audit.images" :key="idx" class="relative aspect-square border-2 border-indigo-100 rounded-lg overflow-hidden group cursor-pointer transform transition-all duration-200 hover:scale-105 hover:shadow-md" @click="showImageModal(idx)">
-                                <img :src="img.url" class="object-cover w-full h-full transition duration-300 group-hover:opacity-90" :alt="'Ảnh kiểm kho ' + (idx+1)" />
-                                <!-- Overlay with number -->
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                                    <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <!-- Image number badge -->
-                                <div class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                    {{ idx + 1 }}
-                                </div>
+                        <div class="flex flex-wrap gap-3">
+                            <div v-for="(img, idx) in audit.images" :key="idx" class="relative w-28 h-28 border rounded overflow-hidden group cursor-pointer" @click="showImageModal(idx)">
+                                <img :src="img.url" class="object-cover w-full h-full" :alt="'Ảnh kiểm kho ' + (idx+1)" />
                             </div>
                         </div>
                     </div>
@@ -403,7 +353,7 @@
 </template>
 <script setup>
 
-import { reactive, ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import AppLayout from '../Layouts/AppLayout.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import Waiting from '../../components/Waiting.vue';
@@ -417,110 +367,48 @@ import axios from 'axios';
 // Modal xem ảnh lớn
 const showModal = ref(false);
 const modalIndex = ref(0);
-const isZoomed = ref(false);
-
 const showImageModal = (idx) => {
   modalIndex.value = idx;
   showModal.value = true;
-  isZoomed.value = false;
 };
-
 const closeModal = () => {
   showModal.value = false;
-  isZoomed.value = false;
 };
 
-const nextImage = () => {
-  if (modalIndex.value < audit.images.length - 1) {
-    modalIndex.value++;
-  } else {
-    modalIndex.value = 0; // Loop back to first
-  }
-  isZoomed.value = false;
-};
-
-const previousImage = () => {
-  if (modalIndex.value > 0) {
-    modalIndex.value--;
-  } else {
-    modalIndex.value = audit.images.length - 1; // Loop to last
-  }
-  isZoomed.value = false;
-};
-
-const toggleZoom = () => {
-  isZoomed.value = !isZoomed.value;
-};
-
+// Tải ảnh hiện tại trong modal
 const downloadCurrentImage = async () => {
+  const img = audit.images[modalIndex.value];
+  await downloadImage(img, modalIndex.value);
+};
+// Tải tất cả ảnh
+const downloadAllImages = async () => {
   try {
-    const imageUrl = audit.images[modalIndex.value]?.url;
-    if (!imageUrl) return;
-    
-    const response = await fetch(imageUrl);
+    for (let i = 0; i < audit.images.length; i++) {
+      await downloadImage(audit.images[i], i);
+      // Đợi 300ms giữa các lần tải để tránh browser block
+      await new Promise(r => setTimeout(r, 300));
+    }
+    toastSuccess('Đã tải tất cả ảnh thành công!');
+  } catch (e) {
+    toastError('Lỗi khi tải tất cả ảnh!');
+  }
+};
+// Tải ảnh bất kỳ
+const downloadImage = async (img, idx) => {
+  try {
+    const url = img.url;
+    const response = await fetch(url);
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    
     const link = document.createElement('a');
-    link.href = url;
-    link.download = `kiem-kho-${audit.id}-anh-${modalIndex.value + 1}.jpg`;
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `kiem-kho-${audit.id}-anh-${idx+1}.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    toastSuccess('Đã tải xuống ảnh thành công');
-  } catch (error) {
-    console.error('Error downloading image:', error);
-    toastError('Lỗi khi tải xuống ảnh');
-  }
-};
-
-const downloadAllImages = async () => {
-  try {
-    toastSuccess('Đang tải xuống tất cả ảnh...');
-    
-    for (let i = 0; i < audit.images.length; i++) {
-      const imageUrl = audit.images[i]?.url;
-      if (!imageUrl) continue;
-      
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `kiem-kho-${audit.id}-anh-${i + 1}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      // Delay nhỏ giữa các downloads
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-    
-    toastSuccess('Đã tải xuống tất cả ảnh thành công');
-  } catch (error) {
-    console.error('Error downloading images:', error);
-    toastError('Lỗi khi tải xuống ảnh');
-  }
-};
-
-// Keyboard navigation
-const handleKeydown = (e) => {
-  if (!showModal.value) return;
-  
-  switch (e.key) {
-    case 'Escape':
-      closeModal();
-      break;
-    case 'ArrowLeft':
-      previousImage();
-      break;
-    case 'ArrowRight':
-      nextImage();
-      break;
+    window.URL.revokeObjectURL(link.href);
+    toastSuccess('Đã tải ảnh thành công!');
+  } catch (e) {
+    toastError('Lỗi khi tải ảnh!');
   }
 };
 
@@ -716,15 +604,6 @@ const confirmReject = async () => {
   showRejectConfirm.value = false;
   await handleReject();
 };
-
-// Add keyboard event listeners
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <style>
