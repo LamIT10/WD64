@@ -81,7 +81,7 @@ class InventoryController extends Controller
             // Cập nhật trạng thái phiếu kiểm kho
             $audit->approved_by = $request->user()->id;
             $audit->is_adjusted = 1;
-            $audit->adjusted_at = now();
+            $audit->adjusted_at = now()->addHours(7);
             $audit->save();
 
             // Gửi thông báo đồng bộ thành công
