@@ -66,8 +66,8 @@ console.log(newUrl.value);
 const newPerPage = perPage == null ? "20" : perPage.trim == "" ? "20" : perPage;
 const editLabel = () => {
     data.links.forEach(element => {
-        if (element.label == "&laquo; Previous") element.label = "Previous";
-        if (element.label == "Next &raquo;") element.label = "Next"
+        if (element.label == "&laquo; Previous") element.label = "Trước";
+        if (element.label == "Next &raquo;") element.label = "Sau"
     });
 }
 editLabel();

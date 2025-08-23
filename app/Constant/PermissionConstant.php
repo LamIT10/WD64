@@ -22,6 +22,8 @@ class PermissionConstant
     public const SALES_ORDER_REJECT = 'admin.sales-order.reject';
     public const SALES_ORDER_EXPORT  = 'admin.sales-order.export';
     public const SALES_ORDER_COMPLETE  = 'admin.sales-order.complete';
+    public const SALES_ORDER_REFUND  = 'admin.sales-order.refund';
+    public const SALES_ORDER_REFUND_CONFIRM  = 'admin.sales-order.refund-confirm';
 
     // ==== INVENTORY AUDIT ==== Quản lý vị trí kho
     public const INVENTORY_AUDIT_INDEX   = 'admin.inventory-audit.index';
@@ -121,6 +123,9 @@ class PermissionConstant
     public const SUPPLIER_CREATE = 'admin.supplier.create';
     public const SUPPLIER_EDIT = 'admin.supplier.edit';
     public const SUPPLIER_DELETE = 'admin.supplier.delete';
+    public const SUPPLIER_PRODUCT_CREATE = 'admin.supplier.product.create';
+    public const SUPPLIER_PRODUCT_DELETE = 'admin.supplier.product.delete';
+
 
 
 
@@ -207,6 +212,14 @@ class PermissionConstant
                     [
                         "description" => "Xác nhận hoàn thành",
                         "name" => self::SALES_ORDER_COMPLETE,
+                    ],
+                    [
+                        "description" => "Hoàn hàng",
+                        "name" => self::SALES_ORDER_REFUND,
+                    ],
+                    [
+                        "description" => "Xác nhận hoàn hàng",
+                        "name" => self::SALES_ORDER_REFUND_CONFIRM,
                     ],
                 ],
             ],
@@ -511,6 +524,14 @@ class PermissionConstant
                     [
                         "description" => "Cập nhật thành toán công nợ",
                         "name" => self::SUPPLIER_TRANSACTION_UPDATE_CREDIT_PAID_AMOUNT,
+                    ],
+                    [
+                        "description" => "Thêm biến thể nhà cung cấp",
+                        "name" => self::SUPPLIER_PRODUCT_CREATE,
+                    ],
+                    [
+                        "description" => "Xoá biến thể nhà cung cấp",
+                        "name" => self::SUPPLIER_PRODUCT_DELETE,
                     ],
                 
                 ]
