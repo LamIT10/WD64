@@ -1019,7 +1019,7 @@ import ToastClient from "../../components/ToastClient.vue";
 import { useForm, router, usePage } from "@inertiajs/vue3";
 import { clearCanvas } from "chart.js/helpers";
 import axios from "axios";
-const { listOrders } = defineProps({
+const { listOrders, filters: initialFilters } = defineProps({
     listOrders: {
         default: () => ({
             data: [],
@@ -1030,6 +1030,14 @@ const { listOrders } = defineProps({
                 total: 0,
                 links: [],
             },
+        }),
+    },
+    filters: {
+        type: Object,
+        default: () => ({
+            customer: "",
+            order_date: "",
+            status: "",
         }),
     },
 });
@@ -1051,9 +1059,9 @@ const selectedOrder = ref({
 });
 const activeTab = ref("all");
 const filters = ref({
-    customer: "",
-    order_date: "",
-    status: "",
+    customer: initialFilters.customer || "",
+    order_date: initialFilters.order_date || "",
+    status: initialFilters.status || "",
 });
 
 function setActiveTab(tab) {

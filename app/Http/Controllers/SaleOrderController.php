@@ -45,7 +45,12 @@ class SaleOrderController extends Controller
                         'per_page' => 10,
                         'total' => 0,
                     ],
-                ]
+                ],
+                'filters' => [
+                    'customer' => $request->customer,
+                    'order_date' => $request->order_date,
+                    'status' => $request->status,
+                ],
             ]);
         }
         return Inertia::render('admin/SaleOrders/List', [
@@ -58,6 +63,11 @@ class SaleOrderController extends Controller
                     'total' => $result->total(),
                     'links' => $result->getUrlRange(1, $result->lastPage()),
                 ],
+            ],
+            'filters' => [
+                'customer' => $request->customer,
+                'order_date' => $request->order_date,
+                'status' => $request->status,
             ],
             'sale_order_id' => $request->query('sale_order_id'),
         ]);
