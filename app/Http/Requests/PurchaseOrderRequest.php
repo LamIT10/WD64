@@ -48,9 +48,9 @@ class PurchaseOrderRequest extends FormRequest
                     'total_amount' => ['required', 'numeric', 'min:0'],
                     'items' => ['required', 'array'],
                     'items.*.variant_id' => ['required', 'integer', 'exists:product_variants,id'],
-                    'items.*.quantity_ordered' => ['required', 'numeric', 'min:0'],
+                    'items.*.quantity_ordered' => ['required', 'numeric', 'gt:0'],
                     'items.*.unit_id' => ['required', 'integer', 'exists:units,id'],
-                    'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+                    'items.*.unit_price' => ['required', 'numeric', 'gt:0'],
                 ];
             default:
                 return [];
@@ -62,8 +62,8 @@ class PurchaseOrderRequest extends FormRequest
             'orders.*.expected_date.required' => 'Ngày dự kiến không được để trống.',
             'orders.*.expected_date.date' => 'Ngày dự kiến không đúng định dạng.',
             'orders.*.expected_date.after_or_equal' => 'Ngày dự kiến không được ở quá khứ.',
-            'items.*.quantity_ordered.min' => 'Số lượng nhập phải lớn hơn 0',
-            'items.*.unit_price.min' => 'Giá nhập phải lớn hơn 0',
+            'items.*.quantity_ordered.gt' => 'Số lượng nhập phải lớn hơn 0',
+            'items.*.unit_price.gt' => 'Giá nhập phải lớn hơn 0',
             'items.required' => 'Phải có sản phẩm trong đơn hàng',
             'order_date.after_or_equal' => 'Ngày dự kiến không được ở quá khứ',
         ];

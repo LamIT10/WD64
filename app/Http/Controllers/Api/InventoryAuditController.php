@@ -71,6 +71,8 @@ class InventoryAuditController extends BaseApiController
     public function showInformationCreate(Request $request)
     {
         $zones = $request->input('zones', []);
+        $showAllZero = $request->boolean('show_all_zero', false); // nhận biến
+
         if (!is_array($zones) || empty($zones)) {
             return response()->json([
                 'data' => [],
@@ -97,7 +99,11 @@ class InventoryAuditController extends BaseApiController
         $result = [];
         foreach ($products as $product) {
             foreach ($product->productVariants as $variant) {
-                // Lấy zone cho biến thể này
+                // Nếu không muốn show hàng hết, thì lọc như cũ
+                if (!$showAllZero && $product->status_product == 0 && optional($variant->inventory->first())->quantity_on_hand == 0) {
+                    continue;
+                }
+
                 $zoneLocation = $variant->inventoryLocations->first(function ($loc) use ($zones) {
                     return $loc->zone && in_array($loc->zone->name, $zones);
                 });
@@ -113,6 +119,7 @@ class InventoryAuditController extends BaseApiController
                     'id_product_variant' => $variant->id,
                     'name_product' => $product->name,
                     'variant_attributes' => $attributes,
+                    'status_product' => $product->status_product,
                     'quantity_on_hand' => optional($variant->inventory->first())->quantity_on_hand,
                     'quantity_reserved' => optional($variant->inventory->first())->quantity_reserved,
                     'quantity_in_transit' => optional($variant->inventory->first())->quantity_in_transit,

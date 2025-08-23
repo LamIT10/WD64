@@ -324,3 +324,5 @@ Route::post('/admin/notifications/{id}/read', [NotificationRealtimeController::c
 Route::post('/admin/notifications/read-all', [NotificationRealtimeController::class, 'markAllAsRead']);
 
 Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+

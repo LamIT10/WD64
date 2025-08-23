@@ -279,18 +279,86 @@
               <p class="text-sm text-gray-500">Bảo vệ tài khoản của bạn</p>
             </div>
             <div class="p-6 space-y-6">
+              <!-- Email đăng nhập -->
               <div>
                 <label class="block text-sm font-medium text-gray-500">Email đăng nhập</label>
                 <p class="text-gray-800">{{ $page.props.auth.user?.email }}</p>
               </div>
+
+              <!-- Phần mật khẩu hiện tại -->
               <div class="flex justify-between items-center">
                 <div>
                   <h3 class="text-lg font-medium text-gray-900">Mật khẩu</h3>
                   <p class="text-sm text-gray-500">Cập nhật mật khẩu thường xuyên</p>
                 </div>
-                <a href="/forgot-password" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                  Lấy lại mật khẩu
-                </a>
+                <div class="flex gap-2">
+                  <button @click="showPasswordForm = !showPasswordForm"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                    Đổi mật khẩu
+                  </button>
+                  <a href="/forgot-password" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    Lấy lại mật khẩu
+                  </a>
+                </div>
+              </div>
+
+              <!-- Form đổi mật khẩu (toggle) -->
+              <div v-if="showPasswordForm" class="mt-6 space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-500">Mật khẩu hiện tại</label>
+                  <div class="relative">
+                    <input :type="showCurrentPassword ? 'text' : 'password'" v-model="passwordForm.current_password"
+                      class="w-full border rounded px-3 py-2 pr-10" />
+                    <button type="button" @click="showCurrentPassword = !showCurrentPassword"
+                      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      <i :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                  </div>
+                  <p v-if="passwordErrors.current_password" class="text-red-600 text-sm mt-1">
+                    {{ passwordErrors.current_password[0] }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-500">Mật khẩu mới</label>
+                  <div class="relative">
+                    <input :type="showNewPassword ? 'text' : 'password'" v-model="passwordForm.new_password"
+                      class="w-full border rounded px-3 py-2 pr-10" />
+                    <button type="button" @click="showNewPassword = !showNewPassword"
+                      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      <i :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                  </div>
+                  <p v-if="passwordErrors.new_password" class="text-red-600 text-sm mt-1">
+                    {{ passwordErrors.new_password[0] }}
+                  </p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-500">Xác nhận mật khẩu mới</label>
+                  <div class="relative">
+                    <input :type="showConfirmPassword ? 'text' : 'password'"
+                      v-model="passwordForm.new_password_confirmation" class="w-full border rounded px-3 py-2 pr-10" />
+                    <button type="button" @click="showConfirmPassword = !showConfirmPassword"
+                      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                    </button>
+                  </div>
+                  <p v-if="passwordErrors.new_password_confirmation" class="text-red-600 text-sm mt-1">
+                    {{ passwordErrors.new_password_confirmation[0] }}
+                  </p>
+
+                </div>
+                <div class="flex gap-2">
+                  <button @click="changePassword"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                    Lưu
+                  </button>
+                  <button @click="showPasswordForm = false"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    Hủy
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -381,6 +449,39 @@ function formatDate(date) {
   const d = new Date(date)
   return d.toLocaleDateString('vi-VN')
 }
+
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+const showPasswordForm = ref(false)
+
+const passwordForm = ref({
+  current_password: '',
+  new_password: '',
+  new_password_confirmation: ''
+})
+
+const passwordErrors = ref({})
+
+const changePassword = () => {
+  router.post(route('profile.change-password'), passwordForm.value, {
+    onSuccess: () => {
+      passwordForm.value = { current_password: '', new_password: '', new_password_confirmation: '' }
+      passwordErrors.value = {}
+      showPasswordForm.value = false
+      alert('Đổi mật khẩu thành công!')
+    },
+    onError: (pageError) => {
+      const rawErrors = pageError?.props?.errors || page.props.errors || {}
+      const formattedErrors = {}
+      for (const key in rawErrors) {
+        formattedErrors[key] = Array.isArray(rawErrors[key]) ? rawErrors[key] : [String(rawErrors[key])]
+      }
+      passwordErrors.value = formattedErrors
+    }
+  })
+}
+
 </script>
 
 <style scoped>

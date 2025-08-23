@@ -64,10 +64,13 @@ class PurchaseOrderRepository extends BaseRepository
         if ($request->filled('code')) {
             $query->where('code', 'like', '%' . $request->code . '%');
         }
-        if ($request->filled('start') || $request->filled('end')) {
-            $start = $request->start ? Carbon::parse($request->start)->startOfDay() : Carbon::minValue();
-            $end   = $request->end   ? Carbon::parse($request->end)->endOfDay()   : Carbon::maxValue();
-            $query->whereBetween('created_at', [$start, $end]);
+        if ($request->filled('start')) {
+            $start = Carbon::parse($request->start)->startOfDay();
+            $query->where('created_at', '>=', $start);
+        }
+        if ($request->filled('end')) {
+            $end = Carbon::parse($request->end)->endOfDay();
+            $query->where('created_at', '<=', $end);
         }
         $query->orderByDesc('id');
 
@@ -194,7 +197,7 @@ class PurchaseOrderRepository extends BaseRepository
             app(NotificationService::class)->notifyAll(
                 'purchase_order_created',
                 'Đặt hàng nhập',
-                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới bởi {$actor->name} ",
+                "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới bởi " . $actor->name,
                 []
             );
             return $newPurchaseOrder;
@@ -492,21 +495,21 @@ class PurchaseOrderRepository extends BaseRepository
                     'updated_by' => Auth::user()->id,
                     'detail' => $textUpdateDetail
                 ]);
+                app(NotificationService::class)->create(
+                    'purchase_order_updated',
+                    'Đặt hàng nhập',
+                    "Đơn hàng #{$purchase->code} đã được cập nhật thành công.",
+                    [],
+                );
+                $actor = Auth::user();
+                app(NotificationService::class)->notifyAll(
+                    'purchase_order_updated',
+                    'Đặt hàng nhập',
+                    "Đơn hàng #{$purchase->code} đã được cập nhật thành công.', bởi {$actor->name} ",
+                    []
+                );
             }
             DB::commit();
-            app(NotificationService::class)->create(
-                'purchase_order_updated',
-                'Đặt hàng nhập',
-                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.",
-                [],
-            );
-            $actor = Auth::user();
-            app(NotificationService::class)->notifyAll(
-                'purchase_order_updated',
-                'Đặt hàng nhập',
-                "Đơn hàng #{$purchase->code} đã được cập nhật thành công.', bởi {$actor->name} ",
-                []
-            );
             return $purchase;
         } catch (\Throwable $th) {
             DB::rollBack();

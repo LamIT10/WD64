@@ -51,7 +51,7 @@ class SaleOrdersRepository extends BaseRepository
                             'quantity_ordered',
                             'unit_id',
                             'unit_price',
-                            'subtotal'
+                            'subtotal',
                         )
                             ->with([
                                 'productVariant' => function ($query) {

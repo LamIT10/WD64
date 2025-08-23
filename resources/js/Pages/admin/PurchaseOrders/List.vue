@@ -149,20 +149,6 @@
                         <i class="fa-solid text-xl fa-rotate-left"></i>
                     </button>
                 </div>
-                <!-- <div class="mt-4 flex gap-3">
-                    <button
-                        @click="submitFilter"
-                        class="px-5 py-2 bg-indigo-600 text-white rounded"
-                    >
-                        LỌC
-                    </button>
-                    <button
-                        @click="resetFilter"
-                        class="px-5 py-2 border rounded"
-                    >
-                        XÓA LỌC
-                    </button>
-                </div> -->
             </div>
 
             <!-- Table -->
@@ -268,9 +254,11 @@
                         <button
                             v-for="link in listOrders.links"
                             :key="link.label"
-                            v-html="link.label"
+                            v-html="link.label
+                            .replace('Previous', 'Trước')
+                            .replace('Next', 'Sau')"
                             :disabled="!link.url"
-                            @click="$inertia.visit(link.url)"
+                            @click="link.url && $inertia.visit(link.url)"
                             :class="[
                                 'px-3 py-1 rounded-md text-sm',
                                 link.active
