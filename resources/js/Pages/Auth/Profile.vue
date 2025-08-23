@@ -68,16 +68,32 @@
                 </h2>
                 <p class="text-sm text-gray-500">Thông tin cơ bản về bạn</p>
               </div>
-              <!-- <button class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors">
-      <i class="fas fa-pen mr-2"></i>Chỉnh sửa
-    </button> -->
+              <div>
+                <button v-if="!isEditing" @click="isEditing = true"
+                  class="px-4 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors">
+                  <i class="fas fa-pen mr-2"></i>Chỉnh sửa
+                </button>
+                <div v-else class="flex gap-2">
+                  <button @click="savePersonalInfo"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Lưu
+                  </button>
+                  <button @click="cancelEdit" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Hủy
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Họ và tên -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Họ và tên</label>
-                <p class="text-gray-800 font-medium">
+                <template v-if="isEditing">
+                  <input v-model="form.name" type="text" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.name" class="text-red-600 text-sm mt-1">{{ errors.name[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800 font-medium">
                   {{ $page.props.auth.user?.name || 'Chưa cập nhật' }}
                 </p>
               </div>
@@ -85,7 +101,11 @@
               <!-- Ngày sinh -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Ngày sinh</label>
-                <p class="text-gray-800">
+                <template v-if="isEditing">
+                  <input v-model="form.birthday" type="date" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.birthday" class="text-red-600 text-sm mt-1">{{ errors.birthday[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ formatDate($page.props.auth.user?.birthday) || 'Chưa cập nhật' }}
                 </p>
               </div>
@@ -93,25 +113,45 @@
               <!-- Giới tính -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Giới tính</label>
-                <p class="text-gray-800">
-                  {{ $page.props.auth.user?.gender === 'male' || $page.props.auth.user?.gender === '1' ? 'Nam' :
-                    $page.props.auth.user?.gender === 'female' || $page.props.auth.user?.gender === '0' ? 'Nữ' :
-                      'Chưa cập nhật' }}
+                <template v-if="isEditing">
+                  <select v-model="form.gender" class="w-full border rounded px-3 py-2">
+                    <option value="">Chọn giới tính</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                  </select>
+                  <p v-if="errors.gender" class="text-red-600 text-sm mt-1">{{ errors.gender[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
+                  {{
+                    $page.props.auth.user?.gender === 'male' || $page.props.auth.user?.gender === '1'
+                      ? 'Nam'
+                      : $page.props.auth.user?.gender === 'female' || $page.props.auth.user?.gender === '0'
+                        ? 'Nữ'
+                        : 'Chưa cập nhật'
+                  }}
                 </p>
               </div>
 
               <!-- CMND/CCCD -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">CMND/CCCD</label>
-                <p class="text-gray-800">
+                <template v-if="isEditing">
+                  <input v-model="form.identity_number" type="text" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.identity_number" class="text-red-600 text-sm mt-1">{{ errors.identity_number[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ $page.props.auth.user?.identity_number || 'Chưa cập nhật' }}
                 </p>
               </div>
 
-              <!-- Địa Chỉ -->
+              <!-- Địa chỉ -->
               <div class="space-y-1">
-                <label class="block text-sm font-medium text-gray-500">Địa Chỉ</label>
-                <p class="text-gray-800">
+                <label class="block text-sm font-medium text-gray-500">Địa chỉ</label>
+                <template v-if="isEditing">
+                  <input v-model="form.address" type="text" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.address" class="text-red-600 text-sm mt-1">{{ errors.address[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ $page.props.auth.user?.address || 'Chưa cập nhật' }}
                 </p>
               </div>
@@ -119,7 +159,11 @@
               <!-- Facebook -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Facebook</label>
-                <p class="text-gray-800">
+                <template v-if="isEditing">
+                  <input v-model="form.facebook" type="text" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.facebook" class="text-red-600 text-sm mt-1">{{ errors.facebook[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ $page.props.auth.user?.facebook || 'Chưa cập nhật' }}
                 </p>
               </div>
@@ -127,7 +171,11 @@
               <!-- Số điện thoại -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Số điện thoại</label>
-                <p class="text-gray-800">
+                <template v-if="isEditing">
+                  <input v-model="form.phone" type="text" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.phone" class="text-red-600 text-sm mt-1">{{ errors.phone[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ $page.props.auth.user?.phone || 'Chưa cập nhật' }}
                 </p>
               </div>
@@ -135,13 +183,16 @@
               <!-- Email -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Email công ty</label>
-                <p class="text-gray-800">
+                <template v-if="isEditing">
+                  <input v-model="form.email" type="email" class="w-full border rounded px-3 py-2" />
+                  <p v-if="errors.email" class="text-red-600 text-sm mt-1">{{ errors.email[0] }}</p>
+                </template>
+                <p v-else class="text-gray-800">
                   {{ $page.props.auth.user?.email || 'Chưa cập nhật' }}
                 </p>
               </div>
             </div>
           </section>
-
 
           <!-- Work Info -->
           <section id="work-info" class="bg-white rounded-xl shadow-md overflow-hidden">
@@ -153,15 +204,11 @@
                 </h2>
                 <p class="text-sm text-gray-500">Thông tin về vị trí và nhiệm vụ của bạn</p>
               </div>
-              <!-- <button class="px-4 py-2 bg-white border border-gray-200 text-gray-500 rounded-lg cursor-not-allowed"
-                disabled>
-                <i class="fas fa-pen mr-2"></i>Chỉnh sửa
-              </button> -->
             </div>
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Mã nhân viên</label>
-                <p class="text-gray-800 font-medium">{{ $page.props.auth.user?.employee_code || "Chưa cập nhật" }}</p>
+                <p class="text-gray-800 font-medium">{{ $page.props.auth.user?.employee_code || 'Chưa cập nhật' }}</p>
               </div>
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Vai trò</label>
@@ -172,22 +219,17 @@
                     {{ $page.props.auth.role.name }}
                   </span>
                 </div>
-
                 <div v-else>
                   <p class="text-gray-800">Chưa cập nhật</p>
                 </div>
               </div>
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Vị trí công việc</label>
-                <p class="text-gray-800">{{ $page.props.auth.user?.position || "Chưa cập nhật" }}</p>
+                <p class="text-gray-800">{{ $page.props.auth.user?.position || 'Chưa cập nhật' }}</p>
               </div>
-              <!-- <div class="space-y-1">
-                <label class="block text-sm font-medium text-gray-500">Ca làm việc</label>
-                <p class="text-gray-800">{{ $page.props.auth.user?.shift }}</p>
-              </div> -->
               <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-500">Ngày bắt đầu làm việc</label>
-                <p class="text-gray-800">{{ formatDate($page.props.auth.user?.start_date) || "Chưa cập nhật" }}</p>
+                <p class="text-gray-800">{{ formatDate($page.props.auth.user?.start_date) || 'Chưa cập nhật' }}</p>
               </div>
             </div>
           </section>
@@ -202,10 +244,6 @@
                 </h2>
                 <p class="text-sm text-gray-500">Hoạt động và phân quyền của bạn</p>
               </div>
-              <!-- <button class="px-4 py-2 bg-white border border-gray-200 text-gray-500 rounded-lg cursor-not-allowed"
-                disabled>
-                <i class="fas fa-pen mr-2"></i>Chỉnh sửa
-              </button> -->
             </div>
             <div class="p-6 space-y-6">
               <div class="flex items-center gap-2">
@@ -218,20 +256,10 @@
                   'text-green-600': $page.props.auth.user?.status === 'active',
                   'text-red-600': $page.props.auth.user?.status === 'inactive'
                 }">
-                  {{
-                    $page.props.auth.user?.status === 'active'
-                      ? 'Đang làm việc'
-                  : 'Đã nghỉ việc'
-                  }}
+                  {{ $page.props.auth.user?.status === 'active' ? 'Đang làm việc' : 'Đã nghỉ việc' }}
                 </p>
               </div>
 
-              <!-- <p>Lần đăng nhập gần nhất: {{ $page.props.auth.user?.last_login }}</p>
-              <div v-for="activity in $page.props.auth.user?.activities" :key="activity.id"
-                class="border-l-2 border-indigo-200 pl-4 py-1">
-                <p class="text-sm">{{ activity.action }} - <span class="text-gray-500 text-xs">{{ activity.time
-                }}</span></p>
-              </div> -->
               <div class="grid grid-cols-2 gap-2 mt-2">
                 <div v-for="perm in $page.props.auth.user?.permissions" :key="perm"
                   class="flex items-center gap-1 bg-indigo-50 p-2 rounded">
@@ -273,28 +301,86 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue'
+import { usePage, router } from '@inertiajs/vue3'
 
-const activeSection = ref('');
+const activeSection = ref('')
+const page = usePage()
+const user = page.props.auth.user
+const role = page.props.auth.role
 
-const getInitial = (name) => !name ? '' : name.split(' ').map(n => n[0]).join('').toUpperCase();
+const isEditing = ref(false)
+
+const form = ref({
+  name: user?.name || '',
+  birthday: user?.birthday || '',
+  gender: user?.gender || '',
+  identity_number: user?.identity_number || '',
+  address: user?.address || '',
+  facebook: user?.facebook || '',
+  phone: user?.phone || '',
+  email: user?.email || ''
+})
+
+// errors state để hiển thị validate
+const errors = ref({})
+
+const savePersonalInfo = () => {
+  router.post(route('profile.update'), form.value, {
+    onSuccess: () => {
+      isEditing.value = false
+      errors.value = {}
+    },
+    onError: (pageError) => {
+      const rawErrors = pageError?.props?.errors || page.props.errors || {}
+      // Chuyển tất cả giá trị thành mảng string
+      const formattedErrors = {}
+      for (const key in rawErrors) {
+        formattedErrors[key] = Array.isArray(rawErrors[key])
+          ? rawErrors[key]
+          : [String(rawErrors[key])]
+      }
+      errors.value = formattedErrors
+    }
+  })
+}
+
+const cancelEdit = () => {
+  isEditing.value = false
+  errors.value = {}
+  form.value = {
+    name: user?.name || '',
+    birthday: user?.birthday || '',
+    gender: user?.gender || '',
+    identity_number: user?.identity_number || '',
+    address: user?.address || '',
+    facebook: user?.facebook || '',
+    phone: user?.phone || '',
+    email: user?.email || ''
+  }
+}
+
+const getInitial = (name) =>
+  !name ? '' : name.split(' ').map((n) => n[0]).join('').toUpperCase()
 
 const handleScroll = () => {
-  let current = '';
-  document.querySelectorAll('section').forEach(sec => {
-    if (window.pageYOffset >= sec.offsetTop - 200) current = sec.id;
-  });
-  activeSection.value = current;
-};
+  let current = ''
+  document.querySelectorAll('section').forEach((sec) => {
+    if (window.pageYOffset >= sec.offsetTop - 200) {
+      current = sec.id
+    }
+  })
+  activeSection.value = current
+}
 
-onMounted(() => window.addEventListener('scroll', handleScroll));
-onUnmounted(() => window.removeEventListener('scroll', handleScroll));
+onMounted(() => window.addEventListener('scroll', handleScroll))
+onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
 function formatDate(date) {
-  if (!date) return 'Chưa cập nhật';
-  const d = new Date(date);
-  return d.toLocaleDateString('vi-VN'); // sẽ ra dd/mm/yyyy
-} 
+  if (!date) return 'Chưa cập nhật'
+  const d = new Date(date)
+  return d.toLocaleDateString('vi-VN')
+}
 </script>
 
 <style scoped>

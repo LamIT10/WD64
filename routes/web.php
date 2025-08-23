@@ -40,6 +40,7 @@ use App\Http\Controllers\SaleOrderController;
 use App\Http\Controllers\Auth\ProfileController;
 
 
+
 Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
     Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
@@ -321,3 +322,5 @@ Route::prefix('admin/notifications')->as('notifications.')->group(function () {
 Route::get('/admin/notifications', [NotificationRealtimeController::class, 'getHeaderNotifications']);
 Route::post('/admin/notifications/{id}/read', [NotificationRealtimeController::class, 'markAsRead']);
 Route::post('/admin/notifications/read-all', [NotificationRealtimeController::class, 'markAllAsRead']);
+
+Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
