@@ -228,6 +228,7 @@ const fetchNotifications = async () => {
         const response = await axios.get("/admin/notifications");
         notifications.value = response.data.notifications;
         unreadCount.value = response.data.unreadCount;
+        console.log("Fetched notifications:", notifications.value);
     } catch (error) {
         console.error("Error fetching notifications:", error);
     }
@@ -326,14 +327,12 @@ const getNotificationIcon = (type) => {
             return "fas fa-check-double text-indigo-500";
         case "order_pending":
             return "fas fa-clock text-yellow-500";
-        // Thông báo kiểm kho
         case "inventory_audit_created":
             return "fas fa-clipboard-list text-indigo-500";
         case "inventory_audit_rejected":
             return "fas fa-times-circle text-red-500";
         case "inventory_audit_synced":
             return "fas fa-sync-alt text-green-500";
-        // ✅ REAL-TIME: Add more notification types
         case "info":
             return "fas fa-info-circle text-blue-500";
         case "success":
@@ -351,7 +350,6 @@ const getNotificationIcon = (type) => {
     }
 };
 
-// ✅ REAL-TIME: Helper function to format notification time
 const formatNotificationTime = (date) => {
     const now = new Date();
     const diff = now - date;
@@ -366,7 +364,6 @@ const formatNotificationTime = (date) => {
     return date.toLocaleDateString("vi-VN");
 };
 
-// Click outside handler
 const handleClickOutside = (event) => {
     if (
         notificationRef.value &&
@@ -384,19 +381,12 @@ const handleClickOutside = (event) => {
 let interval = null;
 let notificationChannel = null;
 
-// Lifecycle hooks
 onMounted(() => {
     fetchNotifications();
 
-    // ✅ REAL-TIME: Replace polling with WebSocket
-    // interval = setInterval(fetchNotifications, 60000); // Polling mỗi 60s - DISABLED
-
-    // ✅ REAL-TIME: Setup WebSocket notifications
     if (window.Echo) {
         console.log("🔔 Setting up real-time notifications in Header...");
 
-        // Subscribe to user-specific notifications (assuming user ID = 1 for now)
-        // TODO: Replace with actual authenticated user ID
         const currentUserId = page.props.auth.user.id; // Get from auth context
 
         notificationChannel = window.Echo.channel(

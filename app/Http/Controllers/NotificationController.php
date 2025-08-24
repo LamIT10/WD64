@@ -18,9 +18,13 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = Notification::where('user_id', Auth::id())
+
+        $notificationsQuery = Notification::where('user_id', Auth::id())
+            ->select(['id', 'type', 'title', 'message', 'created_at', 'is_read', 'data']);
+
+        $notifications = $notificationsQuery
             ->latest()
-            ->take(10) // Chỉ lấy 10 mới nhất
+            ->take(10)
             ->get()
             ->map(function ($n) {
                 return [
@@ -34,7 +38,10 @@ class NotificationController extends Controller
                 ];
             });
 
-        $unreadCount = Notification::where('user_id', Auth::id())->where('is_read', false)->count();
+        $unreadCount = Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
         return response()->json([
             'notifications' => $notifications,
             'unreadCount' => $unreadCount,
