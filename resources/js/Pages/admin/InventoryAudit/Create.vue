@@ -75,7 +75,7 @@
                 class="px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100 hover:border-indigo-300 flex items-center gap-1">
                 <i class="fa fa-download"></i> Tải mẫu
               </button>
-              <input ref="importInput" type="file" accept=".xlsx,.xls" style="display: none"
+              <input ref="importInput" :key="fileInputKey" type="file" accept=".xlsx,.xls" style="display: none"
                 @change="handleImportExcel" />
               <button @click="$refs.importInput.click()"
                 type="button"
@@ -98,54 +98,60 @@
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">Thực tế</th>
                   <th class="px-3 py-2 text-center font-semibold text-indigo-700">SL chênh</th>
                   <th class="px-3 py-2 text-left font-semibold text-indigo-700">Ghi chú chênh</th>
+                  <th class="px-3 py-2 text-center font-semibold text-indigo-700">Bỏ kiểm</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
-                <tr v-for="(product, index) in filteredProducts" :key="product.id" class="hover:bg-gray-50">
+                <tr v-for="(item, index) in filteredProducts" :key="item.product.id" class="hover:bg-gray-50">
                   <td class="px-3 py-2 text-center">{{ index + 1 }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.zone }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.custom_location_name }}</td>
-                  <td class="px-3 py-2 text-center font-medium">{{ product.code }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.zone }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.custom_location_name }}</td>
+                  <td class="px-3 py-2 text-center font-medium">{{ item.product.code }}</td>
                   <td class="px-3 py-2">
                     <br>
-                    {{ product.name_product }} <br>
+                    {{ item.product.name_product }} <br>
                     <span
                       :class="[
                         'px-2 py-0.5 rounded text-xs font-medium',
-                        product.status_product === 0
+                        item.product.status_product === 0
                           ? 'bg-red-100 text-red-600 border border-red-200'
                           : 'bg-green-100 text-green-700 border border-green-200'
                       ]"
                     >
-                      {{ product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
+                      {{ item.product.status_product === 0 ? 'Ngừng bán' : 'Đang bán' }}
                     </span>
-                    <template v-if="product.variant_attributes && Object.keys(product.variant_attributes).length">
+                    <template v-if="item.product.variant_attributes && Object.keys(item.product.variant_attributes).length">
                       <div class="text-xs text-gray-500 mt-1">
-                        <span v-for="(value, key) in product.variant_attributes" :key="key" class="mr-2">
+                        <span v-for="(value, key) in item.product.variant_attributes" :key="key" class="mr-2">
                           <span class="font-medium">{{ value.attribute }}:</span> {{ value.value }}
                         </span>
                       </div>
                     </template>
                   </td>
-                  <td class="px-3 py-2 text-center">{{ product.unit }}</td>
-                  <td class="px-3 py-2 text-center">{{ product.quantity_on_hand }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.unit }}</td>
+                  <td class="px-3 py-2 text-center">{{ item.product.quantity_on_hand }}</td>
                   <td class="px-3 py-2 text-center">
                     <input
                       type="number"
-                      v-model="auditData.items[index].actual_quantity"
+                      v-model="auditData.items[item.originalIndex].actual_quantity"
                       class="w-20 border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm text-center"
                       min="0"
                       required
-                      @input="() => { if (auditData.items[index].actual_quantity < 0) auditData.items[index].actual_quantity = 0 }"
+                      @input="() => { if (auditData.items[item.originalIndex].actual_quantity < 0) auditData.items[item.originalIndex].actual_quantity = 0 }"
                     />
                   </td>
                   <td class="px-3 py-2 text-center">
-                    {{ auditData.items[index].actual_quantity - product.quantity_on_hand || 0 }}
+                    {{ auditData.items[item.originalIndex].actual_quantity - item.product.quantity_on_hand || 0 }}
                   </td>
                   <td class="px-3 py-2">
-                    <input type="text" v-model="auditData.items[index].discrepancy_reason"
+                    <input type="text" v-model="auditData.items[item.originalIndex].discrepancy_reason"
                       class="w-full border border-gray-200 rounded px-2 py-1 bg-gray-50 text-sm"
                       placeholder="Lý do chênh lệch" />
+                  </td>
+                  <td class="px-3 py-2 text-center">
+                    <button type="button" @click="excludeProduct(item.originalIndex)" class="text-red-500 hover:text-red-700" title="Bỏ kiểm sản phẩm này">
+                      <i class="fa fa-times-circle text-xl"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -204,8 +210,8 @@ const auditData = ref({
   items: []
 });
 const canSubmit = computed(() =>
-  auditData.value.items.length > 0 &&
-  auditData.value.items.every(item =>
+  auditData.value.items.filter(item => !item.excluded).length > 0 &&
+  auditData.value.items.filter(item => !item.excluded).every(item =>
     item.actual_quantity !== '' &&
     item.actual_quantity !== null &&
     item.actual_quantity !== undefined &&
@@ -313,42 +319,80 @@ const fetchProductsByZones = async (showAllZero = true) => {
 };
 
 
+const fileInputKey = ref(0);
 const handleImportExcel = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
+  // Kiểm tra định dạng file
+  const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+  if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+    toastError('Vui lòng chọn file Excel hợp lệ (.xlsx, .xls)');
+    return;
+  }
   const reader = new FileReader();
   reader.onload = async (e) => {
-    const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-    // Xác định header
-    const headers = jsonData[0].map(h => h ? h.toString().trim() : '');
-    const rows = jsonData.slice(1).filter(row => row.length && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
-
-    // Lấy danh sách khu vực từ file
-    const importedZones = Array.from(new Set(rows.map(row => row[headers.indexOf('Khu vực')] || '').filter(Boolean)));
-    // Cập nhật selectedZones và chờ API load xong products rồi mới xử lý tiếp
-    selectedZones.value = importedZones;
-    await fetchProductsByZones();
-
-    // Map dữ liệu từ file Excel vào auditData.value.items
-    rows.forEach(row => {
-      const code = row[headers.indexOf('Mã hàng')] || '';
-      const zone = row[headers.indexOf('Khu vực')] || '';
-      const actual_quantity = row[headers.indexOf('Thực tế')] ?? '';
-      const discrepancy_reason = row[headers.indexOf('Ghi chú chênh')] ?? '';
-      // Tìm đúng item trong auditData.value.items để cập nhật
-      const idx = products.findIndex(
-        p => p.code === code && p.zone === zone
-      );
-      if (idx !== -1 && auditData.value.items[idx]) {
-        auditData.value.items[idx].actual_quantity = actual_quantity;
-        auditData.value.items[idx].discrepancy_reason = discrepancy_reason;
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        toastError('File Excel không có sheet dữ liệu!');
+        return;
       }
-    });
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      if (!jsonData.length) {
+        toastError('File Excel không có dữ liệu!');
+        return;
+      }
+      // Xác định header
+      const headers = jsonData[0].map(h => h ? h.toString().trim() : '');
+      const rows = jsonData.slice(1).filter(row => row.length && row.some(cell => cell !== undefined && cell !== null && cell !== ''));
+      if (!headers.includes('Khu vực') || !headers.includes('Mã hàng')) {
+        toastError('File Excel sai cấu trúc. ');
+        return;
+      }
+      // Lấy danh sách khu vực từ file
+      const importedZones = Array.from(new Set(rows.map(row => row[headers.indexOf('Khu vực')] || '').filter(Boolean)));
+      // Cập nhật selectedZones và chờ API load xong products rồi mới xử lý tiếp
+      selectedZones.value = importedZones;
+      await fetchProductsByZones();
+      // Map dữ liệu từ file Excel vào auditData.value.items
+      let invalidRows = [];
+      rows.forEach((row, i) => {
+        const code = row[headers.indexOf('Mã hàng')] || '';
+        const zone = row[headers.indexOf('Khu vực')] || '';
+        let actual_quantity = row[headers.indexOf('Thực tế')] ?? '';
+        const discrepancy_reason = row[headers.indexOf('Ghi chú chênh')] ?? '';
+        // Nếu actual_quantity là số âm hoặc không phải số, bỏ qua và lưu lại dòng lỗi
+        if (actual_quantity !== '' && (!/^-?\d+(\.\d+)?$/.test(actual_quantity) || Number(actual_quantity) < 0)) {
+          invalidRows.push(`#${i+2} (Mã hàng: ${code}, Khu vực: ${zone}, Thực tế: ${actual_quantity})`);
+          return;
+        }
+        // Tìm đúng item trong auditData.value.items để cập nhật
+        const idx = products.findIndex(
+          p => p.code === code && p.zone === zone
+        );
+        if (idx !== -1 && auditData.value.items[idx]) {
+          auditData.value.items[idx].actual_quantity = actual_quantity;
+          auditData.value.items[idx].discrepancy_reason = discrepancy_reason;
+        }
+      });
+      if (invalidRows.length) {
+        toastError(`Có ${invalidRows.length} dòng dữ liệu không hợp lệ (số thực tế âm hoặc không phải số):\n` + invalidRows.join('\n'));
+      } else {
+        toastSuccess('Nhập file Excel thành công!');
+      }
+    } catch (err) {
+      toastError('Lỗi khi đọc file Excel. Vui lòng kiểm tra lại file!');
+    } finally {
+      // Reset input để lần sau chọn lại file vẫn nhận sự kiện
+      fileInputKey.value++;
+    }
+  };
+  reader.onerror = () => {
+    toastError('Không thể đọc file. Vui lòng thử lại!');
+    fileInputKey.value++;
   };
   reader.readAsArrayBuffer(file);
 };
@@ -386,6 +430,7 @@ const submitForm = () => {
   formData.append('audit_date', auditData.value.audit_date);
   formData.append('status', status);
   auditData.value.items.forEach((item, idx) => {
+    if (item.excluded) return;
     formData.append(`items[${idx}][product_variant_id]`, item.product_variant_id);
     formData.append(`items[${idx}][expected_quantity]`, item.expected_quantity);
     formData.append(`items[${idx}][actual_quantity]`, item.actual_quantity);
@@ -416,7 +461,18 @@ const submitForm = () => {
   });
 };
 
-const filteredProducts = computed(() => products);
+const filteredProducts = computed(() => {
+  // Trả về cả product và index gốc để loại bỏ chính xác
+  return products
+    .map((product, idx) => ({ product, originalIndex: idx }))
+    .filter(item => !auditData.value.items[item.originalIndex]?.excluded);
+});
+
+function excludeProduct(originalIndex) {
+  if (auditData.value.items[originalIndex]) {
+    auditData.value.items[originalIndex].excluded = true;
+  }
+}
 
 function toastSuccess(message) {
   toastRef.value?.triggerToast(message, 'success');
@@ -438,16 +494,19 @@ watch(() => page.props.flash, (flash) => {
 const exportSampleExcel = () => {
   const sampleData = [
     ['Khu vực', 'Chi tiết khu vực','Mã hàng', 'Tên hàng', 'ĐVT', 'Tồn kho', 'Thực tế', 'Ghi chú chênh'],
-    ...filteredProducts.value.map((product, idx) => [
-      product.zone,
-      product.custom_location_name,
-      product.code,
-      product.name_product,
-      product.unit,
-      product.quantity_on_hand,
-      auditData.value.items[idx]?.actual_quantity || '',
-      auditData.value.items[idx]?.discrepancy_reason || ''
-    ])
+    ...products.map((product, idx) => {
+      if (auditData.value.items[idx]?.excluded) return null;
+      return [
+        product.zone,
+        product.custom_location_name,
+        product.code,
+        product.name_product,
+        product.unit,
+        product.quantity_on_hand,
+        auditData.value.items[idx]?.actual_quantity || '',
+        auditData.value.items[idx]?.discrepancy_reason || ''
+      ];
+    }).filter(Boolean)
   ];
   const ws = XLSX.utils.aoa_to_sheet(sampleData);
   const wb = XLSX.utils.book_new();
