@@ -59,8 +59,11 @@ class SaleOrdersSheet implements FromCollection, WithHeadings, WithEvents
         if (!empty($this->filters['customer'])) {
             $query->where('customers.name', 'like', '%' . $this->filters['customer'] . '%');
         }
-        if (!empty($this->filters['order_date'])) {
-            $query->whereDate('sale_orders.created_at', $this->filters['order_date']);
+        if (!empty($this->filters['order_date_from'])) {
+            $query->whereDate('sale_orders.created_at', '>=', $this->filters['order_date_from']);
+        }
+        if (!empty($this->filters['order_date_to'])) {
+            $query->whereDate('sale_orders.created_at', '<=', $this->filters['order_date_to']);
         }
         $rawData = $query->get();
 
@@ -181,6 +184,10 @@ class SaleOrdersSheet implements FromCollection, WithHeadings, WithEvents
                 return 'Hoàn thành';
             case 'cancelled':
                 return 'Từ chối';
+            case "returning":
+                return "Đang hoàn hàng";
+            case "returned":
+                return "Đã hoàn hàng";
             default:
                 return 'Không xác định';
         }
@@ -218,8 +225,11 @@ class OrderItemsSheet implements FromCollection, WithHeadings, WithEvents
         if (!empty($this->filters['customer'])) {
             $query->where('customers.name', 'like', '%' . $this->filters['customer'] . '%');
         }
-        if (!empty($this->filters['order_date'])) {
-            $query->whereDate('sale_orders.created_at', $this->filters['order_date']);
+        if (!empty($this->filters['order_date_from'])) {
+            $query->whereDate('sale_orders.created_at', '>=', $this->filters['order_date_from']);
+        }
+        if (!empty($this->filters['order_date_to'])) {
+            $query->whereDate('sale_orders.created_at', '<=', $this->filters['order_date_to']);
         }
         $query->groupBy(
             'sale_order_items.id',
@@ -235,7 +245,6 @@ class OrderItemsSheet implements FromCollection, WithHeadings, WithEvents
         // Trả về array đúng thứ tự headings
         return $items->map(function ($item) {
             return [
-                $item->id,
                 $item->sales_order_id,
                 $item->product_name,
                 $item->attributes,
@@ -250,7 +259,6 @@ class OrderItemsSheet implements FromCollection, WithHeadings, WithEvents
     public function headings(): array
     {
         return [
-            'Mã mục đơn hàng',
             'Mã đơn xuất',
             'Tên sản phẩm',
             'Thuộc tính',

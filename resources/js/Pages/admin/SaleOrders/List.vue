@@ -39,7 +39,7 @@
                 <div
                     class="mb-6 bg-white p-6 rounded-sm border border-gray-100"
                 >
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                         <div>
                             <label
                                 class="block text-sm font-semibold text-gray-700 mb-1"
@@ -62,15 +62,33 @@
                         <div>
                             <label
                                 class="block text-sm font-semibold text-gray-700 mb-1"
+                                >Từ ngày</label
                             >
-                                Ngày đặt hàng
-                            </label>
                             <input
                                 type="date"
-                                v-model="filters.order_date"
+                                v-model="filters.order_date_from"
                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm transition-all"
-                                @input="applyFilters"
+                                @input="validateAndApplyDateFilter"
                             />
+                        </div>
+                        <!-- Đến ngày -->
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 mb-1"
+                                >Đến ngày</label
+                            >
+                            <input
+                                type="date"
+                                v-model="filters.order_date_to"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-sm transition-all"
+                                @input="validateAndApplyDateFilter"
+                            />
+                            <div
+                                v-if="dateError"
+                                class="text-red-600 text-xs mt-1"
+                            >
+                                {{ dateError }}
+                            </div>
                         </div>
                         <div>
                             <label
@@ -99,7 +117,7 @@
 
                 <!-- Table -->
                 <div
-                    v-if="!filteredOrders.length"
+                    v-if="dateFilterInvalid || !filteredOrders.length"
                     class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-6"
                 >
                     Không có đơn hàng nào để hiển thị.
@@ -197,7 +215,10 @@
                     </table>
                 </div>
                 <!-- Pagination -->
-                <div class="mt-4 flex justify-between items-center">
+                <div
+                    v-if="!dateFilterInvalid"
+                    class="mt-4 flex justify-between items-center"
+                >
                     <div class="text-sm text-gray-700">
                         Hiển thị {{ listOrders.meta.current_page }} /
                         {{ listOrders.meta.last_page }} trang (Tổng cộng
@@ -789,9 +810,6 @@
                                                     @click="submitRejectReason"
                                                     type="button"
                                                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                                    :disabled="
-                                                        !rejectReason.trim()
-                                                    "
                                                 >
                                                     <i
                                                         class="fa-solid fa-ban mr-2"
@@ -820,7 +838,8 @@
                                     Xác nhận hoàn thành
                                 </button>
                                 <button
-                                    v-if="selectedOrder.status === 'shipped'" v-can="'admin.sales-order.refund'"
+                                    v-if="selectedOrder.status === 'shipped'"
+                                    v-can="'admin.sales-order.refund'"
                                     @click="openReturnModal(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
@@ -893,12 +912,9 @@
                                                 class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
                                             >
                                                 <button
-                                                    @click="submitReturnReason" 
+                                                    @click="submitReturnReason"
                                                     type="button"
                                                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:ml-3 sm:w-auto sm:text-sm"
-                                                    :disabled="
-                                                        !returnReason.trim()
-                                                    "
                                                 >
                                                     <i
                                                         class="fa-solid fa-undo mr-2"
@@ -919,7 +935,8 @@
 
                                 <!-- Nút xác nhận đã hoàn hàng thành công khi trạng thái là 'returning' -->
                                 <button
-                                    v-if="selectedOrder.status === 'returning'" v-can="'admin.sales-order.refund-confirm'"
+                                    v-if="selectedOrder.status === 'returning'"
+                                    v-can="'admin.sales-order.refund-confirm'"
                                     @click="confirmReturned(selectedOrder.id)"
                                     class="mt-3 w-full flex shadow-xl justify-center gap-1 items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
@@ -1038,7 +1055,8 @@ const { listOrders, filters: initialFilters } = defineProps({
         type: Object,
         default: () => ({
             customer: "",
-            order_date: "",
+            order_date_from: "",
+            order_date_to: "",
             status: "",
         }),
     },
@@ -1062,7 +1080,8 @@ const selectedOrder = ref({
 const activeTab = ref("all");
 const filters = ref({
     customer: initialFilters.customer || "",
-    order_date: initialFilters.order_date || "",
+    order_date_from: initialFilters.order_date_from || "",
+    order_date_to: initialFilters.order_date_to || "",
     status: initialFilters.status || "",
 });
 
@@ -1077,8 +1096,9 @@ function applyFilters() {
         {
             status: filters.value.status,
             customer: filters.value.customer,
-            order_date: filters.value.order_date,
-            page: 1, // Reset về trang đầu khi thay đổi bộ lọc
+            order_date_from: filters.value.order_date_from,
+            order_date_to: filters.value.order_date_to,
+            page: 1,
         },
         {
             preserveState: true,
@@ -1186,7 +1206,8 @@ function changePage(page) {
             page,
             status: filters.value.status,
             customer: filters.value.customer,
-            order_date: filters.value.order_date,
+            order_date_from: filters.value.order_date_from,
+            order_date_to: filters.value.order_date_to,
         },
         {
             preserveState: true,
@@ -1199,7 +1220,8 @@ function exportExcel() {
     window.location.href = route("admin.sale-orders.export", {
         status: filters.value.status,
         customer: filters.value.customer,
-        order_date: filters.value.order_date,
+        order_date_from: filters.value.order_date_from,
+        order_date_to: filters.value.order_date_to,
     });
 }
 
@@ -1277,6 +1299,7 @@ const approveOrder = (id) => {
                 order.pay_before = approve.pay_before;
             }
             emitter.emit("notification-updated");
+            applyFilters();
         },
         onError: (errors) => {
             console.error("Error approving order:", errors);
@@ -1336,6 +1359,7 @@ const completeOrder = (id) => {
                 order.pay_after = complete.pay_after;
             }
             emitter.emit("notification-updated");
+            applyFilters();
         },
         onError: (errors) => {
             console.error("Error completing order details:", {
@@ -1368,7 +1392,7 @@ const openRejectModal = (orderId) => {
 };
 const submitRejectReason = () => {
     if (!rejectReason.value.trim()) {
-        console.log("Vui lòng nhập lý do từ chối.");
+        toastError("Vui lòng nhập lý do từ chối.");
         return;
     }
 
@@ -1381,6 +1405,7 @@ const submitRejectReason = () => {
             closeRejectModal();
             closeModal();
             emitter.emit("notification-updated");
+            applyFilters();
         },
         onError: (errors) => {
             console.error("Error rejecting order:", errors);
@@ -1488,8 +1513,9 @@ const copyQR = async () => {
         console.log("QR copied to clipboard successfully");
     } catch (error) {
         console.error("Lỗi copy QR:", error);
-        qrError.value =
-            "Copy không hỗ trợ trên browser này. Vui lòng screenshot QR.";
+        toastError(
+            "Copy không hỗ trợ trên browser này. Vui lòng screenshot QR."
+        );
     }
 };
 function closeQRModal() {
@@ -1559,7 +1585,7 @@ function closeReturnModal() {
 }
 function submitReturnReason() {
     if (!returnReason.value.trim()) {
-        console.log("Vui lòng nhập lý do hoàn hàng.");
+        toastError("Vui lòng nhập lý do hoàn hàng.");
         return;
     }
     axios
@@ -1578,6 +1604,7 @@ function submitReturnReason() {
             closeReturnModal();
             closeModal();
             emitter.emit("notification-updated");
+            applyFilters();
         })
         .catch(() => {
             console.log("Có lỗi xảy ra khi hoàn hàng.");
@@ -1594,10 +1621,27 @@ function confirmReturned(orderId) {
             }
             closeModal();
             emitter.emit("notification-updated");
+            applyFilters();
         })
         .catch(() => {
             console.log("Có lỗi xảy ra khi xác nhận hoàn hàng.");
         });
+}
+const dateError = ref("");
+const dateFilterInvalid = ref(false);
+function validateAndApplyDateFilter() {
+    dateError.value = "";
+    dateFilterInvalid.value = false;
+    if (
+        filters.value.order_date_from &&
+        filters.value.order_date_to &&
+        filters.value.order_date_from > filters.value.order_date_to
+    ) {
+        dateError.value = "Ngày bắt đầu không được lớn hơn ngày kết thúc.";
+        dateFilterInvalid.value = true;
+        return;
+    }
+    applyFilters();
 }
 </script>
 

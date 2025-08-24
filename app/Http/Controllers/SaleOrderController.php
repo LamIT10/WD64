@@ -48,7 +48,8 @@ class SaleOrderController extends Controller
                 ],
                 'filters' => [
                     'customer' => $request->customer,
-                    'order_date' => $request->order_date,
+                    'order_date_from' => $request->order_date_from,
+                    'order_date_to' => $request->order_date_to,
                     'status' => $request->status,
                 ],
             ]);
@@ -66,7 +67,8 @@ class SaleOrderController extends Controller
             ],
             'filters' => [
                 'customer' => $request->customer,
-                'order_date' => $request->order_date,
+                'order_date_from' => $request->order_date_from,
+                'order_date_to' => $request->order_date_to,
                 'status' => $request->status,
             ],
             'sale_order_id' => $request->query('sale_order_id'),
@@ -147,7 +149,7 @@ class SaleOrderController extends Controller
     public function export(Request $request)
 
     {
-        return Excel::download(new SaleOrderExport($request->only(['status', 'customer', 'order_date'])), 'Đơn_Xuất.xlsx');
+        return Excel::download(new SaleOrderExport($request->only(['status', 'customer', 'order_date_from', 'order_date_to'])), 'Đơn_Xuất.xlsx');
     }
     public function generateQR($id, Request $request)
     {
