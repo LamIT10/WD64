@@ -100,6 +100,7 @@ class SaleOrdersRepository extends BaseRepository
             $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
             $orders = $query->orderBy('created_at', 'desc')->paginate($perPage)->through(function ($order) {
                 $order->total_quantity = $order->items->sum('quantity_ordered');
+                $order->encrypted_id = encrypt($order->id);
                 return $order;
             });
 
@@ -728,7 +729,10 @@ class SaleOrdersRepository extends BaseRepository
         return $this->handleModel
             ->with([
                 'customer' => function ($query) {
-                    $query->select('id', 'name', 'phone', 'email', 'province', 'ward');
+                    $query->select('id', 'name', 'phone', 'email', 'province', 'ward', 'rank_id')
+                        ->with(['rank' => function ($query) {
+                            $query->select('id', 'name', 'discount_percent');
+                        }]);
                 },
                 'items' => function ($query) {
                     $query->select(
