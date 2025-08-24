@@ -49,7 +49,8 @@ class UserController extends Controller
     public function show($id)
     {
         $user = $this->userRepo->getById((int)$id);
-        $user['roles'] = $user->roles()->pluck('name')->toArray();
+        $user['roles'] = $user->roles()->pluck('description')->toArray();
+      
         return Inertia::render('admin/users/Show', [
             'user' => $user
         ]);

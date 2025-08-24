@@ -51,13 +51,6 @@
                                 Khách hàng đang hoạt động
                             </button>
                         </li>
-                        <li class="mr-2">
-                            <button @click="activeTab = 'inactive'"
-                                :class="{ 'text-indigo-600 border-indigo-600': activeTab === 'inactive', 'text-gray-500 hover:text-gray-600 hover:border-gray-300': activeTab !== 'inactive' }"
-                                class="inline-block p-3 border-b-2 rounded-t-lg text-sm font-medium">
-                                Khách hàng không hoạt động
-                            </button>
-                        </li>
                     </ul>
                     <!-- Dropdown thao tác -->
                     <div class="relative ml-2" v-if="selectedCustomers.length > 0" ref="actionDropdownRef">
@@ -82,10 +75,7 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="text-xs text-gray-700 bg-indigo-50 border-b border-indigo-300">
                             <tr>
-                                <th class="w-12 px-4 py-3 text-left">
-                                    <input type="checkbox" v-model="selectAll" @change="toggleSelectAll"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-                                </th>
+                              
                                 <th v-if="visibleColumns.includes('name')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     <div class="flex items-center justify-center space-x-1">
@@ -119,10 +109,7 @@
                             <tr v-for="customer in props.customers.data" :key="customer.id"
                                 @click="handleClick(customer.id)"
                                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150">
-                                <td class="px-4 py-4 whitespace-nowrap" @click.stop>
-                                    <input type="checkbox" :value="customer.id" v-model="selectedCustomers"
-                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-                                </td>
+                              
                                 <td v-if="visibleColumns.includes('name')" class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <img :src="customer.avatar ? `/storage/${customer.avatar}` : '/images/default-ava.png'"
@@ -191,16 +178,7 @@
                                                 <i class="fa fa-credit-card-alt text-indigo-600 mr-2"
                                                     aria-hidden="true"></i> Công nợ
                                                 </Link>
-                                                <ConfirmModal :route-name="'admin.customers.destroy'" v-can="'admin.customers.destroy'"
-                                                    :route-params="{ id: customer.id }" title="Xác nhận xóa khách hàng"
-                                                    :message="`Bạn có chắc chắn muốn xóa khách hàng ${customer.name}? Bạn sẽ không thể khôi phục lại sau khi xác nhận xóa`">
-                                                    <template #trigger="{ openModal }">
-                                                        <button @click="openModal"
-                                                            class="text-sm px-3 py-2 bg-white text-red-600">
-                                                            <i class="fas fa-trash-alt mr-1"></i> Xóa
-                                                        </button>
-                                                    </template>
-                                                </ConfirmModal>
+                                           
                                             </div>
                                         </div>
                                     </div>

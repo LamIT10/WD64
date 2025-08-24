@@ -136,7 +136,7 @@
                                         <span v-for="role in user.roles" :key="role.id"
                                             class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 flex items-center">
                                             <i class="fas fa-user-shield mr-1 text-xs"></i>
-                                            {{ role.name || role }}
+                                            {{ role}}
                                         </span>
                                     </div>
                                     <span v-else class="text-gray-500">Chưa cập nhật</span>

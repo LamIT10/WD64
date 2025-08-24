@@ -26,7 +26,7 @@ class ProductController extends Controller
     {
         $filters = $request->only(['name', 'code', 'stock_status']);
 
-        $products = $this->productRepository->getAll($filters, 20);
+        $products = $this->productRepository->getAll($filters, 1);
 
 
         return Inertia::render('admin/products/ListProduct', [
@@ -122,7 +122,7 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $success = $this->productRepository->destroy($id);
-        return $this->returnInertia($success, 'Xóa sản phẩm thành công', 'admin.products.index');
+        return $this->returnInertia($success, 'Xác nhận sản phẩm ngừng bán', 'admin.products.index');
     }
 
     public function restore(string $id)
