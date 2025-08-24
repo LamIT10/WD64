@@ -7,6 +7,10 @@ export const useAuthStore = defineStore("auth", {
         roles: page.props.auth.roles  || [],
     }),
     actions: {
+         loadFromPage() {
+            this.permissions = page.props.auth?.permissions || [];
+            this.roles = page.props.auth?.roles || [];
+        },
         hasPermission(permission) {
             return this.permissions.includes(permission);
         },

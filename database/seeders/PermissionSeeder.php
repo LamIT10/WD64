@@ -63,7 +63,7 @@ class PermissionSeeder extends Seeder
 
 
         // nếu tài khoản admin tồn tại thì xoá 
-        $user = User::where('name', 'admin')->first();
+        $user = User::where('email', 'admin@example.com')->first();
         if (!$user) {
             $userId = DB::table('users')->insertGetId([
                 'name' => 'admin',

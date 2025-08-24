@@ -98,8 +98,7 @@
                 </div>
             </div>
             <!-- Report Management -->
-            <div class="mb-1"
-                v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
+            <div class="mb-1" v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('report-menu')">
@@ -147,7 +146,7 @@
                 </div>
             </div>
             <!-- User Management -->
-            <div class="mb-1" v-can="'admin.user.index'">
+            <div class="mb-1" v-if="hasPermission('admin.user.index')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('user-menu')">
@@ -238,7 +237,7 @@
             </div>
 
             <!-- Suppliers -->
-            <div class="mb-2" v-can="'admin.supplier.index'">
+            <div class="mb-2" v-if="hasPermission('admin.supplier.index')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('supplier-menu')">
@@ -298,7 +297,7 @@
                 </div>
             </div>
             <!-- Role -->
-            <div v-can="'admin.role.index'" class="mb-40">
+            <div v-if="hasPermission('admin.role.index')" class="mb-40">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('admin-menu')">

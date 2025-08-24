@@ -1,6 +1,6 @@
 <template>
   <AppLayout>
-    <div class="min-h-screen bg-gray-50 p-6" v-can="'admin.dashboard.index'">
+    <div class="min-h-screen bg-gray-50 p-6" v-if="authStore.hasPermission('admin.dashboard.index')">
 
       <!-- <div class="bg-gradient-to-r from-gray-50 to-gray-100 p-2 sm:p-6 rounded-xl">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-0">
@@ -498,12 +498,13 @@
 import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from './admin/Layouts/AppLayout.vue';
 import { route } from 'ziggy-js';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import ChangePurchaseSevenDayAgo from './components/ChangePurchaseSevenDayAgo.vue';
 import RevenueChart from './components/RevenueChart.vue';
 import { reactive } from 'vue';
 import InventoryByPaperChart from './components/InventoryByPaperChart.vue';
 import InventoryStatsCards from './components/InventoryStatsCards.vue';
+import { useAuthStore } from '@/Stores/auth';
 
 const { data } = defineProps({
   data: Object,
@@ -616,6 +617,9 @@ const resetDateFilterPurchase = () => {
     dataFilterDatePurchase.sub_to_date = "",
     handleFilterPurchase();
 }
-
+const authStore = useAuthStore();
+onMounted(() => {
+  authStore.loadFromPage();
+})
 
 </script>
