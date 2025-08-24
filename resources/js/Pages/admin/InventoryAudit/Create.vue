@@ -409,10 +409,10 @@ const confirmSubmit = () => {
 };
 
 const submitForm = () => {
-  // Kiểm tra trạng thái hoàn thành hay có chênh lệch
-  const allMatched = auditData.value.items.every(item =>
-    Number(item.expected_quantity) === Number(item.actual_quantity)
-  );
+  // Kiểm tra trạng thái hoàn thành hay có chênh lệch (chỉ kiểm tra item chưa bị loại)
+  const allMatched = auditData.value.items
+    .filter(item => !item.excluded)
+    .every(item => Number(item.expected_quantity) === Number(item.actual_quantity));
   const status = allMatched ? 'completed' : 'issues';
 
   // Debug: Log dữ liệu trước khi gửi
