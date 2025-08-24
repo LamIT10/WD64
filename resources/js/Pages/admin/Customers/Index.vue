@@ -90,6 +90,10 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Email
                                 </th>                    
+                                <th v-if="visibleColumns.includes('total_spent')"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                    Tổng chi tiêu
+                                </th>                    
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                     Tổng tiền nợ
                                 </th>
@@ -125,6 +129,10 @@
                                 <td v-if="visibleColumns.includes('email')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ customer.email || '-'
                                     }}</td>
+                              <td v-if="visibleColumns.includes('total_spent')"
+                                class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-900">
+                                {{ formatCurrency(customer.total_spent) }}
+                            </td>
                                 <td v-if="visibleColumns.includes('remaining_amount')"
                                     class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-semibold text-left">
                                     {{ formatCurrency(customer.remaining_amount) }}
@@ -244,7 +252,7 @@ const activeTab = ref(props.status || 'active');
 const activeDropdown = ref(null); // Thêm biến cho dropdown hành động
 
 const columnOptions = [
-    'name', 'phone', 'email', 'rank', 'status', 'remaining_amount'
+    'name', 'phone', 'email', 'rank', 'status', 'remaining_amount', 'total_spent'
 ];
 
 const columnLabels = {
@@ -253,13 +261,14 @@ const columnLabels = {
     email: 'Email',
     rank: 'Hạng',
     status: 'Trạng thái',
-    remaining_amount: 'Công nợ'
+    remaining_amount: 'Công nợ',
+    total_spent: 'Tổng chi tiêu'
 };
 
 const visibleColumns = ref(
     localStorage.getItem('customerVisibleColumns')
         ? JSON.parse(localStorage.getItem('customerVisibleColumns'))
-        : ['name', 'phone', 'email', 'rank', 'status', 'remaining_amount']
+        : ['name', 'phone', 'email', 'rank', 'status', 'remaining_amount', 'total_spent']
 );
 
 const search = ref(props.search || '');

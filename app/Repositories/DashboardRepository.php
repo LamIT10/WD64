@@ -416,28 +416,22 @@ class DashboardRepository extends BaseRepository
             ->get();
     }
     public function getExportStatusSummaryByMonth($month)
-    {
-        $query = DB::table('sale_orders')
-            ->select('status', DB::raw('COUNT(*) as total'))
-            ->whereMonth('order_date', $month);
+{
+    $statuses = ['pending', 'shipped', 'completed', 'cancelled', 'returning', 'returned'];
 
-        // Nếu là tháng hiện tại thì lấy đủ 4 trạng thái
-        if ((int) $month === (int) now()->month) {
-            $query->whereIn('status', ['pending', 'shipped', 'completed', 'cancelled']);
-        } else {
-            $query->whereIn('status', ['completed', 'cancelled']);
-        }
+    $results = DB::table('sale_orders')
+        ->select('status', DB::raw('COUNT(*) as total'))
+        ->whereMonth('order_date', $month)
+        ->whereIn('status', $statuses)
+        ->groupBy('status')
+        ->pluck('total', 'status');
 
-        $results = $query->groupBy('status')->pluck('total', 'status');
+    return [
+        'month' => (int) $month,
+        'data' => collect($statuses)->mapWithKeys(function ($status) use ($results) {
+            return [$status => $results[$status] ?? 0];
+        })
+    ];
 
-        return [
-            'month' => (int) $month,
-            'data' => [
-                'pending'   => $results['pending'] ?? 0,
-                'shipped'   => $results['shipped'] ?? 0,
-                'completed' => $results['completed'] ?? 0,
-                'cancelled' => $results['cancelled'] ?? 0,
-            ]
-        ];
-    }
+}
 }

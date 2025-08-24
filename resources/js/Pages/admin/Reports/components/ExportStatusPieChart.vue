@@ -56,19 +56,36 @@ filterByMonth()
 
 // Xử lý dữ liệu biểu đồ
 const chartData = computed(() => {
-  const data = props.export_status_summary?.data || {}
+  const raw = props.export_status_summary?.data || {}
 
-  const pending = data.pending || 0
-  const shipped = data.shipped || 0
-  const completed = data.completed || 0
-  const cancelled = data.cancelled || 0
+  const statusMap = {
+    pending: { label: 'Đang chờ duyệt', color: '#fbbf24' },
+    shipped: { label: 'Đang giao', color: '#3b82f6' },
+    completed: { label: 'Đã hoàn thành', color: '#10b981' },
+    cancelled: { label: 'Từ chối', color: '#ef4444' },
+    returning: { label: 'Đang hoàn hàng', color: '#fb923c' },
+    returned: { label: 'Đã hoàn hàng', color: '#6366f1' }
+  }
+
+  const labels = []
+  const data = []
+  const colors = []
+
+  for (const key in statusMap) {
+    const value = raw[key] || 0
+    if (value > 0) {
+      labels.push(statusMap[key].label)
+      data.push(value)
+      colors.push(statusMap[key].color)
+    }
+  }
 
   return {
-    labels: ['Đang chờ duyệt', 'Đang giao', 'Đã hoàn thành', 'Từ chối'],
+    labels,
     datasets: [
       {
-        data: [pending, shipped, completed, cancelled],
-        backgroundColor: ['#fbbf24', '#3b82f6', '#10b981', '#ef4444']
+        data,
+        backgroundColor: colors
       }
     ]
   }

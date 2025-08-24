@@ -26,7 +26,7 @@ class ProductController extends Controller
     {
         $filters = $request->only(['name', 'code', 'stock_status']);
 
-        $products = $this->productRepository->getAll($filters, 1);
+        $products = $this->productRepository->getAll($filters, 10);
 
 
         return Inertia::render('admin/products/ListProduct', [
