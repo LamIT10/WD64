@@ -67,6 +67,33 @@
         </div>
       </div>
 
+      <!-- Bộ lọc cải tiến nổi bật -->
+      <div class="bg-gradient-to-r from-indigo-50 via-white to-indigo-100 rounded-xl shadow p-4 mb-3 border-2 border-indigo-200 flex flex-wrap gap-4 items-end">
+        <div class="flex flex-col gap-1 w-32">
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-barcode"></i> Mã phiếu</label>
+          <input v-model="filters.code" placeholder="Nhập mã phiếu" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
+        </div>
+        <div class="flex flex-col gap-1 w-32">
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-warehouse"></i> Khu vực</label>
+          <input v-model="filters.zone" placeholder="Nhập khu vực" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
+        </div>
+        <div class="flex flex-col gap-1 w-36">
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-calendar-alt"></i> Ngày kiểm kho</label>
+          <input v-model="filters.audit_date" type="date" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
+        </div>
+        <div class="flex flex-col gap-1 w-36">
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-info-circle"></i> Trạng thái</label>
+          <select v-model="filters.status" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80">
+            <option value="">Tất cả trạng thái</option>
+            <option value="completed">Không chênh lệch</option>
+            <option value="issues">Có chênh lệch</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs text-white font-medium">&nbsp;</label>
+          <button @click="resetFilters" class="px-3 py-1 border border-red-200 rounded text-xs bg-red-50 hover:bg-red-200 text-red-700 flex items-center gap-1 transition"><i class="fas fa-times"></i> Xóa lọc</button>
+        </div>
+      </div>
       <!-- Table -->
       <div class="bg-white rounded-xl shadow overflow-x-auto animate-fade-in border border-indigo-50">
         <table class="min-w-full text-xs border-separate border-spacing-0">
@@ -115,7 +142,7 @@
             </tr>
           </thead>
           <tbody v-if="props.audits && props.audits.data && props.audits.data.length">
-            <tr v-for="item in props.audits.data" :key="item.id"
+            <tr v-for="item in filteredAudits" :key="item.id"
               class="hover:bg-indigo-50 transition cursor-pointer group"
               @click="$inertia.visit(route('admin.audits.show', item.id))"
               :title="`Xem chi tiết phiếu kiểm kho #${item.code}`">
@@ -277,7 +304,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '../Layouts/AppLayout.vue';
 import Waiting from '../../components/Waiting.vue';
@@ -442,6 +469,33 @@ function toastSuccess(message) {
 function toastError(message) {
     toastRef.value?.triggerToast(message, 'error');
 }
+
+// Bộ lọc client-side
+const filters = ref({
+  code: '',
+  zone: '',
+  status: '',
+  audit_date: ''
+});
+
+const resetFilters = () => {
+  filters.value = { code: '', zone: '', status: '', audit_date: '' };
+};
+
+const filteredAudits = computed(() => {
+  if (!props.audits?.data) return [];
+  return props.audits.data.filter(item => {
+    // Lọc mã phiếu
+    if (filters.value.code && !(item.code || '').toLowerCase().includes(filters.value.code.toLowerCase())) return false;
+    // Lọc khu vực (theo audited_zones)
+    if (filters.value.zone && !(item.audited_zones || []).join(',').toLowerCase().includes(filters.value.zone.toLowerCase())) return false;
+    // Lọc trạng thái
+    if (filters.value.status && item.status !== filters.value.status) return false;
+    // Lọc ngày kiểm kho
+    if (filters.value.audit_date && item.audit_date !== filters.value.audit_date) return false;
+    return true;
+  });
+});
 
 const exportToExcel = async () => {
   try {
