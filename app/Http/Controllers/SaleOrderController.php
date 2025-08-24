@@ -169,12 +169,17 @@ class SaleOrderController extends Controller
         return response()->json(['page' => $page]);
     }
 
-    public function print($id)
+    public function print($encryptedId)
     {
-        $order = $this->saleOrdersRepository->getOrderForInvoice($id);
+        try {
+            $orderId = decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(404);
+        }
+        $order = $this->saleOrdersRepository->getOrderForInvoice($orderId);
 
         return Pdf::loadView('pdf.saleorders', compact('order'))
-            ->stream("phieu-xuat-{$order->id}.pdf");
+            ->stream("phieu-xuat-{$order->code}.pdf");
     }
     public function returnOrder(Request $request, $id)
     {

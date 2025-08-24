@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phiếu xuất kho - Đơn {{ $order->id }}</title>
+    <title>Phiếu xuất kho - Đơn {{ $order->code }}</title>
     <style>
         * {
             margin: 0;
@@ -33,7 +33,12 @@
             margin-bottom: 10px;
             font-style: italic;
         }
-
+        .date-bottom{
+            margin-top: 30px;
+            margin-right: 40px;
+              text-align: right;
+            font-style: italic;
+        }
         .title {
             font-size: 24px;
             font-weight: bold;
@@ -109,8 +114,9 @@
 
         .summary {
             float: right;
-            width: 300px;
+            width: 400px;
             margin-bottom: 30px;
+            margin-right: 15px;
         }
 
         .summary-table {
@@ -147,7 +153,6 @@
             /* hàng ký – bảo đảm không bị tách trang */
             clear: both;
             /* chắc chắn đứng dưới khối summary float */
-            margin-top: 50px;
         }
 
         .signatures-table {
@@ -188,10 +193,27 @@
             page-break-inside: avoid;
             break-inside: avoid;
         }
-        .nowrap {
-    white-space: nowrap;
-}
 
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .total-amount-nowrap {
+            text-align: left !important;
+            padding-left: 80px;
+            white-space: nowrap;
+        }
+        .amount-filled-in{
+         font-style: italic
+        }
+        .dot-space{
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+    width: 600px; 
+    height: 18px;
+    vertical-align: middle;
+    margin-left: 8px;
+        }
         @media print {
 
             .signatures-wrap,
@@ -207,8 +229,13 @@
             font-family: 'DejaVu Sans', sans-serif;
 
         }
-        
     </style>
+    @php
+    $totalBeforeDiscount = 0;
+    foreach ($order->items as $item) {
+        $totalBeforeDiscount += $item->subtotal;
+    }
+@endphp
 </head>
 
 <body>
@@ -224,16 +251,20 @@
 
         <div class="info-section">
             <table class="info-table">
+                   <tr>
+                    <td class="label"> Khách hàng</td>
+                    <td>{{ optional($order->customer)->name ?? 'Chưa xác định' }}</td>
+                </tr>
                 <tr>
-                    <td class="label">📞 Số điện thoại</td>
+                    <td class="label"> Số điện thoại</td>
                     <td>{{ optional($order->customer)->phone ?? 'Chưa xác định' }}</td>
                 </tr>
                 <tr>
-                    <td class="label">📧 Email</td>
+                    <td class="label"> Email</td>
                     <td>{{ optional($order->customer)->email ?? 'Chưa xác định' }}</td>
                 </tr>
                 <tr>
-                    <td class="label">📍 Địa chỉ giao hàng</td>
+                    <td class="label"> Địa chỉ giao hàng</td>
                     <td>
                         @if (!empty($order->address_delivery))
                             {{ $order->address_delivery }}
@@ -243,31 +274,7 @@
                         @endif
                     </td>
                 </tr>
-                <tr>
-                    <td class="label">📌 Trạng thái</td>
-                    <td>
-                        @switch($order->status)
-                            @case('pending')
-                                Chờ duyệt
-                            @break
 
-                            @case('shipped')
-                                Đã giao hàng
-                            @break
-
-                            @case('completed')
-                                Hoàn thành
-                            @break
-
-                            @case('cancelled')
-                                Đã hủy
-                            @break
-
-                            @default
-                                {{ $order->status }}
-                        @endswitch
-                    </td>
-                </tr>
                 @if ($order->status === 'cancelled' && $order->note)
                     <tr>
                         <td class="label">📝 Lý do từ chối</td>
@@ -299,7 +306,7 @@
                             </td>
                             <td class="text-center">{{ $item->quantity_ordered }}</td>
                             <td class="text-center">{{ optional($item->unit)->name ?? '---' }}</td>
-                            <td class="text-right nowrap">{{ number_format($item->subtotal, 0, ',', '.') }} ₫</td>
+                            <td class="total-amount-nowrap">{{ number_format($item->subtotal, 0, ',', '.') }} ₫</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -309,21 +316,32 @@
         <div class="clearfix">
             <div class="summary">
                 <table class="summary-table">
-                    <tr>
-                        <td class="label">Tổng tiền đơn:</td>
-                        <td class="text-right nowrap">{{ number_format($order->total_amount, 0, ',', '.') }} ₫</td>
+                           <tr>
+                        <td class="label nowrap">Tổng tiền trước giảm giá:</td>
+                        <td class=" total-amount-nowrap">         {{ number_format($totalBeforeDiscount, 0, ',', '.') }} ₫
+                        </td>
+                    </tr>
+                      <tr>
+                        <td class="label nowrap">% giảm giá:</td>
+                        <td class=" total-amount-nowrap"> {{$order->customer->rank->discount_percent ?? 0}}%
+                        </td>
                     </tr>
                     <tr>
-                        <td class="label">Đã thanh toán trước:</td>
-                        <td class="text-right nowrap">{{ number_format($order->pay_before ?? 0, 0, ',', '.') }} ₫</td>
+                        <td class="label nowrap">Tổng tiền sau giảm giá:</td>
+                        <td class=" total-amount-nowrap">{{ number_format($order->total_amount, 0, ',', '.') }}₫
+                        </td>
                     </tr>
                     <tr>
-                        <td class="label">Đã thanh toán sau:</td>
-                        <td class="text-right nowrap">{{ number_format($order->pay_after ?? 0, 0, ',', '.') }} ₫</td>
+                        <td class="label nowrap">Đã thanh toán trước:</td>
+                        <td class="total-amount-nowrap">{{ number_format($order->pay_before ?? 0, 0, ',', '.') }} ₫</td>
+                    </tr>
+                    <tr>
+                        <td class="label nowrap">Đã thanh toán sau:</td>
+                        <td class="total-amount-nowrap">{{ number_format($order->pay_after ?? 0, 0, ',', '.') }} ₫</td>
                     </tr>
                     <tr class="total-row">
                         <td class="label">Cần thanh toán:</td>
-                        <td class="text-right nowrap">
+                        <td class="total-amount-nowrap">
                             {{ number_format(($order->total_amount ?? 0) - ($order->pay_before ?? 0) - ($order->pay_after ?? 0), 0, ',', '.') }}
                             ₫
                         </td>
@@ -331,7 +349,10 @@
                 </table>
             </div>
         </div>
-
+        <div class="amount-filled-in">Số tiền đã trả: <span class="dot-space"></span></div>
+        <div class="amount-filled-in">Số tiền trả trước: <span class="dot-space"></span></div>
+        <div class="amount-filled-in">Số tiền còn lại: <span class="dot-space"></span></div>
+        <div class="date-bottom">Ngày ........ tháng ........ năm 20</div>
         <div class="signatures-wrap">
             <table class="signatures-table">
                 <tr>
@@ -346,7 +367,7 @@
                         <span class="sig-note">(Ký, ghi rõ họ tên)</span>
                     </td>
                     <td>
-                        <span class="sig-title">Thủ kho</span>
+                        <span class="sig-title">Người giao hàng</span>
 
                         <span class="sig-note">(Ký, ghi rõ họ tên)</span>
                     </td>

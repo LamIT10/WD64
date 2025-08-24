@@ -95,7 +95,7 @@ Route::prefix('admin')->as('admin.')->middleware(['auth'])->group(function () {
 
         Route::post('/store', [SaleOrderController::class, 'store'])->name('store');
         Route::get('/search/products', [SaleOrderController::class, 'searchProductJson'])->name('products.search');
-        Route::get('{id}/print', [SaleOrderController::class, 'print'])->name('print');
+        Route::get('{encryptedId}/print', [SaleOrderController::class, 'print'])->name('print');
         Route::post('/{id}/return', [SaleOrderController::class, 'returnOrder'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_REFUND)->name('return');
         Route::post('/{id}/returned', [SaleOrderController::class, 'returnedOrder'])->middleware('has_permission:' . PermissionConstant::SALES_ORDER_REFUND_CONFIRM)->name('returned');
     });
