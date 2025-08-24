@@ -67,23 +67,23 @@
         </div>
       </div>
 
-      <!-- Bộ lọc cải tiến -->
-      <div class="bg-white rounded-lg shadow p-4 mb-3 border border-indigo-100 flex flex-wrap gap-4 items-end">
+      <!-- Bộ lọc cải tiến nổi bật -->
+      <div class="bg-gradient-to-r from-indigo-50 via-white to-indigo-100 rounded-xl shadow p-4 mb-3 border-2 border-indigo-200 flex flex-wrap gap-4 items-end">
         <div class="flex flex-col gap-1 w-32">
-          <label class="text-xs text-gray-500 font-medium flex items-center gap-1"><i class="fas fa-barcode"></i> Mã phiếu</label>
-          <input v-model="filters.code" placeholder="Nhập mã phiếu" class="px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-indigo-200" />
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-barcode"></i> Mã phiếu</label>
+          <input v-model="filters.code" placeholder="Nhập mã phiếu" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
         </div>
         <div class="flex flex-col gap-1 w-32">
-          <label class="text-xs text-gray-500 font-medium flex items-center gap-1"><i class="fas fa-warehouse"></i> Khu vực</label>
-          <input v-model="filters.zone" placeholder="Nhập khu vực" class="px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-indigo-200" />
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-warehouse"></i> Khu vực</label>
+          <input v-model="filters.zone" placeholder="Nhập khu vực" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
         </div>
         <div class="flex flex-col gap-1 w-36">
-          <label class="text-xs text-gray-500 font-medium flex items-center gap-1"><i class="fas fa-calendar-alt"></i> Ngày kiểm kho</label>
-          <input v-model="filters.audit_date" type="date" class="px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-indigo-200" />
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-calendar-alt"></i> Ngày kiểm kho</label>
+          <input v-model="filters.audit_date" type="date" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80" />
         </div>
         <div class="flex flex-col gap-1 w-36">
-          <label class="text-xs text-gray-500 font-medium flex items-center gap-1"><i class="fas fa-info-circle"></i> Trạng thái</label>
-          <select v-model="filters.status" class="px-2 py-1 border border-gray-200 rounded text-xs focus:ring-2 focus:ring-indigo-200">
+          <label class="text-xs text-indigo-700 font-semibold flex items-center gap-1"><i class="fas fa-info-circle"></i> Trạng thái</label>
+          <select v-model="filters.status" class="px-2 py-1 border border-indigo-200 rounded text-xs focus:ring-2 focus:ring-indigo-200 bg-white/80">
             <option value="">Tất cả trạng thái</option>
             <option value="completed">Không chênh lệch</option>
             <option value="issues">Có chênh lệch</option>
@@ -91,7 +91,7 @@
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs text-white font-medium">&nbsp;</label>
-          <button @click="resetFilters" class="px-3 py-1 border border-gray-200 rounded text-xs bg-gray-100 hover:bg-indigo-100 text-gray-700 flex items-center gap-1"><i class="fas fa-times"></i> Xóa lọc</button>
+          <button @click="resetFilters" class="px-3 py-1 border border-red-200 rounded text-xs bg-red-50 hover:bg-red-200 text-red-700 flex items-center gap-1 transition"><i class="fas fa-times"></i> Xóa lọc</button>
         </div>
       </div>
       <!-- Table -->
