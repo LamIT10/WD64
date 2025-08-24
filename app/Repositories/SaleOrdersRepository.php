@@ -93,8 +93,11 @@ class SaleOrdersRepository extends BaseRepository
                     $q->where('name', 'like', '%' . $request->input('customer') . '%');
                 });
             }
-            if ($request->has('order_date') && !empty($request->order_date)) {
-                $query->whereDate('created_at', $request->order_date);
+            if ($request->has('order_date_from') && !empty($request->order_date_from)) {
+                $query->whereDate('created_at', '>=', $request->order_date_from);
+            }
+            if ($request->has('order_date_to') && !empty($request->order_date_to)) {
+                $query->whereDate('created_at', '<=', $request->order_date_to);
             }
 
             $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
