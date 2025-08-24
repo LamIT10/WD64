@@ -238,52 +238,64 @@ class CustomerTransactionRepository extends BaseRepository
 
         ];
     }
-    public function updateTransaction($orderId, array $data)
-    {
-        $order = SaleOrder::findOrFail($orderId);
-        $newPaid = $data['paid_amount'];
+  public function updateTransaction($orderId, array $data)
+{
+    $order = SaleOrder::findOrFail($orderId);
+    $newPaid = (float) ($data['paid_amount'] ?? 0);
 
-        if ($newPaid <= 0) {
-            throw ValidationException::withMessages([
-                'paid_amount' => 'Số tiền thanh toán phải lớn hơn 0.'
-            ]);
-        }
-
-        if (empty($data['transaction_date']) || !strtotime($data['transaction_date'])) {
-            throw ValidationException::withMessages([
-                'transaction_date' => 'Ngày thanh toán không hợp lệ.'
-            ]);
-        }
-
-        $total = $order->total_amount;
-
-        $paidSoFar = ($order->pay_before ?? 0)
-            + ($order->pay_after ?? 0)
-            + $order->transactions()->where('type', 'payment')->sum('paid_amount');
-
-        $remaining = $total - $paidSoFar;
-
-        if ($newPaid > $remaining) {
-            throw ValidationException::withMessages([
-                'paid_amount' => 'Số tiền thanh toán vượt quá số tiền còn nợ.'
-            ]);
-        }
-
-        return DB::transaction(function () use ($order, $data) {
-            $imagePath = null;
-            if (!empty($data['file']) && ($data['payment_method'] ?? null) === 'bank_transfer') {
-                $imagePath = $this->handleUploadOneFile($data['file']);
-            }
-            return $order->transactions()->create([
-                'type' => 'payment',
-                'paid_amount' => $data['paid_amount'],
-                'transaction_date' => $data['transaction_date'],
-                'description' => $data['description'] ?? null,
-                'created_id' => Auth::id(),
-                'proof_image' => $imagePath,
-            ]);
-        });
+    if ($newPaid <= 0) {
+        throw ValidationException::withMessages([
+            'paid_amount' => 'Số tiền thanh toán phải lớn hơn 0.'
+        ]);
     }
+    if (empty($data['transaction_date']) || !strtotime($data['transaction_date'])) {
+        throw ValidationException::withMessages([
+            'transaction_date' => 'Ngày thanh toán không hợp lệ.'
+        ]);
+    }
+
+    $total = (float) $order->total_amount;
+    $paidSoFar = (float) (($order->pay_before ?? 0) + ($order->pay_after ?? 0))
+        + (float) $order->transactions()->where('type', 'payment')->sum('paid_amount');
+
+    $remaining = max(0, $total - $paidSoFar);
+    if ($newPaid > $remaining) {
+        throw ValidationException::withMessages([
+            'paid_amount' => 'Số tiền thanh toán vượt quá số tiền còn nợ.'
+        ]);
+    }
+
+    
+    $paidNow = min($newPaid, $remaining);
+
+    return DB::transaction(function () use ($order, $data, $paidNow) {
+     
+        $imagePath = null;
+        if (!empty($data['file']) && ($data['payment_method'] ?? null) === 'bank_transfer') {
+            $imagePath = $this->handleUploadOneFile($data['file']);
+        }
+
+       
+        $txn = $order->transactions()->create([
+            'type'             => 'payment',
+            'paid_amount'      => $paidNow,
+            'transaction_date' => $data['transaction_date'],
+            'description'      => $data['description'] ?? null,
+            'created_id'       => Auth::id(),
+            'proof_image'      => $imagePath,
+        ]);
+
+        //  Cộng vào tổng chi tiêu của khách
+    
+        $customer = $order->customer()->lockForUpdate()->first();
+        if ($customer) {
+            $customer->total_spent = (float) ($customer->total_spent ?? 0) + $paidNow;
+            $customer->save();
+        }
+
+        return $txn;
+    });
+}
     public function updateDueDate($orderId, string $newDueDate)
     {
         $order = SaleOrder::findOrFail($orderId);
