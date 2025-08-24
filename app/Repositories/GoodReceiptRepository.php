@@ -79,6 +79,13 @@ class GoodReceiptRepository extends BaseRepository
     }
     public function getByPurchaseOrder($id)
     {
+        $purchaseOrder = PurchaseOrder::find($id);
+        if (!$purchaseOrder) {
+            abort(404, 'Đơn hàng không tồn tại');
+        }
+        if ($purchaseOrder->order_status != 1 && $purchaseOrder->order_status != 2) {
+            abort(403, 'Đơn hàng không thể tạo phiếu nhập kho');
+        }
         $query = PurchaseOrder::with([
             'supplier' => function ($query) {
                 $query->select(['id', 'name']);
