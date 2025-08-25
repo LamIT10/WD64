@@ -304,7 +304,7 @@ class InventoryController extends Controller
                     return [
                         'id' => $item->goodReceipt->id ?? null,
                         'type' => 'Nhập kho',
-                        'date' => $item->goodReceipt->receipt_date ?? null,
+                        'date' => $item->goodReceipt->updated_at ?? null,
                         'code' => $item->goodReceipt->code ?? '',
                         'product' => optional(optional($item->productVariant)->product)->name ?? '',
                         'variant' => optional($item->productVariant)->name ?? '',
@@ -318,7 +318,7 @@ class InventoryController extends Controller
             // Lấy lịch sử xuất kho
             $shipments = SaleOrderItem::with(['salesOrder', 'productVariant.product', 'productVariant.attributes.attribute'])
                 ->where('product_variant_id', $variant->id)
-                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'shipped'))
+                ->whereHas('salesOrder', fn($q) => $q->whereBetween('order_date', [$start, $end])->where('status', '=', 'completed'))
                 ->get()
                 ->map(function ($item) use ($variant) {
                     $attributeString = '';
@@ -330,7 +330,7 @@ class InventoryController extends Controller
                     return [
                         'id' => $item->salesOrder->id ?? null,
                         'type' => 'Xuất kho',
-                        'date' => $item->salesOrder->order_date ?? null,
+                        'date' => $item->salesOrder->updated_at ?? null,
                         'code' => $item->salesOrder->code ?? '',
                         'product' => optional(optional($item->productVariant)->product)->name ?? '',
                         'variant' => optional($item->productVariant)->name ?? '',
@@ -357,7 +357,7 @@ class InventoryController extends Controller
                     return [
                         'id' => $item->audit->id ?? null,
                         'type' => 'Điều chỉnh',
-                        'date' => $item->audit->audit_date ?? null,
+                        'date' => $item->audit->updated_at ?? null,
                         'code' => $item->audit->code ?? '',
                         'product' => optional(optional($item->productVariant)->product)->name ?? '',
                         'variant' => optional($item->productVariant)->name ?? '',

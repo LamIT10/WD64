@@ -104,7 +104,7 @@ class SaleOrdersRepository extends BaseRepository
             }
 
             $perPage = $request->input('per_page', 10); // Mặc định 10 bản ghi mỗi trang
-            $orders = $query->orderBy('created_at', 'desc')->paginate($perPage)->through(function ($order) {
+            $orders = $query->orderBy('id', 'desc')->paginate($perPage)->through(function ($order) {
                 $order->total_quantity = $order->items->sum('quantity_ordered');
                 $order->encrypted_id = encrypt($order->id);
                 return $order;
