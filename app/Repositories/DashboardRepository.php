@@ -154,6 +154,7 @@ class DashboardRepository extends BaseRepository
 
 
             'low_stock_items' => $this->getLowStockItemsByMinStock(5),
+            'export_order_month_comparison' => $this->getExportOrderMonthComparison(),
 
 
         ];
@@ -433,5 +434,48 @@ class DashboardRepository extends BaseRepository
         })
     ];
 
+}
+public function getExportOrderMonthComparison($year = null, $month = null)
+{
+$now = Carbon::now();
+$year = $year ?? $now->year;
+$month = $month ?? $now->month;
+
+
+$prev = Carbon::create($year, $month, 1)->subMonth();
+
+
+$currentTotal = DB::table('sale_orders')
+->whereMonth('order_date', $month)
+->whereYear('order_date', $year)
+->where('status', 'completed')
+->count();
+
+
+$previousTotal = DB::table('sale_orders')
+->whereMonth('order_date', $prev->month)
+->whereYear('order_date', $prev->year)
+->where('status', 'completed')
+->count();
+
+
+$diff = $currentTotal - $previousTotal;
+$percent = $previousTotal > 0 ? round(($diff / $previousTotal) * 100, 1) : null;
+
+
+return [
+'current' => [
+'year' => $year,
+'month' => $month,
+'total' => $currentTotal,
+],
+'previous' => [
+'year' => $prev->year,
+'month' => $prev->month,
+'total' => $previousTotal,
+],
+'diff' => $diff,
+'percent' => $percent,
+];
 }
 }
