@@ -159,7 +159,7 @@
                                 class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
                                 @click="openModal(order)"
                             >
-                                <th
+                                <th  
                                     scope="row"
                                     class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap"
                                 >
@@ -988,6 +988,7 @@
                                 >
                                     Đóng
                                 </button>
+                                <button @click="ShowDetail(selectedOrder.id)" class="w-full inline-flex justify-center gap-1 items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:ml-3 sm:w-auto sm:text-sm" fdprocessedid="akltip" style="height: max-content;"><i data-v-718f89dc="" class="fa-solid fa-clock-rotate-left"></i> Xem lịch sử đơn hàng </button>
                             </div>
                         </div>
                     </div>
@@ -1075,7 +1076,13 @@ const { listOrders, filters: initialFilters } = defineProps({
         }),
     },
 });
-
+const ShowDetail = (id) => {
+    router.visit(
+        route("admin.sale-orders.show-history", {
+            id: id,
+        })
+    );
+};
 console.log("listOrders:", listOrders);
 const showQRModal = ref(false);
 const showRejectModal = ref(false);

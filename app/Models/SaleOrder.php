@@ -64,4 +64,8 @@ class SaleOrder extends Model
     {
         return $this->hasMany(Receiving::class);
     }
+    public function exportHistories()
+    {
+        return $this->hasMany(ExportHistories::class, 'sale_order_id');
+    }
 }
