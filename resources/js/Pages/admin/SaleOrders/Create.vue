@@ -622,7 +622,8 @@
                                     v-model="form.phone"
                                     type="text"
                                     placeholder="Số điện thoại"
-                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500"
+                                    class="flex-1 py-2 border-b border-gray-200 focus:outline-none focus:border-indigo-500 cursor-not-allowed"
+                                    :readonly="true"
                                 />
                             </div>
                             <!-- Province -->
@@ -1476,12 +1477,27 @@ const handleComplete = () => {
 
     // Validate customer
     if (!form.customer_id) {
-        customerError.value = "Vui lòng chọn khách hàng!";
+        customerError.value = "Vui lòng chọn khách hàng có trong hệ thống!";
     }
-
+    const selectedCustomer = filteredCustomers.value.find(
+        (c) => c.id === form.customer_id
+    );
+    if (selectedCustomer && form.phone !== selectedCustomer.phone) {
+        customerError.value =
+            "Số điện thoại không đúng với khách hàng đã chọn!";
+        return;
+    }
     // Validate products
     if (!localProducts.value.length) {
         productError.value = "Vui lòng chọn ít nhất một sản phẩm!";
+    }
+    const invalidProduct = localProducts.value.find(
+        (p) => !p.quantity || p.quantity <= 0
+    );
+    if (invalidProduct) {
+        productError.value =
+            "Số lượng sản phẩm không được phép nhỏ hơn hoặc bằng 0!";
+        return;
     }
 
     // Validate address fields
