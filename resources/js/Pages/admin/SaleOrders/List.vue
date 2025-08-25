@@ -390,7 +390,9 @@
                                                         }}
                                                     </td>
                                                 </tr>
-                                                <tr>
+                                                <tr
+                                                    class="border-b border-gray-200"
+                                                >
                                                     <td
                                                         class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
                                                     >
@@ -412,6 +414,12 @@
                                                                 'text-red-700 bg-red-100 border border-red-300':
                                                                     selectedOrder.status ===
                                                                     'cancelled',
+                                                                'text-orange-700 bg-orange-100 px-2 py-1 rounded-xl ':
+                                                                    selectedOrder.status ===
+                                                                    'returning',
+                                                                'text-green-700 bg-green-100 px-2 py-1 rounded-xl ':
+                                                                    selectedOrder.status ===
+                                                                    'returned',
                                                             }"
                                                         >
                                                             {{
@@ -430,9 +438,9 @@
                                                     "
                                                 >
                                                     <td
-                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2 w-1/3"
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
                                                     >
-                                                        📝 Lý do từ chối
+                                                        Lý do từ chối
                                                     </td>
                                                     <td
                                                         class="px-4 py-2 text-red-700"
@@ -450,8 +458,14 @@
                                                         ) && selectedOrder.note
                                                     "
                                                 >
-                                                    <td>Lý do hoàn hàng</td>
-                                                    <td class="text-yellow-700">
+                                                    <td
+                                                        class="bg-gray-50 font-medium text-gray-700 px-4 py-2"
+                                                    >
+                                                        Lý do hoàn hàng
+                                                    </td>
+                                                    <td
+                                                        class="px-4 py-2 text-yellow-700"
+                                                    >
                                                         {{
                                                             selectedOrder.note.replace(
                                                                 "[RETURN] ",
