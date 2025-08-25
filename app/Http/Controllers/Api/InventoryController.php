@@ -26,18 +26,35 @@ class InventoryController extends Controller
 {
     public function stats()
     {
-        // tổng số lượng sản phẩm trong tình trạng số lượng tồn kho nhỏ hơn min_stock
-        $productIsOutOfStock = Product::select('products.*')
-            ->join('product_variants', 'product_variants.product_id', '=', 'products.id')
-            ->join('inventory', 'inventory.product_variant_id', '=', 'product_variants.id')
-            ->selectRaw('products.*, SUM(inventory.quantity_on_hand) as total_qty')
-            ->groupBy('products.id', 'products.min_stock')
-            ->havingRaw('total_qty < products.min_stock')
-            ->get();
+      
+            $query = Product::with([
+                'productVariants' => function ($query) {
+                    $query->with(['inventory']);
+                }
+            ])->where('status_product', 1);
+            $query->whereHas('productVariants', function ($variantQuery) {
+                $variantQuery->where(function ($q) {
+                    // Out of stock: No inventory or quantity_on_hand = 0
+                    $q->whereDoesntHave('inventory')
+                        ->orWhereHas('inventory', function ($inv) {
+                            $inv->where('quantity_on_hand', '=', 0);
+                        })
+                        // Low stock: quantity_on_hand <= min_stock and > 0
+                        ->orWhere(function ($q) {
+                            $q->whereHas('inventory', function ($inv) {
+                                $inv->select('product_variant_id')
+                                    ->groupBy('product_variant_id')
+                                    ->havingRaw('SUM(quantity_on_hand) <= MIN(min_stock)')
+                                    ->havingRaw('SUM(quantity_on_hand) != 0');
+                            });
+                        });
+                });
+            });
+        
 
         return response()->json([
             'count_product' => Product::count(),
-            'product_is_out_of_stock' => $productIsOutOfStock->count()
+            'product_is_out_of_stock' => $query->count()
         ]);
     }
 
