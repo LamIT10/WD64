@@ -187,13 +187,13 @@ class PurchaseOrderRepository extends BaseRepository
                 }
             }
             DB::commit();
+            $actor = Auth::user();
             app(NotificationService::class)->create(
                 'purchase_order_created',
                 'Đặt hàng nhập',
                 "Có " . count($listPurchaseOrderItems) . " đơn hàng đề xuất nhập kho mới",
                 [],
             );
-            $actor = Auth::user();
             app(NotificationService::class)->notifyAll(
                 'purchase_order_created',
                 'Đặt hàng nhập',
