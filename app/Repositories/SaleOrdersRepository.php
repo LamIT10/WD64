@@ -239,7 +239,7 @@ class SaleOrdersRepository extends BaseRepository
         $customers = Customer::query()
             ->where('name', 'LIKE', "%{$searchTerm}%")
             ->with(['rank' => function ($query) {
-                $query->select('id', 'credit_percent');
+                $query->select('id', 'credit_percent', 'discount_percent');
             }])
             ->get([
                 'id',
