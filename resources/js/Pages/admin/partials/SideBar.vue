@@ -98,7 +98,7 @@
                 </div>
             </div>
             <!-- Report Management -->
-            <div class="mb-1" v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue')">
+            <div class="mb-1" v-if="hasPermission('admin.report.index') || hasPermission('admin.report.suggest') || hasPermission('admin.report.revenue') || hasPermission('admin.report.export')">
                 <button
                     class="flex items-center w-full p-3 text-gray-700 hover:bg-indigo-50 rounded-lg transition-all duration-200 group"
                     @click="toggleDropdown('report-menu')">
@@ -121,7 +121,7 @@
                     </div>
                     <span class="text-xs">Báo cáo nhập kho</span>
                     </Link>
-                    <Link :href="route('admin.reports.export')"
+                    <Link :href="route('admin.reports.export')" v-can="'admin.report.export'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
@@ -129,14 +129,14 @@
                     </div>
                     <span class="text-xs">Báo cáo xuất kho</span>
                     </Link>
-                    <Link :href="route('admin.reports.suggest')"
+                    <Link :href="route('admin.reports.suggest')" v-can="'admin.report.suggest'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">
                         <i class="fas fa-shopping-cart text-xs"></i>
                     </div>
                     <span class="text-xs">Gợi ý nhập hàng</span></Link>
-                    <Link :href="route('admin.reports.revenue')"
+                    <Link :href="route('admin.reports.revenue')"  v-can="'admin.report.revenue'"
                         class="flex items-center p-2 text-gray-600 hover:text-indigo-600 rounded-lg transition-all duration-200 group">
                     <div
                         class="w-6 h-6 flex items-center justify-center mr-2 rounded-full bg-gray-100 group-hover:bg-indigo-100 transition-colors">

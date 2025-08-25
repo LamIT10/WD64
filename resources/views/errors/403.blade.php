@@ -409,12 +409,6 @@
             <p class="error-message">
                 Bạn không có quyền truy cập vào tài nguyên này. Nếu bạn cho rằng đây là lỗi, vui lòng liên hệ với quản trị viên hệ thống.
             </p>
-            
-            <div class="button-container">
-                <button class="action-button back-button" onclick="window.history.back()">
-                    ← Quay lại trang trước
-                </button>
-            </div>
         </div>
     </div>
 

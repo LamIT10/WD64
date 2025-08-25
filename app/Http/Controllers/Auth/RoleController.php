@@ -83,9 +83,9 @@ class RoleController extends Controller
         if ($role->name == 'admin') {
             $data = [
                 'status' => false,
-                'message' => 'Không thể cập nhật quyền của admin'
+                'message' => 'Không thể cập nhật quyền của quản trị hệ thống'
             ];
-            return $this->returnInertia($data, 'Không thể cập nhật quyền của admin', 'admin.role.index');
+            return $this->returnInertia($data, 'Không thể cập nhật quyền của quản trị hệ thống', 'admin.role.index');
         }
         $role['permissions'] = $role->permissions()->pluck('id')->toArray();
         return Inertia::render("admin/Roles/EditRole", ['role' => $role, 'permissions' => $data['permissions']]);
