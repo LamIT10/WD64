@@ -16,7 +16,7 @@
                     <div class="w-full p-6">
                         <form @submit.prevent="hanldeSubmitForm" class="space-y-6">
                             <!-- Phần tên vai trò giữ nguyên -->
-                            <div>
+                            <div class="hidden">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Tên vai trò <span class="text-red-500">*</span>
                                 </label>
