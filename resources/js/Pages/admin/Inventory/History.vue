@@ -25,7 +25,7 @@
             <tr class="bg-indigo-50 text-indigo-900">
               <th class="px-6 py-4 border-b font-bold text-left rounded-tl-2xl">Ngày</th>
               <th class="px-6 py-4 border-b font-bold text-left">Loại</th>
-              <th class="px-6 py-4 border-b font-bold text-left">Mã đơn hàng</th>
+              <th class="px-6 py-4 border-b font-bold text-left">Mã đơn hàng / Mã phiếu </th>
               <!-- <th class="px-6 py-4 border-b font-bold text-left">Sản phẩm - Biến thể</th>
               <th class="px-6 py-4 border-b font-bold text-right">Số lượng (+/-)</th> -->
               <th class="px-6 py-4 border-b font-bold text-left">Ghi chú</th>

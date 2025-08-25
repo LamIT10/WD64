@@ -23,7 +23,7 @@ class NotificationController extends Controller
             ->select(['id', 'type', 'title', 'message', 'created_at', 'is_read', 'data']);
 
         $notifications = $notificationsQuery
-            ->latest()
+            ->latest('id')
             ->take(10)
             ->get()
             ->map(function ($n) {
