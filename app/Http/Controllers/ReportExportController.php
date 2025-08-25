@@ -62,8 +62,10 @@ class ReportExportController extends Controller
         'exportValue' => $exportValue,
         'years' => $years,
         'year' => $year,
-        'exportStatusSummary' => $exportStatusSummary, // ✅
-        'selectedMonth' => $month 
+        'exportStatusSummary' => $exportStatusSummary,
+        'selectedMonth' => $month,
+        'exportOrderMonthComparison' => $this->handleRepository->getExportOrderMonthComparison($year, $month),
+
     ]);
 }
 
