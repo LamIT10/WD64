@@ -28,12 +28,15 @@ class SaleOrdersRepository extends BaseRepository
     protected $product;
     protected $saleOrderItem;
     protected $rank;
-    public function __construct(SaleOrder $saleOrder, Product $product, SaleOrderItem $saleOrderItem, Rank $rank)
+    protected $ExportHistoryRepository;
+
+    public function __construct(SaleOrder $saleOrder, Product $product, SaleOrderItem $saleOrderItem, Rank $rank, ExportHistoryRepository $ExportHistoryRepository)
     {
         $this->handleModel = $saleOrder;
         $this->saleOrderItem = $saleOrderItem;
         $this->product = $product;
         $this->rank = $rank;
+        $this->ExportHistoryRepository = $ExportHistoryRepository;
     }
     public function index(Request $request)
     {
@@ -280,8 +283,12 @@ class SaleOrdersRepository extends BaseRepository
                 'address_delivery' => $addressDelivery,
                 'code' => $this->autoAddSaleOrderCode(),
             ];
-
             $saleOrder = $this->handleModel->create($newSaleOrder);
+            $this->ExportHistoryRepository->createHistory([
+                'sale_order_id' => $saleOrder->id,
+                'action_name' => 'Tạo mới đơn hàng xuất',
+                'content' => ''
+            ]);
             if (!$saleOrder) {
                 throw new \Exception('Không thể tạo đơn hàng');
             }
@@ -364,7 +371,11 @@ class SaleOrdersRepository extends BaseRepository
         }
     }
 
-
+    public function getCodeById($id)
+    {
+        $saleOrder = $this->handleModel->find($id);
+        return $saleOrder ? $saleOrder->code : null;
+    }
     public function getInventoryQuantity($productVariantId)
     {
         $inventory = Inventory::where('product_variant_id', $productVariantId)
@@ -375,7 +386,6 @@ class SaleOrdersRepository extends BaseRepository
     {
         try {
             DB::beginTransaction();
-
 
             $saleOrder = $this->handleModel->find($orderId);
             if (!$saleOrder) {
@@ -417,6 +427,11 @@ class SaleOrdersRepository extends BaseRepository
                 }
             }
             $saleOrder->update(['status' => 'cancelled', 'note' => $rejectReason]);
+            $this->ExportHistoryRepository->createHistory([
+                'sale_order_id' => $orderId,
+                'action_name' => 'Từ chối đơn xuất',
+                'content' => $rejectReason == null ? '' : $rejectReason
+            ]);
             Log::info("Đã xóa sale_order_items cho đơn hàng {$orderId}");
             Log::info("Đã xóa đơn hàng xuất {$orderId}");
             DB::commit();
@@ -531,6 +546,11 @@ class SaleOrdersRepository extends BaseRepository
                 'status' => 'shipped',
                 'pay_before' => $pay_before
             ]);
+            $this->ExportHistoryRepository->createHistory([
+                'sale_order_id' => $orderId,
+                'action_name' => 'Duyệt đơn xuất',
+                'content' => ''
+            ]);
             Log::info("Đã duyệt đơn hàng xuất {$orderId} sang trạng thái shipped với pay_before = {$pay_before}.");
 
             DB::commit();
@@ -632,7 +652,11 @@ class SaleOrdersRepository extends BaseRepository
 
             DB::commit();
 
-
+            $this->ExportHistoryRepository->createHistory([
+                'sale_order_id' => $orderId,
+                'action_name' => 'Hoàn thành đơn xuất',
+                'content' => ''
+            ]);
             app(NotificationService::class)->create(
                 'order_completed',
                 'Đơn hàng đã hoàn thành',
@@ -795,6 +819,11 @@ class SaleOrdersRepository extends BaseRepository
             "Đơn hàng #{$order->code} đang được hoàn hàng. Lý do: {$returnReason}",
             ['order_id' => $order->id]
         );
+        $this->ExportHistoryRepository->createHistory([
+            'sale_order_id' => $orderId,
+            'action_name' => 'Hoàn đơn hàng',
+            'content' => $returnReason == null ? '' : $returnReason
+        ]);
         $actor = Auth::user();
         app(NotificationService::class)->notifyAll(
             'order_returning',
@@ -830,7 +859,11 @@ class SaleOrdersRepository extends BaseRepository
             "Đơn hàng #{$order->code} đã hoàn hàng thành công.",
             ['order_id' => $order->id]
         );
-
+        $this->ExportHistoryRepository->createHistory([
+            'sale_order_id' => $orderId,
+            'action_name' => 'Xác nhận hoàn hàng',
+            'content' => ''
+        ]);
         $actor = Auth::user();
         app(NotificationService::class)->notifyAll(
             'order_returned',
@@ -842,5 +875,9 @@ class SaleOrdersRepository extends BaseRepository
             ]
         );
         return ['success' => true];
+    }
+    public function getHistoryBySaleOrderId($orderId)
+    {
+        return $this->ExportHistoryRepository->getHistoryBySaleOrderId($orderId);
     }
 }

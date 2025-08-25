@@ -201,4 +201,12 @@ class SaleOrderController extends Controller
         }
         return response()->json(['success' => true]);
     }
+    public function showHistory($id)
+    {
+        $data = $this->saleOrdersRepository->getHistoryBySaleOrderId($id);
+        return Inertia::render('admin/SaleOrders/LogHistory', [
+            'data' => $data,
+            'saleOrderCode' => $this->saleOrdersRepository->getCodeById($id)
+        ]);
+    }
 }

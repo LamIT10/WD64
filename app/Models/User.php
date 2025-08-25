@@ -90,4 +90,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(SupplierDebtHistory::class, 'created_id');
     }
+    public function exportHistories()
+    {
+        return $this->hasMany(ExportHistories::class, 'created_id');
+    }
 }
